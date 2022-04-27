@@ -116,6 +116,8 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
 def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
 
+    # TODO: Convert this to a class and decouple it into multiple plot routines for more flexibility
+    # in plotting
     # Check if type of start_time is int or float
     if file_name_sci is None:
         file_name_sci = file_name_sci
@@ -230,6 +232,8 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     img2.image = render2
     img2.grid(row=2, column=2, rowspan=10, columnspan=2, sticky="n")
 
+    # Display the histogram plots
+    # TODO: Find out the best way to display the histogram plots (aspect ratios and stuff)
     fig3 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel1", key2="Channel2")
     load3 = Image.open("figures/kde_plot_Channel1_Channel2.png")
     # Resize the image to fit the canvas (in pixels)
@@ -292,11 +296,8 @@ b_file_load_button = tk.Button(root, text="Load binary File", command=open_file_
                                font=font_style)
 b_file_load_button.grid(row=0, column=2, columnspan=1, pady=0, sticky="w")
 
-# Add a dropdown menu for plotting the time series
-ts_options = ['PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp', '+5.2V_Imon',
-              '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon', 'ADC_Ground',
-              'Cmd_count', 'Pinpuller_Armed', 'HVmcpAuto', 'HVmcpMan', 'DeltaEvntCount',
-              'DeltaDroppedCount', 'DeltaLostevntCount']
+# List out all the columns in the housekeeping file as options for time series plots
+ts_options = list(df_slice_hk.columns)
 
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)
 plot_opt_label_1.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
@@ -320,54 +321,65 @@ ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=9, column=1, columnspan=1, sticky="w")
 
 # Add buttons for plotting values
+
+# The minimum value of x-axis for histogram plot
 x_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 x_min_entry.insert(0, 0)
 x_min_entry.grid(row=1, column=4, columnspan=1, sticky="n")
 x_min_label = tk.Label(root, text="X Min", font=font_style_box)
 x_min_label.grid(row=1, column=5, columnspan=1, sticky="n")
 
+# The maximum value of x-axis for histogram plot
 x_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 x_max_entry.insert(0, "X Maximum")
 x_max_entry.grid(row=2, column=4, columnspan=1, sticky="n")
 x_max_label = tk.Label(root, text="X Max", font=font_style_box)
 x_max_label.grid(row=2, column=5, columnspan=1, sticky="n")
 
+# The minimum value of y-axis for histogram plot
 y_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 y_min_entry.insert(0, "Y Minimum")
 y_min_entry.grid(row=3, column=4, columnspan=1, sticky="n")
 y_min_label = tk.Label(root, text="Y Min", font=font_style_box)
 y_min_label.grid(row=3, column=5, columnspan=1, sticky="n")
 
+# The maximum value of y-axis for histogram plot
 y_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 y_max_entry.insert(0, "Y Maximum")
 y_max_entry.grid(row=4, column=4, columnspan=1, sticky="n")
 y_max_label = tk.Label(root, text="Y Max", font=font_style_box)
 y_max_label.grid(row=4, column=5, columnspan=1, sticky="n")
 
+# The number of bins for histogram plot
 hist_bins_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 hist_bins_entry.insert(0, "Bins")
 hist_bins_entry.grid(row=5, column=4, columnspan=1, sticky="n")
 hist_bins_label = tk.Label(root, text="Bins", font=font_style_box)
 hist_bins_label.grid(row=5, column=5, columnspan=1, sticky="n")
 
+# Mimimum number of data points in each bin for the histogram plot
 c_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 c_min_entry.insert(0, "Colorbar Mininimum")
 c_min_entry.grid(row=6, column=4, columnspan=1, sticky="n")
 c_min_label = tk.Label(root, text="C Min", font=font_style_box)
 c_min_label.grid(row=6, column=5, columnspan=1, sticky="n")
 
+# Maximum number of data points in each bin for the histogram plot
 c_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 c_max_entry.insert(0, "Colorbar Maximum")
 c_max_entry.grid(row=7, column=4, columnspan=1, sticky="n")
 c_max_label = tk.Label(root, text="C Max", font=font_style_box)
 c_max_label.grid(row=7, column=5, columnspan=1, sticky="n")
 
+# Choose whether to plot probability density or the number of data points in each bin (is Bool)
 density_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 density_entry.insert(0, "Density")
 density_entry.grid(row=8, column=4, columnspan=1, sticky="n")
 density_label = tk.Label(root, text="Density", font=font_style_box)
 density_label.grid(row=8, column=5, columnspan=1, sticky="n")
 
+# Choose whther the colorbar is in 'linear' or 'log' scale (default is 'log', other option is 
+# 'linear')
 norm_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 norm_entry.insert(0, "Norm style")
 norm_entry.grid(row=9, column=4, columnspan=1, sticky="n")
