@@ -90,7 +90,7 @@ def plot_histogram(
     axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
 
     # Save the figure
-    save_file_path = "figures/"
+    save_file_path = "../figures/gui_figures/"
     # Check if the save folder exists, if not then create it
     if not Path(save_file_path).exists():
         Path(save_file_path).mkdir(parents=True, exist_ok=True)
@@ -121,7 +121,7 @@ def plot_indiv_time_series(df=None, key="PinPullerTemp", ms=5, alpha=1):
               verticalalignment='top', transform=axs1.transAxes)
 
     # Save the figure
-    save_file_path = "figures/"
+    save_file_path = "../figures/gui_figures/"
     # Check if the save folder exists, if not then create it
     if not Path(save_file_path).exists():
         Path(save_file_path).mkdir(parents=True, exist_ok=True)
@@ -172,7 +172,7 @@ def plot_time_series(df=None, ms=5, alpha=1):
     axs3.set_ylabel('DeltaDroppedCount', fontsize=axis_label_size)
     axs3.set_xlabel('Time', fontsize=axis_label_size)
 
-    save_file_path = "figures/"
+    save_file_path = "../figures/gui_figures/"
     # Check if the save folder exists, if not then create it
     if not Path(save_file_path).exists():
         Path(save_file_path).mkdir(parents=True, exist_ok=True)
@@ -256,7 +256,7 @@ def plot_kde(df, key1, key2, data_type=None, fig_save=True):
     axs1.ax_joint.set_ylabel(key2, fontsize=labelsize)
 
     if (fig_save):
-        fname = f'figures/kde_plot_{key1}_{key2}.png'
+        fname = f'../figures/gui_figures/kde_plot_{key1}_{key2}.png'
         axs1.savefig(fname, format='png', dpi=300, bbox_inches='tight', pad_inches=pad,
                      facecolor='w', edgecolor='w', transparent=False)
     #plt.show()

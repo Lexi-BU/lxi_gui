@@ -189,7 +189,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     fig1_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_1.get(),
                                                    ms=2, alpha=1)
 
-    load1_ts = Image.open(f"figures/{plot_opt_entry_1.get()}_time_series_plot.png")
+    load1_ts = Image.open(f"../figures/gui_figures/{plot_opt_entry_1.get()}_time_series_plot.png")
     # Resize the image to fit the canvas (in pixels)
     load1_ts = load1_ts.resize((int(fig1_ts.get_figwidth() * 100),
                                 int(fig1_ts.get_figheight() * 60)))
@@ -200,7 +200,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
 
     fig2_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_2.get(),
                                                    ms=2, alpha=1)
-    load2_ts = Image.open(f"figures/{plot_opt_entry_2.get()}_time_series_plot.png")
+    load2_ts = Image.open(f"../figures/gui_figures/{plot_opt_entry_2.get()}_time_series_plot.png")
     # Resize the image to fit the canvas (in pixels)
     load2_ts = load2_ts.resize((int(fig2_ts.get_figwidth() * 100),
                                 int(fig2_ts.get_figheight() * 60)))
@@ -211,7 +211,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
 
     fig3_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_3.get(),
                                                     ms=2, alpha=1)
-    load3_ts = Image.open(f"figures/{plot_opt_entry_3.get()}_time_series_plot.png")
+    load3_ts = Image.open(f"../figures/gui_figures/{plot_opt_entry_3.get()}_time_series_plot.png")
     # Resize the image to fit the canvas (in pixels)
     load3_ts = load3_ts.resize((int(fig3_ts.get_figwidth() * 100),
                                 int(fig3_ts.get_figheight() * 60)))
@@ -223,7 +223,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     fig2 = plot_routines.plot_histogram(df=df_slice_sci, x_min=x_min, x_max=x_max,
                                         y_min=y_min, y_max=y_max, bins=bins, cmin=cmin,
                                         density=density, norm=norm)
-    load2 = Image.open("figures/xy_plot.png")
+    load2 = Image.open("../figures/gui_figures/xy_plot.png")
     # Resize the image to fit the canvas (in pixels)
     load2 = load2.resize((int(fig2.get_figwidth() * 60),
                           int(fig2.get_figheight() * 60)))
@@ -235,7 +235,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     # Display the histogram plots
     # TODO: Find out the best way to display the histogram plots (aspect ratios and stuff)
     fig3 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel1", key2="Channel2")
-    load3 = Image.open("figures/kde_plot_Channel1_Channel2.png")
+    load3 = Image.open("../figures/gui_figures/kde_plot_Channel1_Channel2.png")
     # Resize the image to fit the canvas (in pixels)
     load3 = load3.resize((int(fig3.get_figwidth() * 70),
                           int(fig3.get_figheight() * 70)))
@@ -245,7 +245,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     img3.grid(row=14, column=2, rowspan=3, columnspan=1, sticky="n")
 
     fig4 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel3", key2="Channel4")
-    load4 = Image.open("figures/kde_plot_Channel3_Channel4.png")
+    load4 = Image.open("../figures/gui_figures/kde_plot_Channel3_Channel4.png")
     # Resize the image to fit the canvas (in pixels)
     load4 = load4.resize((int(fig4.get_figwidth() * 70),
                           int(fig4.get_figheight() * 70)))
@@ -297,7 +297,10 @@ b_file_load_button = tk.Button(root, text="Load binary File", command=open_file_
 b_file_load_button.grid(row=0, column=2, columnspan=1, pady=0, sticky="w")
 
 # List out all the columns in the housekeeping file as options for time series plots
-ts_options = list(df_slice_hk.columns)
+try:
+    ts_options = list(df_slice_hk.columns)
+except:
+    ts_options = ['PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp']
 
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)
 plot_opt_label_1.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
