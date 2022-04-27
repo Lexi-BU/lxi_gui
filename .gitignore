@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Ignore everything in the document folder
+documents/
+
+# Ignore temporary lock files
+.~lock.*
