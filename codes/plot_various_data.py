@@ -4,11 +4,23 @@ import pandas as pd
 
 class plot_diff_data():
 
-    def __init__(self, file_name_sci, file_name_hk, start_time, end_time) -> None:
+    def __init__(self, file_name_bnr, file_name_sci, file_name_hk, start_time, end_time,
+                 x_min_entry, x_max_entry, y_min_entry, y_max_entry, hist_bin_entry, c_min_entry,
+                 c_max_entry, density_entry, norm_entry) -> None:
+        self.file_name_bnr = file_name_bnr
         self.file_name_sci = file_name_sci
         self.file_name_hk = file_name_hk
         self.start_time = start_time
         self.end_time = end_time
+        self.x_min_entry = x_min_entry
+        self.x_max_entry = x_max_entry
+        self.y_min_entry = y_min_entry
+        self.y_max_entry = y_max_entry
+        self.hist_bin_entry = hist_bin_entry
+        self.c_min_entry = c_min_entry
+        self.c_max_entry = c_max_entry
+        self.density_entry = density_entry
+        self.norm_entry = norm_entry
 
 
     def ts_plots(self):
@@ -34,42 +46,46 @@ class plot_diff_data():
 
         # Read entries from the text boxes
         try:
-            x_min = float(x_min_entry.get())
+            x_min = float(self.x_min_entry.get())
         except Exception:
             x_min = None
         try:
-            x_max = float(x_max_entry.get())
+            x_max = float(self.x_max_entry.get())
         except Exception:
             x_max = None
         try:
-            y_min = float(y_min_entry.get())
+            y_min = float(self.y_min_entry.get())
         except Exception:
             y_min = None
         try:
-            y_max = float(y_max_entry.get())
+            y_max = float(self.y_max_entry.get())
         except Exception:
             y_max = None
         try:
-            bins = int(hist_bins_entry.get())
+            bins = int(self.hist_bins_entry.get())
         except Exception:
             bins = None
         try:
-            cmin = int(c_min_entry.get())
+            cmin = int(self.c_min_entry.get())
         except Exception:
             cmin = None
         try:
-            density = bool(int(density_entry.get()))
+            cmax = int(self.c_max_entry.get())
+        except Exception:
+            cmax = None
+        try:
+            density = bool(int(self.density_entry.get()))
         except Exception:
             density = None
 
-        if norm_entry.get() == "linear":
-            norm = "linear"
-        elif norm_entry.get() == "log":
+        if self.norm_entry.get() == "linear":
+            self.norm = "linear"
+        elif self.norm_entry.get() == "log":
             norm = "log"
         else:
             norm = None
 
-        print(f"Density is {density}")
+        """
         df_slice_hk = read_csv_hk(file_val=file_name_hk, t_start=t_start, t_end=t_end)
         df_slice_sci = read_csv_sci(file_val=file_name_sci, t_start=t_start, t_end=t_end)
         df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==False]
@@ -87,4 +103,4 @@ class plot_diff_data():
         img1_ts = tk.Label(image=render1_ts)
         img1_ts.image = render1_ts
         img1_ts.grid(row=2, column=0, rowspan=3, columnspan=2, sticky="w")
-
+        """

@@ -10,111 +10,20 @@ import importlib
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import lxi_gui_plot_routines as plot_routines
+import plot_various_data as pvd
+import lxi_read_files as lxrf
 
 importlib.reload(plot_routines)
+importlib.reload(pvd)
+importlib.reload(lxrf)
 
 # Default file names
 sci_file_name = "../data/processed_data/sci/2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987_qudsi.csv"
 hk_file_name = "../data/processed_data/hk/2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987_qudsi.csv"
 
 
-def open_file_sci():
-    # define a global variable for the file name
-    global sci_file_name
-    file_val = filedialog.askopenfilename(initialdir="../data/processed_data/sci/",
-                                          title="Select file",
-                                          filetypes=(("csv files", "*.csv"),
-                                                     ("all files", "*.*"))
-                                          )
-    print(f"Loaded {file_val} in the data base")
-    #df = pd.read_csv(file_val)
 
-    sci_file_name = file_val
-    return file_val
-
-
-def open_file_hk():
-    # define a global variable for the file name
-    global hk_file_name
-    file_val = filedialog.askopenfilename(initialdir="../data/processed_data/hk/",
-                                          title="Select file",
-                                          filetypes=(("csv files", "*.csv"),
-                                                     ("all files", "*.*"))
-                                            )
-    print(f"Loaded {file_val} in the data base")
-    #df = pd.read_csv(file_val)
-
-    hk_file_name = file_val
-    return file_val
-
-
-def read_csv_sci(file_val=None, t_start=None, t_end=None):
-    """
-    Reads a csv file and returns a pandas dataframe for the selected time range along with x and
-    y-coordinates.
-
-    Parameters
-    ----------
-    file_val : str
-        Path to the input file. Default is None.
-    t_start : float
-        Start time of the data. Default is None.
-    t_end : float
-        End time of the data. Default is None.
-    """
-    if file_val is None:
-        file_val = sci_file_name
-
-    global df_slice_sci
-    df = pd.read_csv(file_val)
-
-    # Replace index with timestamp
-    df.set_index('TimeStamp', inplace=True)
-
-    # Sort the dataframe by timestamp
-    df = df.sort_index()
-
-    if t_start is None:
-        t_start = df.index.min()
-    if t_end is None:
-        t_end = df.index.max()
-
-    # Select dataframe from timestamp t_start to t_end
-    df_slice_sci = df.loc[t_start:t_end]
-
-    # Find the x and y coordinates from the voltage values.
-    df_slice_sci['x_val'] = df_slice_sci.Channel1 / (df_slice_sci.Channel1 + df_slice_sci.Channel2)
-    df_slice_sci['y_val'] = df_slice_sci.Channel3 / (df_slice_sci.Channel3 + df_slice_sci.Channel4)
-
-    return df_slice_sci
-
-
-def read_csv_hk(file_val=None, t_start=None, t_end=None):
-
-    if file_val is None:
-        file_val = hk_file_name
-
-    global df_slice_hk
-    df = pd.read_csv(file_val)
-
-    # Replace index with timestamp
-    df.set_index('TimeStamp', inplace=True)
-
-    # Sort the dataframe by timestamp
-    df = df.sort_index()
-
-    if t_start is None:
-        t_start = df.index.min()
-    if t_end is None:
-        t_end = df.index.max()
-
-    # Select dataframe from timestamp t_start to t_end
-    df_slice_hk = df.loc[t_start:t_end]
-
-    return df_slice_hk
-
-
-
+"""
 def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
 
     # TODO: Convert this to a class and decouple it into multiple plot routines for more flexibility
@@ -254,7 +163,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     img4 = tk.Label(image=render4)
     img4.image = render4
     img4.grid(row=14, column=3, rowspan=3, columnspan=1, sticky="n")
-
+"""
 
 root = tk.Tk()
 #root.rowconfigure(, {'minsize': 3})
@@ -292,17 +201,27 @@ font_style_box = font.Font(family="Helvetica", size=12, weight="bold")
 font_style_big = font.Font(family="Helvetica", size=25)
 
 # insert a file load button
-sci_file_load_button = tk.Button(root, text="Load Science File", command=open_file_sci,
+sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_files.open_file_sci,
                                  font=font_style)
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
 
-hk_file_load_button = tk.Button(root, text="Load HK File", command=open_file_hk,
-                                font=font_style)
-hk_file_load_button.grid(row=0, column=1, columnspan=1, pady=0, sticky="w")
+sc_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
+                              fg="black", relief="flat", borderwidth=2)
+sc_file_load_entry.grid(row=0, column=1, columnspan=1, pady=0, sticky="w")
+sci_file_label = tk.Label(text="Binary File name", font=font_style_box)
+sci_file_label.grid(row=0, column=2, columnspan=1, pady=0, sticky="w")
+sc_file_load_entry.insert(0, '')
 
-b_file_load_button = tk.Button(root, text="Load binary File", command=open_file_sci,
+
+
+
+hk_file_load_button = tk.Button(root, text="Load HK File", command=lxrf.open_files.open_file_hk,
+                                font=font_style)
+hk_file_load_button.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
+
+b_file_load_button = tk.Button(root, text="Load binary File", command=lxrf.open_files.open_file_b,
                                font=font_style)
-b_file_load_button.grid(row=0, column=2, columnspan=1, pady=0, sticky="w")
+b_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="w")
 
 # List out all the columns in the housekeeping file as options for time series plots
 try :
@@ -311,25 +230,25 @@ except :
     ts_options = ["PinPullerTemp"] * 4
 
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)
-plot_opt_label_1.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
+plot_opt_label_1.grid(row=4, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_entry_1 = tk.StringVar(root)
 plot_opt_entry_1.set(ts_options[0])
 ts_menu_1 = tk.OptionMenu(root, plot_opt_entry_1, *ts_options)
-ts_menu_1.grid(row=1, column=1, columnspan=1, sticky="w")
+ts_menu_1.grid(row=4, column=1, columnspan=1, sticky="w")
 
 #plot_opt_label_2 = tk.Label(root, text="Plot options:", font=font_style_box)
 #plot_opt_label_2.grid(row=5, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_entry_2 = tk.StringVar(root)
 plot_opt_entry_2.set(ts_options[1])
 ts_menu_2 = tk.OptionMenu(root, plot_opt_entry_2, *ts_options)
-ts_menu_2.grid(row=5, column=1, columnspan=1, sticky="w")
+ts_menu_2.grid(row=8, column=1, columnspan=1, sticky="w")
 
 #plot_opt_label_3 = tk.Label(root, text="Plot options:", font=font_style_box)
 #plot_opt_label_3.grid(row=9, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_entry_3 = tk.StringVar(root)
 plot_opt_entry_3.set(ts_options[2])
 ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
-ts_menu_3.grid(row=9, column=1, columnspan=1, sticky="w")
+ts_menu_3.grid(row=12, column=1, columnspan=1, sticky="w")
 
 # Add buttons for plotting values
 
@@ -413,7 +332,7 @@ end_time_label = tk.Label(root, text="End Time", font=font_style)
 end_time_label.grid(row=18, column=3, columnspan=1)
 
 # Add a button to plot the data
-plot_button = tk.Button(root, text="Plot", width=10, font=font_style_box, command=plot_diff_data.ts_plots)
+plot_button = tk.Button(root, text="Plot", width=10, font=font_style_box, command=pvd.plot_diff_data.ts_plots)
 plot_button.grid(row=18, column=0, columnspan=2, rowspan=1)
 # Add a button to the window to get start time
 #start_button = tk.Button(root, text="Start", command=lambda: print("Start"))

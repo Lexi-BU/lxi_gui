@@ -158,7 +158,7 @@ populate(frame)
 
 root.mainloop()
 
-"""
+
 
 import tkinter as tk
 import platform
@@ -253,3 +253,24 @@ if __name__ == "__main__":
     root=tk.Tk()
     Example(root).pack(side="top", fill="both", expand=True)
     root.mainloop()
+
+"""
+
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
+
+def UploadAction(event=None):
+    filename = askopenfilename()
+    # Cut path to the file off
+    filename = filename.split('/')[len(filename.split('/'))-1]
+    print('Selected:', filename)
+    label1['text'] = filename
+
+root= tk.Tk()
+    
+button1 = tk.Button(text='Click Me', command=UploadAction, bg='brown', fg='white')
+button1.pack(padx=2, pady=5)
+label1 = tk.Label(text='Please choose a file')
+label1.pack(padx=2, pady=2)
+
+root.mainloop()
