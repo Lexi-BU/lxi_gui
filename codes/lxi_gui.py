@@ -13,15 +13,15 @@ import lxi_gui_plot_routines as plot_routines
 import plot_various_data as pvd
 import lxi_read_files as lxrf
 
+import global_variables
+
+
 importlib.reload(plot_routines)
 importlib.reload(pvd)
 importlib.reload(lxrf)
+importlib.reload(global_variables)
 
-# Default file names
-sci_file_name = "../data/processed_data/sci/2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987_qudsi.csv"
-hk_file_name = "../data/processed_data/hk/2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987_qudsi.csv"
-
-
+global_variables.init()
 
 """
 def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
@@ -201,40 +201,61 @@ font_style_box = font.Font(family="Helvetica", size=12, weight="bold")
 font_style_big = font.Font(family="Helvetica", size=25)
 
 # insert a file load button
-sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_files.open_file_sci,
+# For science file
+sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_file_sci,
                                  font=font_style)
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
 
-sc_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
+#sci_file_name_label = tk.Label(root, text="", font=font_style, justify="left", anchor="w",
+#                               fg="black", bg="white")
+#sci_file_name_label.grid(row=0, column=1, columnspan=4, pady=0, sticky="w")
+## set the text value of sci_file_name_label to the file name only if the file is loaded
+#if lxrf.open_file_sci:
+#    sci_file_name_label.config(text=lxrf.open_file_sci().split("/")[-1])
+sci_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
                               fg="black", relief="flat", borderwidth=2)
-sc_file_load_entry.grid(row=0, column=1, columnspan=1, pady=0, sticky="w")
-sci_file_label = tk.Label(text="Binary File name", font=font_style_box)
-sci_file_label.grid(row=0, column=2, columnspan=1, pady=0, sticky="w")
-sc_file_load_entry.insert(0, '')
+sci_file_load_entry.grid(row=0, column=1, columnspan=4, pady=0, sticky="w")
+# insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
+sci_file_load_button.config(command=lambda: sci_file_load_entry.insert(0, lxrf.open_file_sci()))
 
-
-
-
-hk_file_load_button = tk.Button(root, text="Load HK File", command=lxrf.open_files.open_file_hk,
+# For housekeeping file
+hk_file_load_button = tk.Button(root, text="Load HK File", command=lxrf.open_file_hk,
                                 font=font_style)
 hk_file_load_button.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
+hk_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
+                              fg="black", relief="flat", borderwidth=2)
+hk_file_load_entry.grid(row=1, column=1, columnspan=4, pady=0, sticky="w")
+# insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
+hk_file_load_button.config(command=lambda: hk_file_load_entry.insert(0, lxrf.open_file_hk()))
 
-b_file_load_button = tk.Button(root, text="Load binary File", command=lxrf.open_files.open_file_b,
+# For binary file
+b_file_load_button = tk.Button(root, text="Load binary File", command=lxrf.open_file_b,
                                font=font_style)
 b_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="w")
+b_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
+                             fg="black", relief="flat", borderwidth=2)
+b_file_load_entry.grid(row=2, column=1, columnspan=4, pady=0, sticky="w")
+# insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
+b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
 
 # List out all the columns in the housekeeping file as options for time series plots
-try :
-    ts_options = list(df_slice_hk.columns)
-except :
-    ts_options = ["PinPullerTemp"] * 4
+ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp', '+5.2V_Imon',
+              '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon', 'ADC_Ground', 'Cmd_count',
+              'Pinpuller_Armed', 'Unused', 'Unused.1', 'HVmcpAuto', 'HVmcpMan', 'DeltaEvntCount',
+              'DeltaDroppedCount', 'DeltaLostevntCount']
 
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)
-plot_opt_label_1.grid(row=4, column=0, columnspan=1, pady=0, sticky="w")
+plot_opt_label_1.grid(row=3, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_entry_1 = tk.StringVar(root)
 plot_opt_entry_1.set(ts_options[0])
 ts_menu_1 = tk.OptionMenu(root, plot_opt_entry_1, *ts_options)
-ts_menu_1.grid(row=4, column=1, columnspan=1, sticky="w")
+ts_menu_1.grid(row=3, column=1, columnspan=1, sticky="w")
+
+# If ts_menu_1 is changed, then print the value of the option selected
+plot_opt_entry_1.trace("w", lambda name, index, mode, sv=plot_opt_entry_1: print(sv.get()))
+
+# If the ts_menu_1 is changed, then update the plot
+#plot_opt_entry_1.trace("w", lambda name, index, mode, sv=plot_opt_entry_1: lxrf.plot_ts(sv.get()))
 
 #plot_opt_label_2 = tk.Label(root, text="Plot options:", font=font_style_box)
 #plot_opt_label_2.grid(row=5, column=0, columnspan=1, pady=0, sticky="w")
@@ -248,7 +269,11 @@ ts_menu_2.grid(row=8, column=1, columnspan=1, sticky="w")
 plot_opt_entry_3 = tk.StringVar(root)
 plot_opt_entry_3.set(ts_options[2])
 ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
-ts_menu_3.grid(row=12, column=1, columnspan=1, sticky="w")
+ts_menu_3.grid(row=13, column=1, columnspan=1, sticky="w")
+
+# if any of the ts_options are changed, update the plot
+#plot_opt_entry_1.trace("w", lambda *args: lxrf.update_plot(plot_opt_entry_1.get(),
+#plot_opt_entry_2.get(), plot_opt_entry_3.get()))  # update the plot
 
 # Add buttons for plotting values
 
@@ -332,7 +357,8 @@ end_time_label = tk.Label(root, text="End Time", font=font_style)
 end_time_label.grid(row=18, column=3, columnspan=1)
 
 # Add a button to plot the data
-plot_button = tk.Button(root, text="Plot", width=10, font=font_style_box, command=pvd.plot_diff_data.ts_plots)
+plot_button = tk.Button(root, text="Plot Time Series", font=font_style_box, justify="center",
+                        command=pvd.plot_diff_data.ts_plots_1)
 plot_button.grid(row=18, column=0, columnspan=2, rowspan=1)
 # Add a button to the window to get start time
 #start_button = tk.Button(root, text="Start", command=lambda: print("Start"))

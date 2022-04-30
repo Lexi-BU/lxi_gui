@@ -1,56 +1,58 @@
 import importlib
 import tkinter as tk
 from tkinter import Variable, filedialog, ttk
+import global_variables
 
 import pandas as pd
 import lxi_read_binary_files as lxrb
 importlib.reload(lxrb)
 
-class open_files():
-
-    def __init__(self, file_name_sci):
-        self.file_name_sci = file_name_sci
-    def open_file_sci():
-        # define a global variable for the file name
-        file_val = filedialog.askopenfilename(initialdir="../data/processed_data/sci/",
-                                              title="Select file",
-                                              filetypes=(("csv files", "*.csv"),
-                                                         ("all files", "*.*"))
-                                              )
-        # Cut path to the file off
-        file_name_sci = file_val.split('/')[-1]
-
-        print(f"Loaded {file_name_sci} in the data base")
-
-        return file_val
 
 
-    def open_file_hk():
-        # define a global variable for the file name
-        file_val = filedialog.askopenfilename(initialdir="../data/processed_data/hk/",
-                                              title="Select file",
-                                              filetypes=(("csv files", "*.csv"),
-                                                         ("all files", "*.*"))
-                                                )
-        print(f"Loaded {file_val} in the data base")
-        return file_val
+
+def open_file_sci():
+    # define a global variable for the file name
+    file_val = filedialog.askopenfilename(initialdir="../data/processed_data/sci/",
+                                          title="Select file",
+                                          filetypes=(("csv files", "*.csv"),
+                                                     ("all files", "*.*"))
+                                          )
+    # Cut path to the file off
+    file_name_sci = file_val.split('/')[-1]
+    global_variables.all_file_names['file_name_sci'] = file_name_sci
+    print(f"Loaded {file_name_sci} in the data base")
+
+    return file_val
 
 
-    def open_file_b():
-        # define a global variable for the file name
-        file_val = filedialog.askopenfilename(initialdir="../data/raw_data/",
-                                              title="Select file",
-                                              filetypes=(("text files", "*.txt"),
-                                                         ("all files", "*.*"))
-                                                )
+def open_file_hk():
+    # define a global variable for the file name
+    file_val = filedialog.askopenfilename(initialdir="../data/processed_data/hk/",
+                                          title="Select file",
+                                          filetypes=(("csv files", "*.csv"),
+                                                     ("all files", "*.*"))
+                                            )
+    # Cut path to the file off
+    file_name_hk = file_val.split('/')[-1]
+    print(f"Loaded {file_name_hk} in the data base")
+    return file_val
 
-        # Cut path to the file off
-        filename = file_val.split('/')[-1]
-        #print('Selected:', filename)
-        df = read_binary_file(file_val)
-        print(f"Loaded {file_val} in the data base and saved the unpacked files as .csv")
 
-        return file_val
+def open_file_b():
+    # define a global variable for the file name
+    file_val = filedialog.askopenfilename(initialdir="../data/raw_data/",
+                                          title="Select file",
+                                          filetypes=(("text files", "*.txt"),
+                                                     ("all files", "*.*"))
+                                            )
+
+    # Cut path to the file off
+    file_name_b = file_val.split('/')[-1]
+    #print('Selected:', filename)
+    _, = read_binary_file(file_val)
+    print(f"Loaded {file_name_b} in the data base and saved the unpacked files as .csv")
+
+    return file_val
 
 
 def read_csv_sci(file_val=None, t_start=None, t_end=None):

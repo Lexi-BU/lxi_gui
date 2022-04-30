@@ -23,7 +23,7 @@ class plot_diff_data():
         self.norm_entry = norm_entry
 
 
-    def ts_plots(self):
+    def ts_plots_1(self):
         """
         """
 
