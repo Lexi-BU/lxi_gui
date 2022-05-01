@@ -42,9 +42,9 @@ def plot_histogram(
     elif norm is None:
         norm = mpl.colors.LogNorm()
 
-    tick_label_size = 18
-    axis_label_size = 25
-
+    tick_label_size = 14
+    axis_label_size = 18
+    c_tick_length = 5
     x_range = [x_min, x_max]
     y_range = [y_min, y_max]
 
@@ -57,7 +57,7 @@ def plot_histogram(
     plt.close("all")
 
     # Make a 2d histogram of the data
-    fig = plt.figure(num=None, figsize=(6,7), dpi=200, facecolor='w', edgecolor='k')
+    fig = plt.figure(num=None, figsize=(4, 4), dpi=200, facecolor='w', edgecolor='k')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
 
     gs = gridspec.GridSpec(8, 4, height_ratios=[1, 1, 1, 1, 1, 1, 1, 1], width_ratios=[1, 1, 1, 1])
@@ -72,8 +72,8 @@ def plot_histogram(
     cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
                          pad=0.0)
 
-    cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True, 
-                         labelbottom=False, bottom=False, width=1, length=10, 
+    cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True,
+                         labelbottom=False, bottom=False, width=1, length=c_tick_length,
                          labelsize=15, labelrotation=0, pad=0)
 
     cbar1.ax.xaxis.set_label_position('top')
@@ -95,7 +95,7 @@ def plot_histogram(
     if not Path(save_file_path).exists():
         Path(save_file_path).mkdir(parents=True, exist_ok=True)
 
-    plt.savefig(f"{save_file_path}/xy_plot.png", dpi=300, bbox_inches='tight', pad_inches=0.05,
+    plt.savefig(f"{save_file_path}/xy_plot.png", dpi=150, bbox_inches='tight', pad_inches=0.05,
                 facecolor='w', edgecolor='w', transparent=False)
 
     plt.close("all")
@@ -108,7 +108,7 @@ def plot_indiv_time_series(df=None, key="PinPullerTemp", ms=5, alpha=1):
     axis_label_size = 25
 
     # Plot the data
-    fig = plt.figure(num=None, figsize=(4, 2), dpi=200, facecolor='w', edgecolor='k')
+    fig = plt.figure(num=None, figsize=(6, 2), dpi=200, facecolor='w', edgecolor='k')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0)
     gs = gridspec.GridSpec(1, 1, width_ratios=[1])
 
@@ -148,7 +148,7 @@ def plot_time_series(df=None, ms=5, alpha=1):
     axis_label_size = 25
 
     # Plot the data
-    fig = plt.figure(num=None, figsize=(3,8), dpi=200, facecolor='w', edgecolor='k')
+    fig = plt.figure(num=None, figsize=(3, 8), dpi=200, facecolor='w', edgecolor='k')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0)
     gs = gridspec.GridSpec(3, 1, width_ratios=[1])
 
@@ -188,15 +188,15 @@ def plot_time_series(df=None, ms=5, alpha=1):
 def plot_kde(df, key1, key2, data_type=None, fig_save=True):
 
     pad = 0.02
-    labelsize = 28
-    ticklabelsize = 20
-    clabelsize = 15
+    labelsize = 30
+    ticklabelsize = 16
+    clabelsize = 12
     ticklength = 10
 
     # Remove the rows with duplicated indices
     df = df[~df.index.duplicated(keep='first')]
 
-    fig = plt.figure(num=None, figsize=(3, 4), dpi=200, facecolor='w', edgecolor='k')
+    fig = plt.figure(num=None, figsize=(2.5, 2.5), dpi=100, facecolor='w', edgecolor='k')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
 
     #axs1 = sns.jointplot(x=x_data, y=y_data, kind="kde", cbar=True, thresh=False, fill=True,
@@ -257,7 +257,7 @@ def plot_kde(df, key1, key2, data_type=None, fig_save=True):
 
     if (fig_save):
         fname = f'../figures/gui_figures/kde_plot_{key1}_{key2}.png'
-        axs1.savefig(fname, format='png', dpi=300, bbox_inches='tight', pad_inches=pad,
+        axs1.savefig(fname, format='png', dpi=130, bbox_inches='tight', pad_inches=pad,
                      facecolor='w', edgecolor='w', transparent=False)
     #plt.show()
     plt.close('all')
