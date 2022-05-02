@@ -17,6 +17,9 @@ importlib.reload(plot_routines)
 sci_file_name = "../data/processed_data/sci/2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987_qudsi.csv"
 hk_file_name = "../data/processed_data/hk/2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987_qudsi.csv"
 
+#sci_file_name = "../data/raw_data/2022_04_21_1431_LEXI_HK_unit_1_mcp_unit_1_eBox_1987_hk_/2022_04_21_1431_LEXI_unit_1_mcp_unit_1_eBox_1987.csv"
+#hk_file_name = "../data/raw_data/2022_04_21_1431_LEXI_HK_unit_1_mcp_unit_1_eBox_1987_hk_/2022_04_21_1431_LEXI_HK_unit_1_mcp_unit_1_eBox_1987_hk_.csv"
+
 
 def open_file_sci():
     # define a global variable for the file name
@@ -40,7 +43,7 @@ def open_file_hk():
                                           title="Select file",
                                           filetypes=(("csv files", "*.csv"),
                                                      ("all files", "*.*"))
-                                            )
+                                          )
     print(f"Loaded {file_val} in the data base")
     #df = pd.read_csv(file_val)
 
@@ -69,8 +72,15 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df = pd.read_csv(file_val)
 
     # Replace index with timestamp
-    df.set_index('TimeStamp', inplace=True)
-
+    try:
+        df.set_index('TimeStamp', inplace=True)
+    except Exception:
+        df['Channel4'] = df['Channel3']
+        df['Channel3'] = df['Channel2']
+        df['Channel2'] = df['Channel1']
+        df['Channel1'] = df['Timestamp']
+        df['Timestamp'] = df.index
+        df.set_index('Timestamp', inplace=True)
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
@@ -83,8 +93,8 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df_slice_sci = df.loc[t_start:t_end]
 
     # Find the x and y coordinates from the voltage values.
-    df_slice_sci['x_val'] = df_slice_sci.Channel1 / (df_slice_sci.Channel1 + df_slice_sci.Channel2)
-    df_slice_sci['y_val'] = df_slice_sci.Channel3 / (df_slice_sci.Channel3 + df_slice_sci.Channel4)
+    df_slice_sci['x_val'] = df_slice_sci.Channel1 / (df_slice_sci.Channel1 + df_slice_sci.Channel3)
+    df_slice_sci['y_val'] = df_slice_sci.Channel2 / (df_slice_sci.Channel2 + df_slice_sci.Channel4)
 
     return df_slice_sci
 
@@ -98,7 +108,10 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
     df = pd.read_csv(file_val)
 
     # Replace index with timestamp
-    df.set_index('TimeStamp', inplace=True)
+    try:
+        df.set_index('TimeStamp', inplace=True)
+    except Exception:
+        df.set_index('Time', inplace=False)
 
     # Sort the dataframe by timestamp
     df = df.sort_index()
@@ -129,12 +142,12 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     try:
         t_start = float(start_time.get())
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Warning: {e}, plotting the entire data set")
         pass
     try:
         t_end = float(end_time.get())
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Warning: {e}, plotting the entire data set")
         pass
     if not isinstance(t_start, (int, float)):
         t_start = None
@@ -168,6 +181,10 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     except Exception:
         cmin = None
     try:
+        cmax = int(c_max_entry.get())
+    except Exception:
+        cmax = None
+    try:
         density = bool(int(density_entry.get()))
     except Exception:
         density = None
@@ -179,11 +196,12 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     else:
         norm = None
 
-    print(f"Density is {density}")
-
     df_slice_hk = read_csv_hk(file_val=file_name_hk, t_start=t_start, t_end=t_end)
     df_slice_sci = read_csv_sci(file_val=file_name_sci, t_start=t_start, t_end=t_end)
-    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==False]
+    try:
+        df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==False]
+    except Exception:
+        pass
 
     # Display the time series plot
     fig1_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_1.get(),
@@ -221,7 +239,7 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     img3_ts.grid(row=10, column=0, rowspan=3, columnspan=3, sticky="new")
 
     fig2 = plot_routines.plot_histogram(df=df_slice_sci, x_min=x_min, x_max=x_max,
-                                        y_min=y_min, y_max=y_max, bins=bins, cmin=cmin,
+                                        y_min=y_min, y_max=y_max, bins=bins, cmin=cmin, cmax=cmax,
                                         density=density, norm=norm)
     load2 = Image.open("../figures/gui_figures/xy_plot.png")
     # Resize the image to fit the canvas (in pixels)
@@ -234,8 +252,8 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
 
     # Display the histogram plots
     # TODO: Find out the best way to display the histogram plots (aspect ratios and stuff)
-    fig3 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel1", key2="Channel2")
-    load3 = Image.open("../figures/gui_figures/kde_plot_Channel1_Channel2.png")
+    fig3 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel2", key2="Channel4")
+    load3 = Image.open("../figures/gui_figures/kde_plot_Channel2_Channel4.png")
     # Resize the image to fit the canvas (in pixels)
     load3 = load3.resize((int(fig3.get_figwidth() * 80),
                           int(fig3.get_figheight() * 80)))
@@ -244,8 +262,8 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     img3.image = render3
     img3.grid(row=9, column=3, rowspan=4, columnspan=1, sticky="ne")
 
-    fig4 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel3", key2="Channel4")
-    load4 = Image.open("../figures/gui_figures/kde_plot_Channel3_Channel4.png")
+    fig4 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel1", key2="Channel3")
+    load4 = Image.open("../figures/gui_figures/kde_plot_Channel1_Channel3.png")
     # Resize the image to fit the canvas (in pixels)
     load4 = load4.resize((int(fig4.get_figwidth() * 80),
                           int(fig4.get_figheight() * 80)))
@@ -315,7 +333,7 @@ b_file_load_button = tk.Button(root, text="Load binary File", command=open_file_
 b_file_load_button.grid(row=0, column=2, columnspan=1, pady=0, sticky="nsew")
 
 # List out all the columns in the housekeeping file as options for time series plots
-ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp', '+5.2V_Imon',
+ts_options = ['PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp', '+5.2V_Imon',
               '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon', 'ADC_Ground', 'Cmd_count',
               'Pinpuller_Armed', 'Unused', 'Unused.1', 'HVmcpAuto', 'HVmcpMan', 'DeltaEvntCount',
               'DeltaDroppedCount', 'DeltaLostevntCount']
@@ -323,21 +341,21 @@ ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyT
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)
 plot_opt_label_1.grid(row=1, column=0, columnspan=1, pady=0, sticky="nsew")
 plot_opt_entry_1 = tk.StringVar(root)
-plot_opt_entry_1.set(ts_options[0])
+plot_opt_entry_1.set(ts_options[4])
 ts_menu_1 = tk.OptionMenu(root, plot_opt_entry_1, *ts_options)
 ts_menu_1.grid(row=1, column=1, columnspan=2, sticky="ne")
 
 #plot_opt_label_2 = tk.Label(root, text="Plot options:", font=font_style_box)
 #plot_opt_label_2.grid(row=5, column=0, columnspan=1, pady=0, sticky="nsew")
 plot_opt_entry_2 = tk.StringVar(root)
-plot_opt_entry_2.set(ts_options[1])
+plot_opt_entry_2.set(ts_options[5])
 ts_menu_2 = tk.OptionMenu(root, plot_opt_entry_2, *ts_options)
 ts_menu_2.grid(row=5, column=1, columnspan=2, sticky="ne")
 
 #plot_opt_label_3 = tk.Label(root, text="Plot options:", font=font_style_box)
 #plot_opt_label_3.grid(row=9, column=0, columnspan=1, pady=0, sticky="nsew")
 plot_opt_entry_3 = tk.StringVar(root)
-plot_opt_entry_3.set(ts_options[2])
+plot_opt_entry_3.set(ts_options[7])
 ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=9, column=1, columnspan=2, sticky="ne")
 
@@ -394,7 +412,7 @@ c_max_label.grid(row=7, column=6, columnspan=1, sticky="n")
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
 density_entry = tk.Entry(root, justify="center", bg="white", fg="black", borderwidth=2)
-density_entry.insert(0, "Density")
+density_entry.insert(0, "0 or 1")
 density_entry.grid(row=8, column=5, columnspan=1, sticky="n")
 density_label = tk.Label(root, text="Density", font=font_style_box)
 density_label.grid(row=8, column=6, columnspan=1, sticky="n")

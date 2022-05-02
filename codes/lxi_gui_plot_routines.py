@@ -17,13 +17,14 @@ def plot_histogram(
     df=None,
     bins=None,
     cmin=5,
+    cmax=100,
     x_min=None,
     x_max=None,
     y_min=None,
     y_max=None,
-    density=True,
+    density=False,
     norm=None,
-    ):
+):
 
     if x_min is None:
         x_min = np.nanmin(df.x_val)
@@ -47,11 +48,10 @@ def plot_histogram(
     c_tick_length = 5
     x_range = [x_min, x_max]
     y_range = [y_min, y_max]
-
     # Remove rows with duplicate indices
     df = df[~df.index.duplicated(keep='first')]
 
-    hst = plt.hist2d(df.x_val, df.y_val, bins=bins, range=[x_range, y_range], cmin=cmin,
+    hst = plt.hist2d(df.x_val, df.y_val, bins=bins, range=[x_range, y_range], cmin=cmin, cmax=cmax,
                      density=density)
     z_counts = np.transpose(hst[0])
     plt.close("all")
@@ -60,11 +60,11 @@ def plot_histogram(
     fig = plt.figure(num=None, figsize=(4, 4), dpi=200, facecolor='w', edgecolor='k')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
 
-    gs = gridspec.GridSpec(8, 4, height_ratios=[1, 1, 1, 1, 1, 1, 1, 1], width_ratios=[1, 1, 1, 1])
+    gs = gridspec.GridSpec(4, 4, height_ratios=[1, 1, 1, 1], width_ratios=[1, 1, 1, 1])
 
-    axs1 = plt.subplot(gs[0:5, 0:4])
+    axs1 = plt.subplot(gs[0:, 0:])
     #im1 = sns.jointplot(data=df[["x_val", "y_val"]], kind="kde")
-    im1 = axs1.imshow(z_counts, cmap='Spectral', norm=norm,
+    im1 = axs1.imshow(z_counts, cmap='Spectral', norm=norm, origin="lower",
                       extent=[x_range[0], x_range[1], y_range[0], y_range[1]], aspect='auto')
 
     divider1 = make_axes_locatable(axs1)
@@ -83,8 +83,8 @@ def plot_histogram(
     else:
         cbar1.set_label(r'$N$', fontsize=15, labelpad=0.0, rotation=0)
 
-    axs1.set_xlabel('x (m)', fontsize=axis_label_size)
-    axs1.set_ylabel('y (m)', fontsize=axis_label_size)
+    axs1.set_xlabel('Strip = V1/(V1+V3)', fontsize=axis_label_size)
+    axs1.set_ylabel('Wedge = V2/(V2+V4)', fontsize=axis_label_size)
     axs1.set_xlim(x_min, x_max)
     axs1.set_ylim(y_min, y_max)
     axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
