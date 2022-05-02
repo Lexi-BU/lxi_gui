@@ -1,11 +1,11 @@
 from pathlib import Path
-from shutil import which
-import numpy as np
-import matplotlib.pyplot as plt
+
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Set the font style to Times New Roman
 font = {'family': 'serif', 'weight': 'normal', 'size': 10}
@@ -136,7 +136,7 @@ def plot_indiv_time_series(df=None, key="PinPullerTemp", ms=5, alpha=1):
 def plot_time_series(df=None, ms=5, alpha=1):
 
     # TODO: Add alpha and market styyle option to the plot_time_series function
-    
+
     #Index(['TimeStamp', 'HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp',
     #   'HVsupplyTemp', '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon',
     #   '+28V_Imon', 'ADC_Ground', 'Cmd_count', 'Pinpuller_Armed', 'Unused',
@@ -190,7 +190,7 @@ def plot_kde(df, key1, key2, data_type=None, fig_save=True):
     pad = 0.02
     labelsize = 30
     ticklabelsize = 16
-    clabelsize = 12
+    # clabelsize = 12
     ticklength = 10
 
     # Remove the rows with duplicated indices

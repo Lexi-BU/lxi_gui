@@ -1,14 +1,10 @@
-import tkinter as tk
-from tkinter import Variable, filedialog, ttk
-from tkinter import PhotoImage, font
-from PIL import Image, ImageTk
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from pathlib import Path
 import importlib
-import numpy as np
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import tkinter as tk
+from tkinter import filedialog, font
+
+import pandas as pd
+from PIL import Image, ImageTk
+
 import lxi_gui_plot_routines as plot_routines
 
 importlib.reload(plot_routines)
