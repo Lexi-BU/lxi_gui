@@ -11,3 +11,5 @@ The GUI for LEXI
 4. The plan is to eventually make the code windows executable.
 
 Please let me know if you have any trouble.
+
+![LEXI GUI](https://github.com/qudsiramiz/lxi_gui/blob/main/figures/lxi_gui_Screenshot.png)
