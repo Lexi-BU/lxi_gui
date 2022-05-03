@@ -1,12 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import global_variables
+import importlib
+
+importlib.reload(global_variables)
+
 
 class plot_diff_data():
 
     def __init__(self, file_name_bnr, file_name_sci, file_name_hk, start_time, end_time,
                  x_min_entry, x_max_entry, y_min_entry, y_max_entry, hist_bin_entry, c_min_entry,
-                 c_max_entry, density_entry, norm_entry) -> None:
+                 c_max_entry, density_entry, norm_entry, plot_entry_1, key):
         self.file_name_bnr = file_name_bnr
         self.file_name_sci = file_name_sci
         self.file_name_hk = file_name_hk
@@ -21,11 +26,14 @@ class plot_diff_data():
         self.c_max_entry = c_max_entry
         self.density_entry = density_entry
         self.norm_entry = norm_entry
+        self.plot_entry_1 = plot_entry_1
+        self.key = key
+        print(key)
 
-
+    #@staticmethod
     def ts_plots_1(self):
         """
-        """
+    
 
         # Try to convert the start_time and end_time to float or int
         try:
@@ -43,49 +51,11 @@ class plot_diff_data():
 
         if not isinstance(t_end, (int, float)):
             t_end = None
-
-        # Read entries from the text boxes
-        try:
-            x_min = float(self.x_min_entry.get())
-        except Exception:
-            x_min = None
-        try:
-            x_max = float(self.x_max_entry.get())
-        except Exception:
-            x_max = None
-        try:
-            y_min = float(self.y_min_entry.get())
-        except Exception:
-            y_min = None
-        try:
-            y_max = float(self.y_max_entry.get())
-        except Exception:
-            y_max = None
-        try:
-            bins = int(self.hist_bins_entry.get())
-        except Exception:
-            bins = None
-        try:
-            cmin = int(self.c_min_entry.get())
-        except Exception:
-            cmin = None
-        try:
-            cmax = int(self.c_max_entry.get())
-        except Exception:
-            cmax = None
-        try:
-            density = bool(int(self.density_entry.get()))
-        except Exception:
-            density = None
-
-        if self.norm_entry.get() == "linear":
-            self.norm = "linear"
-        elif self.norm_entry.get() == "log":
-            norm = "log"
-        else:
-            norm = None
-
         """
+        self.plot_entry_1 = plot_opt_entry_1.get()
+        print(f"Hey...this code worked and key is {self.plot_entry_1}!")
+        """
+
         df_slice_hk = read_csv_hk(file_val=file_name_hk, t_start=t_start, t_end=t_end)
         df_slice_sci = read_csv_sci(file_val=file_name_sci, t_start=t_start, t_end=t_end)
         df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==False]

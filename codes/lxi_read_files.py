@@ -8,8 +8,6 @@ import lxi_read_binary_files as lxrb
 importlib.reload(lxrb)
 
 
-
-
 def open_file_sci():
     # define a global variable for the file name
     file_val = filedialog.askopenfilename(initialdir="../data/processed_data/sci/",
@@ -19,8 +17,11 @@ def open_file_sci():
                                           )
     # Cut path to the file off
     file_name_sci = file_val.split('/')[-1]
-    global_variables.all_file_names['file_name_sci'] = file_name_sci
-    print(f"Loaded {file_name_sci} in the data base")
+    global_variables.all_file_details['file_name_sci'] = file_name_sci
+
+    df_slice_sci = read_csv_sci(file_val)
+    global_variables.all_file_details['df_slice_sci'] = df_slice_sci
+    print(f"\n Loaded {file_name_sci} in the data base")
 
     return file_val
 
@@ -34,7 +35,11 @@ def open_file_hk():
                                             )
     # Cut path to the file off
     file_name_hk = file_val.split('/')[-1]
-    print(f"Loaded {file_name_hk} in the data base")
+    global_variables.all_file_details['file_name_hk'] = file_name_hk
+
+    df_slice_hk = read_csv_hk(file_val)
+    global_variables.all_file_details['df_slice_hk'] = df_slice_hk
+    print(f"\n Loaded {file_name_hk} in the data base")
     return file_val
 
 
@@ -49,8 +54,15 @@ def open_file_b():
     # Cut path to the file off
     file_name_b = file_val.split('/')[-1]
     #print('Selected:', filename)
-    _, = read_binary_file(file_val)
-    print(f"Loaded {file_name_b} in the data base and saved the unpacked files as .csv")
+    df_slice_hk, file_name_hk, df_slice_sci, file_name_sci = read_binary_file(file_val)
+    global_variables.all_file_details["file_name_b"] = file_name_b
+    global_variables.all_file_details["file_name_hk"] = file_name_hk
+    global_variables.all_file_details["file_name_sci"] = file_name_sci
+
+    global_variables.all_file_details["df_slice_hk"] = df_slice_hk
+    global_variables.all_file_details["df_slice_sci"] = df_slice_sci
+
+    print(f"\n Loaded {file_name_b} in the data base, and the csv file for HK and SCI data have been saved to ''{file_name_hk}'' and ''{file_name_sci}''")
 
     return file_val
 
@@ -88,7 +100,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Find the x and y coordinates from the voltage values.
     df_slice_sci['x_val'] = df_slice_sci.Channel1 / (df_slice_sci.Channel1 + df_slice_sci.Channel2)
     df_slice_sci['y_val'] = df_slice_sci.Channel3 / (df_slice_sci.Channel3 + df_slice_sci.Channel4)
-
+    print(f"file {file_val} read")
     return df_slice_sci
 
 
@@ -129,13 +141,13 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
 def read_binary_file(file_val=None, t_start=None, t_end=None):
 
-    df_hk = lxrb.read_binary_data_hk(
+    df_hk, file_name_hk = lxrb.read_binary_data_hk(
         in_file_name=file_val,
         save_file_name=None,
         number_of_decimals=6
         )
 
-    df_sci = lxrb.read_binary_data_sci(
+    df_sci, file_name_sci = lxrb.read_binary_data_sci(
         in_file_name=file_val,
         save_file_name=None,
         number_of_decimals=6
@@ -153,11 +165,9 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         t_start = df_sci.index.min()
     if t_end is None:
         t_end = df_sci.index.max()
-    
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]
 
-
-    return df_slice_hk, df_slice_sci
+    return df_slice_hk, file_name_hk, df_slice_sci, file_name_sci

@@ -114,6 +114,7 @@ class hk_packet_cls(NamedTuple):
                 delta_lost_event_count=delta_lost_event_count,
             )
 
+
 def read_binary_data_sci(
     in_file_name=None,
     save_file_name="../data/processed/sci/output_sci.csv",
@@ -216,7 +217,8 @@ def read_binary_data_sci(
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
-    return df
+    return df, save_file_name
+
 
 def read_binary_data_hk(
     in_file_name=None,
@@ -457,4 +459,4 @@ def read_binary_data_hk(
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
-    return df
+    return df, save_file_name
