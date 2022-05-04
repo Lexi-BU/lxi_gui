@@ -9,15 +9,15 @@ from pathlib import Path
 import importlib
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import lxi_gui_plot_routines as plot_routines
-import plot_various_data as pvd
+import lxi_gui_plot_routines as lgpr
+#import plot_various_data as pvd
 import lxi_read_files as lxrf
 
 import global_variables
 
 
-importlib.reload(plot_routines)
-importlib.reload(pvd)
+#importlib.reload(plot_routines)
+importlib.reload(lgpr)
 importlib.reload(lxrf)
 importlib.reload(global_variables)
 
@@ -187,7 +187,7 @@ def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=Non
     -------
     None
     """
-    fig_ts = pvd.plot_diff_data(df_slice_hk=df_slice_hk, plot_key=plot_key, start_time=start_time,
+    fig_ts = lgpr.plot_data_class(df_slice_hk=df_slice_hk, plot_key=plot_key, start_time=start_time,
                                 end_time=end_time).ts_plots()
     load_ts = Image.open(f"../figures/time_series_plots/{plot_key}_time_series_plot.png")
     # Resize the image to fit the canvas (in pixels)
@@ -202,21 +202,21 @@ def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=Non
 def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
                     cmax=None, x_min=None, x_max=None, y_min=None, y_max=None, density=None,
                     norm=None, row=3
-):
+                    ):
 
-    fig_hist = pvd.plot_diff_data(df_slice_sci=df_slice_sci, start_time=start_time,
+    fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
                                   end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
                                   x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                                   density=density, norm=norm).hist_plots()
 
     load_hist = Image.open("../figures/hist_plots/hist_plot.png")
     # Resize the image to fit the canvas (in pixels)
-    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 100),
-                                  int(fig_hist.get_figheight() * 100)))
+    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 80),
+                                  int(fig_hist.get_figheight() * 80)))
     render_hist = ImageTk.PhotoImage(load_hist)
     img_hist = tk.Label(image=render_hist)
     img_hist.image = render_hist
-    img_hist.grid(row=row, column=2, rowspan=6, columnspan=2, sticky="nsew")
+    img_hist.grid(row=row, column=2, rowspan=14, columnspan=2, sticky="nsew")
 
 
 root = tk.Tk()
@@ -319,8 +319,8 @@ plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=13, column=1, columnspan=1, sticky="w")
 
-#plot_opt_entry_2.trace("w", lambda *args: pvd.plot_diff_data.ts_plots_1(key=plot_opt_entry_2.get()))
-#plot_opt_entry_3.trace("w", lambda *args: pvd.plot_diff_data.ts_plots_1(key=plot_opt_entry_3.get()))
+#plot_opt_entry_2.trace("w", lambda *args: lgpr.plot_data_class.ts_plots_1(key=plot_opt_entry_2.get()))
+#plot_opt_entry_3.trace("w", lambda *args: lgpr.plot_data_class.ts_plots_1(key=plot_opt_entry_3.get()))
 #
 # The minimum value of x-axis for histogram plot
 x_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
@@ -403,7 +403,7 @@ end_time_label.grid(row=18, column=3, columnspan=1)
 
 #print(global_variables.all_file_details)
 # if any of the ts_options are changed, update the plot
-#pvd.plot_diff_data.__init__()
+#lgpr.plot_data_class.__init__()
 plot_opt_entry_1.trace(
     "w", lambda *_: load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
