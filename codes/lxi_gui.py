@@ -165,6 +165,60 @@ def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
     img4.grid(row=14, column=3, rowspan=3, columnspan=1, sticky="n")
 """
 
+
+def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=None, row=2):
+    """
+    Loads the time series plots for the selected time range and displays them in the GUI.
+
+    Parameters
+    ----------
+    df_slice_hk : pandas.DataFrame
+        The dataframe containing the HK data.
+    plot_key : str
+        The key of the HK data to be plotted.
+    start_time : str
+        The start time of the time range to be plotted.
+    end_time : str
+        The end time of the time range to be plotted.
+    row : int
+        The row in which the plots should be displayed.
+
+    Returns
+    -------
+    None
+    """
+    fig_ts = pvd.plot_diff_data(df_slice_hk=df_slice_hk, plot_key=plot_key, start_time=start_time,
+                                end_time=end_time).ts_plots()
+    load_ts = Image.open(f"../figures/time_series_plots/{plot_key}_time_series_plot.png")
+    # Resize the image to fit the canvas (in pixels)
+    load_ts = load_ts.resize((int(fig_ts.get_figwidth() * 100),
+                              int(fig_ts.get_figheight() * 80)))
+    render_ts = ImageTk.PhotoImage(load_ts)
+    img_ts = tk.Label(image=render_ts)
+    img_ts.image = render_ts
+    img_ts.grid(row=row, column=0, rowspan=4, columnspan=2, sticky="w")
+
+
+def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
+                    cmax=None, x_min=None, x_max=None, y_min=None, y_max=None, density=None,
+                    norm=None, row=3
+):
+
+    fig_hist = pvd.plot_diff_data(df_slice_sci=df_slice_sci, start_time=start_time,
+                                  end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
+                                  x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+                                  density=density, norm=norm).hist_plots()
+
+    load_hist = Image.open("../figures/hist_plots/hist_plot.png")
+    # Resize the image to fit the canvas (in pixels)
+    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 100),
+                                  int(fig_hist.get_figheight() * 100)))
+    render_hist = ImageTk.PhotoImage(load_hist)
+    img_hist = tk.Label(image=render_hist)
+    img_hist.image = render_hist
+    img_hist.grid(row=row, column=2, rowspan=6, columnspan=2, sticky="nsew")
+
+
 root = tk.Tk()
 #root.rowconfigure(, {'minsize': 3})
 root.columnconfigure(0, {'minsize': 3}, weight=1)
@@ -265,9 +319,6 @@ plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=13, column=1, columnspan=1, sticky="w")
 
-# if any of the ts_options are changed, update the plot
-#pvd.plot_diff_data.__init__()
-plot_opt_entry_1.trace("w", lambda *args: pvd.plot_diff_data.ts_plots_1())
 #plot_opt_entry_2.trace("w", lambda *args: pvd.plot_diff_data.ts_plots_1(key=plot_opt_entry_2.get()))
 #plot_opt_entry_3.trace("w", lambda *args: pvd.plot_diff_data.ts_plots_1(key=plot_opt_entry_3.get()))
 #
@@ -350,9 +401,40 @@ end_time.grid(row=17, column=3, columnspan=1, pady=5, ipadx=10, ipady=10)
 end_time_label = tk.Label(root, text="End Time", font=font_style)
 end_time_label.grid(row=18, column=3, columnspan=1)
 
-# Add a button to plot the data
-plot_button = tk.Button(root, text="Plot Time Series", font=font_style_box, justify="center",
-                        command=pvd.plot_diff_data.ts_plots_1)
+#print(global_variables.all_file_details)
+# if any of the ts_options are changed, update the plot
+#pvd.plot_diff_data.__init__()
+plot_opt_entry_1.trace(
+    "w", lambda *_: load_ts_plots(
+        df_slice_hk=global_variables.all_file_details["df_slice_hk"],
+        plot_key=plot_opt_entry_1.get(), start_time=start_time.get(),
+        end_time=end_time.get(), row=4)
+)
+
+plot_opt_entry_2.trace(
+    "w", lambda *_: load_ts_plots(
+        df_slice_hk=global_variables.all_file_details["df_slice_hk"],
+        plot_key=plot_opt_entry_2.get(), start_time=start_time.get(),
+        end_time=end_time.get(), row=9)
+)
+
+plot_opt_entry_3.trace(
+    "w", lambda *_: load_ts_plots(
+        df_slice_hk=global_variables.all_file_details["df_slice_hk"],
+        plot_key=plot_opt_entry_3.get(), start_time=start_time.get(),
+        end_time=end_time.get(), row=14)
+)
+# Add a button to plot the histogram data
+plot_button = tk.Button(root, text="Plot Histogram Data", font=font_style_box, justify="center",
+                        command=lambda: load_hist_plots(
+                            df_slice_sci=global_variables.all_file_details["df_slice_sci"],
+                            start_time=start_time.get(), end_time=end_time.get(),
+                            bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
+                            cmax=c_max_entry.get(), x_min=x_min_entry.get(),
+                            x_max=x_max_entry.get(), y_min=y_min_entry.get(),
+                            y_max=y_max_entry.get(), density=density_entry.get(),
+                            norm=norm_entry.get(), row=3))
+
 plot_button.grid(row=18, column=0, columnspan=2, rowspan=1)
 # Add a button to the window to get start time
 #start_button = tk.Button(root, text="Start", command=lambda: print("Start"))
