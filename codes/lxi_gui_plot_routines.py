@@ -212,8 +212,8 @@ class plot_data_class():
         else:
             cbar1.set_label(r'$N$', fontsize=15, labelpad=0.0, rotation=0)
 
-        axs1.set_xlabel('x (m)', fontsize=axis_label_size)
-        axs1.set_ylabel('y (m)', fontsize=axis_label_size)
+        axs1.set_xlabel('Strip = V1/(V1+V3)', fontsize=axis_label_size)
+        axs1.set_ylabel('Wedge = V2/(V2+V4)', fontsize=axis_label_size)
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
         axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
