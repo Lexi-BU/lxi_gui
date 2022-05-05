@@ -159,7 +159,7 @@ font_style_big = font.Font(family="Helvetica", size=25)
 # For science file
 sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_file_sci,
                                  font=font_style)
-sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
+sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
 sci_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
                                fg="black", relief="flat", borderwidth=2)
@@ -171,7 +171,7 @@ sci_file_load_button.config(command=lambda: sci_file_load_entry.insert(0, lxrf.o
 # For housekeeping file
 hk_file_load_button = tk.Button(root, text="Load HK File", command=lxrf.open_file_hk,
                                 font=font_style)
-hk_file_load_button.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
+hk_file_load_button.grid(row=1, column=0, columnspan=1, pady=0, sticky="ew")
 hk_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
                               fg="black", relief="flat", borderwidth=2)
 hk_file_load_entry.grid(row=1, column=1, columnspan=4, pady=0, sticky="w")
@@ -181,7 +181,7 @@ hk_file_load_button.config(command=lambda: hk_file_load_entry.insert(0, lxrf.ope
 # For binary file
 b_file_load_button = tk.Button(root, text="Load binary File", command=lxrf.open_file_b,
                                font=font_style)
-b_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="w")
+b_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
 b_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
                              fg="black", relief="flat", borderwidth=2)
 b_file_load_entry.grid(row=2, column=1, columnspan=4, pady=0, sticky="w")
