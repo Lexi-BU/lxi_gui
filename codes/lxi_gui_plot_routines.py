@@ -155,9 +155,9 @@ class plot_data_class():
         except Exception:
             y_max = self.df_slice_sci["y_val"].max()
         try:
-            density = bool(self.density)
+            density = self.density
         except Exception:
-            density = True
+            density =None
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
@@ -174,6 +174,13 @@ class plot_data_class():
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
         elif norm == 'linear':
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
+
+        if density == str(True):
+            density = True
+        elif density == str(False):
+            density = False
+        elif density == None:
+            density = False
 
         x_range = [x_min, x_max]
         y_range = [y_min, y_max]
@@ -259,7 +266,7 @@ class plot_data_class():
         ticklabelsize = 20
         ticklength = 10
 
-        fig = plt.figure(num=None, figsize=(3, 4), dpi=200, facecolor='w', edgecolor='k')
+        fig = plt.figure(num=None, figsize=(3, 3), dpi=200, facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
 
         axs1 = sns.jointplot(x=v1, y=v2, palette='Spectral',

@@ -49,11 +49,11 @@ def open_file_b():
                                           title="Select file",
                                           filetypes=(("text files", "*.txt"),
                                                      ("all files", "*.*"))
-                                            )
+                                          )
 
     # Cut path to the file off
     file_name_b = file_val.split('/')[-1]
-    #print('Selected:', filename)
+    # print('Selected:', filename)
     df_slice_hk, file_name_hk, df_slice_sci, file_name_sci = read_binary_file(file_val)
     global_variables.all_file_details["file_name_b"] = file_name_b
     global_variables.all_file_details["file_name_hk"] = file_name_hk
@@ -145,13 +145,13 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         in_file_name=file_val,
         save_file_name=None,
         number_of_decimals=6
-        )
+    )
 
     df_sci, file_name_sci = lxrb.read_binary_data_sci(
         in_file_name=file_val,
         save_file_name=None,
         number_of_decimals=6
-        )
+    )
 
     # Replace index with timestamp
     df_hk.set_index('TimeStamp', inplace=True)

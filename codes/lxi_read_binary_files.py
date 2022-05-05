@@ -41,6 +41,16 @@ class sci_packet(NamedTuple):
     @classmethod
     def from_bytes(cls, bytes_: bytes) :
         structure = struct.unpack(packet_format_sci, bytes_)
+        # If any value is 0 then replace it with NaN
+        #print(structure)
+        #if structure[2] == 0:
+        #    structure[2] = np.nan
+        #if structure[3] == 0:
+        #    structure[3] = np.nan
+        #if structure[4] == 0:
+        #    structure[4] = np.nan
+        #if structure[5] == 0:
+        #    structure[5] = np.nan
         return cls(
             is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
             timestamp=structure[1] & 0x3fffffff,           # mask for getting all timestamp bits
@@ -151,18 +161,18 @@ def read_binary_data_sci(
     if not Path(in_file_name).is_file():
         raise FileNotFoundError(
             "The file " + in_file_name + " does not exist."
-            )
+        )
     # Check if the file name and folder name are strings, if not then raise an error
     if not isinstance(in_file_name, str):
         raise TypeError(
             "The file name must be a string."
-            )
+        )
 
     # Check the number of decimals to save
     if not isinstance(number_of_decimals, int):
         raise TypeError(
             "The number of decimals to save must be an integer."
-            )
+        )
 
     input_file_name = in_file_name
 
@@ -199,7 +209,9 @@ def read_binary_data_sci(
                 'Channel1',
                 'Channel2',
                 'Channel3',
-                'Channel4',
+                'Channel4'
+                #'x_val',
+                #'y_val',
             ),
         )
         dict_writer.writeheader()
@@ -210,13 +222,22 @@ def read_binary_data_sci(
                 'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
                 'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
                 'Channel3': np.round(sci_packet.channel3, decimals=number_of_decimals),
-                'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals),
+                'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals)
+                #'x_val': np.round(sci_packet.channel1 / (sci_packet.channel1 + sci_packet.channel3),
+                #                  decimals=number_of_decimals),
+                #'y_val': np.round(sci_packet.channel2 / (sci_packet.channel2 + sci_packet.channel4),
+                #                  decimals=number_of_decimals)
             }
             for sci_packet in packets
         )
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
+    df['x_val'] = np.round(df['Channel1'] / (df['Channel1'] + df['Channel3']), decimals=number_of_decimals)
+    df['y_val'] = np.round(df['Channel2'] / (df['Channel2'] + df['Channel4']), decimals=number_of_decimals)
+    # Save the dataframe to a csv file and set index to time stamp
+    df.to_csv(save_file_name, index=True)
+
     return df, save_file_name
 
 

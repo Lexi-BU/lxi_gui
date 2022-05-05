@@ -54,7 +54,7 @@ def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=Non
     render_ts = ImageTk.PhotoImage(load_ts)
     img_ts = tk.Label(image=render_ts)
     img_ts.image = render_ts
-    img_ts.grid(row=row, column=0, rowspan=4, columnspan=2, sticky="w")
+    img_ts.grid(row=row, column=0, rowspan=3, columnspan=2, sticky="w")
 
 
 def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
@@ -69,19 +69,20 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
 
     load_hist = Image.open("../figures/hist_plots/hist_plot.png")
     # Resize the image to fit the canvas (in pixels)
-    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 80),
-                                  int(fig_hist.get_figheight() * 80)))
+    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 100),
+                                  int(fig_hist.get_figheight() * 100)))
     render_hist = ImageTk.PhotoImage(load_hist)
     img_hist = tk.Label(image=render_hist)
     img_hist.image = render_hist
-    img_hist.grid(row=row, column=2, rowspan=10, columnspan=2, sticky="nsew")
+    img_hist.grid(row=row, column=2, rowspan=12, columnspan=2, sticky="nsew")
 
 
 def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, channel1=None,
                          channel2=None, row=None, column=None, sticky=None):
 
-    fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
-                                    end_time=end_time, channel1=channel1, channel2=channel2).hist_plots_volt()
+    fig_hist = lgpr.plot_data_class(
+        df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, channel1=channel1,
+        channel2=channel2).hist_plots_volt()
 
     load_hist = Image.open(f"../figures/hist_plots/hist_plot_{channel1}_{channel2}.png")
     # Resize the image to fit the canvas (in pixels)
@@ -90,7 +91,7 @@ def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, chan
     render_hist = ImageTk.PhotoImage(load_hist)
     img_hist = tk.Label(image=render_hist)
     img_hist.image = render_hist
-    img_hist.grid(row=row, column=column, rowspan=4, columnspan=1, sticky=sticky)
+    img_hist.grid(row=row, column=column, rowspan=3, columnspan=1, sticky=sticky)
 
 
 def load_all_hist_plots(
@@ -139,6 +140,38 @@ root.title("LEXI GUI")
 root.geometry("600x600")
 root.resizable(True, True)
 
+# Add a scrollbar")
+
+
+def populate(frame):
+    '''Put in some fake data'''
+    for row in range(100):
+        tk.Label(frame, text="%s" % row, width=3, borderwidth="1",
+                 relief="solid").grid(row=row, column=0)
+        t = "this is the second column for row %s" % row
+        tk.Label(frame, text=t).grid(row=row, column=1)
+
+
+def onFrameConfigure(canvas):
+    '''Reset the scroll region to encompass the inner frame'''
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+
+canvas = tk.Canvas(root, borderwidth=0, background="#ffffff")
+frame = tk.Frame(canvas, background="#ffffff")
+vsb = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
+canvas.configure(yscrollcommand=vsb.set)
+vsb.grid(row=0, column=6, sticky="ns")
+canvas.grid(row=0, column=0, columnspan=6, rowspan=19, sticky="nsew")
+#vsb.pack(side="right", fill="y")
+#canvas.pack(side="left", fill="both", expand=True)
+#canvas.create_window((4, 4), window=frame, anchor="nw")
+
+frame.bind("<Configure>", lambda event,
+           canvas=canvas: onFrameConfigure(canvas))
+
+#populate(frame)
+
 # Create a label widget and justify the text
 #my_label = tk.Label(root, text="LEXI GUI", font=(
 #    "Helvetica", 20), justify="center")
@@ -157,7 +190,7 @@ sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.op
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
 
 sci_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
-                              fg="black", relief="flat", borderwidth=2)
+                               fg="black", relief="flat", borderwidth=2)
 sci_file_load_entry.grid(row=0, column=1, columnspan=4, pady=0, sticky="w")
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
@@ -170,7 +203,6 @@ hk_file_load_button.grid(row=1, column=0, columnspan=1, pady=0, sticky="w")
 hk_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg="white",
                               fg="black", relief="flat", borderwidth=2)
 hk_file_load_entry.grid(row=1, column=1, columnspan=4, pady=0, sticky="w")
-
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(command=lambda: hk_file_load_entry.insert(0, lxrf.open_file_hk()))
 
@@ -206,18 +238,15 @@ ts_menu_1.grid(row=3, column=1, columnspan=1, sticky="w")
 plot_opt_entry_2 = tk.StringVar(root)
 plot_opt_entry_2.set("Select a column")
 ts_menu_2 = tk.OptionMenu(root, plot_opt_entry_2, *ts_options)
-ts_menu_2.grid(row=8, column=1, columnspan=1, sticky="w")
+ts_menu_2.grid(row=7, column=1, columnspan=1, sticky="w")
 
 #plot_opt_label_3 = tk.Label(root, text="Plot options:", font=font_style_box)
 #plot_opt_label_3.grid(row=9, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_entry_3 = tk.StringVar(root)
 plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
-ts_menu_3.grid(row=13, column=1, columnspan=1, sticky="w")
+ts_menu_3.grid(row=11, column=1, columnspan=1, sticky="w")
 
-#plot_opt_entry_2.trace("w", lambda *args: lgpr.plot_data_class.ts_plots_1(key=plot_opt_entry_2.get()))
-#plot_opt_entry_3.trace("w", lambda *args: lgpr.plot_data_class.ts_plots_1(key=plot_opt_entry_3.get()))
-#
 # The minimum value of x-axis for histogram plot
 x_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
 x_min_entry.insert(0, 0)
@@ -311,35 +340,17 @@ plot_opt_entry_2.trace(
     "w", lambda *_: load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_2.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=9)
+        end_time=end_time.get(), row=8)
 )
 
 plot_opt_entry_3.trace(
     "w", lambda *_: load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_3.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=14)
+        end_time=end_time.get(), row=12)
 )
-# Add a button to plot the histogram data
-#plot_button = tk.Button(root, text="Plot Histogram Data", font=font_style_box, justify="center",
-#                        command=lambda: load_hist_plots(
-#                            df_slice_sci=global_variables.all_file_details["df_slice_sci"],
-#                            start_time=start_time.get(), end_time=end_time.get(),
-#                            bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
-#                            cmax=c_max_entry.get(), x_min=x_min_entry.get(),
-#                            x_max=x_max_entry.get(), y_min=y_min_entry.get(),
-#                            y_max=y_max_entry.get(), density=density_entry.get(),
-#                            norm=norm_entry.get(), row=0),
-#                            
-#                            load_hist_plots_volt(
-#                            df_slice_sci=global_variables.all_file_details["df_slice_sci"],
-#                            start_time=start_time.get(), end_time=end_time.get(),
-#                            channel1="channel1", channel2="channel2", row=13,
-#                            column=2, sticky="ne"),
-#
-#                            )
 
-plot_button = tk.Button(root, text="Plot Histogram Data", font=font_style_box, justify="center",
+plot_button = tk.Button(root, text="Plot Histogram", font=font_style_box, justify="center",
                         command=lambda: load_all_hist_plots(
                             df_slice_sci=global_variables.all_file_details["df_slice_sci"],
                             start_time=start_time.get(), end_time=end_time.get(),
@@ -347,24 +358,23 @@ plot_button = tk.Button(root, text="Plot Histogram Data", font=font_style_box, j
                             cmax=c_max_entry.get(), x_min=x_min_entry.get(),
                             x_max=x_max_entry.get(), y_min=y_min_entry.get(),
                             y_max=y_max_entry.get(), density=density_entry.get(),
-                            norm=norm_entry.get(), row_hist=0,
-                            channel1="Channel1", channel2="Channel2", row_channel13=10,
+                            norm=norm_entry.get(), row_hist=1,
+                            channel1="Channel1", channel2="Channel2", row_channel13=12,
                             column_channel13=2, sticky_channel13="ne",
-                            channel3="Channel3", channel4="Channel4", row_channel24=10,
+                            channel3="Channel3", channel4="Channel4", row_channel24=12,
                             column_channel24=3, sticky_channel24="nw"
                         )
                         )
 
-plot_button.grid(row=18, column=0, columnspan=2, rowspan=1)
+plot_button.grid(row=0, column=2, columnspan=2, rowspan=1)
 # Add a button to the window to get start time
 #start_button = tk.Button(root, text="Start", command=lambda: print("Start"))
 #start_button.grid(row=13, column=3, columnspan=1)
 
 # Add a quit button
 quit_button = tk.Button(
-    root, text="Quit", command=root.destroy, font=font_style_big)
-quit_button.grid(row=18, column=5, columnspan=1, rowspan=1)
+    root, text="Quit", command=root.destroy, font=font_style_box, justify="center")
+quit_button.grid(row=10, column=4, columnspan=2, rowspan=2)
 # Print the value in the entry box
-
 
 root.mainloop()
