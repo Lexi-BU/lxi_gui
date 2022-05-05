@@ -22,6 +22,8 @@ class plot_data_class():
                  start_time=None,
                  end_time=None,
                  plot_key=None,
+                 channel1=None,
+                 channel2=None,
                  bins=None,
                  cmin=None,
                  cmax=None,
@@ -37,6 +39,8 @@ class plot_data_class():
         self.start_time = start_time
         self.end_time = end_time
         self.plot_key = plot_key
+        self.channel1 = channel1
+        self.channel2 = channel2
         self.bins = bins
         self.cmin = cmin
         self.cmax = cmax
@@ -186,15 +190,16 @@ class plot_data_class():
         plt.close("all")
 
         # Make a 2d histogram of the data
-        fig = plt.figure(num=None, figsize=(6,7), dpi=200, facecolor='w', edgecolor='k')
-        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
+        fig = plt.figure(num=None, figsize=(4, 4), dpi=200, facecolor='w', edgecolor='k')
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0)
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
 
         axs1 = plt.subplot(gs[0, 0])
         #im1 = sns.jointplot(data=df[["x_val", "y_val"]], kind="kde")
         im1 = axs1.imshow(z_counts, cmap='Spectral', norm=norm,
-                          extent=[x_range[0], x_range[1], y_range[0], y_range[1]], aspect='auto')
+                          extent=[x_range[0], x_range[1], y_range[0], y_range[1]], origin='lower',
+                          aspect='auto')
 
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
@@ -236,53 +241,61 @@ class plot_data_class():
         try:
             t_start = float(self.start_time)
         except Exception:
-            #print(f"Error: {e} failed start")
+            # print(f"Error: {e} failed start")
             t_start = self.df_slice_sci.index.min()
             pass
         try:
             t_end = float(self.end_time)
         except Exception:
-            #print(f"Error: {e}, failed end")
+            # print(f"Error: {e}, failed end")
             t_end = self.df_slice_sci.index.max()
             pass
-        try:
-            bins = int(self.bins)
-        except Exception:
-            bins = 50
-        try:
-            cmin = float(self.cmin)
-        except Exception:
-            cmin = 1
-        try:
-            cmax = float(self.cmax)
-        except Exception:
-            cmax = None
-        try:
-            x_min = float(self.x_min)
-        except Exception:
-            x_min = self.df_slice_sci["x_val"].min()
-        try:
-            x_max = float(self.x_max)
-        except Exception:
-            x_max = self.df_slice_sci["x_val"].max()
-        try:
-            y_min = float(self.y_min)
-        except Exception:
-            y_min = self.df_slice_sci["y_val"].min()
-        try:
-            y_max = float(self.y_max)
-        except Exception:
-            y_max = self.df_slice_sci["y_val"].max()
-        try:
-            density = bool(self.density)
-        except Exception:
-            density = True
-        # Check if norm is an instance of mpl.colors.Normalize
-        if (isinstance(self.norm, mpl.colors.Normalize) or self.norm=='log' or self.norm=='linear'):
-            norm = self.norm
-        else:
-            norm = None
 
-        #if not isinstance(t_start, (int, float)):
-        #    t_start = None
+        self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
+        v1 = self.df_slice_sci[self.channel1][t_start:t_end]
+        v2 = self.df_slice_sci[self.channel2][t_start:t_end]
 
+        labelsize = 28
+        ticklabelsize = 20
+        ticklength = 10
+
+        fig = plt.figure(num=None, figsize=(3, 4), dpi=200, facecolor='w', edgecolor='k')
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
+
+        axs1 = sns.jointplot(x=v1, y=v2, palette='Spectral',
+                             hue_norm=mpl.colors.LogNorm(vmin=1, vmax=100),
+                             xlim=[0.1, 4], ylim=[0.1, 4], height=8, ratio=6, space=0.)
+
+        axs1.fig.axes[0].tick_params(axis='both', which='major', direction='in', labelbottom=True,
+                                     bottom=True, labeltop=False, top=True, labelleft=True,
+                                     left=True, labelright=False, right=True, width=1.5,
+                                     length=ticklength, labelsize=ticklabelsize, labelrotation=0)
+
+        axs1.fig.axes[0].tick_params(axis='both', which='minor', direction='in', labelbottom=False,
+                                     bottom=False, left=False, width=1.5, length=ticklength,
+                                     labelsize=ticklabelsize, labelrotation=0)
+
+        axs1.fig.axes[1].tick_params(axis='both', which='both', direction='in', labelbottom=False,
+                                     bottom=False, labelleft=False, left=False, width=1.5,
+                                     length=ticklength, labelsize=ticklabelsize, labelrotation=0)
+
+        axs1.fig.axes[2].tick_params(axis='both', which='both', direction='in', labelbottom=False,
+                                     bottom=False, labelleft=False, left=False, width=1.5,
+                                     length=ticklength, labelsize=ticklabelsize, labelrotation=0)
+
+        axs1.ax_joint.set_xlabel(self.channel1, fontsize=labelsize)
+        axs1.ax_joint.set_ylabel(self.channel2, fontsize=labelsize)
+
+        # Save the figure
+        save_file_path = "../figures/hist_plots/"
+        # Check if the save folder exists, if not then create it
+        if not Path(save_file_path).exists():
+            Path(save_file_path).mkdir(parents=True, exist_ok=True)
+
+        plt.savefig(f"{save_file_path}/hist_plot_{self.channel1}_{self.channel2}.png", dpi=100,
+                    bbox_inches='tight', pad_inches=0.05, facecolor='w', edgecolor='w',
+                    transparent=False)
+
+        plt.close('all')
+
+        return fig

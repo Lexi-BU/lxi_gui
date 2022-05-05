@@ -23,148 +23,6 @@ importlib.reload(global_variables)
 
 global_variables.init()
 
-"""
-def plot_data(file_name_sci=None, file_name_hk=None, t_start=None, t_end=None):
-
-    # TODO: Convert this to a class and decouple it into multiple plot routines for more flexibility
-    # in plotting
-    # Check if type of start_time is int or float
-    if file_name_sci is None:
-        file_name_sci = file_name_sci
-
-    if file_name_hk is None:
-        file_name_hk = file_name_hk
-
-    # Try to convert the start_time and end_time to float or int
-    try:
-        t_start = float(start_time.get())
-    except Exception as e:
-        print(f"Error: {e}")
-        pass
-    try:
-        t_end = float(end_time.get())
-    except Exception as e:
-        print(f"Error: {e}")
-        pass
-    if not isinstance(t_start, (int, float)):
-        t_start = None
-
-    if not isinstance(t_end, (int, float)):
-        t_end = None
-
-    # Read entries from the text boxes
-    try:
-        x_min = float(x_min_entry.get())
-    except Exception:
-        x_min = None
-    try:
-        x_max = float(x_max_entry.get())
-    except Exception:
-        x_max = None
-    try:
-        y_min = float(y_min_entry.get())
-    except Exception:
-        y_min = None
-    try:
-        y_max = float(y_max_entry.get())
-    except Exception:
-        y_max = None
-    try:
-        bins = int(hist_bins_entry.get())
-    except Exception:
-        bins = None
-    try:
-        cmin = int(c_min_entry.get())
-    except Exception:
-        cmin = None
-    try:
-        density = bool(int(density_entry.get()))
-    except Exception:
-        density = None
-
-    if norm_entry.get() == "linear":
-        norm = "linear"
-    elif norm_entry.get() == "log":
-        norm = "log"
-    else:
-        norm = None
-
-    print(f"Density is {density}")
-
-    df_slice_hk = read_csv_hk(file_val=file_name_hk, t_start=t_start, t_end=t_end)
-    df_slice_sci = read_csv_sci(file_val=file_name_sci, t_start=t_start, t_end=t_end)
-    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==False]
-
-    # Display the time series plot
-    fig1_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_1.get(),
-                                                   ms=2, alpha=1)
-
-    load1_ts = Image.open(f"figures/{plot_opt_entry_1.get()}_time_series_plot.png")
-    # Resize the image to fit the canvas (in pixels)
-    load1_ts = load1_ts.resize((int(fig1_ts.get_figwidth() * 100),
-                                int(fig1_ts.get_figheight() * 60)))
-    render1_ts = ImageTk.PhotoImage(load1_ts)
-    img1_ts = tk.Label(image=render1_ts)
-    img1_ts.image = render1_ts
-    img1_ts.grid(row=2, column=0, rowspan=3, columnspan=2, sticky="w")
-
-    fig2_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_2.get(),
-                                                   ms=2, alpha=1)
-    load2_ts = Image.open(f"figures/{plot_opt_entry_2.get()}_time_series_plot.png")
-    # Resize the image to fit the canvas (in pixels)
-    load2_ts = load2_ts.resize((int(fig2_ts.get_figwidth() * 100),
-                                int(fig2_ts.get_figheight() * 60)))
-    render2_ts = ImageTk.PhotoImage(load2_ts)
-    img2_ts = tk.Label(image=render2_ts)
-    img2_ts.image = render2_ts
-    img2_ts.grid(row=6, column=0, rowspan=3, columnspan=2, sticky="w")
-
-    fig3_ts = plot_routines.plot_indiv_time_series(df=df_slice_hk, key=plot_opt_entry_3.get(),
-                                                    ms=2, alpha=1)
-    load3_ts = Image.open(f"figures/{plot_opt_entry_3.get()}_time_series_plot.png")
-    # Resize the image to fit the canvas (in pixels)
-    load3_ts = load3_ts.resize((int(fig3_ts.get_figwidth() * 100),
-                                int(fig3_ts.get_figheight() * 60)))
-    render3_ts = ImageTk.PhotoImage(load3_ts)
-    img3_ts = tk.Label(image=render3_ts)
-    img3_ts.image = render3_ts
-    img3_ts.grid(row=10, column=0, rowspan=3, columnspan=2, sticky="w")
-
-    fig2 = plot_routines.plot_histogram(df=df_slice_sci, x_min=x_min, x_max=x_max,
-                                        y_min=y_min, y_max=y_max, bins=bins, cmin=cmin,
-                                        density=density, norm=norm)
-    load2 = Image.open("figures/xy_plot.png")
-    # Resize the image to fit the canvas (in pixels)
-    load2 = load2.resize((int(fig2.get_figwidth() * 60),
-                          int(fig2.get_figheight() * 60)))
-    render2 = ImageTk.PhotoImage(load2)
-    img2 = tk.Label(image=render2)
-    img2.image = render2
-    img2.grid(row=2, column=2, rowspan=10, columnspan=2, sticky="n")
-
-    # Display the histogram plots
-    # TODO: Find out the best way to display the histogram plots (aspect ratios and stuff)
-    fig3 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel1", key2="Channel2")
-    load3 = Image.open("figures/kde_plot_Channel1_Channel2.png")
-    # Resize the image to fit the canvas (in pixels)
-    load3 = load3.resize((int(fig3.get_figwidth() * 70),
-                          int(fig3.get_figheight() * 70)))
-    render3 = ImageTk.PhotoImage(load3)
-    img3 = tk.Label(image=render3)
-    img3.image = render3
-    img3.grid(row=14, column=2, rowspan=3, columnspan=1, sticky="n")
-
-    fig4 = plot_routines.plot_kde(df=df_slice_sci, key1="Channel3", key2="Channel4")
-    load4 = Image.open("figures/kde_plot_Channel3_Channel4.png")
-    # Resize the image to fit the canvas (in pixels)
-    load4 = load4.resize((int(fig4.get_figwidth() * 70),
-                          int(fig4.get_figheight() * 70)))
-    render4 = ImageTk.PhotoImage(load4)
-    img4 = tk.Label(image=render4)
-    img4.image = render4
-    img4.grid(row=14, column=3, rowspan=3, columnspan=1, sticky="n")
-"""
-
 
 def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=None, row=2):
     """
@@ -205,9 +63,9 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
                     ):
 
     fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
-                                  end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
-                                  x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                                  density=density, norm=norm).hist_plots()
+                                    end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
+                                    x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+                                    density=density, norm=norm).hist_plots()
 
     load_hist = Image.open("../figures/hist_plots/hist_plot.png")
     # Resize the image to fit the canvas (in pixels)
@@ -216,7 +74,45 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
     render_hist = ImageTk.PhotoImage(load_hist)
     img_hist = tk.Label(image=render_hist)
     img_hist.image = render_hist
-    img_hist.grid(row=row, column=2, rowspan=14, columnspan=2, sticky="nsew")
+    img_hist.grid(row=row, column=2, rowspan=10, columnspan=2, sticky="nsew")
+
+
+def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, channel1=None,
+                         channel2=None, row=None, column=None, sticky=None):
+
+    fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
+                                    end_time=end_time, channel1=channel1, channel2=channel2).hist_plots_volt()
+
+    load_hist = Image.open(f"../figures/hist_plots/hist_plot_{channel1}_{channel2}.png")
+    # Resize the image to fit the canvas (in pixels)
+    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 80),
+                                  int(fig_hist.get_figheight() * 80)))
+    render_hist = ImageTk.PhotoImage(load_hist)
+    img_hist = tk.Label(image=render_hist)
+    img_hist.image = render_hist
+    img_hist.grid(row=row, column=column, rowspan=4, columnspan=1, sticky=sticky)
+
+
+def load_all_hist_plots(
+        df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None, cmax=None,
+        x_min=None, x_max=None, y_min=None, y_max=None, density=None, norm=None, row_hist=3,
+        channel1=None, channel3=None, row_channel13=None, column_channel13=None,
+        sticky_channel13=None,
+        channel2=None, channel4=None, row_channel24=None, column_channel24=None,
+        sticky_channel24=None
+):
+
+    load_hist_plots(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, bins=bins,
+                    cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+                    density=density, norm=norm, row=row_hist)
+
+    load_hist_plots_volt(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time,
+                         channel1=channel1, channel2=channel3, row=row_channel13,
+                         column=column_channel13, sticky=sticky_channel13)
+
+    load_hist_plots_volt(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time,
+                         channel1=channel2, channel2=channel4, row=row_channel24,
+                         column=column_channel24, sticky=sticky_channel24)
 
 
 root = tk.Tk()
@@ -425,15 +321,39 @@ plot_opt_entry_3.trace(
         end_time=end_time.get(), row=14)
 )
 # Add a button to plot the histogram data
+#plot_button = tk.Button(root, text="Plot Histogram Data", font=font_style_box, justify="center",
+#                        command=lambda: load_hist_plots(
+#                            df_slice_sci=global_variables.all_file_details["df_slice_sci"],
+#                            start_time=start_time.get(), end_time=end_time.get(),
+#                            bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
+#                            cmax=c_max_entry.get(), x_min=x_min_entry.get(),
+#                            x_max=x_max_entry.get(), y_min=y_min_entry.get(),
+#                            y_max=y_max_entry.get(), density=density_entry.get(),
+#                            norm=norm_entry.get(), row=0),
+#                            
+#                            load_hist_plots_volt(
+#                            df_slice_sci=global_variables.all_file_details["df_slice_sci"],
+#                            start_time=start_time.get(), end_time=end_time.get(),
+#                            channel1="channel1", channel2="channel2", row=13,
+#                            column=2, sticky="ne"),
+#
+#                            )
+
 plot_button = tk.Button(root, text="Plot Histogram Data", font=font_style_box, justify="center",
-                        command=lambda: load_hist_plots(
+                        command=lambda: load_all_hist_plots(
                             df_slice_sci=global_variables.all_file_details["df_slice_sci"],
                             start_time=start_time.get(), end_time=end_time.get(),
                             bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
                             cmax=c_max_entry.get(), x_min=x_min_entry.get(),
                             x_max=x_max_entry.get(), y_min=y_min_entry.get(),
                             y_max=y_max_entry.get(), density=density_entry.get(),
-                            norm=norm_entry.get(), row=3))
+                            norm=norm_entry.get(), row_hist=0,
+                            channel1="Channel1", channel2="Channel2", row_channel13=10,
+                            column_channel13=2, sticky_channel13="ne",
+                            channel3="Channel3", channel4="Channel4", row_channel24=10,
+                            column_channel24=3, sticky_channel24="nw"
+                        )
+                        )
 
 plot_button.grid(row=18, column=0, columnspan=2, rowspan=1)
 # Add a button to the window to get start time
