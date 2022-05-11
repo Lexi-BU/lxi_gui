@@ -3,19 +3,25 @@ import tkinter as tk
 from tkinter import font
 
 import global_variables
-import load_plot_routines as lpr
+import lxi_load_plot_routines as llpr
 import lxi_gui_plot_routines as lgpr
 import lxi_read_files as lxrf
+import lxi_gui_entry_box as lgeb
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
 importlib.reload(global_variables)
-importlib.reload(lpr)
+importlib.reload(llpr)
+importlib.reload(lgeb)
 
+# Initialize the global variables. This is necessary because the global variables is where all the
+# data and name of the files are stored.
 global_variables.init()
 
+# Create the main window.
 root = tk.Tk()
 
+# Set the number of columns for the main window.
 root.columnconfigure(0, {'minsize': 3}, weight=1)
 root.columnconfigure(1, {'minsize': 3}, weight=2)
 root.columnconfigure(2, {'minsize': 3}, weight=3)
@@ -23,6 +29,7 @@ root.columnconfigure(3, {'minsize': 3}, weight=3)
 root.columnconfigure(4, {'minsize': 3}, weight=1)
 root.columnconfigure(5, {'minsize': 3}, weight=1)
 
+# Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
 # img = tk.PhotoImage(file="../../figures/lxi_gui_figures/lxi_icon.ico")
@@ -40,7 +47,7 @@ font_style = font.Font(family="Helvetica", size=12)
 font_style_box = font.Font(family="Helvetica", size=12, weight="bold")
 font_style_big = font.Font(family="Helvetica", size=25)
 
-# insert a file load button
+# Insert a file load button
 # For science file
 sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_file_sci,
                                  font=font_style)
@@ -80,9 +87,8 @@ if bool("df_slice_hk" in global_variables.all_file_details.keys()):
 else:
     ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp',
                   '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon',
-                  'ADC_Ground', 'Cmd_count', 'Pinpuller_Armed', 'Unused', 'Unused.1',
-                  'HVmcpAuto', 'HVmcpMan', 'DeltaEvntCount', 'DeltaDroppedCount',
-                  'DeltaLostevntCount']
+                  'ADC_Ground', 'Cmd_count', 'Pinpuller_Armed', 'HVmcpAuto', 'HVmcpMan',
+                  'DeltaEvntCount', 'DeltaDroppedCount', 'DeltaLostevntCount']
 
 # Plot options for the first plot
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)
@@ -105,53 +111,32 @@ ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=11, column=1, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-x_min_entry.insert(0, 0)
-x_min_entry.grid(row=1, column=4, columnspan=1, sticky="n")
-x_min_label = tk.Label(root, text="X Min", font=font_style_box)
-x_min_label.grid(row=1, column=5, columnspan=1, sticky="n")
+x_min_entry = lgeb.entry_box(root=root, row=1, column=4, entry_label="X-min", entry_val=0,
+                             font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-x_max_entry.insert(0, "X Maximum")
-x_max_entry.grid(row=2, column=4, columnspan=1, sticky="n")
-x_max_label = tk.Label(root, text="X Max", font=font_style_box)
-x_max_label.grid(row=2, column=5, columnspan=1, sticky="n")
+x_max_entry = lgeb.entry_box(root=root, row=2, column=4, entry_label="X-max", entry_val=1,
+                             font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-y_min_entry.insert(0, "Y Minimum")
-y_min_entry.grid(row=3, column=4, columnspan=1, sticky="n")
-y_min_label = tk.Label(root, text="Y Min", font=font_style_box)
-y_min_label.grid(row=3, column=5, columnspan=1, sticky="n")
+y_min_entry = lgeb.entry_box(root=root, row=3, column=4, entry_label="Y-min", entry_val=0,
+                             font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-y_max_entry.insert(0, "Y Maximum")
-y_max_entry.grid(row=4, column=4, columnspan=1, sticky="n")
-y_max_label = tk.Label(root, text="Y Max", font=font_style_box)
-y_max_label.grid(row=4, column=5, columnspan=1, sticky="n")
+y_max_entry = lgeb.entry_box(root=root, row=4, column=4, entry_label="Y-max", entry_val=1,
+                             font_style=font_style_box)
 
 # The number of bins for histogram plot
-hist_bins_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-hist_bins_entry.insert(0, "Bins")
-hist_bins_entry.grid(row=5, column=4, columnspan=1, sticky="n")
-hist_bins_label = tk.Label(root, text="Bins", font=font_style_box)
-hist_bins_label.grid(row=5, column=5, columnspan=1, sticky="n")
+hist_bins_entry = lgeb.entry_box(root=root, row=5, column=4, entry_label="Bins", entry_val=50,
+                                 font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
-c_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-c_min_entry.insert(0, "Colorbar Mininimum")
-c_min_entry.grid(row=6, column=4, columnspan=1, sticky="n")
-c_min_label = tk.Label(root, text="C Min", font=font_style_box)
-c_min_label.grid(row=6, column=5, columnspan=1, sticky="n")
+c_min_entry = lgeb.entry_box(root=root, row=6, column=4, entry_label="C Min", entry_val=1,
+                             font_style=font_style_box)
 
 # Maximum number of data points in each bin for the histogram plot
-c_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-c_max_entry.insert(0, "Colorbar Maximum")
-c_max_entry.grid(row=7, column=4, columnspan=1, sticky="n")
-c_max_label = tk.Label(root, text="C Max", font=font_style_box)
-c_max_label.grid(row=7, column=5, columnspan=1, sticky="n")
+c_max_entry = lgeb.entry_box(root=root, row=7, column=4, entry_label="C Max", entry_val="None",
+                             font_style=font_style_box)
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
 density_label = tk.Label(root, text="Density", font=font_style_box)
@@ -165,7 +150,7 @@ density_checkbox = tk.Checkbutton(root, text="", font=font_style_box, variable=d
 density_checkbox.grid(row=8, column=4, columnspan=1, sticky="n")
 
 # Redo the histogram plot if the status of the checkbox is changed
-density_status_var.trace("w", lambda *_: lpr.load_all_hist_plots(
+density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     df_slice_sci=global_variables.all_file_details["df_slice_sci"],
     start_time=start_time.get(), end_time=end_time.get(),
     bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
@@ -209,6 +194,10 @@ norm_type_var.trace("w", lambda *_: lpr.load_all_hist_plots(
 )
 
 # Add an input box with a label for start time
+#start_time_entry, start_time_label = lgeb.entry_box(root=root, row=17, column=2,
+#                                                    entry_label="Start Time", width=30,
+#                                                    entry_val="YYYY-MM-DD HH:MM:SS",
+#                                                    font_style=font_style)
 start_time = tk.Entry(root, width=30, justify="center", bg="white", fg="black", borderwidth=2)
 start_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 start_time.grid(row=17, column=2, columnspan=1, pady=5, ipadx=10, ipady=10)
@@ -216,6 +205,10 @@ start_time_label = tk.Label(root, text="Start Time", font=font_style)
 start_time_label.grid(row=18, column=2, columnspan=1)
 
 # Add an input box with a label for end time
+#end_time_entry, end_time_label = lgeb.entry_box(root=root, row=17, column=3,
+#                                                entry_label="End Time", width=30,
+#                                                entry_val="YYYY-MM-DD HH:MM:SS",
+#                                                font_style=font_style)
 end_time = tk.Entry(root, width=30, justify="center", bg="white", fg="black", borderwidth=2)
 end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 end_time.grid(row=17, column=3, columnspan=1, pady=5, ipadx=10, ipady=10)
@@ -224,21 +217,21 @@ end_time_label.grid(row=18, column=3, columnspan=1)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
-    "w", lambda *_: lpr.load_ts_plots(
+    "w", lambda *_: llpr.load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_1.get(), start_time=start_time.get(),
         end_time=end_time.get(), row=4)
 )
 
 plot_opt_entry_2.trace(
-    "w", lambda *_: lpr.load_ts_plots(
+    "w", lambda *_: llpr.load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_2.get(), start_time=start_time.get(),
         end_time=end_time.get(), row=8)
 )
 
 plot_opt_entry_3.trace(
-    "w", lambda *_: lpr.load_ts_plots(
+    "w", lambda *_: llpr.load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_3.get(), start_time=start_time.get(),
         end_time=end_time.get(), row=12)
@@ -246,7 +239,7 @@ plot_opt_entry_3.trace(
 
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(root, text="Plot Histogram", font=font_style_box, justify="center",
-                        command=lambda: lpr.load_all_hist_plots(
+                        command=lambda: llpr.load_all_hist_plots(
                             df_slice_sci=global_variables.all_file_details["df_slice_sci"],
                             start_time=start_time.get(), end_time=end_time.get(),
                             bins=hist_bins_entry.get(), cmin=c_min_entry.get(),

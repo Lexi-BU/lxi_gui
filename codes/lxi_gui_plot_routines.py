@@ -1,10 +1,10 @@
 import importlib
 from pathlib import Path
+
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -14,6 +14,120 @@ importlib.reload(global_variables)
 
 
 class plot_data_class():
+    """
+    A class for plotting different kinds of data
+
+    Attributes:
+        df_slice_hk: pandas dataframe
+            The dataframe containing the Housekeeping data. Once you upload an HK file to the GUI
+            the dataframe is stored in a global variable called
+            global_variables.all_file_details["df_slice_hk"] and corresponds to the value in the
+            file which was loaded.
+        df_slice_sci: pandas dataframe
+            The dataframe containing the Science data. Once you upload an SCI file to the GUI
+            the dataframe is stored in a global variable called
+            global_variables.all_file_details["df_slice_sci"] and corresponds to the value in the
+            file which was loaded.
+        start_time: str
+            The start time of the data to be plotted. By default this is the first time in the
+            dataframe.
+        end_time: str
+            The end time of the data to be plotted. By default this is the last time in the
+            dataframe.
+        plot_key: str
+            The key in the dataframe to be plotted for the time series of the housekeeping data.
+        channel1: str
+            The channel to be plotted along x-axis for the histogram of the voltage data from the
+            science data. Though the default value is set to None here, when you start the GUI, the
+            value of "channel1" is set to either "Channel1" or "Channel3" depending on which
+            one is plotting in the GUI.
+        channel2: str
+            The channel to be plotted along y-axis for the histogram of the voltage data from the
+            science data. Though the default value is set to None here, when you start the GUI, the
+            value of "channel2" is set to either "Channel2" or "Channel4" depending on which
+            one is plotting in the GUI.
+        bins: int
+            The number of bins to be used for the histogram of the main plot, the one that shows the
+            distribution of photons on the (x,y) plane.
+        cmin: int
+            The minimum value of the colorbar for the main plot. Default is 1.
+        cmax: int
+            The maximum value of the colorbar for the main plot. Be careful while using it, since
+            anything above this value will be clipped. Default is None.
+        x_min: float
+            The minimum value of the x-axis for the main plot. Default is minimum value of x in the
+            science data.
+        x_max: float
+            The maximum value of the x-axis for the main plot. Default is maximum value of x in the
+            science data.
+        y_min: float
+            The minimum value of the y-axis for the main plot. Default is minimum value of y in the
+            science data.
+        y_max: float
+            The maximum value of the y-axis for the main plot. Default is maximum value of y in the
+            science data.
+        density: bool
+            Whether to plot the histogram as a density or not. Default is False.
+        norm: bool
+            The scale of colorbar to be plotted. Options are "log" or "linear". Default is "log".
+
+    Methods:
+        ts_plots:
+            Plots the time series of any given parameter from the housekeeping data. It is a
+            initialized by the __init__ method. It takes the following arguments:
+                - self: The object itself.
+                - plot_key: The key in the dataframe to be plotted for the time series of the
+                            housekeeping data.
+                - start_time: The start time of the data to be plotted. By default this is the
+                                first time in the dataframe.
+                - end_time: The end time of the data to be plotted. By default this is the last
+                                time in the dataframe.
+
+        hist_plots:
+            Plots the histogram of the x and y position of the observation. It is a initialized by
+            the __init__ method. It needs the following arguments to be passed:
+                - self: The object itself.
+                - t_start: The start time of the data to be plotted. By default this is the first
+                            time in the dataframe.
+                - t_end: The end time of the data to be plotted. By default this is the last time
+                            in the dataframe.
+                - bins: The number of bins to be used for the histogram of the main plot, the one
+                            that shows the distribution of photons on the (x,y) plane.
+                - cmin: The minimum value of the colorbar for the main plot. Default is 1.
+                - cmax: The maximum value of the colorbar for the main plot. Be careful while
+                            using it, since anything above this value will be clipped. Default is
+                            None.
+                - x_min: The minimum value of the x-axis for the main plot. Default is minimum
+                            value of x in the science data.
+                - x_max: The maximum value of the x-axis for the main plot. Default is maximum
+                            value of x in the science data.
+                - y_min: The minimum value of the y-axis for the main plot. Default is minimum
+                            value of y in the science data.
+                - y_max: The maximum value of the y-axis for the main plot. Default is maximum
+                            value of y in the science data.
+                - density: Whether to plot the histogram as a density or not. Default is False.
+                - norm: The scale of colorbar to be plotted. Options are "log" or "linear".
+                            Default is "log".
+
+        hist_plots_volt:
+            Plots the histogram of the voltage of the observation. It is a initialized by the
+            __init__ method. It needs the following arguments to be passed:
+                - self: The object itself.
+                - t_start: The start time of the data to be plotted. By default this is the first
+                            time in the dataframe.
+                - t_end: The end time of the data to be plotted. By default this is the last time
+                            in the dataframe.
+                - channel1: The channel to be plotted along x-axis for the histogram of the voltage
+                            data from the science data. Though the default value is set to None
+                            here, when you start the GUI, the value of "channel1" is set to either
+                            "Channel1" or "Channel3" depending on which one is plotting in the
+                            GUI.
+                - channel2: The channel to be plotted along y-axis for the histogram of the voltage
+                            data from the science data. Though the default value is set to None
+                            here, when you start the GUI, the value of "channel2" is set to either
+                            "Channel2" or "Channel4" depending on which one is plotting in the
+                            GUI.
+    """
 
     def __init__(self,
                  df_slice_hk=None,
@@ -51,29 +165,25 @@ class plot_data_class():
         self.norm = norm
 
     def ts_plots(self):
+        """
+        Plot the time series of the data
 
+        Return
+        ------
+            fig: figure object
+        """
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = float(self.start_time)
         except Exception:
-            #print(f"Error: {e} failed start")
             t_start = self.df_slice_hk.index.min()
             pass
         try:
             t_end = float(self.end_time)
         except Exception:
-            #print(f"Error: {e}, failed end")
             t_end = self.df_slice_hk.index.max()
             pass
-        #if not isinstance(t_start, (int, float)):
-        #    t_start = None
-#
-        #if not isinstance(t_end, (int, float)):
-        #    t_end = None
-        """
-        #self.plot_entry_1 = plot_opt_entry_1.get()
-        print(f"Hey...this code worked and key is {self.key}!")
-        """
+
         tick_label_size = 18
         axis_label_size = 25
         alpha = 0.8
@@ -89,13 +199,9 @@ class plot_data_class():
         axs1.set_xlim(t_start, t_end)
         # Rotate the x-axis labels by 45 degrees and set their fontsize
         plt.setp(axs1.get_xticklabels(), rotation=45, fontsize=tick_label_size)
-        #axs1.set_xticklabels(labels=axs1.get_xticks(), fontsize=tick_label_size, rotattion=45)
         axs1.set_xlabel('Time (s)', fontsize=axis_label_size)
-        #axs1.set_ylabel(f'{self.plot_key}', fontsize=axis_label_size)
         axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
         axs1.legend(loc='best', fontsize=tick_label_size)
-        #axs1.text(1, 0.95, self.plot_key, horizontalalignment='right', fontsize=tick_label_size,
-        #          verticalalignment='top', transform=axs1.transAxes)
 
         # Save the figure
         save_file_path = "../figures/time_series_plots/"
@@ -111,18 +217,23 @@ class plot_data_class():
         return fig
 
     def hist_plots(self):
+        """
+        Plot the histogram of the data
+
+        Return
+        ------
+            fig: figure object
+        """
 
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = float(self.start_time)
         except Exception:
-            #print(f"Error: {e} failed start")
             t_start = self.df_slice_sci.index.min()
             pass
         try:
             t_end = float(self.end_time)
         except Exception:
-            #print(f"Error: {e}, failed end")
             t_end = self.df_slice_sci.index.max()
             pass
         try:
@@ -156,15 +267,12 @@ class plot_data_class():
         try:
             density = self.density
         except Exception:
-            density =None
+            density = None
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
         else:
             norm = None
-
-        #if not isinstance(t_start, (int, float)):
-        #    t_start = None
 
         tick_label_size = 18
         axis_label_size = 25
@@ -173,13 +281,6 @@ class plot_data_class():
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
         elif norm == 'linear':
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
-
-        if density == str(True):
-            density = True
-        elif density == str(False):
-            density = False
-        elif density == None:
-            density = False
 
         x_range = [x_min, x_max]
         y_range = [y_min, y_max]
@@ -195,6 +296,15 @@ class plot_data_class():
         z_counts = np.transpose(hst[0])
         plt.close("all")
 
+        # Raise a warning if the maximum value of the z_counts is greater than the cmax, and print
+        # it in red color
+        if cmax is not None:
+            if np.nanmax(z_counts) > cmax:
+                print(f"\n\x1b[0;31;47m WARNING: The maximum value of the z_counts is \n"
+                      f"{np.nanmax(z_counts)} This is greater than the cmax value of {cmax}.\n"
+                      f"Though the z_counts are plotted, please keep in mind that the"
+                      f" histogram may not be visualized properly.\x1b[0m")
+
         # Make a 2d histogram of the data
         fig = plt.figure(num=None, figsize=(4, 4), dpi=200, facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0)
@@ -202,7 +312,6 @@ class plot_data_class():
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
 
         axs1 = plt.subplot(gs[0, 0])
-        #im1 = sns.jointplot(data=df[["x_val", "y_val"]], kind="kde")
         im1 = axs1.imshow(z_counts, cmap='Spectral', norm=norm,
                           extent=[x_range[0], x_range[1], y_range[0], y_range[1]], origin='lower',
                           aspect='auto')
@@ -242,18 +351,22 @@ class plot_data_class():
         return fig
 
     def hist_plots_volt(self):
+        """
+        This function creates a histogram of the voltage data.
 
+        Return
+        ------
+            fig: figure object
+        """
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = float(self.start_time)
         except Exception:
-            # print(f"Error: {e} failed start")
             t_start = self.df_slice_sci.index.min()
             pass
         try:
             t_end = float(self.end_time)
         except Exception:
-            # print(f"Error: {e}, failed end")
             t_end = self.df_slice_sci.index.max()
             pass
 
