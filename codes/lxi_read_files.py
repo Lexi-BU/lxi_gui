@@ -1,5 +1,5 @@
 import importlib
-from tkinter import Variable, filedialog
+from tkinter import filedialog
 import global_variables
 
 import pandas as pd
@@ -31,7 +31,7 @@ def open_file_hk():
                                           title="Select file",
                                           filetypes=(("csv files", "*.csv"),
                                                      ("all files", "*.*"))
-                                        )
+                                          )
     # Cut path to the file off
     file_name_hk = file_val.split('/')[-1]
     global_variables.all_file_details['file_name_hk'] = file_name_hk

@@ -70,6 +70,63 @@ class plot_data_class():
             Whether to plot the histogram as a density or not. Default is False.
         norm: bool
             The scale of colorbar to be plotted. Options are "log" or "linear". Default is "log".
+
+    Methods:
+        ts_plots:
+            Plots the time series of any given parameter from the housekeeping data. It is a
+            initialized by the __init__ method. It takes the following arguments:
+                - self: The object itself.
+                - plot_key: The key in the dataframe to be plotted for the time series of the
+                            housekeeping data.
+                - start_time: The start time of the data to be plotted. By default this is the
+                                first time in the dataframe.
+                - end_time: The end time of the data to be plotted. By default this is the last
+                                time in the dataframe.
+
+        hist_plots:
+            Plots the histogram of the x and y position of the observation. It is a initialized by
+            the __init__ method. It needs the following arguments to be passed:
+                - self: The object itself.
+                - t_start: The start time of the data to be plotted. By default this is the first
+                            time in the dataframe.
+                - t_end: The end time of the data to be plotted. By default this is the last time
+                            in the dataframe.
+                - bins: The number of bins to be used for the histogram of the main plot, the one
+                            that shows the distribution of photons on the (x,y) plane.
+                - cmin: The minimum value of the colorbar for the main plot. Default is 1.
+                - cmax: The maximum value of the colorbar for the main plot. Be careful while
+                            using it, since anything above this value will be clipped. Default is
+                            None.
+                - x_min: The minimum value of the x-axis for the main plot. Default is minimum
+                            value of x in the science data.
+                - x_max: The maximum value of the x-axis for the main plot. Default is maximum
+                            value of x in the science data.
+                - y_min: The minimum value of the y-axis for the main plot. Default is minimum
+                            value of y in the science data.
+                - y_max: The maximum value of the y-axis for the main plot. Default is maximum
+                            value of y in the science data.
+                - density: Whether to plot the histogram as a density or not. Default is False.
+                - norm: The scale of colorbar to be plotted. Options are "log" or "linear".
+                            Default is "log".
+
+        hist_plots_volt:
+            Plots the histogram of the voltage of the observation. It is a initialized by the
+            __init__ method. It needs the following arguments to be passed:
+                - self: The object itself.
+                - t_start: The start time of the data to be plotted. By default this is the first
+                            time in the dataframe.
+                - t_end: The end time of the data to be plotted. By default this is the last time
+                            in the dataframe.
+                - channel1: The channel to be plotted along x-axis for the histogram of the voltage
+                            data from the science data. Though the default value is set to None
+                            here, when you start the GUI, the value of "channel1" is set to either
+                            "Channel1" or "Channel3" depending on which one is plotting in the
+                            GUI.
+                - channel2: The channel to be plotted along y-axis for the histogram of the voltage
+                            data from the science data. Though the default value is set to None
+                            here, when you start the GUI, the value of "channel2" is set to either
+                            "Channel2" or "Channel4" depending on which one is plotting in the
+                            GUI.
     """
 
     def __init__(self,
@@ -111,7 +168,8 @@ class plot_data_class():
         """
         Plot the time series of the data
 
-        :return:
+        Return
+        ------
             fig: figure object
         """
         # Try to convert the start_time and end_time to float or int
@@ -162,8 +220,9 @@ class plot_data_class():
         """
         Plot the histogram of the data
 
-            :return:
-                fig: figure object
+        Return
+        ------
+            fig: figure object
         """
 
         # Try to convert the start_time and end_time to float or int
@@ -292,7 +351,13 @@ class plot_data_class():
         return fig
 
     def hist_plots_volt(self):
+        """
+        This function creates a histogram of the voltage data.
 
+        Return
+        ------
+            fig: figure object
+        """
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = float(self.start_time)
