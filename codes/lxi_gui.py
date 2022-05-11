@@ -80,9 +80,8 @@ if bool("df_slice_hk" in global_variables.all_file_details.keys()):
 else:
     ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp',
                   '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon',
-                  'ADC_Ground', 'Cmd_count', 'Pinpuller_Armed', 'Unused', 'Unused.1',
-                  'HVmcpAuto', 'HVmcpMan', 'DeltaEvntCount', 'DeltaDroppedCount',
-                  'DeltaLostevntCount']
+                  'ADC_Ground', 'Cmd_count', 'Pinpuller_Armed', 'HVmcpAuto', 'HVmcpMan',
+                  'DeltaEvntCount', 'DeltaDroppedCount', 'DeltaLostevntCount']
 
 # Plot options for the first plot
 plot_opt_label_1 = tk.Label(root, text="Plot options:", font=font_style_box)

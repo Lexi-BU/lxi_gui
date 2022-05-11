@@ -182,7 +182,7 @@ def load_all_hist_plots(
         The minimum value of the y-axis.
     y_max : int
         The maximum value of the y-axis.
-    density : bool 
+    density : bool
         Whether or not the histogram should be normalized.
     norm : bool
         Whether or not the histogram should be normalized.

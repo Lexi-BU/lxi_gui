@@ -6,13 +6,12 @@ from typing import NamedTuple
 import numpy as np
 import pandas as pd
 
+# Tha packet format of the science and housekeeping packets
 packet_format_sci = ">II4H"
-# signed lower case, unsigned upper case (b)
-#packet_format_hk =">II2B3H"
-packet_format_hk =">II4H"
+packet_format_hk = ">II4H"
 
 sync = b'\xfe\x6b\x28\x40'
-volts_per_count = 0.000068817 # volts per increment of digitization
+volts_per_count = 0.000068817  # volts per increment of digitization
 
 
 class sci_packet(NamedTuple):
@@ -39,18 +38,8 @@ class sci_packet(NamedTuple):
     channel4: float
 
     @classmethod
-    def from_bytes(cls, bytes_: bytes) :
+    def from_bytes(cls, bytes_: bytes):
         structure = struct.unpack(packet_format_sci, bytes_)
-        # If any value is 0 then replace it with NaN
-        #print(structure)
-        #if structure[2] == 0:
-        #    structure[2] = np.nan
-        #if structure[3] == 0:
-        #    structure[3] = np.nan
-        #if structure[4] == 0:
-        #    structure[4] = np.nan
-        #if structure[5] == 0:
-        #    structure[5] = np.nan
         return cls(
             is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
             timestamp=structure[1] & 0x3fffffff,           # mask for getting all timestamp bits
@@ -100,23 +89,23 @@ class hk_packet_cls(NamedTuple):
     delta_lost_event_count: int
 
     @classmethod
-    def from_bytes(cls, bytes_: bytes) :
+    def from_bytes(cls, bytes_: bytes):
         structure = struct.unpack(packet_format_hk, bytes_)
         # Check if the present packet is the house-keeping packet. Only the house-keeping packets
         # are processed.
         if structure[1] & 0x80000000:
-            timestamp=structure[1] & 0x3fffffff  # mask for getting all timestamp bits
-            hk_id=(structure[2] & 0xf000) >> 12  # Down-shift 12 bits to get the hk_id
+            timestamp = structure[1] & 0x3fffffff  # mask for getting all timestamp bits
+            hk_id = (structure[2] & 0xf000) >> 12  # Down-shift 12 bits to get the hk_id
             if hk_id == 10 or hk_id == 11:
-                hk_value=structure[2] & 0xfff
+                hk_value = structure[2] & 0xfff
             else:
-                hk_value=(structure[2] & 0xfff) << 4  # Up-shift 4 bits to get the hk_value
-            delta_event_count=structure[3]
-            delta_drop_event_count=structure[4]
-            delta_lost_event_count=structure[5]
+                hk_value = (structure[2] & 0xfff) << 4  # Up-shift 4 bits to get the hk_value
+            delta_event_count = structure[3]
+            delta_drop_event_count = structure[4]
+            delta_lost_event_count = structure[5]
 
             return cls(
-               timestamp=timestamp,
+                timestamp=timestamp,
                 hk_id=hk_id,
                 hk_value=hk_value,
                 delta_event_count=delta_event_count,
@@ -129,7 +118,7 @@ def read_binary_data_sci(
     in_file_name=None,
     save_file_name="../data/processed/sci/output_sci.csv",
     number_of_decimals=6
-    ):
+):
     """
     Reads science packet of the binary data from a file and saves it to a csv file.
 
@@ -153,6 +142,8 @@ def read_binary_data_sci(
     -------
         df : pandas.DataFrame
             DataFrame of the science packet.
+        save_file_name : str
+            Name of the output file.
     """
     if in_file_name is None:
         in_file_name = "../data/raw_data/2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
@@ -210,8 +201,6 @@ def read_binary_data_sci(
                 'Channel2',
                 'Channel3',
                 'Channel4'
-                #'x_val',
-                #'y_val',
             ),
         )
         dict_writer.writeheader()
@@ -223,18 +212,16 @@ def read_binary_data_sci(
                 'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
                 'Channel3': np.round(sci_packet.channel3, decimals=number_of_decimals),
                 'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals)
-                #'x_val': np.round(sci_packet.channel1 / (sci_packet.channel1 + sci_packet.channel3),
-                #                  decimals=number_of_decimals),
-                #'y_val': np.round(sci_packet.channel2 / (sci_packet.channel2 + sci_packet.channel4),
-                #                  decimals=number_of_decimals)
             }
             for sci_packet in packets
         )
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
-    df['x_val'] = np.round(df['Channel1'] / (df['Channel1'] + df['Channel3']), decimals=number_of_decimals)
-    df['y_val'] = np.round(df['Channel2'] / (df['Channel2'] + df['Channel4']), decimals=number_of_decimals)
+    df['x_val'] = np.round(df['Channel1'] / (df['Channel1'] + df['Channel3']),
+                           decimals=number_of_decimals)
+    df['y_val'] = np.round(df['Channel2'] / (df['Channel2'] + df['Channel4']),
+                           decimals=number_of_decimals)
     # Save the dataframe to a csv file and set index to time stamp
     df.to_csv(save_file_name, index=True)
 
@@ -245,18 +232,14 @@ def read_binary_data_hk(
     in_file_name=None,
     save_file_name="../data/processed/hk/output_hk.csv",
     number_of_decimals=6
-    ):
+):
     """
     Reads housekeeping packet of the binary data from a file and saves it to a csv file.
 
     Parameters
     ----------
-    in_file_path : str
-        Path to the input file. Default is None.
     in_file_name : str
         Name of the input file. Default is None.
-    save_file_path : str
-        Path to the output file. Default is "../data/".
     save_file_name : str
         Name of the output file. Default is "output_hk.csv".
     number_of_decimals : int
@@ -267,10 +250,14 @@ def read_binary_data_hk(
     FileNotFoundError :
         If the input file does not exist.
     TypeError :
-        If the name of the input file or input directory is not a string. Or if the number of deminals is not an integer.
+        If the name of the input file or input directory is not a string. Or if the number of
+        deminals is not an integer.
     Returns
     -------
-        None.
+        df : pandas.DataFrame
+            DataFrame of the housekeeping packet.
+        save_file_name : str
+            Name of the output file.
     """
     if in_file_name is None:
         in_file_name = "../data/raw_data/2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
@@ -279,18 +266,18 @@ def read_binary_data_hk(
     if not Path(in_file_name).is_file():
         raise FileNotFoundError(
             "The file " + in_file_name + " does not exist."
-            )
+        )
     # Check if the file name and folder name are strings, if not then raise an error
     if not isinstance(in_file_name, str):
         raise TypeError(
             "The file name must be a string."
-            )
+        )
 
     # Check the number of decimals to save
     if not isinstance(number_of_decimals, int):
         raise TypeError(
             "The number of decimals to save must be an integer."
-            )
+        )
 
     input_file_name = in_file_name
 
@@ -328,49 +315,49 @@ def read_binary_data_hk(
     ADC_Ground = np.full(len(hk_idx), np.nan)
     Cmd_count = np.full(len(hk_idx), np.nan)
     Pinpuller_Armed = np.full(len(hk_idx), np.nan)
-    Unused = np.full(len(hk_idx), np.nan)
-    Unused = np.full(len(hk_idx), np.nan)
+    Unused1 = np.full(len(hk_idx), np.nan)
+    Unused2 = np.full(len(hk_idx), np.nan)
     HVmcpAuto = np.full(len(hk_idx), np.nan)
     HVmcpMan = np.full(len(hk_idx), np.nan)
     DeltaEvntCount = np.full(len(hk_idx), np.nan)
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
     DeltaLostevntCount = np.full(len(hk_idx), np.nan)
 
-    for ii,idx in enumerate(hk_idx):
+    for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
         TimeStamp[ii] = hk_packet.timestamp
         HK_id[ii] = hk_packet.hk_id
-        if hk_packet.hk_id==0:
+        if hk_packet.hk_id == 0:
             PinPullerTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
-        elif hk_packet.hk_id==1:
+        elif hk_packet.hk_id == 1:
             OpticsTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
-        elif hk_packet.hk_id==2:
-            LEXIbaseTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100 
-        elif hk_packet.hk_id==3:
-            HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100 
-        elif hk_packet.hk_id==4:
+        elif hk_packet.hk_id == 2:
+            LEXIbaseTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
+        elif hk_packet.hk_id == 3:
+            HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
+        elif hk_packet.hk_id == 4:
             V_Imon_5_2[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==5:
+        elif hk_packet.hk_id == 5:
             V_Imon_10[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==6:
+        elif hk_packet.hk_id == 6:
             V_Imon_3_3[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==7:
+        elif hk_packet.hk_id == 7:
             AnodeVoltMon[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==8:
+        elif hk_packet.hk_id == 8:
             V_Imon_28[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==9:
+        elif hk_packet.hk_id == 9:
             ADC_Ground[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==10:
+        elif hk_packet.hk_id == 10:
             Cmd_count[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id==11:
+        elif hk_packet.hk_id == 11:
             Pinpuller_Armed[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id==12:
-            Unused[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id==13:
-            Unused[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id==14:
+        elif hk_packet.hk_id == 12:
+            Unused1[ii] = hk_packet.hk_value
+        elif hk_packet.hk_id == 13:
+            Unused2[ii] = hk_packet.hk_value
+        elif hk_packet.hk_id == 14:
             HVmcpAuto[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id==15:
+        elif hk_packet.hk_id == 15:
             HVmcpMan[ii] = hk_packet.hk_value * volts_per_count
 
         DeltaEvntCount[ii] = hk_packet.delta_event_count
@@ -380,37 +367,39 @@ def read_binary_data_hk(
     # For observations which get their values from "HK_value", go through the whole array and
     # replace the nans at any index with the value from the previous index.
     # This is to make sure that the file isn't inundated with nans.
-    for ii in range(1,len(TimeStamp)):
+    for ii in range(1, len(TimeStamp)):
         if np.isnan(PinPullerTemp[ii]):
-            PinPullerTemp[ii] = PinPullerTemp[ii-1]
+            PinPullerTemp[ii] = PinPullerTemp[ii - 1]
         if np.isnan(OpticsTemp[ii]):
-            OpticsTemp[ii] = OpticsTemp[ii-1]
+            OpticsTemp[ii] = OpticsTemp[ii - 1]
         if np.isnan(LEXIbaseTemp[ii]):
-            LEXIbaseTemp[ii] = LEXIbaseTemp[ii-1]
+            LEXIbaseTemp[ii] = LEXIbaseTemp[ii - 1]
         if np.isnan(HVsupplyTemp[ii]):
-            HVsupplyTemp[ii] = HVsupplyTemp[ii-1]
+            HVsupplyTemp[ii] = HVsupplyTemp[ii - 1]
         if np.isnan(V_Imon_5_2[ii]):
-            V_Imon_5_2[ii] = V_Imon_5_2[ii-1]
+            V_Imon_5_2[ii] = V_Imon_5_2[ii - 1]
         if np.isnan(V_Imon_10[ii]):
-            V_Imon_10[ii] = V_Imon_10[ii-1]
+            V_Imon_10[ii] = V_Imon_10[ii - 1]
         if np.isnan(V_Imon_3_3[ii]):
-            V_Imon_3_3[ii] = V_Imon_3_3[ii-1]
+            V_Imon_3_3[ii] = V_Imon_3_3[ii - 1]
         if np.isnan(AnodeVoltMon[ii]):
-            AnodeVoltMon[ii] = AnodeVoltMon[ii-1]
+            AnodeVoltMon[ii] = AnodeVoltMon[ii - 1]
         if np.isnan(V_Imon_28[ii]):
-            V_Imon_28[ii] = V_Imon_28[ii-1]
+            V_Imon_28[ii] = V_Imon_28[ii - 1]
         if np.isnan(ADC_Ground[ii]):
-            ADC_Ground[ii] = ADC_Ground[ii-1]
+            ADC_Ground[ii] = ADC_Ground[ii - 1]
         if np.isnan(Cmd_count[ii]):
-            Cmd_count[ii] = Cmd_count[ii-1]
+            Cmd_count[ii] = Cmd_count[ii - 1]
         if np.isnan(Pinpuller_Armed[ii]):
-            Pinpuller_Armed[ii] = Pinpuller_Armed[ii-1]
-        if np.isnan(Unused[ii]):
-            Unused[ii] = Unused[ii-1]
+            Pinpuller_Armed[ii] = Pinpuller_Armed[ii - 1]
+        if np.isnan(Unused1[ii]):
+            Unused1[ii] = Unused1[ii - 1]
+        if np.isnan(Unused2[ii]):
+            Unused2[ii] = Unused2[ii - 1]
         if np.isnan(HVmcpAuto[ii]):
-            HVmcpAuto[ii] = HVmcpAuto[ii-1]
+            HVmcpAuto[ii] = HVmcpAuto[ii - 1]
         if np.isnan(HVmcpMan[ii]):
-            HVmcpMan[ii] = HVmcpMan[ii-1]
+            HVmcpMan[ii] = HVmcpMan[ii - 1]
 
     # Split the file name in a folder and a file name
     output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_hk_output.csv"
@@ -440,8 +429,8 @@ def read_binary_data_hk(
                 "ADC_Ground",
                 "Cmd_count",
                 "Pinpuller_Armed",
-                "Unused",
-                "Unused",
+                "Unused1",
+                "Unused2",
                 "HVmcpAuto",
                 "HVmcpMan",
                 "DeltaEvntCount",
@@ -467,8 +456,8 @@ def read_binary_data_hk(
                 "ADC_Ground": ADC_Ground[ii],
                 "Cmd_count": Cmd_count[ii],
                 "Pinpuller_Armed": Pinpuller_Armed[ii],
-                "Unused": Unused[ii],
-                "Unused": Unused[ii],
+                "Unused1": Unused1[ii],
+                "Unused2": Unused2[ii],
                 "HVmcpAuto": HVmcpAuto[ii],
                 "HVmcpMan": HVmcpMan[ii],
                 "DeltaEvntCount": DeltaEvntCount[ii],
@@ -480,4 +469,5 @@ def read_binary_data_hk(
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
+
     return df, save_file_name
