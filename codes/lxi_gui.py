@@ -7,6 +7,7 @@ import lxi_load_plot_routines as llpr
 import lxi_gui_plot_routines as lgpr
 import lxi_read_files as lxrf
 import lxi_gui_entry_box as lgeb
+import matplotlib.pyplot as plt
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -28,6 +29,7 @@ root.columnconfigure(2, {'minsize': 3}, weight=3)
 root.columnconfigure(3, {'minsize': 3}, weight=3)
 root.columnconfigure(4, {'minsize': 3}, weight=1)
 root.columnconfigure(5, {'minsize': 3}, weight=1)
+
 
 # Set the title of the main window.
 root.title("LEXI GUI")

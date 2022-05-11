@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import global_variables
 import lxi_gui_plot_routines as lgpr
 import lxi_read_files as lxrf
+import matplotlib.pyplot as plt
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -35,6 +36,11 @@ def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=Non
     -------
     None
     """
+    # Set the fontstyle to Times New Roman
+    font_mpl = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    plt.rc('font', **font_mpl)
+    plt.rc('text', usetex=False)
+
     fig_ts = lgpr.plot_data_class(df_slice_hk=df_slice_hk, plot_key=plot_key, start_time=start_time,
                                   end_time=end_time).ts_plots()
     load_ts = Image.open(
@@ -88,6 +94,11 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
     -------
     None
     """
+    # Set the fontstyle to Times New Roman
+    font_mpl = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    plt.rc('font', **font_mpl)
+    plt.rc('text', usetex=False)
+
     fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
                                     end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
                                     x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
@@ -132,6 +143,11 @@ def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, chan
     -------
     None
     """
+    # Set the fontstyle to Times New Roman
+    font_mpl = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    plt.rc('font', **font_mpl)
+    plt.rc('text', usetex=False)
+
     fig_hist = lgpr.plot_data_class(
         df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, channel1=channel1,
         channel2=channel2).hist_plots_volt()
