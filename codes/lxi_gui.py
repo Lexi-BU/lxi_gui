@@ -3,19 +3,25 @@ import tkinter as tk
 from tkinter import font
 
 import global_variables
-import load_plot_routines as lpr
+import lxi_load_plot_routines as llpr
 import lxi_gui_plot_routines as lgpr
 import lxi_read_files as lxrf
+import lxi_gui_entry_box as lgeb
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
 importlib.reload(global_variables)
-importlib.reload(lpr)
+importlib.reload(llpr)
+importlib.reload(lgeb)
 
+# Initialize the global variables. This is necessary because the global variables is where all the
+# data and name of the files are stored.
 global_variables.init()
 
+# Create the main window.
 root = tk.Tk()
 
+# Set the number of columns for the main window.
 root.columnconfigure(0, {'minsize': 3}, weight=1)
 root.columnconfigure(1, {'minsize': 3}, weight=2)
 root.columnconfigure(2, {'minsize': 3}, weight=3)
@@ -23,6 +29,7 @@ root.columnconfigure(3, {'minsize': 3}, weight=3)
 root.columnconfigure(4, {'minsize': 3}, weight=1)
 root.columnconfigure(5, {'minsize': 3}, weight=1)
 
+# Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
 # img = tk.PhotoImage(file="../../figures/lxi_gui_figures/lxi_icon.ico")
@@ -40,7 +47,7 @@ font_style = font.Font(family="Helvetica", size=12)
 font_style_box = font.Font(family="Helvetica", size=12, weight="bold")
 font_style_big = font.Font(family="Helvetica", size=25)
 
-# insert a file load button
+# Insert a file load button
 # For science file
 sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_file_sci,
                                  font=font_style)
@@ -104,25 +111,26 @@ ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=11, column=1, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-x_min_entry.insert(0, 0)
-x_min_entry.grid(row=1, column=4, columnspan=1, sticky="n")
-x_min_label = tk.Label(root, text="X Min", font=font_style_box)
-x_min_label.grid(row=1, column=5, columnspan=1, sticky="n")
+x_min_entry, x_min_label = lgeb.entry_box(root=root, row=1, column=4, entry_label="X-min",
+                                          entry_val=0, font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-x_max_entry.insert(0, "X Maximum")
-x_max_entry.grid(row=2, column=4, columnspan=1, sticky="n")
-x_max_label = tk.Label(root, text="X Max", font=font_style_box)
-x_max_label.grid(row=2, column=5, columnspan=1, sticky="n")
+x_max_entry, x_max_label = lgeb.entry_box(root=root, row=2, column=4, entry_label="X-max",
+                                          entry_val=1, font_style=font_style_box)
+# x_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
+# x_max_entry.insert(0, "X Maximum")
+# x_max_entry.grid(row=2, column=4, columnspan=1, sticky="n")
+# x_max_label = tk.Label(root, text="X Max", font=font_style_box)
+# x_max_label.grid(row=2, column=5, columnspan=1, sticky="n")
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-y_min_entry.insert(0, "Y Minimum")
-y_min_entry.grid(row=3, column=4, columnspan=1, sticky="n")
-y_min_label = tk.Label(root, text="Y Min", font=font_style_box)
-y_min_label.grid(row=3, column=5, columnspan=1, sticky="n")
+y_min_entry, y_min_label = lgeb.entry_box(root=root, row=3, column=4, entry_label="Y-min",
+                                          entry_val=0, font_style=font_style_box)
+#y_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
+#y_min_entry.insert(0, "Y Minimum")
+#y_min_entry.grid(row=3, column=4, columnspan=1, sticky="n")
+#y_min_label = tk.Label(root, text="Y Min", font=font_style_box)
+#y_min_label.grid(row=3, column=5, columnspan=1, sticky="n")
 
 # The maximum value of y-axis for histogram plot
 y_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
@@ -164,7 +172,7 @@ density_checkbox = tk.Checkbutton(root, text="", font=font_style_box, variable=d
 density_checkbox.grid(row=8, column=4, columnspan=1, sticky="n")
 
 # Redo the histogram plot if the status of the checkbox is changed
-density_status_var.trace("w", lambda *_: lpr.load_all_hist_plots(
+density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     df_slice_sci=global_variables.all_file_details["df_slice_sci"],
     start_time=start_time.get(), end_time=end_time.get(),
     bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
@@ -223,21 +231,21 @@ end_time_label.grid(row=18, column=3, columnspan=1)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
-    "w", lambda *_: lpr.load_ts_plots(
+    "w", lambda *_: llpr.load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_1.get(), start_time=start_time.get(),
         end_time=end_time.get(), row=4)
 )
 
 plot_opt_entry_2.trace(
-    "w", lambda *_: lpr.load_ts_plots(
+    "w", lambda *_: llpr.load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_2.get(), start_time=start_time.get(),
         end_time=end_time.get(), row=8)
 )
 
 plot_opt_entry_3.trace(
-    "w", lambda *_: lpr.load_ts_plots(
+    "w", lambda *_: llpr.load_ts_plots(
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_3.get(), start_time=start_time.get(),
         end_time=end_time.get(), row=12)
@@ -245,7 +253,7 @@ plot_opt_entry_3.trace(
 
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(root, text="Plot Histogram", font=font_style_box, justify="center",
-                        command=lambda: lpr.load_all_hist_plots(
+                        command=lambda: llpr.load_all_hist_plots(
                             df_slice_sci=global_variables.all_file_details["df_slice_sci"],
                             start_time=start_time.get(), end_time=end_time.get(),
                             bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
