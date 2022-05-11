@@ -3,11 +3,10 @@ import tkinter as tk
 from tkinter import font
 
 import global_variables
-import lxi_load_plot_routines as llpr
-import lxi_gui_plot_routines as lgpr
-import lxi_read_files as lxrf
 import lxi_gui_entry_box as lgeb
-import matplotlib.pyplot as plt
+import lxi_gui_plot_routines as lgpr
+import lxi_load_plot_routines as llpr
+import lxi_read_files as lxrf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
