@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "LEXI-GUI"
-version = "0.0.2"
+version = "0.1.0"
 description = "GUI for LEXI data visualization"
 authors = ["Ramiz A. Qudsi <qudsira@bu.edu>"]
 
