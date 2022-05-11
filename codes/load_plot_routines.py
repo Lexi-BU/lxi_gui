@@ -208,10 +208,10 @@ def load_all_hist_plots(
         The column in which the histogram plots should be displayed.
     sticky_channel24 : str
         The sticky parameter for the grid.
-            
-        Returns
+
+    Returns
     -------
-    None
+        None
     """
     load_hist_plots(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, bins=bins,
                     cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
