@@ -111,54 +111,32 @@ ts_menu_3 = tk.OptionMenu(root, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=11, column=1, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry, x_min_label = lgeb.entry_box(root=root, row=1, column=4, entry_label="X-min",
-                                          entry_val=0, font_style=font_style_box)
+x_min_entry = lgeb.entry_box(root=root, row=1, column=4, entry_label="X-min", entry_val=0,
+                             font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry, x_max_label = lgeb.entry_box(root=root, row=2, column=4, entry_label="X-max",
-                                          entry_val=1, font_style=font_style_box)
-# x_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-# x_max_entry.insert(0, "X Maximum")
-# x_max_entry.grid(row=2, column=4, columnspan=1, sticky="n")
-# x_max_label = tk.Label(root, text="X Max", font=font_style_box)
-# x_max_label.grid(row=2, column=5, columnspan=1, sticky="n")
+x_max_entry = lgeb.entry_box(root=root, row=2, column=4, entry_label="X-max", entry_val=1,
+                             font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry, y_min_label = lgeb.entry_box(root=root, row=3, column=4, entry_label="Y-min",
-                                          entry_val=0, font_style=font_style_box)
-#y_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-#y_min_entry.insert(0, "Y Minimum")
-#y_min_entry.grid(row=3, column=4, columnspan=1, sticky="n")
-#y_min_label = tk.Label(root, text="Y Min", font=font_style_box)
-#y_min_label.grid(row=3, column=5, columnspan=1, sticky="n")
+y_min_entry = lgeb.entry_box(root=root, row=3, column=4, entry_label="Y-min", entry_val=0,
+                             font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-y_max_entry.insert(0, "Y Maximum")
-y_max_entry.grid(row=4, column=4, columnspan=1, sticky="n")
-y_max_label = tk.Label(root, text="Y Max", font=font_style_box)
-y_max_label.grid(row=4, column=5, columnspan=1, sticky="n")
+y_max_entry = lgeb.entry_box(root=root, row=4, column=4, entry_label="Y-max", entry_val=1,
+                             font_style=font_style_box)
 
 # The number of bins for histogram plot
-hist_bins_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-hist_bins_entry.insert(0, "Bins")
-hist_bins_entry.grid(row=5, column=4, columnspan=1, sticky="n")
-hist_bins_label = tk.Label(root, text="Bins", font=font_style_box)
-hist_bins_label.grid(row=5, column=5, columnspan=1, sticky="n")
+hist_bins_entry = lgeb.entry_box(root=root, row=5, column=4, entry_label="Bins", entry_val=50,
+                                 font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
-c_min_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-c_min_entry.insert(0, "Colorbar Mininimum")
-c_min_entry.grid(row=6, column=4, columnspan=1, sticky="n")
-c_min_label = tk.Label(root, text="C Min", font=font_style_box)
-c_min_label.grid(row=6, column=5, columnspan=1, sticky="n")
+c_min_entry = lgeb.entry_box(root=root, row=6, column=4, entry_label="C Min", entry_val=1,
+                             font_style=font_style_box)
 
 # Maximum number of data points in each bin for the histogram plot
-c_max_entry = tk.Entry(root, width=10, justify="center", bg="white", fg="black", borderwidth=2)
-c_max_entry.insert(0, "Colorbar Maximum")
-c_max_entry.grid(row=7, column=4, columnspan=1, sticky="n")
-c_max_label = tk.Label(root, text="C Max", font=font_style_box)
-c_max_label.grid(row=7, column=5, columnspan=1, sticky="n")
+c_max_entry = lgeb.entry_box(root=root, row=7, column=4, entry_label="C Max", entry_val="None",
+                             font_style=font_style_box)
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
 density_label = tk.Label(root, text="Density", font=font_style_box)
@@ -216,6 +194,10 @@ norm_type_var.trace("w", lambda *_: lpr.load_all_hist_plots(
 )
 
 # Add an input box with a label for start time
+#start_time_entry, start_time_label = lgeb.entry_box(root=root, row=17, column=2,
+#                                                    entry_label="Start Time", width=30,
+#                                                    entry_val="YYYY-MM-DD HH:MM:SS",
+#                                                    font_style=font_style)
 start_time = tk.Entry(root, width=30, justify="center", bg="white", fg="black", borderwidth=2)
 start_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 start_time.grid(row=17, column=2, columnspan=1, pady=5, ipadx=10, ipady=10)
@@ -223,6 +205,10 @@ start_time_label = tk.Label(root, text="Start Time", font=font_style)
 start_time_label.grid(row=18, column=2, columnspan=1)
 
 # Add an input box with a label for end time
+#end_time_entry, end_time_label = lgeb.entry_box(root=root, row=17, column=3,
+#                                                entry_label="End Time", width=30,
+#                                                entry_val="YYYY-MM-DD HH:MM:SS",
+#                                                font_style=font_style)
 end_time = tk.Entry(root, width=30, justify="center", bg="white", fg="black", borderwidth=2)
 end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 end_time.grid(row=17, column=3, columnspan=1, pady=5, ipadx=10, ipady=10)
