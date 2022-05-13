@@ -9,7 +9,6 @@ import lxi_load_plot_routines as llpr
 import lxi_read_files as lxrf
 import lxi_misc_codes as lmsc
 
-
 importlib.reload(lgpr)
 importlib.reload(lxrf)
 importlib.reload(global_variables)
