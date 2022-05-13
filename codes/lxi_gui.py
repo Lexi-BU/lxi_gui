@@ -7,12 +7,15 @@ import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_read_files as lxrf
+import lxi_misc_codes as lmsc
+
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
 importlib.reload(global_variables)
 importlib.reload(llpr)
 importlib.reload(lgeb)
+importlib.reload(lmsc)
 
 # Initialize the global variables. This is necessary because the global variables is where all the
 # data and name of the files are stored.
@@ -50,7 +53,9 @@ font_style_big = font.Font(family="Helvetica", size=25)
 
 # Insert a file load button
 # For science file
-sci_file_load_button = tk.Button(root, text="Load Science File", command=lxrf.open_file_sci,
+sci_file_load_button = tk.Button(root, text="Load Science File",
+                                 command=lambda: lxrf.open_file_sci(start_time=start_time.get(),
+                                                                    end_time=end_time.get()),
                                  font=font_style)
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -80,6 +85,14 @@ b_file_load_entry = tk.Entry(root, font=font_style, width=30, justify="left", bg
 b_file_load_entry.grid(row=2, column=1, columnspan=4, pady=0, sticky="w")
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
+
+# If a new file is loaded, then print its name in the entry box.
+sci_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
+    file_load_entry=sci_file_load_entry, tk=tk, file_name=lxrf.open_file_sci()))
+hk_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
+    file_load_entry=hk_file_load_entry, tk=tk, file_name=lxrf.open_file_hk()))
+b_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
+    file_load_entry=b_file_load_entry, tk=tk, file_name=lxrf.open_file_b()))
 
 # If the global_variables.all_file_details["df_slice_hk"] is not empty, then set the comlumn names
 # to the columns in the dataframe
@@ -179,7 +192,7 @@ norm_type_2 = tk.Radiobutton(root, text="Linear", variable=norm_type_var, value=
 norm_type_2.grid(row=10, column=4, columnspan=1, sticky="new")
 
 # Redo the histogram plot when the norm type is changed
-norm_type_var.trace("w", lambda *_: lpr.load_all_hist_plots(
+norm_type_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     df_slice_sci=global_variables.all_file_details["df_slice_sci"],
     start_time=start_time.get(), end_time=end_time.get(),
     bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
@@ -195,7 +208,7 @@ norm_type_var.trace("w", lambda *_: lpr.load_all_hist_plots(
 )
 
 # Add an input box with a label for start time
-#start_time_entry, start_time_label = lgeb.entry_box(root=root, row=17, column=2,
+# start_time_entry, start_time_label = lgeb.entry_box(root=root, row=17, column=2,
 #                                                    entry_label="Start Time", width=30,
 #                                                    entry_val="YYYY-MM-DD HH:MM:SS",
 #                                                    font_style=font_style)
@@ -206,15 +219,21 @@ start_time_label = tk.Label(root, text="Start Time", font=font_style)
 start_time_label.grid(row=18, column=2, columnspan=1)
 
 # Add an input box with a label for end time
-#end_time_entry, end_time_label = lgeb.entry_box(root=root, row=17, column=3,
-#                                                entry_label="End Time", width=30,
-#                                                entry_val="YYYY-MM-DD HH:MM:SS",
-#                                                font_style=font_style)
+# end_time_entry, end_time_label = lgeb.entry_box(root=root, row=17, column=3,
+#                                                 entry_label="End Time", width=30,
+#                                                 entry_val="YYYY-MM-DD HH:MM:SS",
+#                                                 font_style=font_style)
 end_time = tk.Entry(root, width=30, justify="center", bg="white", fg="black", borderwidth=2)
 end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 end_time.grid(row=17, column=3, columnspan=1, pady=5, ipadx=10, ipady=10)
 end_time_label = tk.Label(root, text="End Time", font=font_style)
 end_time_label.grid(row=18, column=3, columnspan=1)
+
+# If the start time or end time is changed, print the value of the start time or end time
+# start_time.bind("<KeyRelease>", lambda event: print(start_time.get()))
+# end_time.bind("<KeyRelease>", lambda event: sleep(1))
+# end_time.bind("<KeyRelease>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
+# end_time=end_time.get()))
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
@@ -256,6 +275,9 @@ plot_button = tk.Button(root, text="Plot Histogram", font=font_style_box, justif
                         )
 plot_button.grid(row=0, column=2, columnspan=2, rowspan=1)
 
+# If the plot button is pressed, then print the current time
+plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
+                                                                     end_time=end_time.get()))
 # Add a quit button
 quit_button = tk.Button(
     root, text="Quit", command=root.destroy, font=font_style_box, justify="center")
