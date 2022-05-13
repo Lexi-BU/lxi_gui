@@ -5,7 +5,7 @@ import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+# import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import global_variables
@@ -174,15 +174,36 @@ class plot_data_class():
         """
         # Try to convert the start_time and end_time to float or int
         try:
-            t_start = float(self.start_time)
+            t_start = int(self.start_time)
         except Exception:
             t_start = self.df_slice_hk.index.min()
             pass
         try:
-            t_end = float(self.end_time)
+            t_end = int(self.end_time)
         except Exception:
             t_end = self.df_slice_hk.index.max()
             pass
+
+        # Make a dictionary of all the plot options and their units
+        unit_dict = {"HK_id": "(#)",
+                     "PinPullerTemp": "(K)",
+                     "OpticsTemp": "(K)",
+                     "LEXIbaseTemp": "(C)",
+                     "HVsupplyTemp": "(K)",
+                     "+5.2V_Imon": "(A)",
+                     "+10V_Imon": "(A)",
+                     "+3.3V_Imon": "(A)",
+                     "AnodeVoltMon": "(V)",
+                     "+28 V_Imon": "A",
+                     "ADC_Ground": "V",
+                     "Cmd_count": "#",
+                     "Pinpuller_Armed": "",
+                     "HVmcpAuto": "",
+                     "HVmcpMan": "",
+                     "DeltaEvntCount": "#",
+                     "DeltaDroppedCount": "#",
+                     "DeltaLostevntCount": "#"
+                     }
 
         tick_label_size = 18
         axis_label_size = 25
@@ -200,6 +221,7 @@ class plot_data_class():
         # Rotate the x-axis labels by 45 degrees and set their fontsize
         plt.setp(axs1.get_xticklabels(), rotation=45, fontsize=tick_label_size)
         axs1.set_xlabel('Time (s)', fontsize=axis_label_size)
+        axs1.set_ylabel(f"{self.plot_key}{unit_dict[self.plot_key]}", fontsize=axis_label_size)
         axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
         axs1.legend(loc='best', fontsize=tick_label_size)
 
@@ -227,12 +249,12 @@ class plot_data_class():
 
         # Try to convert the start_time and end_time to float or int
         try:
-            t_start = float(self.start_time)
+            t_start = int(self.start_time)
         except Exception:
             t_start = self.df_slice_sci.index.min()
             pass
         try:
-            t_end = float(self.end_time)
+            t_end = int(self.end_time)
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass
@@ -300,7 +322,7 @@ class plot_data_class():
         # it in red color
         if cmax is not None:
             if np.nanmax(z_counts) > cmax:
-                print(f"\n\x1b[0;31;47m WARNING: The maximum value of the z_counts is \n"
+                print(f"\n\x1b[1;31;255m WARNING: The maximum value of the z_counts is \n"
                       f"{np.nanmax(z_counts)} This is greater than the cmax value of {cmax}.\n"
                       f"Though the z_counts are plotted, please keep in mind that the"
                       f" histogram may not be visualized properly.\x1b[0m")
@@ -360,12 +382,12 @@ class plot_data_class():
         """
         # Try to convert the start_time and end_time to float or int
         try:
-            t_start = float(self.start_time)
+            t_start = int(self.start_time)
         except Exception:
             t_start = self.df_slice_sci.index.min()
             pass
         try:
-            t_end = float(self.end_time)
+            t_end = int(self.end_time)
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass
@@ -381,10 +403,14 @@ class plot_data_class():
         fig = plt.figure(num=None, figsize=(3, 3), dpi=200, facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
 
-        axs1 = sns.jointplot(x=v1, y=v2, palette='Spectral',
-                             hue_norm=mpl.colors.LogNorm(vmin=1, vmax=100),
+        '''
+        axs1 = sns.jointplot(x=v1, y=v2, cmap='Reds', kind="hist", bins=30,
+                             hue_norm=mpl.colors.Normalize(vmin=1, vmax=10),
                              xlim=[0.1, 4], ylim=[0.1, 4], height=8, ratio=6, space=0.)
 
+        #axs1 = sns.jointplot(x=v1, y=v2, cmap='Reds', kind="scatter", alpha=0.5,
+        #                     hue_norm=mpl.colors.LogNorm(vmin=1, vmax=10000),
+        #                     xlim=[0.1, 4], ylim=[0.1, 4], height=8, ratio=6, space=0.)
         axs1.fig.axes[0].tick_params(axis='both', which='major', direction='in', labelbottom=True,
                                      bottom=True, labeltop=False, top=True, labelleft=True,
                                      left=True, labelright=False, right=True, width=1.5,
@@ -404,7 +430,33 @@ class plot_data_class():
 
         axs1.ax_joint.set_xlabel(self.channel1, fontsize=labelsize)
         axs1.ax_joint.set_ylabel(self.channel2, fontsize=labelsize)
+        '''
+        x_range = [0.9 * v1.min(), 1.1 * v1.max()]
+        y_range = [0.9 * v2.min(), 1.1 * v2.max()]
+        hst = np.histogram2d(v1, v2, bins=50,
+                             range=[[x_range[0], x_range[1]], [y_range[0], y_range[1]]],
+                             density=True)
 
+        gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
+
+        axs1 = plt.subplot(gs[0, 0])
+        im1 = axs1.imshow(hst[0], cmap="Spectral_r", norm=mpl.colors.LogNorm(),
+                          extent=[x_range[0], x_range[1], y_range[0], y_range[1]], aspect='auto',
+                          interpolation='nearest', origin='lower')
+        divider1 = make_axes_locatable(axs1)
+        cax1 = divider1.append_axes("top", size="5%", pad=0.02)
+        cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
+                             pad=0.0)
+        axs1.tick_params(axis='both', which='major', direction='in', labelbottom=True,
+                         bottom=True, labeltop=False, top=True, labelleft=True,
+                         left=True, labelright=False, right=True, width=1.5,
+                         length=ticklength, labelsize=ticklabelsize, labelrotation=0)
+
+        cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True,
+                             labelbottom=False, bottom=False, width=0.7, length=5,
+                             labelsize=10, labelrotation=0, pad=0)
+        axs1.set_xlabel(self.channel1, fontsize=labelsize)
+        axs1.set_ylabel(self.channel2, fontsize=labelsize)
         # Save the figure
         save_file_path = "../figures/hist_plots/"
         # Check if the save folder exists, if not then create it
