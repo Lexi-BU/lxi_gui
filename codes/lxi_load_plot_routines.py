@@ -2,7 +2,6 @@ import importlib
 import tkinter as tk
 
 from PIL import Image, ImageTk
-from sqlalchemy import column
 
 import global_variables
 import lxi_gui_plot_routines as lgpr
