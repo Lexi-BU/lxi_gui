@@ -2,6 +2,7 @@ import importlib
 import tkinter as tk
 
 from PIL import Image, ImageTk
+from sqlalchemy import column
 
 import global_variables
 import lxi_gui_plot_routines as lgpr
@@ -15,7 +16,7 @@ importlib.reload(global_variables)
 global_variables.init()
 
 
-def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=None, row=2):
+def load_ts_plots(root=None, df_slice_hk=None, plot_key=None, start_time=None, end_time=None, row=2):
     """
     Loads the time series plots for the selected time range and displays them in the GUI.
 
@@ -49,14 +50,14 @@ def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=Non
     load_ts = load_ts.resize((int(fig_ts.get_figwidth() * 100),
                               int(fig_ts.get_figheight() * 80)))
     render_ts = ImageTk.PhotoImage(load_ts)
-    img_ts = tk.Label(image=render_ts)
+    img_ts = tk.Label(master=root, image=render_ts)
     img_ts.image = render_ts
     img_ts.grid(row=row, column=0, rowspan=3, columnspan=2, sticky="w")
 
 
-def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
+def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
                     cmax=None, x_min=None, x_max=None, y_min=None, y_max=None, density=None,
-                    norm=None, row=3
+                    norm=None, row=3, column=1
                     ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI.
@@ -89,6 +90,8 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
         Whether or not the histogram should be normalized.
     row : int
         The row in which the plots should be displayed.
+    column : int
+        The column in which the plots should be displayed.
 
     Returns
     -------
@@ -109,12 +112,13 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
     load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 100),
                                   int(fig_hist.get_figheight() * 100)))
     render_hist = ImageTk.PhotoImage(load_hist)
-    img_hist = tk.Label(image=render_hist)
+    img_hist = tk.Label(master=root, image=render_hist)
     img_hist.image = render_hist
-    img_hist.grid(row=row, column=2, rowspan=12, columnspan=2, sticky="nsew")
+    img_hist.grid(row=row, column=column, rowspan=4, columnspan=2, sticky="nsew")
+    print(fig_hist.get_figwidth(), load_hist.size)
 
 
-def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, channel1=None,
+def load_hist_plots_volt(root=None, df_slice_sci=None, start_time=None, end_time=None, channel1=None,
                          channel2=None, row=None, column=None, sticky=None):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -158,19 +162,18 @@ def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, chan
     load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 80),
                                   int(fig_hist.get_figheight() * 80)))
     render_hist = ImageTk.PhotoImage(load_hist)
-    img_hist = tk.Label(image=render_hist)
+    img_hist = tk.Label(master=root, image=render_hist)
     img_hist.image = render_hist
     img_hist.grid(row=row, column=column, rowspan=3,
                   columnspan=1, sticky=sticky)
 
 
 def load_all_hist_plots(
-        df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None, cmax=None,
-        x_min=None, x_max=None, y_min=None, y_max=None, density=None, norm=None, row_hist=3,
-        channel1=None, channel3=None, row_channel13=None, column_channel13=None,
-        sticky_channel13=None,
-        channel2=None, channel4=None, row_channel24=None, column_channel24=None,
-        sticky_channel24=None
+        root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
+        cmax=None, x_min=None, x_max=None, y_min=None, y_max=None, density=None, norm=None,
+        row_hist=3, col_hist=1, channel1=None, channel3=None, row_channel13=None, column_channel13=None,
+        sticky_channel13=None, channel2=None, channel4=None, row_channel24=None,
+        column_channel24=None, sticky_channel24=None
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -229,14 +232,15 @@ def load_all_hist_plots(
     -------
         None
     """
-    load_hist_plots(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, bins=bins,
-                    cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                    density=density, norm=norm, row=row_hist)
+    load_hist_plots(root=root[0], df_slice_sci=df_slice_sci, start_time=start_time,
+                    end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max,
+                    y_min=y_min, y_max=y_max, density=density, norm=norm, row=row_hist,
+                    column=col_hist)
 
-    load_hist_plots_volt(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time,
-                         channel1=channel1, channel2=channel3, row=row_channel13,
-                         column=column_channel13, sticky=sticky_channel13)
+    load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
+                         end_time=end_time, channel1=channel1, channel2=channel3,
+                         row=row_channel13, column=column_channel13, sticky=sticky_channel13)
 
-    load_hist_plots_volt(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time,
-                         channel1=channel2, channel2=channel4, row=row_channel24,
+    load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
+                         end_time=end_time, channel1=channel2, channel2=channel4, row=row_channel24,
                          column=column_channel24, sticky=sticky_channel24)

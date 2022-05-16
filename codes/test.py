@@ -273,7 +273,7 @@ label1 = tk.Label(text='Please choose a file')
 label1.pack(padx=2, pady=2)
 
 root.mainloop()
-"""
+
 
 import tkinter as tk
 
@@ -308,3 +308,33 @@ frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
 populate(frame)
 
 root.mainloop()
+"""
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
+my_w = tk.Tk()
+my_w.geometry("400x200")
+my_tabs = ttk.Notebook(my_w, padding=20)  # declaring
+
+tab0 = ttk.Frame(my_tabs)
+tab1 = ttk.Frame(my_tabs)
+tab2 = ttk.Frame(my_tabs)
+r1 = tk.PhotoImage(file='../figures/time_series_plots/+3.3V_Imon_time_series_plot.png')
+y1 = tk.PhotoImage(file='../figures/time_series_plots/+5.2V_Imon_time_series_plot.png')
+g1 = tk.PhotoImage(file='../figures/time_series_plots/+10V_Imon_time_series_plot.png')
+my_tabs.add(tab0, text='Tab-0', image=r1, compound='bottom')
+my_tabs.add(tab1, text='Tab-1', image=y1, compound='top')
+my_tabs.add(tab2, text='Tab-2', image=g1, compound='right')
+my_tabs.pack(expand=1, fill="both")
+
+font1 = ('times', 24, 'normal')
+l1 = tk.Label(tab0, text='I am tab-0', bg='yellow', font=font1)
+l1.place(relx=0.4, rely=0.2)  # using place
+
+
+l2 = tk.Label(tab1, text='I am tab-1', bg='yellow', font=font1)
+l2.place(relx=0.4, rely=0.2)  # using place
+l3 = tk.Label(tab2, text='I am tab-2', bg='yellow', font=font1)
+l3.place(relx=0.4, rely=0.2)  # using place
+
+my_w.mainloop()  # Keep the window open
