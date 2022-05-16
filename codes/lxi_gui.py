@@ -1,7 +1,6 @@
 import importlib
 import tkinter as tk
 from tkinter import font, ttk
-from win32api import GetSystemMetrics
 
 import global_variables
 import lxi_gui_entry_box as lgeb
@@ -33,7 +32,10 @@ root = tk.Tk()
 # root.columnconfigure(5, {'minsize': 3}, weight=1)
 
 # Get the screen width and height.
-screen_width, screen_height = GetSystemMetrics(0), GetSystemMetrics(1)
+#screen_width, screen_height = GetSystemMetrics(0), GetSystemMetrics(1)
+
+# Get the screen width and height.
+screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
 # Set the title of the main window.
 root.title("LEXI GUI")

@@ -27,6 +27,7 @@
         "pady",
         "tolist",
         "Vmcp",
-        "Vsupply"
+        "Vsupply",
+        "winfo"
     ]
 }
