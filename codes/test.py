@@ -463,7 +463,7 @@ x_hist.invert_yaxis()
 y_hist.hist(y, 40, histtype='stepfilled',
             orientation='horizontal', color='gray')
 y_hist.invert_xaxis()
-"""
+
 
 from torch import norm
 
@@ -493,3 +493,12 @@ x_hist.step(xedges[:-1], xn, color='k', lw=1)
 y_hist.step(yn, yedges[:-1], color='k', lw=1)
 plt.show()
 #plt.colorbar()
+"""
+
+
+def test_func(x=None, y=None):
+    return x + y
+
+
+# Use lambda function to pass the function as an argument
+lambda_func = lambda x, y: test_func(x, y)

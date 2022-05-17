@@ -66,5 +66,6 @@ def insert_file_name(file_load_entry=None, tk=None, file_name=None):
     -------
         None
     """
+    file_name_short = file_name.split('/')[-1]
     file_load_entry.delete(0, tk.END)
-    file_load_entry.insert(0, file_name)
+    file_load_entry.insert(0, file_name_short)

@@ -67,7 +67,7 @@ def load_ts_plots(root=None, df_slice_hk=None, plot_key=None, start_time=None, e
 def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None,
                     cmin=None, cmax=None, x_min=None, x_max=None, y_min=None, y_max=None,
                     density=None, norm=None, row=3, column=1, fig_width=5, fig_height=5,
-                    columnspan=2, rowspan=2
+                    columnspan=2, rowspan=2, v_min=2.2, v_max=3.9
                     ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI.
@@ -124,7 +124,7 @@ def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None
                                     end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
                                     x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                                     density=density, norm=norm, hist_fig_height=fig_height,
-                                    hist_fig_width=fig_width).hist_plots()
+                                    hist_fig_width=fig_width, v_min=v_min, v_max=v_max).hist_plots()
 
     frame = tk.Frame(root)
     frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky='nsew')
@@ -137,7 +137,7 @@ def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None
 def load_hist_plots_volt(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None,
                          cmin=None, cmax=None, density=None, norm=None, channel1=None,
                          channel2=None, row=None, column=None, sticky=None, columnspan=None,
-                         rowspan=None, fig_width=None, fig_height=None):
+                         rowspan=None, fig_width=None, fig_height=None, v_min=2.2, v_max=3.9):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
     the voltage
@@ -181,7 +181,7 @@ def load_hist_plots_volt(root=None, df_slice_sci=None, start_time=None, end_time
     fig_hist = lgpr.plot_data_class(
         df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, bins=bins, cmin=cmin,
         cmax=cmax, density=density, norm=norm, channel1=channel1, channel2=channel2,
-        volt_fig_width=fig_width, volt_fig_height=fig_height
+        volt_fig_width=fig_width, volt_fig_height=fig_height, v_min=v_min, v_max=v_max
     ).hist_plots_volt()
 
     frame = tk.Frame(root)
@@ -201,7 +201,7 @@ def load_all_hist_plots(
         column_channel24=None, sticky_channel24=None, row_span_channel24=None,
         column_span_channel24=None, hist_fig_height=None, hist_fig_width=None, hist_colspan=None,
         hist_rowspan=None, channel13_fig_height=None, channel13_fig_width=None,
-        channel24_fig_height=None, channel24_fig_width=None
+        channel24_fig_height=None, channel24_fig_width=None, v_min=None, v_max=None,
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -280,18 +280,20 @@ def load_all_hist_plots(
                     end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max,
                     y_min=y_min, y_max=y_max, density=density, norm=norm, row=row_hist,
                     column=col_hist, fig_height=hist_fig_height, fig_width=hist_fig_width,
-                    columnspan=hist_colspan, rowspan=hist_rowspan)
+                    columnspan=hist_colspan, rowspan=hist_rowspan, v_min=v_min, v_max=v_max)
 
     load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
                          end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, density=density,
                          norm=norm, channel1=channel1, channel2=channel3,
                          row=row_channel13, column=column_channel13, sticky=sticky_channel13,
                          rowspan=row_span_channel13, columnspan=column_span_channel13,
-                         fig_width=channel13_fig_width, fig_height=channel13_fig_height)
+                         fig_width=channel13_fig_width, fig_height=channel13_fig_height,
+                         v_min=v_min, v_max=v_max)
 
     load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
                          end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, density=density,
                          norm=norm, channel1=channel2, channel2=channel4, row=row_channel24,
                          column=column_channel24, sticky=sticky_channel24,
                          rowspan=row_span_channel24, columnspan=column_span_channel24,
-                         fig_width=channel24_fig_width, fig_height=channel24_fig_height)
+                         fig_width=channel24_fig_width, fig_height=channel24_fig_height,
+                         v_min=v_min, v_max=v_max)

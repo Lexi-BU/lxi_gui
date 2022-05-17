@@ -161,7 +161,9 @@ class plot_data_class():
                  hist_fig_height=None,
                  hist_fig_width=None,
                  volt_fig_height=None,
-                 volt_fig_width=None
+                 volt_fig_width=None,
+                 v_min=None,
+                 v_max=None
                  ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -185,6 +187,8 @@ class plot_data_class():
         self.hist_fig_width = hist_fig_width
         self.volt_fig_height = volt_fig_height
         self.volt_fig_width = volt_fig_width
+        self.v_min = v_min
+        self.v_max = v_max
 
     def ts_plots(self):
         """
@@ -305,6 +309,15 @@ class plot_data_class():
             density = self.density
         except Exception:
             density = None
+        try:
+            v_min = float(self.v_min)
+        except Exception:
+            v_min = None
+        try:
+            v_max = float(self.v_max)
+        except Exception:
+            v_max = None
+
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
@@ -325,6 +338,16 @@ class plot_data_class():
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci[t_start:t_end]
 
+        # Exclude channel1 to channel4 data based on v_min and v_max
+        if v_min is not None and v_max is not None:
+            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
+                                                  (self.df_slice_sci["Channel1"] <= v_max) &
+                                                  (self.df_slice_sci["Channel2"] >= v_min) &
+                                                  (self.df_slice_sci["Channel2"] <= v_max) &
+                                                  (self.df_slice_sci["Channel3"] >= v_min) &
+                                                  (self.df_slice_sci["Channel3"] <= v_max) &
+                                                  (self.df_slice_sci["Channel4"] >= v_min) &
+                                                  (self.df_slice_sci["Channel4"] <= v_max)]
         fig = plt.figure(num=None, figsize=(self.hist_fig_width * 1, self.hist_fig_height * 1),
                          facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.05, right=0.92, top=0.95, bottom=0.05, wspace=0., hspace=0)
@@ -341,16 +364,29 @@ class plot_data_class():
                                                  range=[x_range, y_range], cmin=cmin,
                                                  density=density)
 
-        # Number of data points in each bin along the x-axis
-        xn = [np.nansum(counts[i, :]) for i in range(counts.shape[0])]
-        # Number of data points in each bin along the y-axis
-        yn = [np.nansum(counts[:, i]) for i in range(counts.shape[1])]
+        # Find the index of the maximum value in counts, ignoring NaNs
+        max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
+
+        # Draw a horizontal adn vertical line at the maximum value
+        axs1.axvline(x=(xedges[max_index[0]] + xedges[max_index[0] + 1]) / 2, color='k',
+                     linestyle='--', linewidth=1)
+        axs1.axhline(y=(yedges[max_index[1]] + yedges[max_index[1] + 1]) / 2, color='k',
+                     linestyle='--', linewidth=1)
+
+        # Number of data points in each bin along the x- and y-axes
+        yn = counts[max_index[0], :]
+        xn = counts[:, max_index[1]]
+
+        x_step = (xedges[1:] + xedges[0:-1]) / 2
+        y_step = (yedges[1:] + yedges[0:-1]) / 2
 
         # Make step plot between xedges and xn
-        x_hist.step(xedges[:-1], xn, color='k', where='post')
+        x_hist.step(x_step, xn, color='k', where='post')
+        x_hist.set_xlabel('Vertical Cut')
         # Make step plot between yedges and yn
-        y_hist.step(yn, yedges[:-1], color='k', where='post')
+        y_hist.step(yn, y_step, color='k', where='post')
         y_hist.invert_xaxis()
+        y_hist.set_xlabel('Horizontal Cut')
 
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
@@ -421,6 +457,15 @@ class plot_data_class():
             density = self.density
         except Exception:
             density = None
+        try:
+            v_min = float(self.v_min)
+        except Exception:
+            v_min = None
+        try:
+            v_max = float(self.v_max)
+        except Exception:
+            v_max = None
+
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
@@ -437,15 +482,29 @@ class plot_data_class():
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
 
         self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
-        v1 = self.df_slice_sci[self.channel1][t_start:t_end]
-        v2 = self.df_slice_sci[self.channel2][t_start:t_end]
+
+        # Exclude channel1 to channel4 data based on v_min and v_max
+        if v_min is not None and v_max is not None:
+            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
+                                                  (self.df_slice_sci["Channel1"] <= v_max) &
+                                                  (self.df_slice_sci["Channel2"] >= v_min) &
+                                                  (self.df_slice_sci["Channel2"] <= v_max) &
+                                                  (self.df_slice_sci["Channel3"] >= v_min) &
+                                                  (self.df_slice_sci["Channel3"] <= v_max) &
+                                                  (self.df_slice_sci["Channel4"] >= v_min) &
+                                                  (self.df_slice_sci["Channel4"] <= v_max)]
+
+        v1 = self.df_slice_sci[self.channel1][
+            (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
+        v2 = self.df_slice_sci[self.channel2][
+            (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
 
         fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
                          facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
 
-        x_range = [0.9 * v1.min(), 1.1 * v1.max()]
-        y_range = [0.9 * v2.min(), 1.1 * v2.max()]
+        x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
+        y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
         axs1 = fig.add_subplot(gs[0, 0])
