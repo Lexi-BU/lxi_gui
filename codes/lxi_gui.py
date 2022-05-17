@@ -23,17 +23,6 @@ global_variables.init()
 # Create the main window.
 root = tk.Tk()
 
-# Set the number of columns for the main window.
-# root.columnconfigure(0, {'minsize': 3}, weight=1)
-# root.columnconfigure(1, {'minsize': 3}, weight=2)
-# root.columnconfigure(2, {'minsize': 3}, weight=3)
-# root.columnconfigure(3, {'minsize': 3}, weight=3)
-# root.columnconfigure(4, {'minsize': 3}, weight=1)
-# root.columnconfigure(5, {'minsize': 3}, weight=1)
-
-# Get the screen width and height.
-#screen_width, screen_height = GetSystemMetrics(0), GetSystemMetrics(1)
-
 # Get the screen width and height.
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
@@ -43,7 +32,7 @@ root.title("LEXI GUI")
 # img = tk.PhotoImage(file="../../figures/lxi_gui_figures/lxi_icon.ico")
 # root.tk.call('wm', 'iconphoto', root._w, img)
 # root.iconbitmap("../../figures/lxi_gui_figures/lxi_icon.ico")
-#root.geometry("1100x700")
+# root.geometry("1100x700")
 # set size of you window here is example for 1/2 screen height and width
 root.geometry(f"{int(screen_width * 1)}x{int(screen_height * 1)}")
 
@@ -58,10 +47,6 @@ hk_tab = ttk.Frame(tabControl)
 
 tabControl.add(sci_tab, text='Science Stuff')
 tabControl.add(hk_tab, text='Housekeeping Stuff')
-
-# Make sure the two tabs are resizable.
-#sci_tab.resizable(True, True)
-#hk_tab.resizable(True, True)
 
 # Configure the science tab rows and columns.
 sci_tab.columnconfigure(0, {'minsize': 1}, weight=1)
@@ -97,9 +82,9 @@ hk_tab.rowconfigure(5, {'minsize': 1}, weight=1)
 # scrollbar.grid(row=0, column=6, rowspan=12, sticky="nsew")
 
 # Choose a font style for GUI
-font_style = font.Font(family="Helvetica", size=12)
-font_style_box = font.Font(family="Helvetica", size=12, weight="bold")
-font_style_big = font.Font(family="Helvetica", size=25)
+font_style = font.Font(family="serif", size=12)
+font_style_box = font.Font(family="serif", size=12, weight="bold")
+font_style_big = font.Font(family="serif", size=25)
 
 # Insert a file load button
 # For science file
@@ -175,23 +160,23 @@ ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-min", entry_val=0,
+x_min_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-min", entry_val=0.35,
                              font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = lgeb.entry_box(root=sci_tab, row=2, column=4, entry_label="X-max", entry_val=1,
+x_max_entry = lgeb.entry_box(root=sci_tab, row=2, column=4, entry_label="X-max", entry_val=0.62,
                              font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = lgeb.entry_box(root=sci_tab, row=3, column=4, entry_label="Y-min", entry_val=0,
+y_min_entry = lgeb.entry_box(root=sci_tab, row=3, column=4, entry_label="Y-min", entry_val=0.35,
                              font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = lgeb.entry_box(root=sci_tab, row=4, column=4, entry_label="Y-max", entry_val=1,
+y_max_entry = lgeb.entry_box(root=sci_tab, row=4, column=4, entry_label="Y-max", entry_val=0.62,
                              font_style=font_style_box)
 
 # The number of bins for histogram plot
-hist_bins_entry = lgeb.entry_box(root=sci_tab, row=5, column=4, entry_label="Bins", entry_val=50,
+hist_bins_entry = lgeb.entry_box(root=sci_tab, row=5, column=4, entry_label="Bins", entry_val=100,
                                  font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
@@ -216,7 +201,7 @@ density_checkbox.grid(row=8, column=4, columnspan=1, sticky="n")
 
 # Redo the histogram plot if the status of the checkbox is changed
 density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
-    root=[sci_tab, hk_tab],
+    root=[sci_tab, sci_tab],
     df_slice_sci=global_variables.all_file_details["df_slice_sci"],
     start_time=start_time.get(), end_time=end_time.get(),
     bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
@@ -224,14 +209,20 @@ density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     x_max=x_max_entry.get(), y_min=y_min_entry.get(),
     y_max=y_max_entry.get(), density=density_status_var.get(),
     norm=norm_type_var.get(), row_hist=0, col_hist=2,
-    channel1="Channel1", channel2="Channel2", row_channel13=12,
-    column_channel13=2, sticky_channel13="ne",
-    channel3="Channel3", channel4="Channel4", row_channel24=12,
-    column_channel24=3, sticky_channel24="nw",
-    hist_fig_height=screen_height / (2 * 96),
+    channel1="Channel1", channel2="Channel2", row_channel13=0,
+    column_channel13=7, sticky_channel13="nesw",
+    row_span_channel13=5, column_span_channel13=3,
+    channel3="Channel3", channel4="Channel4", row_channel24=5,
+    column_channel24=7, sticky_channel24="nesw",
+    row_span_channel24=6, column_span_channel24=3,
+    hist_fig_height=screen_height / (1.1 * 96),
     hist_fig_width=screen_width / (2 * 96),
     hist_colspan=2,
-    hist_rowspan=10
+    hist_rowspan=12,
+    channel13_fig_height=screen_height / (3 * 96),
+    channel13_fig_width=screen_width / (3 * 96),
+    channel24_fig_height=screen_height / (3 * 96),
+    channel24_fig_width=screen_width / (3 * 96),
 )
 )
 
@@ -249,7 +240,7 @@ norm_type_2.grid(row=10, column=4, columnspan=1, sticky="new")
 
 # Redo the histogram plot when the norm type is changed
 norm_type_var.trace("w", lambda *_: llpr.load_all_hist_plots(
-    root=[sci_tab, hk_tab],
+    root=[sci_tab, sci_tab],
     df_slice_sci=global_variables.all_file_details["df_slice_sci"],
     start_time=start_time.get(), end_time=end_time.get(),
     bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
@@ -257,14 +248,20 @@ norm_type_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     x_max=x_max_entry.get(), y_min=y_min_entry.get(),
     y_max=y_max_entry.get(), density=density_status_var.get(),
     norm=norm_type_var.get(), row_hist=0, col_hist=2,
-    channel1="Channel1", channel2="Channel2", row_channel13=12,
-    column_channel13=2, sticky_channel13="ne",
-    channel3="Channel3", channel4="Channel4", row_channel24=12,
-    column_channel24=3, sticky_channel24="nw",
-    hist_fig_height=screen_height / (2 * 96),
+    channel1="Channel1", channel2="Channel2", row_channel13=0,
+    column_channel13=7, sticky_channel13="nesw",
+    row_span_channel13=5, column_span_channel13=3,
+    channel3="Channel3", channel4="Channel4", row_channel24=5,
+    column_channel24=7, sticky_channel24="nesw",
+    row_span_channel24=6, column_span_channel24=3,
+    hist_fig_height=screen_height / (1.1 * 96),
     hist_fig_width=screen_width / (2 * 96),
     hist_colspan=2,
-    hist_rowspan=10
+    hist_rowspan=12,
+    channel13_fig_height=screen_height / (3 * 96),
+    channel13_fig_width=screen_width / (3 * 96),
+    channel24_fig_height=screen_height / (3 * 96),
+    channel24_fig_width=screen_width / (3 * 96),
 )
 )
 
@@ -330,7 +327,7 @@ plot_opt_entry_3.trace(
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, justify="center",
                         command=lambda: llpr.load_all_hist_plots(
-                            root=[sci_tab, hk_tab],
+                            root=[sci_tab, sci_tab],
                             df_slice_sci=global_variables.all_file_details["df_slice_sci"],
                             start_time=start_time.get(), end_time=end_time.get(),
                             bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
@@ -338,14 +335,20 @@ plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, jus
                             x_max=x_max_entry.get(), y_min=y_min_entry.get(),
                             y_max=y_max_entry.get(), density=density_status_var.get(),
                             norm=norm_type_var.get(), row_hist=0, col_hist=2,
-                            channel1="Channel1", channel2="Channel2", row_channel13=12,
-                            column_channel13=2, sticky_channel13="ne",
-                            channel3="Channel3", channel4="Channel4", row_channel24=12,
-                            column_channel24=3, sticky_channel24="nw",
+                            channel1="Channel1", channel2="Channel2", row_channel13=0,
+                            column_channel13=7, sticky_channel13="nesw",
+                            row_span_channel13=5, column_span_channel13=3,
+                            channel3="Channel3", channel4="Channel4", row_channel24=5,
+                            column_channel24=7, sticky_channel24="nesw",
+                            row_span_channel24=6, column_span_channel24=3,
                             hist_fig_height=screen_height / (1.1 * 96),
                             hist_fig_width=screen_width / (2 * 96),
                             hist_colspan=2,
-                            hist_rowspan=10
+                            hist_rowspan=12,
+                            channel13_fig_height=screen_height / (3 * 96),
+                            channel13_fig_width=screen_width / (3 * 96),
+                            channel24_fig_height=screen_height / (3 * 96),
+                            channel24_fig_width=screen_width / (3 * 96),
                         )
                         )
 plot_button.grid(row=10, column=0, columnspan=2, rowspan=1, sticky="nsew", pady=5, padx=5)

@@ -405,8 +405,8 @@ class My_GUI:
 root = tk.Tk()
 gui = My_GUI(root)
 root.mainloop()
-"""
 
+# Mouse scroll thingy
 import tkinter as tk
 
 
@@ -444,3 +444,52 @@ if __name__ == "__main__":
     root = tk.Tk()
     Example(root).pack(fill="both", expand=True)
     root.mainloop()
+
+
+fig = plt.figure(figsize=(6, 6))
+grid = plt.GridSpec(4, 4, hspace=0.2, wspace=0.2)
+main_ax = fig.add_subplot(grid[:-1, 1:])
+y_hist = fig.add_subplot(grid[:-1, 0], xticklabels=[], sharey=main_ax)
+x_hist = fig.add_subplot(grid[-1, 1:], yticklabels=[], sharex=main_ax)
+
+# scatter points on the main axes
+main_ax.plot(x, y, 'ok', markersize=3, alpha=0.2)
+
+# histogram on the attached axes
+x_hist.hist(x, 40, histtype='stepfilled',
+            orientation='vertical', color='gray')
+x_hist.invert_yaxis()
+
+y_hist.hist(y, 40, histtype='stepfilled',
+            orientation='horizontal', color='gray')
+y_hist.invert_xaxis()
+"""
+
+from torch import norm
+
+
+fig = plt.figure(num=None, figsize=(5,5),
+                 facecolor='w', edgecolor='k')
+fig.subplots_adjust(left=0.01, right=0.99, top=0.99,
+                    bottom=0.01, wspace=0., hspace=0)
+
+gs = plt.GridSpec(4, 4, hspace=0.02, wspace=0.02)
+axs1 = fig.add_subplot(gs[0:-1, :-1])
+y_hist = fig.add_subplot(gs[:-1, -1], xticklabels=[], sharey=axs1)
+x_hist = fig.add_subplot(gs[-1, 1:], yticklabels=[], sharex=axs1)
+
+counts, xedges, yedges, im = axs1.hist2d(df_slice_sci["x_val"], df_slice_sci["y_val"], bins=50,
+           range=[[0.31, 0.62], [0.31, 0.61]], cmin=1, density=True, cmap='Blues', norm=mpl.colors.LogNorm())
+
+fig.colorbar(im, ax=axs1)
+# Number of data along x-axis
+xn = [np.nansum(counts[i, :]) for i in range(counts.shape[0])]
+# Number of data along y-axis
+yn = [np.nansum(counts[:, i]) for i in range(counts.shape[1])]
+
+# Add step plot of x-axis
+x_hist.step(xedges[:-1], xn, color='k', lw=1)
+# Add step plot of y-axis
+y_hist.step(yn, yedges[:-1], color='k', lw=1)
+plt.show()
+#plt.colorbar()
