@@ -45,19 +45,23 @@ root.title("LEXI GUI")
 # root.iconbitmap("../../figures/lxi_gui_figures/lxi_icon.ico")
 #root.geometry("1100x700")
 # set size of you window here is example for 1/2 screen height and width
-root.geometry(f"{int(screen_width * 0.75)}x{int(screen_height * 0.75)}")
+root.geometry(f"{int(screen_width * 1)}x{int(screen_height * 1)}")
 
 root.resizable(True, True)
 
 tabControl = ttk.Notebook(root)
 
-tabControl.grid(row=0, column=0, sticky="nsew")
+tabControl.grid(row=0, column=0, columnspan=16, rowspan=18, sticky="nsew")
 
 sci_tab = ttk.Frame(tabControl)
 hk_tab = ttk.Frame(tabControl)
 
 tabControl.add(sci_tab, text='Science Stuff')
 tabControl.add(hk_tab, text='Housekeeping Stuff')
+
+# Make sure the two tabs are resizable.
+#sci_tab.resizable(True, True)
+#hk_tab.resizable(True, True)
 
 # Configure the science tab rows and columns.
 sci_tab.columnconfigure(0, {'minsize': 1}, weight=1)
@@ -66,6 +70,27 @@ sci_tab.columnconfigure(2, {'minsize': 1}, weight=3)
 sci_tab.columnconfigure(3, {'minsize': 1}, weight=3)
 sci_tab.columnconfigure(4, {'minsize': 1}, weight=1)
 sci_tab.columnconfigure(5, {'minsize': 1}, weight=1)
+
+# Configure the housekeeping tab rows and columns.
+hk_tab.columnconfigure(0, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(1, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(2, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(3, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(4, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(5, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(6, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(7, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(8, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(9, {'minsize': 1}, weight=1)
+hk_tab.columnconfigure(10, {'minsize': 1}, weight=1)
+
+hk_tab.rowconfigure(0, {'minsize': 1}, weight=1)
+hk_tab.rowconfigure(1, {'minsize': 1}, weight=1)
+hk_tab.rowconfigure(2, {'minsize': 1}, weight=1)
+hk_tab.rowconfigure(3, {'minsize': 1}, weight=1)
+hk_tab.rowconfigure(4, {'minsize': 1}, weight=1)
+hk_tab.rowconfigure(5, {'minsize': 1}, weight=1)
+
 
 # Add a scrollbar
 # scrollbar = tk.Scrollbar(sci_tab)
@@ -131,23 +156,23 @@ else:
 
 # Plot options for the first plot
 plot_opt_label_1 = tk.Label(hk_tab, text="Plot options:", font=font_style_box)
-plot_opt_label_1.grid(row=3, column=0, columnspan=1, pady=0, sticky="w")
+plot_opt_label_1.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_entry_1 = tk.StringVar(hk_tab)
 plot_opt_entry_1.set("Select a column")
 ts_menu_1 = tk.OptionMenu(hk_tab, plot_opt_entry_1, *ts_options)
-ts_menu_1.grid(row=3, column=1, columnspan=1, sticky="w")
+ts_menu_1.grid(row=0, column=2, columnspan=1, sticky="w")
 
 # Plot options for the second plot
 plot_opt_entry_2 = tk.StringVar(hk_tab)
 plot_opt_entry_2.set("Select a column")
 ts_menu_2 = tk.OptionMenu(hk_tab, plot_opt_entry_2, *ts_options)
-ts_menu_2.grid(row=7, column=1, columnspan=1, sticky="w")
+ts_menu_2.grid(row=0, column=5, columnspan=1, sticky="w")
 
 # Plot optiosn for third plot
 plot_opt_entry_3 = tk.StringVar(hk_tab)
 plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
-ts_menu_3.grid(row=11, column=1, columnspan=1, sticky="w")
+ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
 x_min_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-min", entry_val=0,
@@ -191,17 +216,22 @@ density_checkbox.grid(row=8, column=4, columnspan=1, sticky="n")
 
 # Redo the histogram plot if the status of the checkbox is changed
 density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
+    root=[sci_tab, hk_tab],
     df_slice_sci=global_variables.all_file_details["df_slice_sci"],
     start_time=start_time.get(), end_time=end_time.get(),
     bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
     cmax=c_max_entry.get(), x_min=x_min_entry.get(),
     x_max=x_max_entry.get(), y_min=y_min_entry.get(),
     y_max=y_max_entry.get(), density=density_status_var.get(),
-    norm=norm_type_var.get(), row_hist=1,
+    norm=norm_type_var.get(), row_hist=0, col_hist=2,
     channel1="Channel1", channel2="Channel2", row_channel13=12,
     column_channel13=2, sticky_channel13="ne",
     channel3="Channel3", channel4="Channel4", row_channel24=12,
-    column_channel24=3, sticky_channel24="nw"
+    column_channel24=3, sticky_channel24="nw",
+    hist_fig_height=screen_height / (2 * 96),
+    hist_fig_width=screen_width / (2 * 96),
+    hist_colspan=2,
+    hist_rowspan=10
 )
 )
 
@@ -226,11 +256,15 @@ norm_type_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     cmax=c_max_entry.get(), x_min=x_min_entry.get(),
     x_max=x_max_entry.get(), y_min=y_min_entry.get(),
     y_max=y_max_entry.get(), density=density_status_var.get(),
-    norm=norm_type_var.get(), row_hist=1,
+    norm=norm_type_var.get(), row_hist=0, col_hist=2,
     channel1="Channel1", channel2="Channel2", row_channel13=12,
     column_channel13=2, sticky_channel13="ne",
     channel3="Channel3", channel4="Channel4", row_channel24=12,
-    column_channel24=3, sticky_channel24="nw"
+    column_channel24=3, sticky_channel24="nw",
+    hist_fig_height=screen_height / (2 * 96),
+    hist_fig_width=screen_width / (2 * 96),
+    hist_colspan=2,
+    hist_rowspan=10
 )
 )
 
@@ -268,7 +302,9 @@ plot_opt_entry_1.trace(
         root=hk_tab,
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_1.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=4)
+        end_time=end_time.get(), row=1, column=0, columnspan=3, rowspan=2,
+        fig_width=screen_width / (6 * 96),
+        fig_height=screen_height / (6 * 96))
 )
 
 plot_opt_entry_2.trace(
@@ -276,7 +312,9 @@ plot_opt_entry_2.trace(
         root=hk_tab,
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_2.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=8)
+        end_time=end_time.get(), row=1, column=3, columnspan=3, rowspan=2,
+        fig_width=screen_width / (6 * 96),
+        fig_height=screen_height / (6 * 96))
 )
 
 plot_opt_entry_3.trace(
@@ -284,7 +322,9 @@ plot_opt_entry_3.trace(
         root=hk_tab,
         df_slice_hk=global_variables.all_file_details["df_slice_hk"],
         plot_key=plot_opt_entry_3.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=12)
+        end_time=end_time.get(), row=1, column=6, columnspan=3, rowspan=2,
+        fig_width=screen_width / (6 * 96),
+        fig_height=screen_height / (6 * 96))
 )
 
 # If the plot button is pressed then all the histogram plots are redrawn
@@ -301,7 +341,11 @@ plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, jus
                             channel1="Channel1", channel2="Channel2", row_channel13=12,
                             column_channel13=2, sticky_channel13="ne",
                             channel3="Channel3", channel4="Channel4", row_channel24=12,
-                            column_channel24=3, sticky_channel24="nw"
+                            column_channel24=3, sticky_channel24="nw",
+                            hist_fig_height=screen_height / (1.1 * 96),
+                            hist_fig_width=screen_width / (2 * 96),
+                            hist_colspan=2,
+                            hist_rowspan=10
                         )
                         )
 plot_button.grid(row=10, column=0, columnspan=2, rowspan=1, sticky="nsew", pady=5, padx=5)
@@ -316,6 +360,6 @@ quit_button_sci.grid(row=11, column=0, columnspan=2, rowspan=2)
 
 quit_button_hk = tk.Button(
     hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center")
-quit_button_hk.grid(row=11, column=6, columnspan=2, rowspan=2)
+quit_button_hk.grid(row=11, column=3, columnspan=2, rowspan=2)
 
 root.mainloop()

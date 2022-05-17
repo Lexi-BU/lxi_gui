@@ -2,6 +2,7 @@ import importlib
 from pathlib import Path
 
 import matplotlib as mpl
+from matplotlib import legend_handler
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -145,7 +146,11 @@ class plot_data_class():
                  y_min=None,
                  y_max=None,
                  density=None,
-                 norm=None
+                 norm=None,
+                 ts_fig_height=None,
+                 ts_fig_width=None,
+                 hist_fig_height=None,
+                 hist_fig_width=None
                  ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -163,6 +168,10 @@ class plot_data_class():
         self.y_max = y_max
         self.density = density
         self.norm = norm
+        self.ts_fig_height = ts_fig_height
+        self.ts_fig_width = ts_fig_width
+        self.hist_fig_height = hist_fig_height
+        self.hist_fig_width = hist_fig_width
 
     def ts_plots(self):
         """
@@ -205,12 +214,11 @@ class plot_data_class():
                      "DeltaLostevntCount": "#"
                      }
 
-        tick_label_size = 18
-        axis_label_size = 25
         alpha = 0.8
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(4, 2), dpi=200, facecolor='w', edgecolor='k')
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), facecolor='w',
+                         edgecolor='k')
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 1, width_ratios=[1])
 
@@ -219,11 +227,14 @@ class plot_data_class():
                   label=self.plot_key)
         axs1.set_xlim(t_start, t_end)
         # Rotate the x-axis labels by 45 degrees and set their fontsize
-        plt.setp(axs1.get_xticklabels(), rotation=45, fontsize=tick_label_size)
-        axs1.set_xlabel('Time (s)', fontsize=axis_label_size)
-        axs1.set_ylabel(f"{self.plot_key}{unit_dict[self.plot_key]}", fontsize=axis_label_size)
-        axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
-        axs1.legend(loc='best', fontsize=tick_label_size)
+        plt.setp(axs1.get_xticklabels(), rotation=45)
+        axs1.set_xlabel('Time (s)')
+        axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
+        axs1.tick_params(axis="both", which="major")
+        axs1.legend(loc='best')
+        legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
+        for item in legend_list.legendHandles:
+            item.set_visible(False)
 
         # Save the figure
         save_file_path = "../figures/time_series_plots/"
@@ -231,11 +242,11 @@ class plot_data_class():
         if not Path(save_file_path).exists():
             Path(save_file_path).mkdir(parents=True, exist_ok=True)
 
-        plt.savefig(f"{save_file_path}/{self.plot_key}_time_series_plot.png", dpi=300,
-                    bbox_inches='tight', pad_inches=0.05, facecolor='w', edgecolor='w',
-                    transparent=False)
+        #plt.savefig(f"{save_file_path}/{self.plot_key}_time_series_plot.png", dpi=300,
+        #            bbox_inches='tight', pad_inches=0.05, facecolor='w', edgecolor='w',
+        #            transparent=False)
+        plt.tight_layout()
 
-        plt.close("all")
         return fig
 
     def hist_plots(self):
@@ -296,9 +307,6 @@ class plot_data_class():
         else:
             norm = None
 
-        tick_label_size = 18
-        axis_label_size = 25
-
         if norm == 'log':
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
         elif norm == 'linear':
@@ -328,7 +336,8 @@ class plot_data_class():
                       f" histogram may not be visualized properly.\x1b[0m")
 
         # Make a 2d histogram of the data
-        fig = plt.figure(num=None, figsize=(4, 4), dpi=200, facecolor='w', edgecolor='k')
+        fig = plt.figure(num=None, figsize=(self.hist_fig_width, self.hist_fig_height),
+                         facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0)
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
@@ -336,7 +345,7 @@ class plot_data_class():
         axs1 = plt.subplot(gs[0, 0])
         im1 = axs1.imshow(z_counts, cmap='Spectral', norm=norm,
                           extent=[x_range[0], x_range[1], y_range[0], y_range[1]], origin='lower',
-                          aspect='auto')
+                          aspect='equal')
 
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
@@ -350,26 +359,27 @@ class plot_data_class():
         cbar1.ax.xaxis.set_label_position('top')
 
         if density is True:
-            cbar1.set_label('Density', fontsize=20)
+            cbar1.set_label('Density')
         else:
-            cbar1.set_label(r'$N$', fontsize=15, labelpad=0.0, rotation=0)
+            cbar1.set_label('N', labelpad=0.0, rotation=0)
 
-        axs1.set_xlabel('Strip = V1/(V1+V3)', fontsize=axis_label_size)
-        axs1.set_ylabel('Wedge = V2/(V2+V4)', fontsize=axis_label_size)
+        axs1.set_xlabel('Strip = V1/(V1+V3)')
+        axs1.set_ylabel('Wedge = V2/(V2+V4)')
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
-        axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
+        axs1.tick_params(axis="both", which="major")
 
         # Save the figure
-        save_file_path = "../figures/hist_plots/"
+        #save_file_path = "../figures/hist_plots/"
         # Check if the save folder exists, if not then create it
-        if not Path(save_file_path).exists():
-            Path(save_file_path).mkdir(parents=True, exist_ok=True)
+        #if not Path(save_file_path).exists():
+        #    Path(save_file_path).mkdir(parents=True, exist_ok=True)
+#
+        #plt.savefig(f"{save_file_path}/hist_plot.png", dpi=100, bbox_inches='tight',
+        #            pad_inches=0.05, facecolor='w', edgecolor='w', transparent=False)
 
-        plt.savefig(f"{save_file_path}/hist_plot.png", dpi=100, bbox_inches='tight',
-                    pad_inches=0.05, facecolor='w', edgecolor='w', transparent=False)
-
-        plt.close("all")
+        #plt.close("all")
+        plt.tight_layout()
         return fig
 
     def hist_plots_volt(self):

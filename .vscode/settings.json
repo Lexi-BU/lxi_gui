@@ -8,11 +8,15 @@
         "html"
     ],
     "cSpell.words": [
+        "cbar",
+        "cmap",
         "cmax",
         "cmin",
         "comlumn",
         "Evnt",
+        "hspace",
         "Imon",
+        "imshow",
         "ipadx",
         "ipady",
         "LEXI",
@@ -24,10 +28,22 @@
         "lxrf",
         "nsew",
         "optiosn",
+        "padx",
         "pady",
+        "pyplot",
+        "setp",
         "tolist",
+        "vmax",
         "Vmcp",
+        "vmin",
         "Vsupply",
-        "winfo"
+        "winfo",
+        "wspace",
+        "xaxis",
+        "xlabel",
+        "xlim",
+        "xticklabels",
+        "ylabel",
+        "ylim"
     ]
 }

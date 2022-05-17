@@ -308,7 +308,7 @@ frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
 populate(frame)
 
 root.mainloop()
-"""
+
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
@@ -338,3 +338,109 @@ l3 = tk.Label(tab2, text='I am tab-2', bg='yellow', font=font1)
 l3.place(relx=0.4, rely=0.2)  # using place
 
 my_w.mainloop()  # Keep the window open
+
+
+import tkinter as Tkinter
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
+
+class Application():
+    def __init__(self, master):
+
+        master.columnconfigure(0, weight=1)
+        master.rowconfigure(0, weight=1)
+        frame2 = Tkinter.Frame(master, bg='red')
+        frame2.grid(row=0, column=0, sticky='nsew')
+        frame2.columnconfigure(0, weight=1)
+        frame2.rowconfigure(0, weight=1)
+
+        frame2a = Tkinter.Frame(frame2, bg='blue')
+        frame2a.grid(row=0, column=0, sticky='nsew')
+        frame2a.columnconfigure(0, weight=1)
+        frame2a.rowconfigure(0, weight=1)
+
+        frame2b = Tkinter.Frame(frame2, bg='green')
+        frame2b.grid(row=1, column=0, sticky='nsew')
+        frame2b.columnconfigure(0, weight=1)
+        frame2b.rowconfigure(1, weight=1)
+
+        # add plot
+        fig = Figure(figsize=(9.5, 5.2), facecolor='white')
+        fig.add_subplot(111)
+        canvas = FigureCanvasTkAgg(fig, master=frame2b)
+
+        canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+
+
+if __name__ == '__main__':
+
+    root = Tkinter.Tk()
+    root.geometry("200x200")
+    app = Application(root)
+    root.mainloop()
+
+
+from tkinter import ttk
+import tkinter as tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import matplotlib
+matplotlib.use('TkAgg')
+
+
+class My_GUI:
+
+    def __init__(self, master):
+        self.master = master
+        master.title("Dashboard")
+        f = Figure(figsize=(5, 5), dpi=100)
+        a = f.add_subplot(111)
+        a.scatter([1, 2, 3, 4, 5, 6, 7, 8], [5, 6, 1, 3, 8, 9, 3, 5])
+        canvas1 = FigureCanvasTkAgg(f, master)
+        canvas1.draw()
+        canvas1.get_tk_widget().pack(side="top", fill='both', expand=True)
+
+
+root = tk.Tk()
+gui = My_GUI(root)
+root.mainloop()
+"""
+
+import tkinter as tk
+
+
+class Example(tk.Frame):
+    def __init__(self, root):
+        tk.Frame.__init__(self, root)
+        self.canvas = tk.Canvas(
+            self, width=400, height=400, background="bisque")
+        self.xsb = tk.Scrollbar(self, orient="horizontal",
+                                command=self.canvas.xview)
+        self.ysb = tk.Scrollbar(self, orient="vertical",
+                                command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.ysb.set,
+                              xscrollcommand=self.xsb.set)
+        self.canvas.configure(scrollregion=(0, 0, 1000, 1000))
+
+        self.xsb.grid(row=1, column=0, sticky="ew")
+        self.ysb.grid(row=0, column=1, sticky="ns")
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        # This is what enables scrolling with the mouse:
+        self.canvas.bind("<ButtonPress-1>", self.scroll_start)
+        self.canvas.bind("<B1-Motion>", self.scroll_move)
+
+    def scroll_start(self, event):
+        self.canvas.scan_mark(event.x, event.y)
+
+    def scroll_move(self, event):
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    Example(root).pack(fill="both", expand=True)
+    root.mainloop()
