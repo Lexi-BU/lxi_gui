@@ -1,12 +1,12 @@
 import importlib
 import tkinter as tk
 
-from PIL import Image, ImageTk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import global_variables
 import lxi_gui_plot_routines as lgpr
 import lxi_read_files as lxrf
-import matplotlib.pyplot as plt
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -15,7 +15,8 @@ importlib.reload(global_variables)
 global_variables.init()
 
 
-def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=None, row=2):
+def load_ts_plots(root=None, df_slice_hk=None, plot_key=None, start_time=None, end_time=None, row=2,
+                  column=1, columnspan=2, rowspan=2, fig_width=None, fig_height=None):
     """
     Loads the time series plots for the selected time range and displays them in the GUI.
 
@@ -31,32 +32,42 @@ def load_ts_plots(df_slice_hk=None, plot_key=None, start_time=None, end_time=Non
         The end time of the time range to be plotted.
     row : int
         The row in which the plots should be displayed.
+    column : int
+        The column in which the plots should be displayed.
+    columnspan : int
+        The number of columns the plots should span.
+    rowspan : int
+        The number of rows the plots should span.
+    fig_width : float
+        The width of the figure.
+    fig_height : float
+        The height of the figure.
 
     Returns
     -------
     None
     """
     # Set the fontstyle to Times New Roman
-    font_mpl = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    font_mpl = {'family': 'serif', 'weight': 'normal'}
     plt.rc('font', **font_mpl)
     plt.rc('text', usetex=False)
 
+    frame = tk.Frame(root)
+    frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky='nsew')
+
     fig_ts = lgpr.plot_data_class(df_slice_hk=df_slice_hk, plot_key=plot_key, start_time=start_time,
-                                  end_time=end_time).ts_plots()
-    load_ts = Image.open(
-        f"../figures/time_series_plots/{plot_key}_time_series_plot.png")
-    # Resize the image to fit the canvas (in pixels)
-    load_ts = load_ts.resize((int(fig_ts.get_figwidth() * 100),
-                              int(fig_ts.get_figheight() * 80)))
-    render_ts = ImageTk.PhotoImage(load_ts)
-    img_ts = tk.Label(image=render_ts)
-    img_ts.image = render_ts
-    img_ts.grid(row=row, column=0, rowspan=3, columnspan=2, sticky="w")
+                                  end_time=end_time, ts_fig_height=fig_height,
+                                  ts_fig_width=fig_width).ts_plots()
+    canvas = FigureCanvasTkAgg(fig_ts, master=frame)
+    canvas.get_tk_widget().pack(side="left", fill='both', expand=False)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side='left', fill='both', expand=False)
 
 
-def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
-                    cmax=None, x_min=None, x_max=None, y_min=None, y_max=None, density=None,
-                    norm=None, row=3
+def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None,
+                    cmin=None, cmax=None, x_min=None, x_max=None, y_min=None, y_max=None,
+                    density=None, norm=None, row=3, column=1, fig_width=5, fig_height=5,
+                    columnspan=2, rowspan=2, v_min=2.2, v_max=3.9
                     ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI.
@@ -89,33 +100,44 @@ def load_hist_plots(df_slice_sci=None, start_time=None, end_time=None, bins=None
         Whether or not the histogram should be normalized.
     row : int
         The row in which the plots should be displayed.
+    column : int
+        The column in which the plots should be displayed.
+    fig_width : float
+        The width of the figure.
+    fig_height : float
+        The height of the figure.
+    columnspan : int
+        The number of columns the plots should span.
+    rowspan : int
+        The number of rows the plots should span.
 
     Returns
     -------
     None
     """
     # Set the fontstyle to Times New Roman
-    font_mpl = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    font_mpl = {'family': 'serif', 'weight': 'normal'}
     plt.rc('font', **font_mpl)
     plt.rc('text', usetex=False)
 
     fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
                                     end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
                                     x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                                    density=density, norm=norm).hist_plots()
+                                    density=density, norm=norm, hist_fig_height=fig_height,
+                                    hist_fig_width=fig_width, v_min=v_min, v_max=v_max).hist_plots()
 
-    load_hist = Image.open("../figures/hist_plots/hist_plot.png")
-    # Resize the image to fit the canvas (in pixels)
-    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 100),
-                                  int(fig_hist.get_figheight() * 100)))
-    render_hist = ImageTk.PhotoImage(load_hist)
-    img_hist = tk.Label(image=render_hist)
-    img_hist.image = render_hist
-    img_hist.grid(row=row, column=2, rowspan=12, columnspan=2, sticky="nsew")
+    frame = tk.Frame(root)
+    frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky='nsew')
+    canvas = FigureCanvasTkAgg(fig_hist, master=frame)
+    canvas.get_tk_widget().pack(side="left", fill='both', expand=True)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side='left', fill='both', expand=True)
 
 
-def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, channel1=None,
-                         channel2=None, row=None, column=None, sticky=None):
+def load_hist_plots_volt(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None,
+                         cmin=None, cmax=None, density=None, norm=None, channel1=None,
+                         channel2=None, row=None, column=None, sticky=None, columnspan=None,
+                         rowspan=None, fig_width=None, fig_height=None, v_min=2.2, v_max=3.9):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
     the voltage
@@ -138,39 +160,48 @@ def load_hist_plots_volt(df_slice_sci=None, start_time=None, end_time=None, chan
         The column in which the plots should be displayed.
     sticky : str
         The sticky parameter for the grid.
+    columnspan : int
+        The number of columns the plots should span.
+    rowspan : int
+        The number of rows the plots should span.
+    fig_width : float
+        The width of the figure.
+    fig_height : float
+        The height of the figure.
 
     Returns
     -------
     None
     """
     # Set the fontstyle to Times New Roman
-    font_mpl = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    font_mpl = {'family': 'serif', 'weight': 'normal'}
     plt.rc('font', **font_mpl)
     plt.rc('text', usetex=False)
 
     fig_hist = lgpr.plot_data_class(
-        df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, channel1=channel1,
-        channel2=channel2).hist_plots_volt()
+        df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, bins=bins, cmin=cmin,
+        cmax=cmax, density=density, norm=norm, channel1=channel1, channel2=channel2,
+        volt_fig_width=fig_width, volt_fig_height=fig_height, v_min=v_min, v_max=v_max
+    ).hist_plots_volt()
 
-    load_hist = Image.open(
-        f"../figures/hist_plots/hist_plot_{channel1}_{channel2}.png")
-    # Resize the image to fit the canvas (in pixels)
-    load_hist = load_hist.resize((int(fig_hist.get_figwidth() * 80),
-                                  int(fig_hist.get_figheight() * 80)))
-    render_hist = ImageTk.PhotoImage(load_hist)
-    img_hist = tk.Label(image=render_hist)
-    img_hist.image = render_hist
-    img_hist.grid(row=row, column=column, rowspan=3,
-                  columnspan=1, sticky=sticky)
+    frame = tk.Frame(root)
+    frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky)
+    canvas = FigureCanvasTkAgg(fig_hist, master=frame)
+    canvas.get_tk_widget().pack(side="left", fill='both', expand=True)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side='left', fill='both', expand=True)
 
 
 def load_all_hist_plots(
-        df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None, cmax=None,
-        x_min=None, x_max=None, y_min=None, y_max=None, density=None, norm=None, row_hist=3,
-        channel1=None, channel3=None, row_channel13=None, column_channel13=None,
-        sticky_channel13=None,
-        channel2=None, channel4=None, row_channel24=None, column_channel24=None,
-        sticky_channel24=None
+        root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None, cmin=None,
+        cmax=None, x_min=None, x_max=None, y_min=None, y_max=None, density=None, norm=None,
+        row_hist=3, col_hist=1, channel1=None, channel3=None, row_channel13=None,
+        column_channel13=None, sticky_channel13=None, row_span_channel13=None,
+        column_span_channel13=None, channel2=None, channel4=None, row_channel24=None,
+        column_channel24=None, sticky_channel24=None, row_span_channel24=None,
+        column_span_channel24=None, hist_fig_height=None, hist_fig_width=None, hist_colspan=None,
+        hist_rowspan=None, channel13_fig_height=None, channel13_fig_width=None,
+        channel24_fig_height=None, channel24_fig_width=None, v_min=None, v_max=None,
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -224,19 +255,45 @@ def load_all_hist_plots(
         The column in which the histogram plots should be displayed.
     sticky_channel24 : str
         The sticky parameter for the grid.
+    hist_fig_height : float
+        The height of the main histogram figure.
+    hist_fig_width : float
+        The width of the main histogram figure.
+    hist_colspan : int
+        The number of columns the histogram plots should span.
+    hist_rowspan : int
+        The number of rows the histogram plots should span.
+    channel13_fig_height : float
+        The height of the histogram figure for the channel 1 and 3.
+    channel13_fig_width : float
+        The width of the histogram figure for the channel 1 and 3.
+    channel24_fig_height : float
+        The height of the histogram figure for the channel 2 and 4.
+    channel24_fig_width : float
+        The width of the histogram figure for the channel 2 and 4.
 
     Returns
     -------
         None
     """
-    load_hist_plots(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time, bins=bins,
-                    cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                    density=density, norm=norm, row=row_hist)
+    load_hist_plots(root=root[0], df_slice_sci=df_slice_sci, start_time=start_time,
+                    end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, x_min=x_min, x_max=x_max,
+                    y_min=y_min, y_max=y_max, density=density, norm=norm, row=row_hist,
+                    column=col_hist, fig_height=hist_fig_height, fig_width=hist_fig_width,
+                    columnspan=hist_colspan, rowspan=hist_rowspan, v_min=v_min, v_max=v_max)
 
-    load_hist_plots_volt(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time,
-                         channel1=channel1, channel2=channel3, row=row_channel13,
-                         column=column_channel13, sticky=sticky_channel13)
+    load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
+                         end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, density=density,
+                         norm=norm, channel1=channel1, channel2=channel3,
+                         row=row_channel13, column=column_channel13, sticky=sticky_channel13,
+                         rowspan=row_span_channel13, columnspan=column_span_channel13,
+                         fig_width=channel13_fig_width, fig_height=channel13_fig_height,
+                         v_min=v_min, v_max=v_max)
 
-    load_hist_plots_volt(df_slice_sci=df_slice_sci, start_time=start_time, end_time=end_time,
-                         channel1=channel2, channel2=channel4, row=row_channel24,
-                         column=column_channel24, sticky=sticky_channel24)
+    load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
+                         end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, density=density,
+                         norm=norm, channel1=channel2, channel2=channel4, row=row_channel24,
+                         column=column_channel24, sticky=sticky_channel24,
+                         rowspan=row_span_channel24, columnspan=column_span_channel24,
+                         fig_width=channel24_fig_width, fig_height=channel24_fig_height,
+                         v_min=v_min, v_max=v_max)

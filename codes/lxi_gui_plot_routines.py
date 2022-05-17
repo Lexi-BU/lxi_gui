@@ -1,11 +1,9 @@
 import importlib
-from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-# import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import global_variables
@@ -70,6 +68,18 @@ class plot_data_class():
             Whether to plot the histogram as a density or not. Default is False.
         norm: bool
             The scale of colorbar to be plotted. Options are "log" or "linear". Default is "log".
+        ts_fig_height: float
+            The height of the time series plot. Default is 6.
+        ts_fig_width: float
+            The width of the time series plot. Default is 12.
+        hist_fig_height: float
+            The height of the histogram plot. Default is 6.
+        hist_fig_width: float
+            The width of the histogram plot. Default is 12.
+        volt_fig_height: float
+            The height of the voltage plot. Default is 6.
+        volt_fig_width: float
+            The width of the voltage plot. Default is 12.
 
     Methods:
         ts_plots:
@@ -145,7 +155,15 @@ class plot_data_class():
                  y_min=None,
                  y_max=None,
                  density=None,
-                 norm=None
+                 norm=None,
+                 ts_fig_height=None,
+                 ts_fig_width=None,
+                 hist_fig_height=None,
+                 hist_fig_width=None,
+                 volt_fig_height=None,
+                 volt_fig_width=None,
+                 v_min=None,
+                 v_max=None
                  ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -163,6 +181,14 @@ class plot_data_class():
         self.y_max = y_max
         self.density = density
         self.norm = norm
+        self.ts_fig_height = ts_fig_height
+        self.ts_fig_width = ts_fig_width
+        self.hist_fig_height = hist_fig_height
+        self.hist_fig_width = hist_fig_width
+        self.volt_fig_height = volt_fig_height
+        self.volt_fig_width = volt_fig_width
+        self.v_min = v_min
+        self.v_max = v_max
 
     def ts_plots(self):
         """
@@ -205,13 +231,12 @@ class plot_data_class():
                      "DeltaLostevntCount": "#"
                      }
 
-        tick_label_size = 18
-        axis_label_size = 25
         alpha = 0.8
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(4, 2), dpi=200, facecolor='w', edgecolor='k')
-        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0)
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), facecolor='w',
+                         edgecolor='k')
+        fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 1, width_ratios=[1])
 
         axs1 = plt.subplot(gs[0])
@@ -219,23 +244,17 @@ class plot_data_class():
                   label=self.plot_key)
         axs1.set_xlim(t_start, t_end)
         # Rotate the x-axis labels by 45 degrees and set their fontsize
-        plt.setp(axs1.get_xticklabels(), rotation=45, fontsize=tick_label_size)
-        axs1.set_xlabel('Time (s)', fontsize=axis_label_size)
-        axs1.set_ylabel(f"{self.plot_key}{unit_dict[self.plot_key]}", fontsize=axis_label_size)
-        axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
-        axs1.legend(loc='best', fontsize=tick_label_size)
-
-        # Save the figure
-        save_file_path = "../figures/time_series_plots/"
-        # Check if the save folder exists, if not then create it
-        if not Path(save_file_path).exists():
-            Path(save_file_path).mkdir(parents=True, exist_ok=True)
-
-        plt.savefig(f"{save_file_path}/{self.plot_key}_time_series_plot.png", dpi=300,
-                    bbox_inches='tight', pad_inches=0.05, facecolor='w', edgecolor='w',
-                    transparent=False)
+        plt.setp(axs1.get_xticklabels(), rotation=0)
+        axs1.set_xlabel('Time (s)')
+        axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
+        axs1.tick_params(axis="both", which="major")
+        axs1.legend(loc='best')
+        legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
+        for item in legend_list.legendHandles:
+            item.set_visible(False)
 
         plt.close("all")
+
         return fig
 
     def hist_plots(self):
@@ -290,14 +309,20 @@ class plot_data_class():
             density = self.density
         except Exception:
             density = None
+        try:
+            v_min = float(self.v_min)
+        except Exception:
+            v_min = None
+        try:
+            v_max = float(self.v_max)
+        except Exception:
+            v_max = None
+
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
         else:
             norm = None
-
-        tick_label_size = 18
-        axis_label_size = 25
 
         if norm == 'log':
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
@@ -313,63 +338,83 @@ class plot_data_class():
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci[t_start:t_end]
 
-        hst = plt.hist2d(self.df_slice_sci.x_val, self.df_slice_sci.y_val, bins=bins,
-                         range=[x_range, y_range], cmin=cmin, density=density)
-        z_counts = np.transpose(hst[0])
-        plt.close("all")
+        # Exclude channel1 to channel4 data based on v_min and v_max
+        if v_min is not None and v_max is not None:
+            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
+                                                  (self.df_slice_sci["Channel1"] <= v_max) &
+                                                  (self.df_slice_sci["Channel2"] >= v_min) &
+                                                  (self.df_slice_sci["Channel2"] <= v_max) &
+                                                  (self.df_slice_sci["Channel3"] >= v_min) &
+                                                  (self.df_slice_sci["Channel3"] <= v_max) &
+                                                  (self.df_slice_sci["Channel4"] >= v_min) &
+                                                  (self.df_slice_sci["Channel4"] <= v_max)]
+        fig = plt.figure(num=None, figsize=(self.hist_fig_width * 1, self.hist_fig_height * 1),
+                         facecolor='w', edgecolor='k')
+        fig.subplots_adjust(left=0.05, right=0.92, top=0.95, bottom=0.05, wspace=0., hspace=0)
 
-        # Raise a warning if the maximum value of the z_counts is greater than the cmax, and print
-        # it in red color
-        if cmax is not None:
-            if np.nanmax(z_counts) > cmax:
-                print(f"\n\x1b[1;31;255m WARNING: The maximum value of the z_counts is \n"
-                      f"{np.nanmax(z_counts)} This is greater than the cmax value of {cmax}.\n"
-                      f"Though the z_counts are plotted, please keep in mind that the"
-                      f" histogram may not be visualized properly.\x1b[0m")
+        gs = plt.GridSpec(4, 4, hspace=0.35, wspace=0.02)
+        axs1 = fig.add_subplot(gs[:-1, 1:])
+        y_hist = fig.add_subplot(gs[:-1, 0], xticklabels=[], sharey=axs1)
+        x_hist = fig.add_subplot(gs[-1, 1:], yticklabels=[], sharex=axs1)
 
-        # Make a 2d histogram of the data
-        fig = plt.figure(num=None, figsize=(4, 4), dpi=200, facecolor='w', edgecolor='k')
-        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0)
+        # Plot the histogram on axs1
+        counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
+                                                 self.df_slice_sci["y_val"], bins=bins,
+                                                 cmap='Spectral', norm=norm,
+                                                 range=[x_range, y_range], cmin=cmin,
+                                                 density=density)
 
-        gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
+        # Find the index of the maximum value in counts, ignoring NaNs
+        max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
-        axs1 = plt.subplot(gs[0, 0])
-        im1 = axs1.imshow(z_counts, cmap='Spectral', norm=norm,
-                          extent=[x_range[0], x_range[1], y_range[0], y_range[1]], origin='lower',
-                          aspect='auto')
+        # Draw a horizontal adn vertical line at the maximum value
+        axs1.axvline(x=(xedges[max_index[0]] + xedges[max_index[0] + 1]) / 2, color='k',
+                     linestyle='--', linewidth=1)
+        axs1.axhline(y=(yedges[max_index[1]] + yedges[max_index[1] + 1]) / 2, color='k',
+                     linestyle='--', linewidth=1)
+
+        # Number of data points in each bin along the x- and y-axes
+        yn = counts[max_index[0], :]
+        xn = counts[:, max_index[1]]
+
+        x_step = (xedges[1:] + xedges[0:-1]) / 2
+        y_step = (yedges[1:] + yedges[0:-1]) / 2
+
+        # Make step plot between xedges and xn
+        x_hist.step(x_step, xn, color='k', where='post')
+        x_hist.set_xlabel('Vertical Cut')
+        # Make step plot between yedges and yn
+        y_hist.step(yn, y_step, color='k', where='post')
+        y_hist.invert_xaxis()
+        y_hist.set_xlabel('Horizontal Cut')
 
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
-        cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
+        cbar1 = plt.colorbar(im, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
                              pad=0.0)
 
         cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True,
                              labelbottom=False, bottom=False, width=1, length=10,
-                             labelsize=15, labelrotation=0, pad=0)
+                             labelrotation=0, pad=0)
 
         cbar1.ax.xaxis.set_label_position('top')
 
         if density is True:
-            cbar1.set_label('Density', fontsize=20)
+            cbar1.set_label('Density')
         else:
-            cbar1.set_label(r'$N$', fontsize=15, labelpad=0.0, rotation=0)
+            cbar1.set_label('N', labelpad=0.0, rotation=0)
 
-        axs1.set_xlabel('Strip = V1/(V1+V3)', fontsize=axis_label_size)
-        axs1.set_ylabel('Wedge = V2/(V2+V4)', fontsize=axis_label_size)
+        # Put y-label and tickmarks on right side
+        axs1.yaxis.tick_right()
+        axs1.yaxis.set_label_position('right')
+        axs1.set_xlabel('Strip = V1/(V1+V3)')
+        axs1.set_ylabel('Wedge = V2/(V2+V4)')
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
-        axs1.tick_params(axis="both", which="major", labelsize=tick_label_size)
-
-        # Save the figure
-        save_file_path = "../figures/hist_plots/"
-        # Check if the save folder exists, if not then create it
-        if not Path(save_file_path).exists():
-            Path(save_file_path).mkdir(parents=True, exist_ok=True)
-
-        plt.savefig(f"{save_file_path}/hist_plot.png", dpi=100, bbox_inches='tight',
-                    pad_inches=0.05, facecolor='w', edgecolor='w', transparent=False)
+        axs1.tick_params(axis="both", which="major")
 
         plt.close("all")
+
         return fig
 
     def hist_plots_volt(self):
@@ -391,81 +436,93 @@ class plot_data_class():
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass
+        try:
+            bins = int(self.bins)
+        except Exception:
+            bins = 50
+        try:
+            cmin = float(self.cmin)
+        except Exception:
+            cmin = 1
+        try:
+            cmax = float(self.cmax)
+        except Exception:
+            cmax = None
+        # Check if norm is an instance of mpl.colors.Normalize
+        if (self.norm == 'log' or self.norm == 'linear'):
+            norm = self.norm
+        else:
+            norm = None
+        try:
+            density = self.density
+        except Exception:
+            density = None
+        try:
+            v_min = float(self.v_min)
+        except Exception:
+            v_min = None
+        try:
+            v_max = float(self.v_max)
+        except Exception:
+            v_max = None
+
+        # Check if norm is an instance of mpl.colors.Normalize
+        if (self.norm == 'log' or self.norm == 'linear'):
+            norm = self.norm
+        else:
+            norm = None
+
+        # If density is true, set cmin to None
+        if density is True:
+            cmin = None
+
+        if norm == 'log':
+            norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
+        elif norm == 'linear':
+            norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
 
         self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
-        v1 = self.df_slice_sci[self.channel1][t_start:t_end]
-        v2 = self.df_slice_sci[self.channel2][t_start:t_end]
 
-        labelsize = 28
-        ticklabelsize = 20
-        ticklength = 10
+        # Exclude channel1 to channel4 data based on v_min and v_max
+        if v_min is not None and v_max is not None:
+            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
+                                                  (self.df_slice_sci["Channel1"] <= v_max) &
+                                                  (self.df_slice_sci["Channel2"] >= v_min) &
+                                                  (self.df_slice_sci["Channel2"] <= v_max) &
+                                                  (self.df_slice_sci["Channel3"] >= v_min) &
+                                                  (self.df_slice_sci["Channel3"] <= v_max) &
+                                                  (self.df_slice_sci["Channel4"] >= v_min) &
+                                                  (self.df_slice_sci["Channel4"] <= v_max)]
 
-        fig = plt.figure(num=None, figsize=(3, 3), dpi=200, facecolor='w', edgecolor='k')
-        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=3)
+        v1 = self.df_slice_sci[self.channel1][
+            (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
+        v2 = self.df_slice_sci[self.channel2][
+            (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
 
-        '''
-        axs1 = sns.jointplot(x=v1, y=v2, cmap='Reds', kind="hist", bins=30,
-                             hue_norm=mpl.colors.Normalize(vmin=1, vmax=10),
-                             xlim=[0.1, 4], ylim=[0.1, 4], height=8, ratio=6, space=0.)
+        fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
+                         facecolor='w', edgecolor='k')
+        fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
 
-        #axs1 = sns.jointplot(x=v1, y=v2, cmap='Reds', kind="scatter", alpha=0.5,
-        #                     hue_norm=mpl.colors.LogNorm(vmin=1, vmax=10000),
-        #                     xlim=[0.1, 4], ylim=[0.1, 4], height=8, ratio=6, space=0.)
-        axs1.fig.axes[0].tick_params(axis='both', which='major', direction='in', labelbottom=True,
-                                     bottom=True, labeltop=False, top=True, labelleft=True,
-                                     left=True, labelright=False, right=True, width=1.5,
-                                     length=ticklength, labelsize=ticklabelsize, labelrotation=0)
-
-        axs1.fig.axes[0].tick_params(axis='both', which='minor', direction='in', labelbottom=False,
-                                     bottom=False, left=False, width=1.5, length=ticklength,
-                                     labelsize=ticklabelsize, labelrotation=0)
-
-        axs1.fig.axes[1].tick_params(axis='both', which='both', direction='in', labelbottom=False,
-                                     bottom=False, labelleft=False, left=False, width=1.5,
-                                     length=ticklength, labelsize=ticklabelsize, labelrotation=0)
-
-        axs1.fig.axes[2].tick_params(axis='both', which='both', direction='in', labelbottom=False,
-                                     bottom=False, labelleft=False, left=False, width=1.5,
-                                     length=ticklength, labelsize=ticklabelsize, labelrotation=0)
-
-        axs1.ax_joint.set_xlabel(self.channel1, fontsize=labelsize)
-        axs1.ax_joint.set_ylabel(self.channel2, fontsize=labelsize)
-        '''
-        x_range = [0.9 * v1.min(), 1.1 * v1.max()]
-        y_range = [0.9 * v2.min(), 1.1 * v2.max()]
-        hst = np.histogram2d(v1, v2, bins=50,
-                             range=[[x_range[0], x_range[1]], [y_range[0], y_range[1]]],
-                             density=True)
+        x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
+        y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
-
-        axs1 = plt.subplot(gs[0, 0])
-        im1 = axs1.imshow(hst[0], cmap="Spectral_r", norm=mpl.colors.LogNorm(),
-                          extent=[x_range[0], x_range[1], y_range[0], y_range[1]], aspect='auto',
-                          interpolation='nearest', origin='lower')
+        axs1 = fig.add_subplot(gs[0, 0])
+        _, _, _, im = axs1.hist2d(v1, v2, bins=bins, cmap='Spectral', norm=norm,
+                                  range=[x_range, y_range], cmin=cmin, density=density)
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
-        cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
+        cbar1 = plt.colorbar(im, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
                              pad=0.0)
-        axs1.tick_params(axis='both', which='major', direction='in', labelbottom=True,
-                         bottom=True, labeltop=False, top=True, labelleft=True,
-                         left=True, labelright=False, right=True, width=1.5,
-                         length=ticklength, labelsize=ticklabelsize, labelrotation=0)
 
         cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True,
-                             labelbottom=False, bottom=False, width=0.7, length=5,
-                             labelsize=10, labelrotation=0, pad=0)
-        axs1.set_xlabel(self.channel1, fontsize=labelsize)
-        axs1.set_ylabel(self.channel2, fontsize=labelsize)
-        # Save the figure
-        save_file_path = "../figures/hist_plots/"
-        # Check if the save folder exists, if not then create it
-        if not Path(save_file_path).exists():
-            Path(save_file_path).mkdir(parents=True, exist_ok=True)
+                             labelbottom=False, bottom=False, width=1, length=10,
+                             labelrotation=0, pad=0)
 
-        plt.savefig(f"{save_file_path}/hist_plot_{self.channel1}_{self.channel2}.png", dpi=100,
-                    bbox_inches='tight', pad_inches=0.05, facecolor='w', edgecolor='w',
-                    transparent=False)
+        cbar1.ax.xaxis.set_label_position('top')
+
+        axs1.set_xlabel(self.channel1)
+        axs1.set_ylabel(self.channel2)
 
         plt.close('all')
 

@@ -273,7 +273,7 @@ label1 = tk.Label(text='Please choose a file')
 label1.pack(padx=2, pady=2)
 
 root.mainloop()
-"""
+
 
 import tkinter as tk
 
@@ -308,3 +308,197 @@ frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
 populate(frame)
 
 root.mainloop()
+
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
+my_w = tk.Tk()
+my_w.geometry("400x200")
+my_tabs = ttk.Notebook(my_w, padding=20)  # declaring
+
+tab0 = ttk.Frame(my_tabs)
+tab1 = ttk.Frame(my_tabs)
+tab2 = ttk.Frame(my_tabs)
+r1 = tk.PhotoImage(file='../figures/time_series_plots/+3.3V_Imon_time_series_plot.png')
+y1 = tk.PhotoImage(file='../figures/time_series_plots/+5.2V_Imon_time_series_plot.png')
+g1 = tk.PhotoImage(file='../figures/time_series_plots/+10V_Imon_time_series_plot.png')
+my_tabs.add(tab0, text='Tab-0', image=r1, compound='bottom')
+my_tabs.add(tab1, text='Tab-1', image=y1, compound='top')
+my_tabs.add(tab2, text='Tab-2', image=g1, compound='right')
+my_tabs.pack(expand=1, fill="both")
+
+font1 = ('times', 24, 'normal')
+l1 = tk.Label(tab0, text='I am tab-0', bg='yellow', font=font1)
+l1.place(relx=0.4, rely=0.2)  # using place
+
+
+l2 = tk.Label(tab1, text='I am tab-1', bg='yellow', font=font1)
+l2.place(relx=0.4, rely=0.2)  # using place
+l3 = tk.Label(tab2, text='I am tab-2', bg='yellow', font=font1)
+l3.place(relx=0.4, rely=0.2)  # using place
+
+my_w.mainloop()  # Keep the window open
+
+
+import tkinter as Tkinter
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
+
+class Application():
+    def __init__(self, master):
+
+        master.columnconfigure(0, weight=1)
+        master.rowconfigure(0, weight=1)
+        frame2 = Tkinter.Frame(master, bg='red')
+        frame2.grid(row=0, column=0, sticky='nsew')
+        frame2.columnconfigure(0, weight=1)
+        frame2.rowconfigure(0, weight=1)
+
+        frame2a = Tkinter.Frame(frame2, bg='blue')
+        frame2a.grid(row=0, column=0, sticky='nsew')
+        frame2a.columnconfigure(0, weight=1)
+        frame2a.rowconfigure(0, weight=1)
+
+        frame2b = Tkinter.Frame(frame2, bg='green')
+        frame2b.grid(row=1, column=0, sticky='nsew')
+        frame2b.columnconfigure(0, weight=1)
+        frame2b.rowconfigure(1, weight=1)
+
+        # add plot
+        fig = Figure(figsize=(9.5, 5.2), facecolor='white')
+        fig.add_subplot(111)
+        canvas = FigureCanvasTkAgg(fig, master=frame2b)
+
+        canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+
+
+if __name__ == '__main__':
+
+    root = Tkinter.Tk()
+    root.geometry("200x200")
+    app = Application(root)
+    root.mainloop()
+
+
+from tkinter import ttk
+import tkinter as tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import matplotlib
+matplotlib.use('TkAgg')
+
+
+class My_GUI:
+
+    def __init__(self, master):
+        self.master = master
+        master.title("Dashboard")
+        f = Figure(figsize=(5, 5), dpi=100)
+        a = f.add_subplot(111)
+        a.scatter([1, 2, 3, 4, 5, 6, 7, 8], [5, 6, 1, 3, 8, 9, 3, 5])
+        canvas1 = FigureCanvasTkAgg(f, master)
+        canvas1.draw()
+        canvas1.get_tk_widget().pack(side="top", fill='both', expand=True)
+
+
+root = tk.Tk()
+gui = My_GUI(root)
+root.mainloop()
+
+# Mouse scroll thingy
+import tkinter as tk
+
+
+class Example(tk.Frame):
+    def __init__(self, root):
+        tk.Frame.__init__(self, root)
+        self.canvas = tk.Canvas(
+            self, width=400, height=400, background="bisque")
+        self.xsb = tk.Scrollbar(self, orient="horizontal",
+                                command=self.canvas.xview)
+        self.ysb = tk.Scrollbar(self, orient="vertical",
+                                command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.ysb.set,
+                              xscrollcommand=self.xsb.set)
+        self.canvas.configure(scrollregion=(0, 0, 1000, 1000))
+
+        self.xsb.grid(row=1, column=0, sticky="ew")
+        self.ysb.grid(row=0, column=1, sticky="ns")
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        # This is what enables scrolling with the mouse:
+        self.canvas.bind("<ButtonPress-1>", self.scroll_start)
+        self.canvas.bind("<B1-Motion>", self.scroll_move)
+
+    def scroll_start(self, event):
+        self.canvas.scan_mark(event.x, event.y)
+
+    def scroll_move(self, event):
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    Example(root).pack(fill="both", expand=True)
+    root.mainloop()
+
+
+fig = plt.figure(figsize=(6, 6))
+grid = plt.GridSpec(4, 4, hspace=0.2, wspace=0.2)
+main_ax = fig.add_subplot(grid[:-1, 1:])
+y_hist = fig.add_subplot(grid[:-1, 0], xticklabels=[], sharey=main_ax)
+x_hist = fig.add_subplot(grid[-1, 1:], yticklabels=[], sharex=main_ax)
+
+# scatter points on the main axes
+main_ax.plot(x, y, 'ok', markersize=3, alpha=0.2)
+
+# histogram on the attached axes
+x_hist.hist(x, 40, histtype='stepfilled',
+            orientation='vertical', color='gray')
+x_hist.invert_yaxis()
+
+y_hist.hist(y, 40, histtype='stepfilled',
+            orientation='horizontal', color='gray')
+y_hist.invert_xaxis()
+
+
+from torch import norm
+
+
+fig = plt.figure(num=None, figsize=(5,5),
+                 facecolor='w', edgecolor='k')
+fig.subplots_adjust(left=0.01, right=0.99, top=0.99,
+                    bottom=0.01, wspace=0., hspace=0)
+
+gs = plt.GridSpec(4, 4, hspace=0.02, wspace=0.02)
+axs1 = fig.add_subplot(gs[0:-1, :-1])
+y_hist = fig.add_subplot(gs[:-1, -1], xticklabels=[], sharey=axs1)
+x_hist = fig.add_subplot(gs[-1, 1:], yticklabels=[], sharex=axs1)
+
+counts, xedges, yedges, im = axs1.hist2d(df_slice_sci["x_val"], df_slice_sci["y_val"], bins=50,
+           range=[[0.31, 0.62], [0.31, 0.61]], cmin=1, density=True, cmap='Blues', norm=mpl.colors.LogNorm())
+
+fig.colorbar(im, ax=axs1)
+# Number of data along x-axis
+xn = [np.nansum(counts[i, :]) for i in range(counts.shape[0])]
+# Number of data along y-axis
+yn = [np.nansum(counts[:, i]) for i in range(counts.shape[1])]
+
+# Add step plot of x-axis
+x_hist.step(xedges[:-1], xn, color='k', lw=1)
+# Add step plot of y-axis
+y_hist.step(yn, yedges[:-1], color='k', lw=1)
+plt.show()
+#plt.colorbar()
+"""
+
+
+def test_func(x=None, y=None):
+    return x + y
+
+
+# Use lambda function to pass the function as an argument
+lambda_func = lambda x, y: test_func(x, y)
