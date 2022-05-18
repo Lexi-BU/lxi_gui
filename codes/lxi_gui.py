@@ -227,6 +227,7 @@ density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     channel24_fig_width=screen_width / (3 * 96),
     v_min=v_min_thresh_entry.get(),
     v_max=v_max_thresh_entry.get(),
+    crv_fit=curve_fit_status_var.get()
 )
 )
 
@@ -268,16 +269,59 @@ norm_type_var.trace("w", lambda *_: llpr.load_all_hist_plots(
     channel24_fig_width=screen_width / (3 * 96),
     v_min=v_min_thresh_entry.get(),
     v_max=v_max_thresh_entry.get(),
+    crv_fit=curve_fit_status_var.get()
 )
 )
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=10, column=4, entry_label="V Min",
-                                    entry_val=2.1, font_style=font_style_box)
+                                    entry_val=1.2, font_style=font_style_box)
 
 # Maximum threshold for the voltage to be considered
 v_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=11, column=4, entry_label="V Max",
-                                    entry_val=2.5, font_style=font_style_box)
+                                    entry_val=4, font_style=font_style_box)
+
+
+# Choose whether to plot probability density or the number of data points in each bin (is Bool)
+curve_fit_label = tk.Label(sci_tab, text="Curve Fit", font=font_style_box)
+curve_fit_label.grid(row=12, column=5, columnspan=1, sticky="n")
+
+# Add a checkbox to choose whether to plot probability density or the number of data points in each
+# bin
+curve_fit_status_var = tk.BooleanVar()
+curve_fit_status_var.set(False)
+curve_fit_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
+                                    variable=curve_fit_status_var)
+curve_fit_checkbox.grid(row=12, column=4, columnspan=1, sticky="n")
+
+curve_fit_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
+    root=[sci_tab, sci_tab],
+    df_slice_sci=global_variables.all_file_details["df_slice_sci"],
+    start_time=start_time.get(), end_time=end_time.get(),
+    bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
+    cmax=c_max_entry.get(), x_min=x_min_entry.get(),
+    x_max=x_max_entry.get(), y_min=y_min_entry.get(),
+    y_max=y_max_entry.get(), density=density_status_var.get(),
+    norm=norm_type_var.get(), row_hist=0, col_hist=2,
+    channel1="Channel1", channel2="Channel2", row_channel13=0,
+    column_channel13=7, sticky_channel13="nesw",
+    row_span_channel13=5, column_span_channel13=3,
+    channel3="Channel3", channel4="Channel4", row_channel24=5,
+    column_channel24=7, sticky_channel24="nesw",
+    row_span_channel24=6, column_span_channel24=3,
+    hist_fig_height=screen_height / (1.1 * 96),
+    hist_fig_width=screen_width / (2 * 96),
+    hist_colspan=2,
+    hist_rowspan=12,
+    channel13_fig_height=screen_height / (3 * 96),
+    channel13_fig_width=screen_width / (3 * 96),
+    channel24_fig_height=screen_height / (3 * 96),
+    channel24_fig_width=screen_width / (3 * 96),
+    v_min=v_min_thresh_entry.get(),
+    v_max=v_max_thresh_entry.get(),
+    crv_fit=curve_fit_status_var.get(),
+)
+)
 
 # Add an input box with a label for start time
 # start_time_entry, start_time_label = lgeb.entry_box(root=sci_tab, row=17, column=2,
@@ -365,6 +409,7 @@ plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, jus
                             channel24_fig_width=screen_width / (3 * 96),
                             v_min=v_min_thresh_entry.get(),
                             v_max=v_max_thresh_entry.get(),
+                            crv_fit=curve_fit_status_var.get()
                         )
                         )
 plot_button.grid(row=10, column=0, columnspan=2, rowspan=1, sticky="nsew", pady=5, padx=5)
