@@ -7,9 +7,10 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import global_variables
+import lxi_misc_codes as lmsc
 
 importlib.reload(global_variables)
-
+importlib.reload(lmsc)
 
 class plot_data_class():
     """
@@ -163,7 +164,8 @@ class plot_data_class():
                  volt_fig_height=None,
                  volt_fig_width=None,
                  v_min=None,
-                 v_max=None
+                 v_max=None,
+                 crv_fit=None,
                  ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -189,6 +191,7 @@ class plot_data_class():
         self.volt_fig_width = volt_fig_width
         self.v_min = v_min
         self.v_max = v_max
+        self.crv_fit = crv_fit
 
     def ts_plots(self):
         """
@@ -382,9 +385,12 @@ class plot_data_class():
 
         # Make step plot between xedges and xn
         x_hist.step(x_step, xn, color='k', where='post')
+        x_hist.plot(xedges[1:], xn, 'ko', markerfacecolor='none', markeredgecolor='gray')
+
         x_hist.set_xlabel('Vertical Cut')
         # Make step plot between yedges and yn
         y_hist.step(yn, y_step, color='k', where='post')
+        y_hist.plot(yn, yedges[:-1], 'ko', markerfacecolor='none', markeredgecolor='gray')
         y_hist.invert_xaxis()
         y_hist.set_xlabel('Horizontal Cut')
 
@@ -412,6 +418,57 @@ class plot_data_class():
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
         axs1.tick_params(axis="both", which="major")
+
+        # If curve fit option is chosen, fit a Gaussian to the data and plot it
+        if self.crv_fit:
+            try:
+                from scipy.optimize import curve_fit
+                x_vals = (xedges[max_index[0] - 10:max_index[0] + 10] +
+                          xedges[max_index[0] - 9:max_index[0] + 11]) / 2
+                y_vals = (yedges[max_index[1] - 10:max_index[1] + 10] +
+                          yedges[max_index[1] - 9:max_index[1] + 11]) / 2
+                x_vals_counts = yn[max_index[1] - 10:max_index[1] + 10]
+                y_vals_counts = xn[max_index[0] - 10:max_index[0] + 10]
+
+                # Drop NaNs from x_vals and y_vals
+                #x_vals = x_vals[~np.isnan(x_vals_counts)]
+                #x_vals_counts = x_vals_counts[~np.isnan(x_vals_counts)]
+                #y_vals = y_vals[~np.isnan(y_vals_counts)]
+                #y_vals_counts = y_vals_counts[~np.isnan(y_vals_counts)]
+                # Replace NaNs with zeros
+                x_vals_counts = x_vals_counts.astype(float)
+                x_vals_counts[np.isnan(x_vals_counts)] = 0
+                y_vals_counts = y_vals_counts.astype(float)
+                y_vals_counts[np.isnan(y_vals_counts)] = 0
+
+                # Fit a Gaussian to the data
+                popt_x, _ = curve_fit(lmsc.curve_fit_func, x_vals, x_vals_counts)
+
+                x_hist.plot(x_vals, lmsc.curve_fit_func(x_vals, *popt_x), 'r--')
+                popt_y, _ = curve_fit(lmsc.curve_fit_func, y_vals, y_vals_counts)
+
+                y_hist.plot(lmsc.curve_fit_func(y_vals, *popt_y), y_vals, 'r--')
+
+                # Find the full width at half maximum of the fitted Gaussian
+                x_fwhm = lmsc.fwhm(x_vals, lmsc.curve_fit_func(x_vals, *popt_x))
+                y_fwhm = lmsc.fwhm(y_vals, lmsc.curve_fit_func(y_vals, *popt_y))
+                # Print the fit values to the plot
+                x_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_x[1]),
+                            transform=x_hist.transAxes, verticalalignment='top')
+                x_hist.text(0.05, 0.80, '$\sigma$ = {:.3f}'.format(popt_x[2]),
+                            transform=x_hist.transAxes, verticalalignment='top')
+                x_hist.text(0.05, 0.65, '$FWHM$ = {:.3f}'.format(x_fwhm),
+                            transform=x_hist.transAxes, verticalalignment='top')
+                y_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_y[1]),
+                            transform=y_hist.transAxes, verticalalignment='top')
+                y_hist.text(0.05, 0.90, '$\sigma$ = {:.3f}'.format(popt_y[2]),
+                            transform=y_hist.transAxes, verticalalignment='top')
+                y_hist.text(0.05, 0.85, '$FWHM$ = {:.3f}'.format(y_fwhm),
+                            transform=y_hist.transAxes, verticalalignment='top')
+
+            except Exception:
+                print('Error: Could not fit Gaussian to data.')
+                pass
 
         plt.close("all")
 

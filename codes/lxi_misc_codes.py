@@ -1,6 +1,6 @@
 from tabulate import tabulate
 import global_variables
-
+import numpy as np
 
 def print_time_details(file_type=None, start_time=None, end_time=None):
     """
@@ -69,3 +69,38 @@ def insert_file_name(file_load_entry=None, tk=None, file_name=None):
     file_name_short = file_name.split('/')[-1]
     file_load_entry.delete(0, tk.END)
     file_load_entry.insert(0, file_name_short)
+
+
+def curve_fit_func(x, a, b, c):
+    """
+    Get the Gaussian curve function
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        The x values
+    a : float
+        The amplitude of the curve
+    b : float
+        The mean of the curve
+    c : float
+        The standard deviation of the curve
+    """
+    return a * np.exp(-(x - b) ** 2 / (2 * c ** 2))
+
+
+def fwhm(x, y):
+    """
+    Calculate the full width at half maximum of a curve
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        The x values
+    y : numpy.ndarray
+        The y values
+    """
+    half_max = np.max(y) / 2.
+    left_idx = np.where(y > half_max)[0][0]
+    right_idx = np.where(y > half_max)[0][-1]
+    return x[right_idx] - x[left_idx]
