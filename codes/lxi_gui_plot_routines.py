@@ -539,7 +539,6 @@ class plot_data_class():
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
 
         self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
-
         # Exclude channel1 to channel4 data based on v_min and v_max
         if v_min is not None and v_max is not None:
             self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
