@@ -20,6 +20,77 @@ importlib.reload(lmsc)
 # data and name of the files are stored.
 global_variables.init()
 
+
+def hist_plot_inputs():
+    """
+    The function creates and updates the list of widget inputs as might be available from the GUI.
+    """
+
+    inputs = {
+        "root": [sci_tab, sci_tab],
+        "df_slice_sci": global_variables.all_file_details["df_slice_sci"],
+        "start_time": start_time.get(),
+        "end_time": end_time.get(),
+        "bins": hist_bins_entry.get(),
+        "cmin": c_min_entry.get(),
+        "cmax": c_max_entry.get(),
+        "x_min": x_min_entry.get(),
+        "x_max": x_max_entry.get(),
+        "y_min": y_min_entry.get(),
+        "y_max": y_max_entry.get(),
+        "density": density_status_var.get(),
+        "norm": norm_type_var.get(),
+        "row_hist": 0,
+        "col_hist": 2,
+        "channel1": "Channel1",
+        "channel2": "Channel2",
+        "row_channel13": 0,
+        "column_channel13": 7,
+        "sticky_channel13": "nesw",
+        "row_span_channel13": 5,
+        "column_span_channel13": 3,
+        "channel3": "Channel3",
+        "channel4": "Channel4",
+        "row_channel24": 5,
+        "column_channel24": 7,
+        "sticky_channel24": "nesw",
+        "row_span_channel24": 6,
+        "column_span_channel24": 3,
+        "hist_fig_height": screen_height / (1.1 * 96),
+        "hist_fig_width": screen_width / (2 * 96),
+        "hist_colspan": 2,
+        "hist_rowspan": 12,
+        "channel13_fig_height": screen_height / (3 * 96),
+        "channel13_fig_width": screen_width / (3 * 96),
+        "channel24_fig_height": screen_height / (3 * 96),
+        "channel24_fig_width": screen_width / (3 * 96),
+        "v_min": v_min_thresh_entry.get(),
+        "v_max": v_max_thresh_entry.get(),
+        "crv_fit": curve_fit_status_var.get()
+    }
+
+    llpr.load_all_hist_plots(**inputs)
+
+
+def ts_plot_inputs(plot_opt_entry):
+
+    inputs = {
+        "root": hk_tab,
+        "df_slice_hk": global_variables.all_file_details["df_slice_hk"],
+        "plot_key": plot_opt_entry.get(),
+        "start_time": start_time.get(),
+        "end_time": end_time.get(),
+        "row": 1,
+        "column": 3,
+        "columnspan": 3,
+        "rowspan": 2,
+        "fig_width": screen_width / (6 * 96),
+        "fig_height": screen_height / (6 * 96)
+    }
+
+    llpr.load_ts_plots(**inputs)
+
+
 # Create the main window.
 root = tk.Tk()
 
@@ -34,7 +105,7 @@ root.title("LEXI GUI")
 # root.iconbitmap("../../figures/lxi_gui_figures/lxi_icon.ico")
 # root.geometry("1100x700")
 # set size of you window here is example for 1/2 screen height and width
-root.geometry(f"{int(screen_width * 1)}x{int(screen_height * 1)}")
+root.geometry(f"{int(screen_width * 1.1)}x{int(screen_height * 1)}")
 
 root.resizable(True, True)
 
@@ -202,34 +273,7 @@ density_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
 density_checkbox.grid(row=7, column=4, columnspan=1, sticky="n")
 
 # Redo the histogram plot if the status of the checkbox is changed
-density_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
-    root=[sci_tab, sci_tab],
-    df_slice_sci=global_variables.all_file_details["df_slice_sci"],
-    start_time=start_time.get(), end_time=end_time.get(),
-    bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
-    cmax=c_max_entry.get(), x_min=x_min_entry.get(),
-    x_max=x_max_entry.get(), y_min=y_min_entry.get(),
-    y_max=y_max_entry.get(), density=density_status_var.get(),
-    norm=norm_type_var.get(), row_hist=0, col_hist=2,
-    channel1="Channel1", channel2="Channel2", row_channel13=0,
-    column_channel13=7, sticky_channel13="nesw",
-    row_span_channel13=5, column_span_channel13=3,
-    channel3="Channel3", channel4="Channel4", row_channel24=5,
-    column_channel24=7, sticky_channel24="nesw",
-    row_span_channel24=6, column_span_channel24=3,
-    hist_fig_height=screen_height / (1.1 * 96),
-    hist_fig_width=screen_width / (2 * 96),
-    hist_colspan=2,
-    hist_rowspan=12,
-    channel13_fig_height=screen_height / (3 * 96),
-    channel13_fig_width=screen_width / (3 * 96),
-    channel24_fig_height=screen_height / (3 * 96),
-    channel24_fig_width=screen_width / (3 * 96),
-    v_min=v_min_thresh_entry.get(),
-    v_max=v_max_thresh_entry.get(),
-    crv_fit=curve_fit_status_var.get()
-)
-)
+density_status_var.trace("w", lambda *_: hist_plot_inputs())
 
 # Key for the norm of the colorbar
 norm_label = tk.Label(sci_tab, text="Norm", font=font_style_box)
@@ -244,34 +288,7 @@ norm_type_2 = tk.Radiobutton(sci_tab, text="Linear", variable=norm_type_var, val
 norm_type_2.grid(row=9, column=4, columnspan=1, sticky="new")
 
 # Redo the histogram plot when the norm type is changed
-norm_type_var.trace("w", lambda *_: llpr.load_all_hist_plots(
-    root=[sci_tab, sci_tab],
-    df_slice_sci=global_variables.all_file_details["df_slice_sci"],
-    start_time=start_time.get(), end_time=end_time.get(),
-    bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
-    cmax=c_max_entry.get(), x_min=x_min_entry.get(),
-    x_max=x_max_entry.get(), y_min=y_min_entry.get(),
-    y_max=y_max_entry.get(), density=density_status_var.get(),
-    norm=norm_type_var.get(), row_hist=0, col_hist=2,
-    channel1="Channel1", channel2="Channel2", row_channel13=0,
-    column_channel13=7, sticky_channel13="nesw",
-    row_span_channel13=5, column_span_channel13=3,
-    channel3="Channel3", channel4="Channel4", row_channel24=5,
-    column_channel24=7, sticky_channel24="nesw",
-    row_span_channel24=6, column_span_channel24=3,
-    hist_fig_height=screen_height / (1.1 * 96),
-    hist_fig_width=screen_width / (2 * 96),
-    hist_colspan=2,
-    hist_rowspan=12,
-    channel13_fig_height=screen_height / (3 * 96),
-    channel13_fig_width=screen_width / (3 * 96),
-    channel24_fig_height=screen_height / (3 * 96),
-    channel24_fig_width=screen_width / (3 * 96),
-    v_min=v_min_thresh_entry.get(),
-    v_max=v_max_thresh_entry.get(),
-    crv_fit=curve_fit_status_var.get()
-)
-)
+norm_type_var.trace("w", lambda *_: hist_plot_inputs())
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=10, column=4, entry_label="V Min",
@@ -294,40 +311,9 @@ curve_fit_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
                                     variable=curve_fit_status_var)
 curve_fit_checkbox.grid(row=12, column=4, columnspan=1, sticky="n")
 
-curve_fit_status_var.trace("w", lambda *_: llpr.load_all_hist_plots(
-    root=[sci_tab, sci_tab],
-    df_slice_sci=global_variables.all_file_details["df_slice_sci"],
-    start_time=start_time.get(), end_time=end_time.get(),
-    bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
-    cmax=c_max_entry.get(), x_min=x_min_entry.get(),
-    x_max=x_max_entry.get(), y_min=y_min_entry.get(),
-    y_max=y_max_entry.get(), density=density_status_var.get(),
-    norm=norm_type_var.get(), row_hist=0, col_hist=2,
-    channel1="Channel1", channel2="Channel2", row_channel13=0,
-    column_channel13=7, sticky_channel13="nesw",
-    row_span_channel13=5, column_span_channel13=3,
-    channel3="Channel3", channel4="Channel4", row_channel24=5,
-    column_channel24=7, sticky_channel24="nesw",
-    row_span_channel24=6, column_span_channel24=3,
-    hist_fig_height=screen_height / (1.1 * 96),
-    hist_fig_width=screen_width / (2 * 96),
-    hist_colspan=2,
-    hist_rowspan=12,
-    channel13_fig_height=screen_height / (3 * 96),
-    channel13_fig_width=screen_width / (3 * 96),
-    channel24_fig_height=screen_height / (3 * 96),
-    channel24_fig_width=screen_width / (3 * 96),
-    v_min=v_min_thresh_entry.get(),
-    v_max=v_max_thresh_entry.get(),
-    crv_fit=curve_fit_status_var.get(),
-)
-)
+curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs())
 
 # Add an input box with a label for start time
-# start_time_entry, start_time_label = lgeb.entry_box(root=sci_tab, row=17, column=2,
-#                                                    entry_label="Start Time", width=30,
-#                                                    entry_val="YYYY-MM-DD HH:MM:SS",
-#                                                    font_style=font_style)
 start_time = tk.Entry(sci_tab, justify="center", bg="white", fg="black", borderwidth=2)
 start_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 start_time.grid(row=6, column=0, columnspan=2)
@@ -353,65 +339,18 @@ end_time_label.grid(row=9, column=0, columnspan=2)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
-    "w", lambda *_: llpr.load_ts_plots(
-        root=hk_tab,
-        df_slice_hk=global_variables.all_file_details["df_slice_hk"],
-        plot_key=plot_opt_entry_1.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=1, column=0, columnspan=3, rowspan=2,
-        fig_width=screen_width / (6 * 96),
-        fig_height=screen_height / (6 * 96))
-)
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry_1))
 
 plot_opt_entry_2.trace(
-    "w", lambda *_: llpr.load_ts_plots(
-        root=hk_tab,
-        df_slice_hk=global_variables.all_file_details["df_slice_hk"],
-        plot_key=plot_opt_entry_2.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=1, column=3, columnspan=3, rowspan=2,
-        fig_width=screen_width / (6 * 96),
-        fig_height=screen_height / (6 * 96))
-)
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry_2))
 
 plot_opt_entry_3.trace(
-    "w", lambda *_: llpr.load_ts_plots(
-        root=hk_tab,
-        df_slice_hk=global_variables.all_file_details["df_slice_hk"],
-        plot_key=plot_opt_entry_3.get(), start_time=start_time.get(),
-        end_time=end_time.get(), row=1, column=6, columnspan=3, rowspan=2,
-        fig_width=screen_width / (6 * 96),
-        fig_height=screen_height / (6 * 96))
-)
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry_3))
 
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, justify="center",
-                        command=lambda: llpr.load_all_hist_plots(
-                            root=[sci_tab, sci_tab],
-                            df_slice_sci=global_variables.all_file_details["df_slice_sci"],
-                            start_time=start_time.get(), end_time=end_time.get(),
-                            bins=hist_bins_entry.get(), cmin=c_min_entry.get(),
-                            cmax=c_max_entry.get(), x_min=x_min_entry.get(),
-                            x_max=x_max_entry.get(), y_min=y_min_entry.get(),
-                            y_max=y_max_entry.get(), density=density_status_var.get(),
-                            norm=norm_type_var.get(), row_hist=0, col_hist=2,
-                            channel1="Channel1", channel2="Channel2", row_channel13=0,
-                            column_channel13=7, sticky_channel13="nesw",
-                            row_span_channel13=5, column_span_channel13=3,
-                            channel3="Channel3", channel4="Channel4", row_channel24=5,
-                            column_channel24=7, sticky_channel24="nesw",
-                            row_span_channel24=6, column_span_channel24=3,
-                            hist_fig_height=screen_height / (1.1 * 96),
-                            hist_fig_width=screen_width / (2 * 96),
-                            hist_colspan=2,
-                            hist_rowspan=12,
-                            channel13_fig_height=screen_height / (3 * 96),
-                            channel13_fig_width=screen_width / (3 * 96),
-                            channel24_fig_height=screen_height / (3 * 96),
-                            channel24_fig_width=screen_width / (3 * 96),
-                            v_min=v_min_thresh_entry.get(),
-                            v_max=v_max_thresh_entry.get(),
-                            crv_fit=curve_fit_status_var.get()
-                        )
-                        )
+                        command=lambda: hist_plot_inputs())
+
 plot_button.grid(row=10, column=0, columnspan=2, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # If the plot button is pressed, then print the current time

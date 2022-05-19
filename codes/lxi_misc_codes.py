@@ -34,16 +34,16 @@ def print_time_details(file_type=None, start_time=None, end_time=None):
     for file_type in file_type_list:
         try:
             df_all = global_variables.all_file_details[f"df_all_{file_type}"]
-            df_slice = global_variables.all_file_details[f"df_all_{file_type}"]
+            # df_slice = global_variables.all_file_details[f"df_all_{file_type}"]
             file_name = global_variables.all_file_details[f"file_name_{file_type}"]
             print(f"\n \x1b[1;32;255m Displaying values for {file_name} \x1b[0m")
             print(tabulate(
                 [[f"Minimum time in the {file_type} file", df_all.index.min()],
                  [f"Maximum time in the  {file_type} file", df_all.index.max()],
-                 [f"Minimum time in the sliced  {file_type} file", df_slice.index.min()],
-                 [f"Maximum time in the sliced  {file_type} file", df_slice.index.max()],
-                 ["Start time", start_time],
-                 ["End time", end_time]],
+                 # [f"Minimum time in the sliced  {file_type} file", df_slice.index.min()],
+                 # [f"Maximum time in the sliced  {file_type} file", df_slice.index.max()],
+                 ["Start time from widget", start_time],
+                 ["End time from widget", end_time]],
                 headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
                 numalign="center"))
         except Exception:

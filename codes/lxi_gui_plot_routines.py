@@ -340,8 +340,7 @@ class plot_data_class():
         self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
 
         # Select data in the specified time range
-        self.df_slice_sci = self.df_slice_sci[t_start:t_end]
-
+        self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
         # Exclude channel1 to channel4 data based on v_min and v_max
         if v_min is not None and v_max is not None:
             self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
@@ -352,6 +351,19 @@ class plot_data_class():
                                                   (self.df_slice_sci["Channel3"] <= v_max) &
                                                   (self.df_slice_sci["Channel4"] >= v_min) &
                                                   (self.df_slice_sci["Channel4"] <= v_max)]
+        elif v_min is not None and v_max is None:
+            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
+                                                  (self.df_slice_sci["Channel2"] >= v_min) &
+                                                  (self.df_slice_sci["Channel3"] >= v_min) &
+                                                  (self.df_slice_sci["Channel4"] >= v_min)]
+        elif v_min is None and v_max is not None:
+            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] <= v_max) &
+                                                  (self.df_slice_sci["Channel2"] <= v_max) &
+                                                  (self.df_slice_sci["Channel3"] <= v_max) &
+                                                  (self.df_slice_sci["Channel4"] <= v_max)]
+        else:
+            pass
+
         fig = plt.figure(num=None, figsize=(self.hist_fig_width * 1, self.hist_fig_height * 1),
                          facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.05, right=0.92, top=0.95, bottom=0.05, wspace=0., hspace=0)

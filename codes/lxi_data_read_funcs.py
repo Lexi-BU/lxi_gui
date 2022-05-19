@@ -7,8 +7,7 @@ import numpy as np
 
 packet_format_sci = ">II4H"
 # signed lower case, unsigned upper case (b)
-#packet_format_hk =">II2B3H"
-packet_format_hk =">II4H"
+packet_format_hk = ">II4H"
 
 sync = b'\xfe\x6b\x28\x40'
 volts_per_count = 0.00006881  # volts per increment of digitization
@@ -21,10 +20,10 @@ class sci_packet(NamedTuple):
     is unpacked into following parameters:
     - timestamp: int (32 bit)
     - IsCommanded: bool (1 bit)
-    - volatge channel1: float (16 bit)
-    - volatge channel2: float (16 bit)
-    - volatge channel3: float (16 bit)
-    - volatge channel4: float (16 bit)
+    - voltage channel1: float (16 bit)
+    - voltage channel2: float (16 bit)
+    - voltage channel3: float (16 bit)
+    - voltage channel4: float (16 bit)
 
     TimeStamp is the time stamp of the packet in seconds.
     IsCommand tells you if the packet was commanded.
@@ -38,7 +37,7 @@ class sci_packet(NamedTuple):
     channel4: float
 
     @classmethod
-    def from_bytes(cls, bytes_: bytes) :
+    def from_bytes(cls, bytes_: bytes):
         structure = struct.unpack(packet_format_sci, bytes_)
         return cls(
             is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
@@ -89,7 +88,7 @@ class hk_packet_cls(NamedTuple):
     delta_lost_event_count: int
 
     @classmethod
-    def from_bytes(cls, bytes_: bytes) :
+    def from_bytes(cls, bytes_: bytes):
         structure = struct.unpack(packet_format_hk, bytes_)
         # Check if the present packet is the house-keeping packet. Only the house-keeping packets
         # are processed.
@@ -105,12 +104,12 @@ class hk_packet_cls(NamedTuple):
             delta_lost_event_count = structure[5]
 
             return cls(
-               timestamp = timestamp,
-                hk_id = hk_id,
-                hk_value = hk_value,
-                delta_event_count = delta_event_count,
-                delta_drop_event_count = delta_drop_event_count,
-                delta_lost_event_count = delta_lost_event_count,
+                timestamp=timestamp,
+                hk_id=hk_id,
+                hk_value=hk_value,
+                delta_event_count=delta_event_count,
+                delta_drop_event_count=delta_drop_event_count,
+                delta_lost_event_count=delta_lost_event_count,
             )
 
 
@@ -143,7 +142,7 @@ def read_binary_data_sci(
         If the input file does not exist.
     TypeError :
         If the name of the input file or input directory is not a string. Or if the number of
-        deminals is not an integer.
+        decimals is not an integer.
     Returns
     -------
         None.
@@ -253,7 +252,8 @@ def read_binary_data_hk(
     FileNotFoundError :
         If the input file does not exist.
     TypeError :
-        If the name of the input file or input directory is not a string. Or if the number of decimals is not an integer.
+        If the name of the input file or input directory is not a string. Or if the number of
+        decimals is not an integer.
     Returns
     -------
         None.
@@ -337,9 +337,9 @@ def read_binary_data_hk(
         elif hk_packet.hk_id == 1:
             OpticsTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
         elif hk_packet.hk_id == 2:
-            LEXIbaseTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100 
+            LEXIbaseTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
         elif hk_packet.hk_id == 3:
-            HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100 
+            HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
         elif hk_packet.hk_id == 4:
             V_Imon_5_2[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 5:
@@ -372,7 +372,7 @@ def read_binary_data_hk(
     # For observations which get their values from "HK_value", go through the whole array and
     # replace the nans at any index with the value from the previous index.
     # This is to make sure that the file isn't inundated with nans.
-    for ii in range(1,len(TimeStamp)):
+    for ii in range(1, len(TimeStamp)):
         if np.isnan(PinPullerTemp[ii]):
             PinPullerTemp[ii] = PinPullerTemp[ii - 1]
         if np.isnan(OpticsTemp[ii]):

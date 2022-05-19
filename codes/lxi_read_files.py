@@ -26,14 +26,6 @@ def open_file_sci(start_time=None, end_time=None):
     global_variables.all_file_details['df_all_sci'] = df_all_sci
     print(f"\n \x1b[1;32;255m Loaded {file_name_sci} in the data base \x1b[0m")
 
-    # print(tabulate(
-    #     [["Minimum time in the SCI file", df_all_sci.index.min()],
-    #      ["Maximum time in the SCI file", df_all_sci.index.max()],
-    #      ["Minimum time in the sliced SCI file", df_slice_sci.index.min()],
-    #      ["Maximum time in the sliced SCI file", df_slice_sci.index.max()]],
-    #     headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
-    #     numalign="center"))
-
     return file_val
 
 
@@ -97,11 +89,17 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     t_end : float
         End time of the data. Default is None.
     """
-    df = pd.read_csv(file_val)
+    df = pd.read_csv(file_val, index_col=False)
 
-    # Replace index with timestamp
+    # Check all the keys and find out which one has the word "time" in it
+    for key in df.keys():
+        if "time" in key.lower():
+            time_col = key
+            break
+    # Rename the time column to TimeStamp
+    df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
+    # Set the index to the time column
     df.set_index('TimeStamp', inplace=True)
-
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
