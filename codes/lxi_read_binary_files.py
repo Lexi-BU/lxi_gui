@@ -21,10 +21,10 @@ class sci_packet(NamedTuple):
     is unpacked into following parameters:
     - timestamp: int (32 bit)
     - IsCommanded: bool (1 bit)
-    - volatge channel1: float (16 bit)
-    - volatge channel2: float (16 bit)
-    - volatge channel3: float (16 bit)
-    - volatge channel4: float (16 bit)
+    - voltage channel1: float (16 bit)
+    - voltage channel2: float (16 bit)
+    - voltage channel3: float (16 bit)
+    - voltage channel4: float (16 bit)
 
     TimeStamp is the time stamp of the packet in seconds.
     IsCommand tells you if the packet was commanded.
@@ -137,7 +137,7 @@ def read_binary_data_sci(
         If the input file does not exist.
     TypeError :
         If the name of the input file or input directory is not a string. Or if the number of
-        deminals is not an integer.
+        decimals is not an integer.
     Returns
     -------
         df : pandas.DataFrame
@@ -251,7 +251,7 @@ def read_binary_data_hk(
         If the input file does not exist.
     TypeError :
         If the name of the input file or input directory is not a string. Or if the number of
-        deminals is not an integer.
+        decimals is not an integer.
     Returns
     -------
         df : pandas.DataFrame
