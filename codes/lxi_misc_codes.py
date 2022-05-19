@@ -2,6 +2,7 @@ from tabulate import tabulate
 import global_variables
 import numpy as np
 
+
 def print_time_details(file_type=None, start_time=None, end_time=None):
     """
     Prints the details of the time values in different files in the data base for both SCI and

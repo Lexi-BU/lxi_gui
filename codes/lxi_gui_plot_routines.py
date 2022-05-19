@@ -12,6 +12,7 @@ import lxi_misc_codes as lmsc
 importlib.reload(global_variables)
 importlib.reload(lmsc)
 
+
 class plot_data_class():
     """
     A class for plotting different kinds of data
@@ -430,11 +431,6 @@ class plot_data_class():
                 x_vals_counts = yn[max_index[1] - 10:max_index[1] + 10]
                 y_vals_counts = xn[max_index[0] - 10:max_index[0] + 10]
 
-                # Drop NaNs from x_vals and y_vals
-                #x_vals = x_vals[~np.isnan(x_vals_counts)]
-                #x_vals_counts = x_vals_counts[~np.isnan(x_vals_counts)]
-                #y_vals = y_vals[~np.isnan(y_vals_counts)]
-                #y_vals_counts = y_vals_counts[~np.isnan(y_vals_counts)]
                 # Replace NaNs with zeros
                 x_vals_counts = x_vals_counts.astype(float)
                 x_vals_counts[np.isnan(x_vals_counts)] = 0
