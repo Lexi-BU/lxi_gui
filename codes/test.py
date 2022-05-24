@@ -493,12 +493,58 @@ x_hist.step(xedges[:-1], xn, color='k', lw=1)
 y_hist.step(yn, yedges[:-1], color='k', lw=1)
 plt.show()
 #plt.colorbar()
+
+import tkinter as tk
+
+
+def get_curr_screen_geometry():
+    '''
+    Workaround to get the size of the current screen in a multi-screen setup.
+
+    Returns:
+        geometry (str): The standard Tk geometry string.
+            [width]x[height]+[left]+[top]
+    '''
+    root = tk.Tk()
+    root.update_idletasks()
+    root.attributes('-fullscreen', True)
+    root.state('iconic')
+    geometry = root.winfo_geometry()
+    root.destroy()
+    return geometry
+
+get_curr_screen_geometry()
+
+
+import tkinter as tk
+root = tk.Tk()
+
+width_px = root.winfo_screenwidth()
+height_px = root.winfo_screenheight()
+width_mm = root.winfo_screenmmwidth()
+height_mm = root.winfo_screenmmheight()
+# 2.54 cm = in
+width_in = width_mm / 25.4
+height_in = height_mm / 25.4
+width_dpi = width_px/width_in
+height_dpi = height_px/height_in
+
+print('Width: %i px, Height: %i px' % (width_px, height_px))
+print('Width: %i mm, Height: %i mm' % (width_mm, height_mm))
+print('Width: %f in, Height: %f in' % (width_in, height_in))
+print('Width: %f dpi, Height: %f dpi' % (width_dpi, height_dpi))
+
+import ctypes
+user32 = ctypes.windll.user32
+user32.SetProcessDPIAware()
+[w, h] = [user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)]
+print('Size is %f %f' % (w, h))
+
+curr_dpi = w*96/width_px
+print('Current DPI is %f' % (curr_dpi))
 """
 
-
-def test_func(x=None, y=None):
-    return x + y
-
-
-# Use lambda function to pass the function as an argument
-lambda_func = lambda x, y: test_func(x, y)
+import os
+# Get the system resolution and size for an ubuntu machine and save it to a variable
+os.system('xrandr | grep "mm" > screen_info.txt')
+#xx = os.system('xrandr')
