@@ -90,6 +90,38 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     t_end : float
         End time of the data. Default is None.
     """
+
+    def compute_position(v1=None, v2=None, n_bins=400, bin_min=0, bin_max=5):
+
+        bin_size = (bin_max - bin_min) / (n_bins - 1)
+
+        # make 1-D histogram of all 4 channels
+        hist_c1 = np.histogram(v1, bins=n_bins, range=(bin_min, bin_max))
+        hist_c2 = np.histogram(v2, bins=n_bins, range=(bin_min, bin_max))
+
+        xx = bin_min + bin_size * np.arange(n_bins)
+
+        # Find the index where the histogram is the maximum
+        max_index_c1 = np.argmax(hist_c1[0][0:int(n_bins/2)])
+        print(f"Value is:{max_index_c1}")
+        max_index_c2 = np.argmax(hist_c2[0][0:int(n_bins/2)])
+
+        z1_min = 1000 * xx[max_index_c1]
+        z2_min = 1000 * xx[max_index_c2]
+
+        n1_z = z1_min/1000
+        n2_z = z2_min/1000
+
+        x0_raw = v1
+        x1_raw = v2
+
+        x0 = x0_raw - n1_z
+        x1 = x1_raw - n2_z
+
+        x = x1/(x0+x1)
+
+        return x
+
     df = pd.read_csv(file_val, index_col=False)
 
     # Check all the keys and find out which one has the word "time" in it
@@ -112,50 +144,14 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Select dataframe from timestamp t_start to t_end
     df_slice_sci = df.loc[t_start:t_end]
 
-    n_bins = 501
-    bin_min = 0
-    bin_max = 5
-    bin_size = (bin_max - bin_min) / (n_bins - 1)
 
-    # make 1-D histogram of all 4 channels
-    hist_c1 = np.histogram(df_slice_sci['Channel1'], bins=n_bins, range=(bin_min, bin_max))
-    hist_c2 = np.histogram(df_slice_sci['Channel2'], bins=n_bins, range=(bin_min, bin_max))
-    hist_c3 = np.histogram(df_slice_sci['Channel3'], bins=n_bins, range=(bin_min, bin_max))
-    hist_c4 = np.histogram(df_slice_sci['Channel4'], bins=n_bins, range=(bin_min, bin_max))
+    df_slice_sci['x_val'] = compute_position(v1=df_slice_sci['Channel1'],
+                                             v2=df_slice_sci['Channel3'], n_bins=400, bin_min=0,
+                                             bin_max=5)
 
-    xx = bin_min + bin_size * np.arange(n_bins)
-
-    # Find the index where the histogram is the maximum
-    max_index_c1 = np.argmax(hist_c1[0][0:250])
-    max_index_c2 = np.argmax(hist_c2[0][0:250])
-    max_index_c3 = np.argmax(hist_c3[0][0:250])
-    max_index_c4 = np.argmax(hist_c4[0][0:250])
-
-    z1_min = 1000 * xx[max_index_c1]
-    z2_min = 1000 * xx[max_index_c2]
-    z3_min = 1000 * xx[max_index_c3]
-    z4_min = 1000 * xx[max_index_c4]
-
-    n1_z = z1_min/1000
-    n2_z = z2_min/1000
-    n3_z = z3_min/1000
-    n4_z = z4_min/1000
-
-    x0_raw = df_slice_sci['Channel1']
-    x1_raw = df_slice_sci['Channel3']
-    y0_raw = df_slice_sci['Channel4']
-    y1_raw = df_slice_sci['Channel2']
-
-    x0 = x0_raw - n1_z
-    x1 = x1_raw - n3_z
-    y0 = y0_raw - n4_z
-    y1 = y1_raw - n2_z
-
-    x = x1/(x0+x1)
-    y = y1/(y0+y1)
-    # Find the x and y coordinates from the voltage values.
-    df_slice_sci['x_val'] = x
-    df_slice_sci['y_val'] = y
+    df_slice_sci['y_val'] = compute_position(v1=df_slice_sci['Channel4'],
+                                            v2=df_slice_sci['Channel2'], n_bins=400, bin_min=0,
+                                            bin_max=5)
 
     return df, df_slice_sci
 

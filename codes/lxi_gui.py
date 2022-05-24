@@ -97,8 +97,8 @@ root = tk.Tk()
 # Get the screen width and height.
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
-#screen_width = 1200
-#screen_height = 800
+screen_width = 1200
+screen_height = 800
 
 # Set the title of the main window.
 root.title("LEXI GUI")
@@ -257,19 +257,19 @@ ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry = lgeb.entry_box(root=frame_sci, row=0, column=4, entry_label="X-min", entry_val=0.40,
+x_min_entry = lgeb.entry_box(root=frame_sci, row=0, column=4, entry_label="X-min", entry_val=0.35,
                              font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = lgeb.entry_box(root=frame_sci, row=1, column=4, entry_label="X-max", entry_val=0.54,
+x_max_entry = lgeb.entry_box(root=frame_sci, row=1, column=4, entry_label="X-max", entry_val=0.55,
                              font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = lgeb.entry_box(root=frame_sci, row=2, column=4, entry_label="Y-min", entry_val=0.45,
+y_min_entry = lgeb.entry_box(root=frame_sci, row=2, column=4, entry_label="Y-min", entry_val=0.40,
                              font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = lgeb.entry_box(root=frame_sci, row=3, column=4, entry_label="Y-max", entry_val=0.58,
+y_max_entry = lgeb.entry_box(root=frame_sci, row=3, column=4, entry_label="Y-max", entry_val=0.60,
                              font_style=font_style_box)
 
 # The number of bins for histogram plot

@@ -425,8 +425,8 @@ class plot_data_class():
         # Put y-label and tickmarks on right side
         axs1.yaxis.tick_right()
         axs1.yaxis.set_label_position('right')
-        axs1.set_xlabel('Strip = V1/(V1+V2)')
-        axs1.set_ylabel('Wedge = V3/(V3+V4)')
+        axs1.set_xlabel('Strip = V3/(V1+V3)')
+        axs1.set_ylabel('Wedge = V4/(V2+V4)')
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
         axs1.tick_params(axis="both", which="major")
