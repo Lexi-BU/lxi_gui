@@ -83,9 +83,7 @@ def ts_plot_inputs(plot_opt_entry=None, row=None, column=None, columnspan=3, row
         "row": row,
         "column": column,
         "columnspan": columnspan,
-        "rowspan": rowspan,
-        "fig_width": screen_width / (4 * 96),
-        "fig_height": screen_height / (18 * 96)
+        "rowspan": rowspan
     }
 
     llpr.load_ts_plots(**inputs)
@@ -97,8 +95,8 @@ root = tk.Tk()
 # Get the screen width and height.
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
-screen_width = 1200
-screen_height = 800
+screen_width = 1920
+screen_height = 1080
 
 # Set the title of the main window.
 root.title("LEXI GUI")
@@ -106,7 +104,7 @@ root.title("LEXI GUI")
 # root.iconbitmap("../figures/lxi_icon.ico")
 # root.geometry("1100x700")
 # set size of you window here is example for 1/2 screen height and width
-root.geometry(f"{int(screen_width * 1.1)}x{int(screen_height * 1)}")
+root.geometry(f"{int(screen_width * 0.9)}x{int(screen_height * 0.9)}")
 
 root.resizable(True, True)
 
@@ -354,12 +352,6 @@ end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
 end_time.grid(row=8, column=0, columnspan=2)
 end_time_label = tk.Label(frame_sci, text="End Time", font=font_style)
 end_time_label.grid(row=9, column=0, columnspan=2)
-
-# If the start time or end time is changed, print the value of the start time or end time
-# start_time.bind("<KeyRelease>", lambda event: print(start_time.get()))
-# end_time.bind("<KeyRelease>", lambda event: sleep(1))
-# end_time.bind("<KeyRelease>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
-# end_time=end_time.get()))
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
