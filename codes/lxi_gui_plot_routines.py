@@ -238,12 +238,11 @@ class plot_data_class():
         alpha = 0.8
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), facecolor='w',
-                         edgecolor='k')
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), edgecolor='k')
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
-        gs = gridspec.GridSpec(1, 1, width_ratios=[1])
+        gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
 
-        axs1 = plt.subplot(gs[0])
+        axs1 = plt.subplot(gs[:])
         axs1.plot(self.df_slice_hk.index, self.df_slice_hk[self.plot_key], '.k', alpha=alpha, ms=ms,
                   label=self.plot_key)
         axs1.set_xlim(t_start, t_end)
