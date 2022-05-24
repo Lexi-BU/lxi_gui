@@ -273,15 +273,15 @@ y_max_entry = lgeb.entry_box(root=frame_sci, row=3, column=4, entry_label="Y-max
                              font_style=font_style_box)
 
 # The number of bins for histogram plot
-hist_bins_entry = lgeb.entry_box(root=frame_sci, row=4, column=4, entry_label="Bins", entry_val=400,
+hist_bins_entry = lgeb.entry_box(root=frame_sci, row=4, column=4, entry_label="Bins", entry_val=200,
                                  font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
-c_min_entry = lgeb.entry_box(root=frame_sci, row=5, column=4, entry_label="C Min", entry_val=10,
+c_min_entry = lgeb.entry_box(root=frame_sci, row=5, column=4, entry_label="C Min", entry_val=1,
                              font_style=font_style_box)
 
 # Maximum number of data points in each bin for the histogram plot
-c_max_entry = lgeb.entry_box(root=frame_sci, row=6, column=4, entry_label="C Max", entry_val="None",
+c_max_entry = lgeb.entry_box(root=frame_sci, row=6, column=4, entry_label="C Max", entry_val=100,
                              font_style=font_style_box)
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
@@ -316,11 +316,11 @@ norm_type_var.trace("w", lambda *_: hist_plot_inputs())
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=frame_sci, row=10, column=4, entry_label="V Min",
-                                    entry_val=1.6, font_style=font_style_box)
+                                    entry_val=1.3, font_style=font_style_box)
 
 # Maximum threshold for the voltage to be considered
 v_max_thresh_entry = lgeb.entry_box(root=frame_sci, row=11, column=4, entry_label="V Max",
-                                    entry_val=3.6, font_style=font_style_box)
+                                    entry_val=3.3, font_style=font_style_box)
 
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
