@@ -97,6 +97,9 @@ root = tk.Tk()
 # Get the screen width and height.
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
+#screen_width = 1200
+#screen_height = 800
+
 # Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
@@ -254,27 +257,27 @@ ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry = lgeb.entry_box(root=frame_sci, row=0, column=4, entry_label="X-min", entry_val=0.35,
+x_min_entry = lgeb.entry_box(root=frame_sci, row=0, column=4, entry_label="X-min", entry_val=0.40,
                              font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = lgeb.entry_box(root=frame_sci, row=1, column=4, entry_label="X-max", entry_val=0.62,
+x_max_entry = lgeb.entry_box(root=frame_sci, row=1, column=4, entry_label="X-max", entry_val=0.54,
                              font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = lgeb.entry_box(root=frame_sci, row=2, column=4, entry_label="Y-min", entry_val=0.35,
+y_min_entry = lgeb.entry_box(root=frame_sci, row=2, column=4, entry_label="Y-min", entry_val=0.45,
                              font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = lgeb.entry_box(root=frame_sci, row=3, column=4, entry_label="Y-max", entry_val=0.62,
+y_max_entry = lgeb.entry_box(root=frame_sci, row=3, column=4, entry_label="Y-max", entry_val=0.58,
                              font_style=font_style_box)
 
 # The number of bins for histogram plot
-hist_bins_entry = lgeb.entry_box(root=frame_sci, row=4, column=4, entry_label="Bins", entry_val=100,
+hist_bins_entry = lgeb.entry_box(root=frame_sci, row=4, column=4, entry_label="Bins", entry_val=400,
                                  font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
-c_min_entry = lgeb.entry_box(root=frame_sci, row=5, column=4, entry_label="C Min", entry_val=1,
+c_min_entry = lgeb.entry_box(root=frame_sci, row=5, column=4, entry_label="C Min", entry_val=10,
                              font_style=font_style_box)
 
 # Maximum number of data points in each bin for the histogram plot
@@ -313,11 +316,11 @@ norm_type_var.trace("w", lambda *_: hist_plot_inputs())
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=frame_sci, row=10, column=4, entry_label="V Min",
-                                    entry_val=1.2, font_style=font_style_box)
+                                    entry_val=1.6, font_style=font_style_box)
 
 # Maximum threshold for the voltage to be considered
 v_max_thresh_entry = lgeb.entry_box(root=frame_sci, row=11, column=4, entry_label="V Max",
-                                    entry_val=4, font_style=font_style_box)
+                                    entry_val=3.6, font_style=font_style_box)
 
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)

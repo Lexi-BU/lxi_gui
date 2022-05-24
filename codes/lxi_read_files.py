@@ -1,6 +1,7 @@
 import importlib
 from tkinter import filedialog
 
+import numpy as np
 import pandas as pd
 
 import global_variables
@@ -111,9 +112,50 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Select dataframe from timestamp t_start to t_end
     df_slice_sci = df.loc[t_start:t_end]
 
+    n_bins = 501
+    bin_min = 0
+    bin_max = 5
+    bin_size = (bin_max - bin_min) / (n_bins - 1)
+
+    # make 1-D histogram of all 4 channels
+    hist_c1 = np.histogram(df_slice_sci['Channel1'], bins=n_bins, range=(bin_min, bin_max))
+    hist_c2 = np.histogram(df_slice_sci['Channel2'], bins=n_bins, range=(bin_min, bin_max))
+    hist_c3 = np.histogram(df_slice_sci['Channel3'], bins=n_bins, range=(bin_min, bin_max))
+    hist_c4 = np.histogram(df_slice_sci['Channel4'], bins=n_bins, range=(bin_min, bin_max))
+
+    xx = bin_min + bin_size * np.arange(n_bins)
+
+    # Find the index where the histogram is the maximum
+    max_index_c1 = np.argmax(hist_c1[0][0:250])
+    max_index_c2 = np.argmax(hist_c2[0][0:250])
+    max_index_c3 = np.argmax(hist_c3[0][0:250])
+    max_index_c4 = np.argmax(hist_c4[0][0:250])
+
+    z1_min = 1000 * xx[max_index_c1]
+    z2_min = 1000 * xx[max_index_c2]
+    z3_min = 1000 * xx[max_index_c3]
+    z4_min = 1000 * xx[max_index_c4]
+
+    n1_z = z1_min/1000
+    n2_z = z2_min/1000
+    n3_z = z3_min/1000
+    n4_z = z4_min/1000
+
+    x0_raw = df_slice_sci['Channel1']
+    x1_raw = df_slice_sci['Channel3']
+    y0_raw = df_slice_sci['Channel4']
+    y1_raw = df_slice_sci['Channel2']
+
+    x0 = x0_raw - n1_z
+    x1 = x1_raw - n3_z
+    y0 = y0_raw - n4_z
+    y1 = y1_raw - n2_z
+
+    x = x1/(x0+x1)
+    y = y1/(y0+y1)
     # Find the x and y coordinates from the voltage values.
-    df_slice_sci['x_val'] = df_slice_sci.Channel3 / (df_slice_sci.Channel1 + df_slice_sci.Channel3)
-    df_slice_sci['y_val'] = df_slice_sci.Channel4 / (df_slice_sci.Channel2 + df_slice_sci.Channel4)
+    df_slice_sci['x_val'] = x
+    df_slice_sci['y_val'] = y
 
     return df, df_slice_sci
 

@@ -4,6 +4,8 @@
     "dictionaryDefinitions": [],
     "dictionaries": [],
     "words": [
+        "arange",
+        "argmax",
         "astype",
         "axhline",
         "axvline",
