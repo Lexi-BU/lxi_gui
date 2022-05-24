@@ -238,6 +238,8 @@ class plot_data_class():
         alpha = 0.8
         ms = 2
         # Plot the data
+        # figsize=(self.ts_fig_width, self.ts_fig_height), This isn't really required, but if you
+        # want, you can add it in the next line
         fig = plt.figure(num=None, edgecolor='k')
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
@@ -363,7 +365,7 @@ class plot_data_class():
         else:
             pass
 
-        fig = plt.figure(num=None, 
+        fig = plt.figure(num=None, figsize=(self.hist_fig_width * 1, self.hist_fig_height * 1),
                          facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.05, right=0.92, top=0.95, bottom=0.05, wspace=0., hspace=0)
 
@@ -563,7 +565,7 @@ class plot_data_class():
         v2 = self.df_slice_sci[self.channel2][
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
 
-        fig = plt.figure(num=None,
+        fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
                          facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
 
@@ -571,7 +573,7 @@ class plot_data_class():
         y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
-        axs1 = fig.add_subplot(gs[0, 0])
+        axs1 = fig.add_subplot(gs[0, 0], aspect="equal")
         _, _, _, im = axs1.hist2d(v1, v2, bins=bins, cmap='Spectral', norm=norm,
                                   range=[x_range, y_range], cmin=cmin, density=density)
         divider1 = make_axes_locatable(axs1)
@@ -580,14 +582,15 @@ class plot_data_class():
                              pad=0.0)
 
         cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True,
-                             labelbottom=False, bottom=False, width=1, length=10,
+                             labelbottom=False, bottom=False, width=1, length=3,
                              labelrotation=0, pad=0)
 
         cbar1.ax.xaxis.set_label_position('top')
 
         axs1.set_xlabel(self.channel1)
         axs1.set_ylabel(self.channel2)
-
+        # Tight layout
+        plt.tight_layout()
         plt.close('all')
 
         return fig

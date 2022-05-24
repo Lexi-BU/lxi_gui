@@ -21,7 +21,7 @@ importlib.reload(lmsc)
 global_variables.init()
 
 
-def hist_plot_inputs():
+def hist_plot_inputs(dpi=100):
     """
     The function creates and updates the list of widget inputs as might be available from the GUI.
     """
@@ -47,23 +47,23 @@ def hist_plot_inputs():
         "row_channel13": 0,
         "column_channel13": 7,
         "sticky_channel13": "nesw",
-        "row_span_channel13": 5,
-        "column_span_channel13": 3,
+        "row_span_channel13": 10,
+        "column_span_channel13": 2,
         "channel3": "Channel3",
         "channel4": "Channel4",
-        "row_channel24": 5,
+        "row_channel24": 11,
         "column_channel24": 7,
         "sticky_channel24": "nesw",
-        "row_span_channel24": 6,
-        "column_span_channel24": 3,
-        "hist_fig_height": screen_height / (1.1 * 96),
-        "hist_fig_width": screen_width / (2 * 96),
+        "row_span_channel24": 10,
+        "column_span_channel24": 2,
+        "hist_fig_height": screen_height / (2 * dpi),
+        "hist_fig_width": screen_width / (2 * dpi),
         "hist_colspan": 2,
-        "hist_rowspan": 12,
-        "channel13_fig_height": screen_height / (3 * 96),
-        "channel13_fig_width": screen_width / (3 * 96),
-        "channel24_fig_height": screen_height / (3 * 96),
-        "channel24_fig_width": screen_width / (3 * 96),
+        "hist_rowspan": 20,
+        "channel13_fig_height": screen_height / (4 * dpi),
+        "channel13_fig_width": screen_width / (4 * dpi),
+        "channel24_fig_height": screen_height / (4 * dpi),
+        "channel24_fig_width": screen_width / (4 * dpi),
         "v_min": v_min_thresh_entry.get(),
         "v_max": v_max_thresh_entry.get(),
         "crv_fit": curve_fit_status_var.get()
@@ -72,7 +72,7 @@ def hist_plot_inputs():
     llpr.load_all_hist_plots(**inputs)
 
 
-def ts_plot_inputs(plot_opt_entry=None, row=None, column=None, columnspan=3, rowspan=2):
+def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnspan=3, rowspan=2):
 
     inputs = {
         "root": hk_tab,
@@ -83,7 +83,9 @@ def ts_plot_inputs(plot_opt_entry=None, row=None, column=None, columnspan=3, row
         "row": row,
         "column": column,
         "columnspan": columnspan,
-        "rowspan": rowspan
+        "rowspan": rowspan,
+        "fig_width": screen_width / (dpi),
+        "fig_height": screen_height / (5 * dpi)
     }
 
     llpr.load_ts_plots(**inputs)
@@ -95,8 +97,9 @@ root = tk.Tk()
 # Get the screen width and height.
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
-screen_width = 1920
-screen_height = 1080
+screen_width = 1920 * 0.8
+screen_height = 1080 * 0.8
+dpi = 100
 
 # Set the title of the main window.
 root.title("LEXI GUI")
@@ -295,7 +298,7 @@ density_checkbox = tk.Checkbutton(frame_sci, text="", font=font_style_box,
 density_checkbox.grid(row=7, column=4, columnspan=1, sticky="n")
 
 # Redo the histogram plot if the status of the checkbox is changed
-density_status_var.trace("w", lambda *_: hist_plot_inputs())
+density_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Key for the norm of the colorbar
 norm_label = tk.Label(frame_sci, text="Norm", font=font_style_box)
@@ -310,7 +313,7 @@ norm_type_2 = tk.Radiobutton(frame_sci, text="Linear", variable=norm_type_var, v
 norm_type_2.grid(row=9, column=4, columnspan=1, sticky="new")
 
 # Redo the histogram plot when the norm type is changed
-norm_type_var.trace("w", lambda *_: hist_plot_inputs())
+norm_type_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=frame_sci, row=10, column=4, entry_label="V Min",
@@ -333,7 +336,7 @@ curve_fit_checkbox = tk.Checkbutton(frame_sci, text="", font=font_style_box,
                                     variable=curve_fit_status_var)
 curve_fit_checkbox.grid(row=12, column=4, columnspan=1, sticky="n")
 
-curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs())
+curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Add an input box with a label for start time
 start_time = tk.Entry(frame_sci, justify="center", bg="white", fg="black", borderwidth=2)
@@ -368,7 +371,7 @@ plot_opt_entry_3.trace(
 
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(frame_sci, text="Plot Histogram", font=font_style_box, justify="center",
-                        command=lambda: hist_plot_inputs())
+                        command=lambda: hist_plot_inputs(dpi=dpi))
 
 plot_button.grid(row=10, column=0, columnspan=2, rowspan=1, sticky="nsew", pady=5, padx=5)
 
