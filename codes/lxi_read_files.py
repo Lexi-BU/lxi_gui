@@ -112,8 +112,8 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df_slice_sci = df.loc[t_start:t_end]
 
     # Find the x and y coordinates from the voltage values.
-    df_slice_sci['x_val'] = df_slice_sci.Channel1 / (df_slice_sci.Channel1 + df_slice_sci.Channel2)
-    df_slice_sci['y_val'] = df_slice_sci.Channel3 / (df_slice_sci.Channel3 + df_slice_sci.Channel4)
+    df_slice_sci['x_val'] = df_slice_sci.Channel3 / (df_slice_sci.Channel1 + df_slice_sci.Channel3)
+    df_slice_sci['y_val'] = df_slice_sci.Channel4 / (df_slice_sci.Channel2 + df_slice_sci.Channel4)
 
     return df, df_slice_sci
 

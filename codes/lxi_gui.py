@@ -100,7 +100,7 @@ screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight(
 # Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
-#root.iconbitmap("../figures/lxi_icon.ico")
+# root.iconbitmap("../figures/lxi_icon.ico")
 # root.geometry("1100x700")
 # set size of you window here is example for 1/2 screen height and width
 root.geometry(f"{int(screen_width * 1.1)}x{int(screen_height * 1)}")
@@ -109,7 +109,7 @@ root.resizable(True, True)
 
 tabControl = ttk.Notebook(root)
 tabControl.pack(expand=1, fill="both")
-#tabControl.grid(row=0, column=0, columnspan=16, rowspan=18, sticky="nsew")
+# tabControl.grid(row=0, column=0, columnspan=16, rowspan=18, sticky="nsew")
 tabControl.pack(expand=1, fill="both")
 sci_tab = tk.Frame(tabControl)
 sci_tab.pack(expand=1, fill="both")
