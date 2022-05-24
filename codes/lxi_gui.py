@@ -84,8 +84,8 @@ def ts_plot_inputs(plot_opt_entry=None, row=None, column=None, columnspan=3, row
         "column": column,
         "columnspan": columnspan,
         "rowspan": rowspan,
-        "fig_width": screen_width / (6 * 96),
-        "fig_height": screen_height / (6 * 96)
+        "fig_width": screen_width / (4 * 96),
+        "fig_height": screen_height / (18 * 96)
     }
 
     llpr.load_ts_plots(**inputs)
@@ -360,13 +360,16 @@ end_time_label.grid(row=9, column=0, columnspan=2)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
-    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_1, row=1, column=0))
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_1, row=1, column=0, rowspan=1,
+                                   columnspan=3))
 
 plot_opt_entry_2.trace(
-    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_2, row=1, column=3))
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1,
+                                   columnspan=3))
 
 plot_opt_entry_3.trace(
-    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_3, row=1, column=6))
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1,
+                                   columnspan=3))
 
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(frame_sci, text="Plot Histogram", font=font_style_box, justify="center",
