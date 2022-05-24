@@ -369,10 +369,10 @@ class plot_data_class():
                          facecolor='w', edgecolor='k')
         fig.subplots_adjust(left=0.05, right=0.92, top=0.95, bottom=0.05, wspace=0., hspace=0)
 
-        gs = plt.GridSpec(4, 4, hspace=0.35, wspace=0.02)
+        gs = plt.GridSpec(2, 2, hspace=0.35, wspace=0.02, height_ratios=[5, 1], width_ratios=[5, 1])
         axs1 = fig.add_subplot(gs[:-1, 1:])
         y_hist = fig.add_subplot(gs[:-1, 0], xticklabels=[], sharey=axs1)
-        x_hist = fig.add_subplot(gs[-1, 1:], yticklabels=[], sharex=axs1)
+        x_hist = fig.add_subplot(gs[-1, 2:-1], yticklabels=[], sharex=axs1)
 
         # Plot the histogram on axs1
         counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
@@ -478,6 +478,9 @@ class plot_data_class():
             except Exception:
                 print('Error: Could not fit Gaussian to data.')
                 pass
+
+        # Set tight layout
+        axs1.set_aspect('equal')
 
         plt.close("all")
 
