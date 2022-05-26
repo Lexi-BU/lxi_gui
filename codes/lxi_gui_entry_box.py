@@ -76,7 +76,7 @@ def entry_box(root=None,
     main_entry = tk.Entry(root, width=width, justify=justify, bg=bg, fg=fg, borderwidth=borderwidth)
     main_entry.insert(0, entry_val)
     main_entry.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky)
-    main_label = tk.Label(root, text=entry_label, font=font_style)
+    main_label = tk.Label(root, text=entry_label, font=font_style, bg=bg, fg=fg)
     main_label.grid(row=row, column=column + 1, columnspan=columnspan, rowspan=rowspan,
                     sticky=sticky)
 

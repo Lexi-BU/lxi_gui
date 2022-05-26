@@ -166,7 +166,10 @@ class plot_data_class():
                  volt_fig_width=None,
                  v_min=None,
                  v_max=None,
+                 v_sum_min=None,
+                 v_sum_max=None,
                  crv_fit=None,
+                 use_fig_size=None,
                  ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -192,7 +195,10 @@ class plot_data_class():
         self.volt_fig_width = volt_fig_width
         self.v_min = v_min
         self.v_max = v_max
+        self.v_sum_min = v_sum_min
+        self.v_sum_max = v_sum_max
         self.crv_fit = crv_fit
+        self.use_fig_size = use_fig_size
 
     def ts_plots(self):
         """
@@ -235,10 +241,11 @@ class plot_data_class():
                      "DeltaLostevntCount": "#"
                      }
 
-        alpha = 0.8
+        alpha = 0.1
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), edgecolor='k')
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), edgecolor='k',
+                         facecolor='w')
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
 
@@ -246,7 +253,7 @@ class plot_data_class():
         axs1.plot(self.df_slice_hk.index, self.df_slice_hk[self.plot_key], '.k', alpha=alpha, ms=ms,
                   label=self.plot_key)
         axs1.set_xlim(t_start, t_end)
-        # Rotate the x-axis labels by 45 degrees and set their fontsize
+        # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
         axs1.set_xlabel('Time (s)')
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
@@ -257,7 +264,6 @@ class plot_data_class():
             item.set_visible(False)
 
         plt.close("all")
-
         return fig
 
     def hist_plots(self):
@@ -320,6 +326,14 @@ class plot_data_class():
             v_max = float(self.v_max)
         except Exception:
             v_max = None
+        try:
+            v_sum_min = float(self.v_sum_min)
+        except Exception:
+            v_sum_min = None
+        try:
+            v_sum_max = float(self.v_sum_max)
+        except Exception:
+            v_sum_max = None
 
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
@@ -349,7 +363,15 @@ class plot_data_class():
                                                   (self.df_slice_sci["Channel3"] >= v_min) &
                                                   (self.df_slice_sci["Channel3"] <= v_max) &
                                                   (self.df_slice_sci["Channel4"] >= v_min) &
-                                                  (self.df_slice_sci["Channel4"] <= v_max)]
+                                                  (self.df_slice_sci["Channel4"] <= v_max) &
+                                                  ((self.df_slice_sci["Channel1"] + 
+                                                    self.df_slice_sci["Channel2"] +
+                                                    self.df_slice_sci["Channel3"] +
+                                                    self.df_slice_sci["Channel4"]) >= v_sum_min) &
+                                                    ((self.df_slice_sci["Channel1"] + 
+                                                      self.df_slice_sci["Channel2"] +
+                                                      self.df_slice_sci["Channel3"] +
+                                                      self.df_slice_sci["Channel4"]) <= v_sum_max)]
         elif v_min is not None and v_max is None:
             self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
                                                   (self.df_slice_sci["Channel2"] >= v_min) &
@@ -363,14 +385,17 @@ class plot_data_class():
         else:
             pass
 
-        fig = plt.figure(num=None, figsize=(self.hist_fig_width * 1, self.hist_fig_height * 1),
-                         facecolor='w', edgecolor='k')
-        fig.subplots_adjust(left=0.05, right=0.92, top=0.95, bottom=0.05, wspace=0., hspace=0)
+        if self.use_fig_size:
+            fig = plt.figure(num=None, figsize=(self.hist_fig_width, self.hist_fig_height),
+                             facecolor='w', edgecolor='k')
+        else:
+            fig = plt.figure(num=None, facecolor='w', edgecolor='k')
 
-        gs = plt.GridSpec(4, 4, hspace=0.35, wspace=0.02)
-        axs1 = fig.add_subplot(gs[:-1, 1:])
-        y_hist = fig.add_subplot(gs[:-1, 0], xticklabels=[], sharey=axs1)
-        x_hist = fig.add_subplot(gs[-1, 1:], yticklabels=[], sharex=axs1)
+        fig.subplots_adjust(wspace=0., hspace=1)
+        gs = plt.GridSpec(6, 6)
+        axs1 = fig.add_subplot(gs[:-1, 1:], aspect=1)
+        y_hist = fig.add_subplot(gs[:-1, 0], sharey=axs1)
+        x_hist = fig.add_subplot(gs[-1, 1:], sharex=axs1)
 
         # Plot the histogram on axs1
         counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
@@ -476,9 +501,8 @@ class plot_data_class():
             except Exception:
                 print('Error: Could not fit Gaussian to data.')
                 pass
-
         plt.close("all")
-
+        #fig.tight_layout()
         return fig
 
     def hist_plots_volt(self):
@@ -565,22 +589,22 @@ class plot_data_class():
 
         fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
                          facecolor='w', edgecolor='k')
-        fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
+        #fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
 
         x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
         y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
-        axs1 = fig.add_subplot(gs[0, 0])
+        axs1 = fig.add_subplot(gs[0, 0], aspect=1)
         _, _, _, im = axs1.hist2d(v1, v2, bins=bins, cmap='Spectral', norm=norm,
                                   range=[x_range, y_range], cmin=cmin, density=density)
         divider1 = make_axes_locatable(axs1)
-        cax1 = divider1.append_axes("top", size="5%", pad=0.02)
+        cax1 = divider1.append_axes("top", size="5%", pad=0.01)
         cbar1 = plt.colorbar(im, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
                              pad=0.0)
 
         cbar1.ax.tick_params(axis='x', which='both', direction='in', labeltop=True, top=True,
-                             labelbottom=False, bottom=False, width=1, length=10,
+                             labelbottom=False, bottom=False,
                              labelrotation=0, pad=0)
 
         cbar1.ax.xaxis.set_label_position('top')
@@ -588,6 +612,7 @@ class plot_data_class():
         axs1.set_xlabel(self.channel1)
         axs1.set_ylabel(self.channel2)
 
+        plt.tight_layout()
         plt.close('all')
 
         return fig
