@@ -264,7 +264,6 @@ class plot_data_class():
             item.set_visible(False)
 
         plt.close("all")
-
         return fig
 
     def hist_plots(self):
@@ -497,7 +496,7 @@ class plot_data_class():
         x_hist.set_aspect('auto', anchor="C")
 
         plt.close("all")
-
+        #fig.tight_layout()
         return fig
 
     def hist_plots_volt(self):
@@ -584,7 +583,6 @@ class plot_data_class():
 
         fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
                          facecolor='w', edgecolor='k')
-        # fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
 
         x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
         y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
@@ -606,7 +604,7 @@ class plot_data_class():
 
         axs1.set_xlabel(self.channel1)
         axs1.set_ylabel(self.channel2)
-        # Tight layout
+
         plt.tight_layout()
         plt.close('all')
 

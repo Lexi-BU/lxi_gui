@@ -61,7 +61,6 @@ def load_ts_plots(root=None, df_slice_hk=None, plot_key=None, start_time=None, e
     canvas = FigureCanvasTkAgg(fig_ts, master=frame)
     canvas.get_tk_widget().pack(side="left", fill='both', expand=False)
     canvas.draw()
-    canvas.get_tk_widget().pack(side='left', fill='both', expand=False)
 
 
 def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None,
@@ -132,7 +131,6 @@ def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.get_tk_widget().pack(side="left", fill='both', expand=True)
     canvas.draw()
-    canvas.get_tk_widget().pack(side='left', fill='both', expand=True)
 
 
 def load_hist_plots_volt(root=None, df_slice_sci=None, start_time=None, end_time=None, bins=None,
@@ -184,11 +182,10 @@ def load_hist_plots_volt(root=None, df_slice_sci=None, start_time=None, end_time
         cmax=cmax, density=density, norm=norm, channel1=channel1, channel2=channel2,
         volt_fig_width=fig_width, volt_fig_height=fig_height, v_min=v_min, v_max=v_max
     ).hist_plots_volt()
-
+    fig_hist.tight_layout()
     frame = tk.Frame(root)
     frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky)
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
-    canvas.get_tk_widget().pack(side="left", fill='both', expand=True)
     canvas.draw()
     canvas.get_tk_widget().pack(side='left', fill='both', expand=True)
 

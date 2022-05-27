@@ -294,6 +294,7 @@ norm_type_var.set("log")
 norm_type_1 = tk.Radiobutton(sci_tab, text="Log", variable=norm_type_var, value="log", bg="white",
                              fg="black")
 norm_type_1.grid(row=8, column=4, columnspan=1, sticky="new")
+
 norm_type_2 = tk.Radiobutton(sci_tab, text="Lin", variable=norm_type_var, value="linear",
                              bg="white", fg="black")
 norm_type_2.grid(row=9, column=4, columnspan=1, sticky="new")
@@ -389,5 +390,10 @@ quit_button_hk.grid(row=11, column=4, columnspan=2, rowspan=1, sticky="n")
 # for row in range(10):
 #     blank_label.grid(row=11 + row, column=0, columnspan=2, sticky="nsew")
 #     blank_label.grid(row=12 + row, column=4, columnspan=5, sticky="nsew")
+
+#blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
+#for row in range(10):
+#    blank_label.grid(row=11+row, column=0, columnspan=2, sticky="nsew")
+#    blank_label.grid(row=12+row, column=4, columnspan=5, sticky="nsew")
 
 root.mainloop()
