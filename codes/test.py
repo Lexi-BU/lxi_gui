@@ -542,7 +542,7 @@ print('Size is %f %f' % (w, h))
 
 curr_dpi = w*96/width_px
 print('Current DPI is %f' % (curr_dpi))
-"""
+
 import platform
 import os
 if platform.system() == 'Windows':
@@ -578,3 +578,5 @@ elif platform.system() == 'Linux':
     # Get the system resolution and size for an ubuntu machine and save it to a variable
     os.system('xrandr | grep "mm" > screen_info.txt')
     #xx = os.system('xrandr')
+"""
+

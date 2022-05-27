@@ -105,3 +105,8 @@ def fwhm(x, y):
     left_idx = np.where(y > half_max)[0][0]
     right_idx = np.where(y > half_max)[0][-1]
     return x[right_idx] - x[left_idx]
+
+
+def ts_option_update():
+    print(global_variables.all_file_details["df_slice_hk"].columns.tolist())
+    return global_variables.all_file_details["df_slice_hk"].columns.tolist()
