@@ -23,7 +23,8 @@ global_variables.init()
 
 def hist_plot_inputs(dpi=100):
     """
-    The function creates and updates the list of widget inputs as might be available from the GUI.
+    The function creates and updates the list of widget inputs as might be available from the GUI
+    and plots all the histograms.
     """
 
     inputs = {
@@ -76,7 +77,10 @@ def hist_plot_inputs(dpi=100):
 
 
 def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnspan=3, rowspan=2):
-
+    """
+    The function creates and updates the list of widget inputs as might be available from the GUI
+    and plots time series, one at a time.
+    """
     inputs = {
         "root": hk_tab,
         "df_slice_hk": global_variables.all_file_details["df_slice_hk"],
@@ -101,32 +105,31 @@ root = tk.Tk()
 screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
 # Get the DPI of the screen. This is used to scale the figure size.
-# TODO: Check if this works on a windows machine
 dpi = root.winfo_fpixels('1i')
 
 # NOTE: This hack is necessary since I am using multiple monitors. This can be edited as we work on
 # a different machine.
-screen_width = screen_width / 3
-screen_height = screen_height / 1.2
-print("Check comment on line #105")
+screen_width = screen_width / 4
+# screen_height = screen_height / 1.2
+print("If the GUI size is messed up, check comment on line #105 and uncomment line #108 and " +
+      "#109 to redefine the GUI height and width as per the requirement.")
 
 # Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
 # NOTE: This doesn't work on UNIX system. Couldn't find a solution.
-#root.iconbitmap("../figures/lxi_icon.ico")
+# root.iconbitmap("../figures/lxi_icon.ico")
 # set size of you window here is example for screen height and width
-root.geometry(f"{int(screen_width * 1)}x{int(screen_height * 1)}")
+root.geometry(f"{int(screen_width * 0.9)}x{int(screen_height * 0.9)}")
 
 # if the window is resized, the figure will be scaled accordingly
 root.resizable(width=True, height=True)
 # redefine screen_width and screen_height if the window is resized.
 root.bind("<Configure>", lambda event: root.update_idletasks())
-#root.resizable(True, True)
 
+# Create two tabs corresponding to science and housekeeping stuff.
 tabControl = ttk.Notebook(root)
 tabControl.pack(expand=1, fill="both")
-#tabControl.grid(row=0, column=0, columnspan=16, rowspan=18, sticky="nsew")
 tabControl.pack(expand=1, fill="both")
 sci_tab = tk.Frame(tabControl)
 sci_tab.pack(expand=1, fill="both")
@@ -149,31 +152,16 @@ sci_tab.columnconfigure(8, {'minsize': 1}, weight=1)
 sci_tab.columnconfigure(9, {'minsize': 1}, weight=1)
 
 # Configure the sci_tab rows
-#for i in range(0, 20):
-#    sci_tab.rowconfigure(i, {'minsize': 0}, weight=0)
+# for i in range(0, 20):
+#     sci_tab.rowconfigure(i, {'minsize': 0}, weight=0)
 
-sci_tab.configure(bg="white", padx=5, pady=5, relief="raised", borderwidth=0, highlightthickness=0)
-hk_tab.configure(padx=5, pady=5, relief="raised", borderwidth=0, highlightthickness=0)
+sci_tab.configure(bg="white", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
+hk_tab.configure(padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
 
 # Configure the housekeeping tab rows and columns.
-hk_tab.columnconfigure(0, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(1, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(2, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(3, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(4, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(5, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(6, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(7, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(8, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(9, {'minsize': 1}, weight=1)
-hk_tab.columnconfigure(10, {'minsize': 1}, weight=1)
-
-hk_tab.rowconfigure(0, {'minsize': 1}, weight=1)
-hk_tab.rowconfigure(1, {'minsize': 1}, weight=1)
-hk_tab.rowconfigure(2, {'minsize': 1}, weight=1)
-hk_tab.rowconfigure(3, {'minsize': 1}, weight=1)
-hk_tab.rowconfigure(4, {'minsize': 1}, weight=1)
-hk_tab.rowconfigure(5, {'minsize': 1}, weight=1)
+for i in range(0, 10):
+    hk_tab.rowconfigure(i, {'minsize': 1}, weight=1)
+    hk_tab.columnconfigure(i, {'minsize': 1}, weight=1)
 
 # Choose a font style for GUI
 font_style = font.Font(family="serif", size=12)
@@ -213,8 +201,7 @@ b_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white
                              fg="black", relief="flat", borderwidth=2)
 b_file_load_entry.grid(row=5, column=0, columnspan=1, pady=0, sticky="ew")
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
-b_file_load_button.config(
-    command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
+b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
 
 # If a new file is loaded, then print its name in the entry box.
 sci_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
@@ -307,7 +294,8 @@ norm_type_var.set("log")
 norm_type_1 = tk.Radiobutton(sci_tab, text="Log", variable=norm_type_var, value="log", bg="white",
                              fg="black")
 norm_type_1.grid(row=8, column=4, columnspan=1, sticky="new")
-norm_type_2 = tk.Radiobutton(sci_tab, text="Linear", variable=norm_type_var, value="linear",
+
+norm_type_2 = tk.Radiobutton(sci_tab, text="Lin", variable=norm_type_var, value="linear",
                              bg="white", fg="black")
 norm_type_2.grid(row=9, column=4, columnspan=1, sticky="new")
 
@@ -324,9 +312,9 @@ v_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=11, column=4, entry_label=
 
 # Sum of minimum and maximum threshold for the voltage to be considered
 v_sum_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=12, column=4, entry_label="V sum Min",
-                                    entry_val=3, font_style=font_style_box)
+                                        entry_val=3, font_style=font_style_box)
 v_sum_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=13, column=4, entry_label="V sum Max",
-                                    entry_val=8, font_style=font_style_box)
+                                        entry_val=8, font_style=font_style_box)
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
 curve_fit_label = tk.Label(sci_tab, text="Curve Fit", font=font_style_box, bg="white", fg="black")
@@ -385,12 +373,23 @@ plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=
 
 # Add a quit button
 quit_button_sci = tk.Button(
-    sci_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="red")
-quit_button_sci.grid(row=11, column=0, columnspan=2, rowspan=2)
+    sci_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
+    fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
+    highlightbackground="red", highlightcolor="red"
+)
+quit_button_sci.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="n")
 
 quit_button_hk = tk.Button(
-    hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="red")
-quit_button_hk.grid(row=11, column=3, columnspan=2, rowspan=2)
+    hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
+    fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
+    highlightbackground="red", highlightcolor="red"
+)
+quit_button_hk.grid(row=11, column=4, columnspan=2, rowspan=1, sticky="n")
+
+# blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
+# for row in range(10):
+#     blank_label.grid(row=11 + row, column=0, columnspan=2, sticky="nsew")
+#     blank_label.grid(row=12 + row, column=4, columnspan=5, sticky="nsew")
 
 #blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
 #for row in range(10):

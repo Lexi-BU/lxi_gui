@@ -241,17 +241,17 @@ class plot_data_class():
                      "DeltaLostevntCount": "#"
                      }
 
-        alpha = 0.1
+        alpha = 0.4
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height), edgecolor='k',
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width * 1.5, self.ts_fig_height), edgecolor='k',
                          facecolor='w')
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
 
         axs1 = plt.subplot(gs[:])
-        axs1.plot(self.df_slice_hk.index, self.df_slice_hk[self.plot_key], '.k', alpha=alpha, ms=ms,
-                  label=self.plot_key)
+        axs1.plot(self.df_slice_hk.index, self.df_slice_hk[self.plot_key], '.', color="darkred",
+                  alpha=alpha, ms=ms, label=self.plot_key)
         axs1.set_xlim(t_start, t_end)
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
@@ -321,19 +321,19 @@ class plot_data_class():
         try:
             v_min = float(self.v_min)
         except Exception:
-            v_min = None
+            v_min = 0
         try:
             v_max = float(self.v_max)
         except Exception:
-            v_max = None
+            v_max = 4
         try:
             v_sum_min = float(self.v_sum_min)
         except Exception:
-            v_sum_min = None
+            v_sum_min = 0
         try:
             v_sum_max = float(self.v_sum_max)
         except Exception:
-            v_sum_max = None
+            v_sum_max = 16
 
         # Check if norm is an instance of mpl.colors.Normalize
         if (self.norm == 'log' or self.norm == 'linear'):
@@ -355,35 +355,23 @@ class plot_data_class():
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
         # Exclude channel1 to channel4 data based on v_min and v_max
-        if v_min is not None and v_max is not None:
-            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
-                                                  (self.df_slice_sci["Channel1"] <= v_max) &
-                                                  (self.df_slice_sci["Channel2"] >= v_min) &
-                                                  (self.df_slice_sci["Channel2"] <= v_max) &
-                                                  (self.df_slice_sci["Channel3"] >= v_min) &
-                                                  (self.df_slice_sci["Channel3"] <= v_max) &
-                                                  (self.df_slice_sci["Channel4"] >= v_min) &
-                                                  (self.df_slice_sci["Channel4"] <= v_max) &
-                                                  ((self.df_slice_sci["Channel1"] + 
-                                                    self.df_slice_sci["Channel2"] +
-                                                    self.df_slice_sci["Channel3"] +
-                                                    self.df_slice_sci["Channel4"]) >= v_sum_min) &
-                                                    ((self.df_slice_sci["Channel1"] + 
-                                                      self.df_slice_sci["Channel2"] +
-                                                      self.df_slice_sci["Channel3"] +
-                                                      self.df_slice_sci["Channel4"]) <= v_sum_max)]
-        elif v_min is not None and v_max is None:
-            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
-                                                  (self.df_slice_sci["Channel2"] >= v_min) &
-                                                  (self.df_slice_sci["Channel3"] >= v_min) &
-                                                  (self.df_slice_sci["Channel4"] >= v_min)]
-        elif v_min is None and v_max is not None:
-            self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] <= v_max) &
-                                                  (self.df_slice_sci["Channel2"] <= v_max) &
-                                                  (self.df_slice_sci["Channel3"] <= v_max) &
-                                                  (self.df_slice_sci["Channel4"] <= v_max)]
-        else:
-            pass
+        # Check if either v_min or v_max or v_sum_min or v_sum_max are None
+        self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci["Channel1"] >= v_min) &
+                                              (self.df_slice_sci["Channel1"] <= v_max) &
+                                              (self.df_slice_sci["Channel2"] >= v_min) &
+                                              (self.df_slice_sci["Channel2"] <= v_max) &
+                                              (self.df_slice_sci["Channel3"] >= v_min) &
+                                              (self.df_slice_sci["Channel3"] <= v_max) &
+                                              (self.df_slice_sci["Channel4"] >= v_min) &
+                                              (self.df_slice_sci["Channel4"] <= v_max) &
+                                              ((self.df_slice_sci["v1_shift"] +
+                                                self.df_slice_sci["v2_shift"] +
+                                                self.df_slice_sci["v3_shift"] +
+                                                self.df_slice_sci["v4_shift"]) >= v_sum_min) &
+                                              ((self.df_slice_sci["v1_shift"] +
+                                                self.df_slice_sci["v2_shift"] +
+                                                self.df_slice_sci["v3_shift"] +
+                                                self.df_slice_sci["v4_shift"]) <= v_sum_max)]
 
         if self.use_fig_size:
             fig = plt.figure(num=None, figsize=(self.hist_fig_width, self.hist_fig_height),
@@ -450,8 +438,8 @@ class plot_data_class():
         # Put y-label and tickmarks on right side
         axs1.yaxis.tick_right()
         axs1.yaxis.set_label_position('right')
-        axs1.set_xlabel('Strip = V1/(V1+V3)')
-        axs1.set_ylabel('Wedge = V2/(V2+V4)')
+        axs1.set_xlabel('Strip = V3/(V1+V3)')
+        axs1.set_ylabel('Wedge = V4/(V2+V4)')
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
         axs1.tick_params(axis="both", which="major")
@@ -484,7 +472,7 @@ class plot_data_class():
                 # Find the full width at half maximum of the fitted Gaussian
                 x_fwhm = lmsc.fwhm(x_vals, lmsc.curve_fit_func(x_vals, *popt_x))
                 y_fwhm = lmsc.fwhm(y_vals, lmsc.curve_fit_func(y_vals, *popt_y))
-                # Print the fit values to the plot
+                # Print the fit values on the plot
                 x_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_x[1]),
                             transform=x_hist.transAxes, verticalalignment='top')
                 x_hist.text(0.05, 0.80, '$\sigma$ = {:.3f}'.format(popt_x[2]),
@@ -501,6 +489,12 @@ class plot_data_class():
             except Exception:
                 print('Error: Could not fit Gaussian to data.')
                 pass
+
+        # Set tight layout
+        axs1.set_aspect('equal', anchor="C")
+        y_hist.set_aspect('auto', anchor="SW")
+        x_hist.set_aspect('auto', anchor="C")
+
         plt.close("all")
         #fig.tight_layout()
         return fig
@@ -589,7 +583,6 @@ class plot_data_class():
 
         fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
                          facecolor='w', edgecolor='k')
-        #fig.subplots_adjust(left=0.1, right=0.99, top=0.9, bottom=0.12, wspace=0., hspace=3)
 
         x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
         y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
