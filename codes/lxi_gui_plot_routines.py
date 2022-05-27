@@ -473,7 +473,7 @@ class plot_data_class():
                 # Find the full width at half maximum of the fitted Gaussian
                 x_fwhm = lmsc.fwhm(x_vals, lmsc.curve_fit_func(x_vals, *popt_x))
                 y_fwhm = lmsc.fwhm(y_vals, lmsc.curve_fit_func(y_vals, *popt_y))
-                # Print the fit values to the plot
+                # Print the fit values on the plot
                 x_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_x[1]),
                             transform=x_hist.transAxes, verticalalignment='top')
                 x_hist.text(0.05, 0.80, '$\sigma$ = {:.3f}'.format(popt_x[2]),
@@ -492,7 +492,9 @@ class plot_data_class():
                 pass
 
         # Set tight layout
-        axs1.set_aspect('equal')
+        axs1.set_aspect('equal', anchor="C")
+        y_hist.set_aspect('auto', anchor="SW")
+        x_hist.set_aspect('auto', anchor="C")
 
         plt.close("all")
 

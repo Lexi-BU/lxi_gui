@@ -109,7 +109,7 @@ dpi = root.winfo_fpixels('1i')
 
 # NOTE: This hack is necessary since I am using multiple monitors. This can be edited as we work on
 # a different machine.
-# screen_width = screen_width / 3
+screen_width = screen_width / 4
 # screen_height = screen_height / 1.2
 print("If the GUI size is messed up, check comment on line #105 and uncomment line #108 and " +
       "#109 to redefine the GUI height and width as per the requirement.")
@@ -294,7 +294,7 @@ norm_type_var.set("log")
 norm_type_1 = tk.Radiobutton(sci_tab, text="Log", variable=norm_type_var, value="log", bg="white",
                              fg="black")
 norm_type_1.grid(row=8, column=4, columnspan=1, sticky="new")
-norm_type_2 = tk.Radiobutton(sci_tab, text="Linear", variable=norm_type_var, value="linear",
+norm_type_2 = tk.Radiobutton(sci_tab, text="Lin", variable=norm_type_var, value="linear",
                              bg="white", fg="black")
 norm_type_2.grid(row=9, column=4, columnspan=1, sticky="new")
 
@@ -372,12 +372,18 @@ plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=
 
 # Add a quit button
 quit_button_sci = tk.Button(
-    sci_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="gray")
-quit_button_sci.grid(row=11, column=0, columnspan=1, rowspan=1)
+    sci_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
+    fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
+    highlightbackground="red", highlightcolor="red"
+)
+quit_button_sci.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="n")
 
 quit_button_hk = tk.Button(
-    hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="red")
-quit_button_hk.grid(row=11, column=3, columnspan=1, rowspan=1)
+    hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
+    fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
+    highlightbackground="red", highlightcolor="red"
+)
+quit_button_hk.grid(row=11, column=4, columnspan=2, rowspan=1, sticky="n")
 
 # blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
 # for row in range(10):

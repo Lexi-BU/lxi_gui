@@ -32,6 +32,8 @@
         "gridspec",
         "handlelength",
         "handletextpad",
+        "highlightbackground",
+        "highlightcolor",
         "highlightthickness",
         "hspace",
         "iconbitmap",
