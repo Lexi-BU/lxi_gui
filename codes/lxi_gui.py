@@ -1,4 +1,5 @@
 import importlib
+import platform
 import tkinter as tk
 from tkinter import font, ttk
 
@@ -6,8 +7,8 @@ import global_variables
 import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
-import lxi_read_files as lxrf
 import lxi_misc_codes as lmsc
+import lxi_read_files as lxrf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -108,9 +109,9 @@ dpi = root.winfo_fpixels('1i')
 # a different machine.
 # Check whether the operating system is windows or linux, and assign the correct screen width and
 # height.
-if "win" in root.tk.call("tk", "windowingsystem"):
+if platform.system() == "Windows":
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
-elif "x11" in root.tk.call("tk", "windowingsystem"):
+if platform.system() == "Linux":
     screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 else:
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
