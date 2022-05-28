@@ -101,24 +101,27 @@ def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnsp
 # Create the main window.
 root = tk.Tk()
 
-# Get the screen width and height.
-screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
-
 # Get the DPI of the screen. This is used to scale the figure size.
 dpi = root.winfo_fpixels('1i')
 
 # NOTE: This hack is necessary since I am using multiple monitors. This can be edited as we work on
 # a different machine.
-screen_width = screen_width / 4
-# screen_height = screen_height / 1.2
-print("If the GUI size is messed up, check comment on line #105 and uncomment line #108 and " +
-      "#109 to redefine the GUI height and width as per the requirement.")
+# Check whether the operating system is windows or linux, and assign the correct screen width and
+# height.
+if "win" in root.tk.call("tk", "windowingsystem"):
+    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+elif "x11" in root.tk.call("tk", "windowingsystem"):
+    screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+else:
+    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+
+print("If the GUI size is messed up, check comment on line #107 of the code 'lxi_gui.py'.")
 
 # Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
 # NOTE: This doesn't work on UNIX system. Couldn't find a solution.
-# root.iconbitmap("../figures/lxi_icon.ico")
+root.iconbitmap("../figures/lxi_icon.ico")
 # set size of you window here is example for screen height and width
 root.geometry(f"{int(screen_width * 0.9)}x{int(screen_height * 0.9)}")
 
@@ -174,8 +177,8 @@ sci_file_load_button = tk.Button(sci_tab, text="Load Science File", command=lxrf
                                  font=font_style)
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
-sci_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white",
-                               fg="black", relief="flat", borderwidth=2)
+sci_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
+                               fg="black", relief="sunken", borderwidth=2)
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
@@ -186,8 +189,8 @@ sci_file_load_button.config(
 hk_file_load_button = tk.Button(sci_tab, text="Load HK File", command=lxrf.open_file_hk,
                                 font=font_style)
 hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
-hk_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white",
-                              fg="black", relief="flat", borderwidth=2)
+hk_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
+                              fg="black", relief="sunken", borderwidth=2)
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(
@@ -197,9 +200,9 @@ hk_file_load_button.config(
 b_file_load_button = tk.Button(sci_tab, text="Load binary File", command=lxrf.open_file_b,
                                font=font_style)
 b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
-b_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white",
-                             fg="black", relief="flat", borderwidth=2)
-b_file_load_entry.grid(row=5, column=0, columnspan=1, pady=0, sticky="ew")
+b_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
+                             fg="black", relief="sunken", borderwidth=2)
+b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
 
@@ -330,23 +333,27 @@ curve_fit_checkbox.grid(row=14, column=4, columnspan=1, sticky="n")
 
 curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
+# Label for plot times
+start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="white", fg="black")
+start_time_label.grid(row=6, column=0, columnspan=2, sticky="nsew")
+
 # Add an input box with a label for start time
-start_time = tk.Entry(sci_tab, justify="center", bg="white", fg="black", borderwidth=2)
+start_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 start_time.insert(0, "YYYY-MM-DD HH:MM:SS")
-start_time.grid(row=6, column=0, columnspan=2)
+start_time.grid(row=7, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(sci_tab, text="Start Time", font=font_style, bg="white", fg="black")
-start_time_label.grid(row=7, column=0, columnspan=2)
+start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for end time
 # end_time_entry, end_time_label = lgeb.entry_box(root=sci_tab, row=17, column=3,
 #                                                 entry_label="End Time", width=30,
 #                                                 entry_val="YYYY-MM-DD HH:MM:SS",
 #                                                 font_style=font_style)
-end_time = tk.Entry(sci_tab, justify="center", bg="white", fg="black", borderwidth=2)
+end_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
-end_time.grid(row=8, column=0, columnspan=2)
+end_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
 end_time_label = tk.Label(sci_tab, text="End Time", font=font_style, bg="white", fg="black")
-end_time_label.grid(row=9, column=0, columnspan=2)
+end_time_label.grid(row=10, column=0, columnspan=2)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
@@ -365,7 +372,7 @@ plot_opt_entry_3.trace(
 plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, justify="center",
                         command=lambda: hist_plot_inputs(dpi=dpi))
 
-plot_button.grid(row=10, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+plot_button.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # If the plot button is pressed, then print the current time
 plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
@@ -377,23 +384,23 @@ quit_button_sci = tk.Button(
     fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
     highlightbackground="red", highlightcolor="red"
 )
-quit_button_sci.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="n")
+quit_button_sci.grid(row=12, column=0, columnspan=1, rowspan=1, sticky="n")
 
 quit_button_hk = tk.Button(
     hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
     fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
     highlightbackground="red", highlightcolor="red"
 )
-quit_button_hk.grid(row=11, column=4, columnspan=2, rowspan=1, sticky="n")
+quit_button_hk.grid(row=12, column=4, columnspan=2, rowspan=1, sticky="n")
 
 # blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
 # for row in range(10):
 #     blank_label.grid(row=11 + row, column=0, columnspan=2, sticky="nsew")
 #     blank_label.grid(row=12 + row, column=4, columnspan=5, sticky="nsew")
 
-#blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
-#for row in range(10):
-#    blank_label.grid(row=11+row, column=0, columnspan=2, sticky="nsew")
-#    blank_label.grid(row=12+row, column=4, columnspan=5, sticky="nsew")
+# blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
+# for row in range(10):
+#     blank_label.grid(row=11+row, column=0, columnspan=2, sticky="nsew")
+#     blank_label.grid(row=12+row, column=4, columnspan=5, sticky="nsew")
 
 root.mainloop()
