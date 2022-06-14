@@ -221,17 +221,17 @@ class plot_data_class():
             pass
 
         # Make a dictionary of all the plot options and their units
-        unit_dict = {"HK_id": "(#)",
+        unit_dict = {"HK_id": "#",
                      "PinPullerTemp": "(K)",
                      "OpticsTemp": "(K)",
                      "LEXIbaseTemp": "(C)",
                      "HVsupplyTemp": "(K)",
-                     "+5.2V_Imon": "(A)",
-                     "+10V_Imon": "(A)",
-                     "+3.3V_Imon": "(A)",
+                     "+5.2V_Imon": "(mA)",
+                     "+10V_Imon": "(mA)",
+                     "+3.3V_Imon": "(mA)",
                      "AnodeVoltMon": "(V)",
-                     "+28 V_Imon": "A",
-                     "ADC_Ground": "V",
+                     "+28V_Imon": "(mA)",
+                     "ADC_Ground": "(V)",
                      "Cmd_count": "#",
                      "Pinpuller_Armed": "",
                      "HVmcpAuto": "",

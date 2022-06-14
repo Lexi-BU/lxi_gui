@@ -218,10 +218,10 @@ def read_binary_data_sci(
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
-    df['x_val'] = np.round(df['Channel1'] / (df['Channel1'] + df['Channel3']),
-                           decimals=number_of_decimals)
-    df['y_val'] = np.round(df['Channel2'] / (df['Channel2'] + df['Channel4']),
-                           decimals=number_of_decimals)
+    #df['x_val'] = np.round(df['Channel1'] / (df['Channel1'] + df['Channel3']),
+    #                       decimals=number_of_decimals)
+    #df['y_val'] = np.round(df['Channel2'] / (df['Channel2'] + df['Channel4']),
+    #                       decimals=number_of_decimals)
     # Save the dataframe to a csv file and set index to time stamp
     df.to_csv(save_file_name, index=True)
 
@@ -258,9 +258,16 @@ def read_binary_data_hk(
             DataFrame of the housekeeping packet.
         save_file_name : str
             Name of the output file.
+
+    Raises
+    ------
+    FileNotFoundError :
+        If the input file does not exist or isn't a specified
     """
     if in_file_name is None:
-        in_file_name = "../data/raw_data/2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
+        raise FileNotFoundError(
+            "The input file name must be specified."
+        )
 
     # Check if the file exists, if does not exist raise an error
     if not Path(in_file_name).is_file():
@@ -323,6 +330,20 @@ def read_binary_data_hk(
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
     DeltaLostevntCount = np.full(len(hk_idx), np.nan)
 
+    # Check if "unit_1" or "unit1" is in the file name, if so then the data is from the unit 1
+    if "unit_1" in input_file_name or "unit1" in input_file_name:
+        lxi_unit = 1
+    elif "unit_2" in input_file_name or "unit2" in input_file_name:
+        lxi_unit = 2
+    else:
+        # Print warning that unit is defaulted to 1
+        print(
+            "\n FileName Warning: \033[91m \nThe unit is defaulted to 1 because the name of the file does not contain "
+            "\"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\". \033[0m \n"
+        )
+        lxi_unit = 1
+
+
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
         TimeStamp[ii] = hk_packet.timestamp
@@ -336,15 +357,24 @@ def read_binary_data_hk(
         elif hk_packet.hk_id == 3:
             HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
         elif hk_packet.hk_id == 4:
-            V_Imon_5_2[ii] = hk_packet.hk_value * volts_per_count
+            if lxi_unit == 1:
+                V_Imon_5_2[ii] = (hk_packet.hk_value * volts_per_count) * 1e3 / 18
+            elif lxi_unit == 2:
+                V_Imon_5_2[ii] = (hk_packet.hk_value - 1.129) / 21.456
         elif hk_packet.hk_id == 5:
             V_Imon_10[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 6:
-            V_Imon_3_3[ii] = hk_packet.hk_value * volts_per_count
+            if lxi_unit == 1:
+                V_Imon_3_3[ii] = (hk_packet.hk_value * volts_per_count + 0.0178) * 1e3 / 9.131
+            elif lxi_unit == 2:
+                V_Imon_3_3[ii] = (hk_packet.hk_value * volts_per_count + 0.029) * 1e3 / 18
         elif hk_packet.hk_id == 7:
             AnodeVoltMon[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 8:
-            V_Imon_28[ii] = hk_packet.hk_value * volts_per_count
+            if lxi_unit == 1:
+                V_Imon_28[ii] = (hk_packet.hk_value  * volts_per_count + 0.00747) * 1e3 / 17.94
+            elif lxi_unit == 2:
+                V_Imon_28[ii] = (hk_packet.hk_value  * volts_per_count + 0.00747) * 1e3 / 17.94
         elif hk_packet.hk_id == 9:
             ADC_Ground[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 10:

@@ -12,4 +12,4 @@ The GUI for LEXI
 
 Please let me know if you have any trouble.
 
-![LEXI GUI](https://raw.githubusercontent.com/qudsiramiz/lxi_gui/main/figures/lxi_gui_Screenshot.png?token=GHSAT0AAAAAABTZOXNE7MBFMK2ZC5YK7PSKYUGYMLA)
+![LEXI GUI](https://raw.githubusercontent.com/qudsiramiz/lxi_gui/main/figures/lxi_gui_Screenshot.png?token=GHSAT0AAAAAABOWV7JYFDKPEMKOIOWJJQD4YU7TZ2Q)
