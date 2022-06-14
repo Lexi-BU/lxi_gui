@@ -36,7 +36,7 @@ def print_time_details(file_type=None, start_time=None, end_time=None):
             df_all = global_variables.all_file_details[f"df_all_{file_type}"]
             # df_slice = global_variables.all_file_details[f"df_all_{file_type}"]
             file_name = global_variables.all_file_details[f"file_name_{file_type}"]
-            print(f"\n \x1b[1;32;255m Displaying values for {file_name} \x1b[0m")
+            print(f"\n Displaying values for \x1b[1;32;255m {file_name.split('/')[-1]} \x1b[0m")
             print(tabulate(
                 [[f"Minimum time in the {file_type} file", df_all.index.min()],
                  [f"Maximum time in the  {file_type} file", df_all.index.max()],

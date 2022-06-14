@@ -70,10 +70,73 @@ def open_file_b():
     global_variables.all_file_details["df_all_sci"] = df_all_sci
 
     print(
-        f"\n \x1b[1;32;255m Loaded {file_name_b} in the data base, and the csv file for HK and "
-        f"SCI data have been saved to ''{file_name_hk}'' and ''{file_name_sci}''\x1b[0m")
+        f"\n Loaded \x1b[1;32;255m{file_name_b}\x1b[0m in the data base,\n  and the csv file for "
+        f"\x1b[1;32;255m HK \x1b[0m and \x1b[1;32;255m SCI \x1b[0m data have been saved to \n "
+        f"HK File : \x1b[1;32;255m{file_name_hk} \x1b[0m \n and \n Sci File: "
+        f"\x1b[1;32;255m{file_name_sci}\x1b[0m")
 
     return file_val
+
+
+def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
+    """
+    The function computes the position of the particle in the xy-plane. The ratios to compute
+    both the x and y position are taken from Dennis' code. The code computes the offset of the
+    four voltages as measured by LEXI. We then subtract the offset from the four voltages to get
+    the shifted voltages and then compute the position of the particle based on the shifted
+    voltages.
+
+    Parameters
+    ----------
+    v1 : float
+        Voltage of the first channel. Default is None.
+    v2 : float
+        Voltage of the second channel. Default is None.
+    n_bins : int
+        Number of bins to compute the position. Default is 401.
+    bin_min : float
+        Minimum value of the bin. Default is 0.
+    bin_max : float
+        Maximum value of the bin. Default is 4.
+
+    Returns
+    -------
+    particle_pos : float
+        position of the particle along one of the axis. Whether it gives x or y position depends
+        on which voltages were provided. For example, if v1 and v3 were provided, then the x
+        position is returned. Else if v4 and v2 were provided, then the y position is returned.
+        It is important to note that the order of the voltages is important.
+    v1_shift: float
+        Offset corrected voltage of the first channel.
+    v2_shift: float
+        Offset corrected voltage of the second channel.
+    """
+    bin_size = (bin_max - bin_min) / (n_bins - 1)
+
+    # make 1-D histogram of all 4 channels
+    hist_v1 = np.histogram(v1, bins=n_bins, range=(bin_min, bin_max))
+    hist_v2 = np.histogram(v2, bins=n_bins, range=(bin_min, bin_max))
+
+    xx = bin_min + bin_size * np.arange(n_bins)
+
+    # Find the index where the histogram is the maximum
+    # NOTE/TODO: I don't quite understand why the offset is computed this way. Need to talk to
+    # Dennis about this and get an engineering/physics reason for it.
+    max_index_v1 = np.argmax(hist_v1[0][0:int(n_bins / 2)])
+    max_index_v2 = np.argmax(hist_v2[0][0:int(n_bins / 2)])
+
+    z1_min = 1000 * xx[max_index_v1]
+    z2_min = 1000 * xx[max_index_v2]
+
+    n1_z = z1_min / 1000
+    n2_z = z2_min / 1000
+
+    v1_shift = v1 - n1_z
+    v2_shift = v2 - n2_z
+
+    particle_pos = v2_shift / (v2_shift + v1_shift)
+
+    return particle_pos, v1_shift, v2_shift
 
 
 def read_csv_sci(file_val=None, t_start=None, t_end=None):
@@ -90,66 +153,6 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     t_end : float
         End time of the data. Default is None.
     """
-
-    def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
-        """
-        The function computes the position of the particle in the xy-plane. The ratios to compute
-        both the x and y position are taken from Dennis' code. The code computes the offset of the
-        four voltages as measured by LEXI. We then subtract the offset from the four voltages to get
-        the shifted voltages and then compute the position of the particle based on the shifted
-        voltages.
-
-        Parameters
-        ----------
-        v1 : float
-            Voltage of the first channel. Default is None.
-        v2 : float
-            Voltage of the second channel. Default is None.
-        n_bins : int
-            Number of bins to compute the position. Default is 401.
-        bin_min : float
-            Minimum value of the bin. Default is 0.
-        bin_max : float
-            Maximum value of the bin. Default is 4.
-
-        Returns
-        -------
-        particle_pos : float
-            position of the particle along one of the axis. Whether it gives x or y position depends
-            on which voltages were provided. For example, if v1 and v3 were provided, then the x
-            position is returned. Else if v4 and v2 were provided, then the y position is returned.
-            It is important to note that the order of the voltages is important.
-        v1_shift: float
-            Offset corrected voltage of the first channel.
-        v2_shift: float
-            Offset corrected voltage of the second channel.
-        """
-        bin_size = (bin_max - bin_min) / (n_bins - 1)
-
-        # make 1-D histogram of all 4 channels
-        hist_v1 = np.histogram(v1, bins=n_bins, range=(bin_min, bin_max))
-        hist_v2 = np.histogram(v2, bins=n_bins, range=(bin_min, bin_max))
-
-        xx = bin_min + bin_size * np.arange(n_bins)
-
-        # Find the index where the histogram is the maximum
-        # NOTE/TODO: I don't quite understand why the offset is computed this way. Need to talk to
-        # Dennis about this and get an engineering/physics reason for it.
-        max_index_v1 = np.argmax(hist_v1[0][0:int(n_bins / 2)])
-        max_index_v2 = np.argmax(hist_v2[0][0:int(n_bins / 2)])
-
-        z1_min = 1000 * xx[max_index_v1]
-        z2_min = 1000 * xx[max_index_v2]
-
-        n1_z = z1_min / 1000
-        n2_z = z2_min / 1000
-
-        v1_shift = v1 - n1_z
-        v2_shift = v2 - n2_z
-
-        particle_pos = v2_shift / (v2_shift + v1_shift)
-
-        return particle_pos, v1_shift, v2_shift
 
     df = pd.read_csv(file_val, index_col=False)
 
@@ -173,6 +176,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Select dataframe from timestamp t_start to t_end
     df_slice_sci = df.loc[t_start:t_end]
 
+    # TODO: Add comments here
     x, v1_shift, v3_shift = compute_position(v1=df_slice_sci['Channel1'],
                                              v2=df_slice_sci['Channel3'], n_bins=401, bin_min=0,
                                              bin_max=4)
@@ -255,5 +259,20 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]
+
+
+    x, v1_shift, v3_shift = compute_position(v1=df_slice_sci['Channel1'],
+                                             v2=df_slice_sci['Channel3'], n_bins=401, bin_min=0,
+                                             bin_max=4)
+    df_slice_sci['x_val'] = x
+    df_slice_sci['v1_shift'] = v1_shift
+    df_slice_sci['v3_shift'] = v3_shift
+
+    y, v4_shift, v2_shift = compute_position(v1=df_slice_sci['Channel4'],
+                                             v2=df_slice_sci['Channel2'], n_bins=401, bin_min=0,
+                                             bin_max=4)
+    df_slice_sci['y_val'] = y
+    df_slice_sci['v4_shift'] = v4_shift
+    df_slice_sci['v2_shift'] = v2_shift
 
     return df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_hk, df_sci

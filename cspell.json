@@ -106,6 +106,7 @@
         "Vmcp",
         "vmin",
         "Vsupply",
+        "windowingsystem",
         "winfo",
         "wspace",
         "xaxis",

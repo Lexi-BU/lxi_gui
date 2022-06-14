@@ -1,4 +1,5 @@
 import importlib
+import platform
 import tkinter as tk
 from tkinter import font, ttk
 
@@ -6,8 +7,8 @@ import global_variables
 import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
-import lxi_read_files as lxrf
 import lxi_misc_codes as lmsc
+import lxi_read_files as lxrf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -76,7 +77,8 @@ def hist_plot_inputs(dpi=100):
     llpr.load_all_hist_plots(**inputs)
 
 
-def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnspan=3, rowspan=2):
+def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnspan=3, rowspan=2,
+                   plot_key=None):
     """
     The function creates and updates the list of widget inputs as might be available from the GUI
     and plots time series, one at a time.
@@ -98,27 +100,97 @@ def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnsp
     llpr.load_ts_plots(**inputs)
 
 
+def ts_button_val_change():
+    """
+    This function is called when the "Default Options" button is clicked. It sets the values of all
+    the 9 time series plot options to the default values.
+    """
+
+    default_key_list = ['PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp',
+                        '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon',
+                        '+28V_Imon', 'DeltaEvntCount', 'DeltaDroppedCount']
+    plot_opt_entry_list = [plot_opt_entry_1, plot_opt_entry_2, plot_opt_entry_3,
+                            plot_opt_entry_4, plot_opt_entry_5, plot_opt_entry_6,
+                            plot_opt_entry_7, plot_opt_entry_8, plot_opt_entry_9]
+
+    if default_opt_var.get() == True:
+        for i in range(len(default_key_list)):
+            plot_opt_entry_list[i].set(default_key_list[i])
+
+
+def refresh_ts_plot():
+    """
+    Refresh the time series plot
+    """
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_1, row=1, column=0, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+    
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+    
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+    
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+
+    try:
+        ts_plot_inputs(plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3)
+    except Exception:
+        pass
+
 # Create the main window.
 root = tk.Tk()
-
-# Get the screen width and height.
-screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
 
 # Get the DPI of the screen. This is used to scale the figure size.
 dpi = root.winfo_fpixels('1i')
 
 # NOTE: This hack is necessary since I am using multiple monitors. This can be edited as we work on
 # a different machine.
-screen_width = screen_width / 4
-# screen_height = screen_height / 1.2
-print("If the GUI size is messed up, check comment on line #105 and uncomment line #108 and " +
-      "#109 to redefine the GUI height and width as per the requirement.")
+# Check whether the operating system is windows or linux, and assign the correct screen width and
+# height.
+if platform.system() == "Windows":
+    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+if platform.system() == "Linux":
+    screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+else:
+    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+
+print("If the GUI size is messed up, check comment on line #107 of the code 'lxi_gui.py'.")
 
 # Set the title of the main window.
 root.title("LEXI GUI")
 # Add the lxi logo
 # NOTE: This doesn't work on UNIX system. Couldn't find a solution.
-# root.iconbitmap("../figures/lxi_icon.ico")
+#root.iconbitmap("../figures/lxi_icon.ico")
 # set size of you window here is example for screen height and width
 root.geometry(f"{int(screen_width * 0.9)}x{int(screen_height * 0.9)}")
 
@@ -174,8 +246,8 @@ sci_file_load_button = tk.Button(sci_tab, text="Load Science File", command=lxrf
                                  font=font_style)
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
-sci_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white",
-                               fg="black", relief="flat", borderwidth=2)
+sci_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
+                               fg="black", relief="sunken", borderwidth=2)
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
@@ -186,8 +258,8 @@ sci_file_load_button.config(
 hk_file_load_button = tk.Button(sci_tab, text="Load HK File", command=lxrf.open_file_hk,
                                 font=font_style)
 hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
-hk_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white",
-                              fg="black", relief="flat", borderwidth=2)
+hk_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
+                              fg="black", relief="sunken", borderwidth=2)
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(
@@ -197,9 +269,9 @@ hk_file_load_button.config(
 b_file_load_button = tk.Button(sci_tab, text="Load binary File", command=lxrf.open_file_b,
                                font=font_style)
 b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
-b_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="white",
-                             fg="black", relief="flat", borderwidth=2)
-b_file_load_entry.grid(row=5, column=0, columnspan=1, pady=0, sticky="ew")
+b_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
+                             fg="black", relief="sunken", borderwidth=2)
+b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
 
@@ -240,6 +312,42 @@ plot_opt_entry_3 = tk.StringVar(hk_tab)
 plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
 ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
+
+# Plot options for fourth plot (in the second row)
+plot_opt_entry_4 = tk.StringVar(hk_tab)
+plot_opt_entry_4.set("Select a column")
+ts_menu_4 = tk.OptionMenu(hk_tab, plot_opt_entry_4, *ts_options)
+ts_menu_4.grid(row=2, column=2, columnspan=1, sticky="w")
+
+# Plot options for fifth plot (in the second row)
+plot_opt_entry_5 = tk.StringVar(hk_tab)
+plot_opt_entry_5.set("Select a column")
+ts_menu_5 = tk.OptionMenu(hk_tab, plot_opt_entry_5, *ts_options)
+ts_menu_5.grid(row=2, column=5, columnspan=1, sticky="w")
+
+# Plot options for sixth plot (in the second row)
+plot_opt_entry_6 = tk.StringVar(hk_tab)
+plot_opt_entry_6.set("Select a column")
+ts_menu_6 = tk.OptionMenu(hk_tab, plot_opt_entry_6, *ts_options)
+ts_menu_6.grid(row=2, column=8, columnspan=1, sticky="w")
+
+# Plot options for seventh plot (in the third row)
+plot_opt_entry_7 = tk.StringVar(hk_tab)
+plot_opt_entry_7.set("Select a column")
+ts_menu_7 = tk.OptionMenu(hk_tab, plot_opt_entry_7, *ts_options)
+ts_menu_7.grid(row=4, column=2, columnspan=1, sticky="w")
+
+# Plot options for eighth plot (in the third row)
+plot_opt_entry_8 = tk.StringVar(hk_tab)
+plot_opt_entry_8.set("Select a column")
+ts_menu_8 = tk.OptionMenu(hk_tab, plot_opt_entry_8, *ts_options)
+ts_menu_8.grid(row=4, column=5, columnspan=1, sticky="w")
+
+# Plot options for ninth plot (in the third row)
+plot_opt_entry_9 = tk.StringVar(hk_tab)
+plot_opt_entry_9.set("Select a column")
+ts_menu_9 = tk.OptionMenu(hk_tab, plot_opt_entry_9, *ts_options)
+ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
 x_min_entry = lgeb.entry_box(root=sci_tab, row=0, column=4, entry_label="X-min", entry_val=0.35,
@@ -330,23 +438,27 @@ curve_fit_checkbox.grid(row=14, column=4, columnspan=1, sticky="n")
 
 curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
+# Label for plot times
+start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="white", fg="black")
+start_time_label.grid(row=6, column=0, columnspan=2, sticky="nsew")
+
 # Add an input box with a label for start time
-start_time = tk.Entry(sci_tab, justify="center", bg="white", fg="black", borderwidth=2)
+start_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 start_time.insert(0, "YYYY-MM-DD HH:MM:SS")
-start_time.grid(row=6, column=0, columnspan=2)
+start_time.grid(row=7, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(sci_tab, text="Start Time", font=font_style, bg="white", fg="black")
-start_time_label.grid(row=7, column=0, columnspan=2)
+start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for end time
 # end_time_entry, end_time_label = lgeb.entry_box(root=sci_tab, row=17, column=3,
 #                                                 entry_label="End Time", width=30,
 #                                                 entry_val="YYYY-MM-DD HH:MM:SS",
 #                                                 font_style=font_style)
-end_time = tk.Entry(sci_tab, justify="center", bg="white", fg="black", borderwidth=2)
+end_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
-end_time.grid(row=8, column=0, columnspan=2)
+end_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
 end_time_label = tk.Label(sci_tab, text="End Time", font=font_style, bg="white", fg="black")
-end_time_label.grid(row=9, column=0, columnspan=2)
+end_time_label.grid(row=10, column=0, columnspan=2)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
@@ -361,11 +473,35 @@ plot_opt_entry_3.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1,
                                    columnspan=3))
 
+plot_opt_entry_4.trace(
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1,
+                                      columnspan=3))
+
+plot_opt_entry_5.trace(
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1,
+                                      columnspan=3))
+
+plot_opt_entry_6.trace(
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1,
+                                        columnspan=3))
+
+plot_opt_entry_7.trace(
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1,
+                                        columnspan=3))
+
+plot_opt_entry_8.trace(
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1,
+                                        columnspan=3))
+
+plot_opt_entry_9.trace(
+    "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1,
+                                        columnspan=3))
+
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, justify="center",
                         command=lambda: hist_plot_inputs(dpi=dpi))
 
-plot_button.grid(row=10, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+plot_button.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # If the plot button is pressed, then print the current time
 plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
@@ -377,23 +513,42 @@ quit_button_sci = tk.Button(
     fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
     highlightbackground="red", highlightcolor="red"
 )
-quit_button_sci.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="n")
+quit_button_sci.grid(row=12, column=0, columnspan=1, rowspan=1, sticky="n")
+
+# Add a default option check box
+default_opt_var = tk.BooleanVar()
+default_opt_var.set(False)
+default_opt_checkbox = tk.Checkbutton(hk_tab, text="Default Options", font=font_style_box,
+                                        variable=default_opt_var, bg="white", fg="black")
+default_opt_checkbox.grid(row=12, column=1, columnspan=1, sticky="n")
+
+default_opt_var.trace("w", lambda *_: ts_button_val_change())
+
+# If Default Checkbox is checked, then set the default options for the time series data
+
+# Add a refresh button to reload all the time series plots
+refresh_ts_hk_button = tk.Button(
+    hk_tab, text="Refresh", command=lambda: refresh_ts_plot(), font=font_style_box,
+    justify="center", bg="snow", fg="green", pady=5, padx=5, borderwidth=2,
+    relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
+)
+refresh_ts_hk_button.grid(row=12, column=2, columnspan=2, rowspan=1, sticky="n")
 
 quit_button_hk = tk.Button(
     hk_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
     fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
     highlightbackground="red", highlightcolor="red"
 )
-quit_button_hk.grid(row=11, column=4, columnspan=2, rowspan=1, sticky="n")
+quit_button_hk.grid(row=12, column=4, columnspan=2, rowspan=1, sticky="n")
 
 # blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
 # for row in range(10):
 #     blank_label.grid(row=11 + row, column=0, columnspan=2, sticky="nsew")
 #     blank_label.grid(row=12 + row, column=4, columnspan=5, sticky="nsew")
 
-#blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
-#for row in range(10):
-#    blank_label.grid(row=11+row, column=0, columnspan=2, sticky="nsew")
-#    blank_label.grid(row=12+row, column=4, columnspan=5, sticky="nsew")
+# blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
+# for row in range(10):
+#     blank_label.grid(row=11+row, column=0, columnspan=2, sticky="nsew")
+#     blank_label.grid(row=12+row, column=4, columnspan=5, sticky="nsew")
 
 root.mainloop()
