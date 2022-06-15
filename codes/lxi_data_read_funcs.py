@@ -4,13 +4,15 @@ from pathlib import Path
 from typing import NamedTuple
 
 import numpy as np
+import pandas as pd
 
+# Tha packet format of the science and housekeeping packets
 packet_format_sci = ">II4H"
 # signed lower case, unsigned upper case (b)
 packet_format_hk = ">II4H"
 
 sync = b'\xfe\x6b\x28\x40'
-volts_per_count = 0.00006881  # volts per increment of digitization
+volts_per_count = 0.000068817  # volts per increment of digitization
 
 
 class sci_packet(NamedTuple):
@@ -114,10 +116,8 @@ class hk_packet_cls(NamedTuple):
 
 
 def read_binary_data_sci(
-    in_file_path=None,
     in_file_name=None,
-    save_file_path="../data/",
-    save_file_name="output_sci_2.csv",
+    save_file_name="../data/processed/sci/output_sci.csv",
     number_of_decimals=6
 ):
     """
@@ -125,12 +125,8 @@ def read_binary_data_sci(
 
     Parameters
     ----------
-    in_file_path : str
-        Path to the input file. Default is None.
     in_file_name : str
         Name of the input file. Default is None.
-    save_file_path : str
-        Path to the output file. Default is "../data/".
     save_file_name : str
         Name of the output file. Default is "output_sci.csv".
     number_of_decimals : int
@@ -145,26 +141,23 @@ def read_binary_data_sci(
         decimals is not an integer.
     Returns
     -------
-        None.
+        df : pandas.DataFrame
+            DataFrame of the science packet.
+        save_file_name : str
+            Name of the output file.
     """
-    if in_file_path is None:
-        in_file_path = "../data/raw_data/"
     if in_file_name is None:
-        in_file_name = "2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
+        in_file_name = "../data/raw_data/2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
 
     # Check if the file exists, if does not exist raise an error
-    if not Path(in_file_path + in_file_name).is_file():
+    if not Path(in_file_name).is_file():
         raise FileNotFoundError(
-            "The file " + in_file_path + in_file_name + " does not exist."
+            "The file " + in_file_name + " does not exist."
         )
     # Check if the file name and folder name are strings, if not then raise an error
     if not isinstance(in_file_name, str):
         raise TypeError(
             "The file name must be a string."
-        )
-    if not isinstance(in_file_path, str):
-        raise TypeError(
-            "The file path must be a string."
         )
 
     # Check the number of decimals to save
@@ -173,7 +166,7 @@ def read_binary_data_sci(
             "The number of decimals to save must be an integer."
         )
 
-    input_file_name = in_file_path + in_file_name
+    input_file_name = in_file_name
 
     with open(input_file_name, 'rb') as file:
         raw = file.read()
@@ -189,14 +182,17 @@ def read_binary_data_sci(
 
         index += 1
 
+    # Split the file name in a folder and a file name
+    output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_sci_output.csv"
+    output_folder_name = "/".join(in_file_name.split("/")[:-2]) + "/processed_data/sci"
+
+    save_file_name = output_folder_name + "/" + output_file_name
+
     # Check if the save folder exists, if not then create it
-    if not Path(save_file_path).exists():
-        Path(save_file_path).mkdir(parents=True, exist_ok=True)
+    if not Path(output_folder_name).exists():
+        Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
-    # Name of the output file
-    output_file_name = save_file_path + save_file_name
-
-    with open(output_file_name, 'w', newline='') as file:
+    with open(save_file_name, 'w', newline='') as file:
         dict_writer = csv.DictWriter(
             file,
             fieldnames=(
@@ -205,7 +201,7 @@ def read_binary_data_sci(
                 'Channel1',
                 'Channel2',
                 'Channel3',
-                'Channel4',
+                'Channel4'
             ),
         )
         dict_writer.writeheader()
@@ -216,19 +212,23 @@ def read_binary_data_sci(
                 'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
                 'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
                 'Channel3': np.round(sci_packet.channel3, decimals=number_of_decimals),
-                'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals),
+                'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals)
             }
             for sci_packet in packets
         )
 
-    return None
+    # Read the saved file data in a dataframe
+    df = pd.read_csv(save_file_name)
+
+    # Save the dataframe to a csv file and set index to time stamp
+    df.to_csv(save_file_name, index=True)
+
+    return df, save_file_name
 
 
 def read_binary_data_hk(
-    in_file_path=None,
     in_file_name=None,
-    save_file_path="../data/",
-    save_file_name="output_hk.csv",
+    save_file_name="../data/processed/hk/output_hk.csv",
     number_of_decimals=6
 ):
     """
@@ -236,12 +236,8 @@ def read_binary_data_hk(
 
     Parameters
     ----------
-    in_file_path : str
-        Path to the input file. Default is None.
     in_file_name : str
         Name of the input file. Default is None.
-    save_file_path : str
-        Path to the output file. Default is "../data/".
     save_file_name : str
         Name of the output file. Default is "output_hk.csv".
     number_of_decimals : int
@@ -256,26 +252,30 @@ def read_binary_data_hk(
         decimals is not an integer.
     Returns
     -------
-        None.
+        df : pandas.DataFrame
+            DataFrame of the housekeeping packet.
+        save_file_name : str
+            Name of the output file.
+
+    Raises
+    ------
+    FileNotFoundError :
+        If the input file does not exist or isn't a specified
     """
-    if in_file_path is None:
-        in_file_path = "../data/raw_data/"
     if in_file_name is None:
-        in_file_name = "2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
+        raise FileNotFoundError(
+            "The input file name must be specified."
+        )
 
     # Check if the file exists, if does not exist raise an error
-    if not Path(in_file_path + in_file_name).is_file():
+    if not Path(in_file_name).is_file():
         raise FileNotFoundError(
-            "The file " + in_file_path + in_file_name + " does not exist."
+            "The file " + in_file_name + " does not exist."
         )
     # Check if the file name and folder name are strings, if not then raise an error
     if not isinstance(in_file_name, str):
         raise TypeError(
             "The file name must be a string."
-        )
-    if not isinstance(in_file_path, str):
-        raise TypeError(
-            "The file path must be a string."
         )
 
     # Check the number of decimals to save
@@ -284,7 +284,7 @@ def read_binary_data_hk(
             "The number of decimals to save must be an integer."
         )
 
-    input_file_name = in_file_path + in_file_name
+    input_file_name = in_file_name
 
     with open(input_file_name, 'rb') as file:
         raw = file.read()
@@ -320,13 +320,26 @@ def read_binary_data_hk(
     ADC_Ground = np.full(len(hk_idx), np.nan)
     Cmd_count = np.full(len(hk_idx), np.nan)
     Pinpuller_Armed = np.full(len(hk_idx), np.nan)
-    Unused = np.full(len(hk_idx), np.nan)
-    Unused = np.full(len(hk_idx), np.nan)
+    Unused1 = np.full(len(hk_idx), np.nan)
+    Unused2 = np.full(len(hk_idx), np.nan)
     HVmcpAuto = np.full(len(hk_idx), np.nan)
     HVmcpMan = np.full(len(hk_idx), np.nan)
     DeltaEvntCount = np.full(len(hk_idx), np.nan)
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
     DeltaLostevntCount = np.full(len(hk_idx), np.nan)
+
+    # Check if "unit_1" or "unit1" is in the file name, if so then the data is from the unit 1
+    if "unit_1" in input_file_name or "unit1" in input_file_name:
+        lxi_unit = 1
+    elif "unit_2" in input_file_name or "unit2" in input_file_name:
+        lxi_unit = 2
+    else:
+        # Print warning that unit is defaulted to 1
+        print(
+            "\n FileName Warning: \033[91m \nThe unit is defaulted to 1 because the name of the "
+            "file does not contain \"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\". \033[0m \n"
+        )
+        lxi_unit = 1
 
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
@@ -341,15 +354,24 @@ def read_binary_data_hk(
         elif hk_packet.hk_id == 3:
             HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
         elif hk_packet.hk_id == 4:
-            V_Imon_5_2[ii] = hk_packet.hk_value * volts_per_count
+            if lxi_unit == 1:
+                V_Imon_5_2[ii] = (hk_packet.hk_value * volts_per_count) * 1e3 / 18
+            elif lxi_unit == 2:
+                V_Imon_5_2[ii] = (hk_packet.hk_value - 1.129) / 21.456
         elif hk_packet.hk_id == 5:
             V_Imon_10[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 6:
-            V_Imon_3_3[ii] = hk_packet.hk_value * volts_per_count
+            if lxi_unit == 1:
+                V_Imon_3_3[ii] = (hk_packet.hk_value * volts_per_count + 0.0178) * 1e3 / 9.131
+            elif lxi_unit == 2:
+                V_Imon_3_3[ii] = (hk_packet.hk_value * volts_per_count + 0.029) * 1e3 / 18
         elif hk_packet.hk_id == 7:
             AnodeVoltMon[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 8:
-            V_Imon_28[ii] = hk_packet.hk_value * volts_per_count
+            if lxi_unit == 1:
+                V_Imon_28[ii] = (hk_packet.hk_value * volts_per_count + 0.00747) * 1e3 / 17.94
+            elif lxi_unit == 2:
+                V_Imon_28[ii] = (hk_packet.hk_value * volts_per_count + 0.00747) * 1e3 / 17.94
         elif hk_packet.hk_id == 9:
             ADC_Ground[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 10:
@@ -357,9 +379,9 @@ def read_binary_data_hk(
         elif hk_packet.hk_id == 11:
             Pinpuller_Armed[ii] = hk_packet.hk_value
         elif hk_packet.hk_id == 12:
-            Unused[ii] = hk_packet.hk_value
+            Unused1[ii] = hk_packet.hk_value
         elif hk_packet.hk_id == 13:
-            Unused[ii] = hk_packet.hk_value
+            Unused2[ii] = hk_packet.hk_value
         elif hk_packet.hk_id == 14:
             HVmcpAuto[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 15:
@@ -397,20 +419,26 @@ def read_binary_data_hk(
             Cmd_count[ii] = Cmd_count[ii - 1]
         if np.isnan(Pinpuller_Armed[ii]):
             Pinpuller_Armed[ii] = Pinpuller_Armed[ii - 1]
-        if np.isnan(Unused[ii]):
-            Unused[ii] = Unused[ii - 1]
+        if np.isnan(Unused1[ii]):
+            Unused1[ii] = Unused1[ii - 1]
+        if np.isnan(Unused2[ii]):
+            Unused2[ii] = Unused2[ii - 1]
         if np.isnan(HVmcpAuto[ii]):
             HVmcpAuto[ii] = HVmcpAuto[ii - 1]
         if np.isnan(HVmcpMan[ii]):
             HVmcpMan[ii] = HVmcpMan[ii - 1]
 
-    # Check if the save folder exists, if not then create it
-    if not Path(save_file_path).exists():
-        Path(save_file_path).mkdir(parents=True, exist_ok=True)
+    # Split the file name in a folder and a file name
+    output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_hk_output.csv"
+    output_folder_name = "/".join(in_file_name.split("/")[:-2]) + "/processed_data/hk"
 
-    # Name of the output file
-    output_file_name = save_file_path + save_file_name
-    with open(output_file_name, 'w', newline='') as file:
+    save_file_name = output_folder_name + "/" + output_file_name
+
+    # Check if the save folder exists, if not then create it
+    if not Path(output_folder_name).exists():
+        Path(output_folder_name).mkdir(parents=True, exist_ok=True)
+
+    with open(save_file_name, 'w', newline='') as file:
         dict_writer = csv.DictWriter(
             file,
             fieldnames=(
@@ -428,8 +456,8 @@ def read_binary_data_hk(
                 "ADC_Ground",
                 "Cmd_count",
                 "Pinpuller_Armed",
-                "Unused",
-                "Unused",
+                "Unused1",
+                "Unused2",
                 "HVmcpAuto",
                 "HVmcpMan",
                 "DeltaEvntCount",
@@ -455,8 +483,8 @@ def read_binary_data_hk(
                 "ADC_Ground": ADC_Ground[ii],
                 "Cmd_count": Cmd_count[ii],
                 "Pinpuller_Armed": Pinpuller_Armed[ii],
-                "Unused": Unused[ii],
-                "Unused": Unused[ii],
+                "Unused1": Unused1[ii],
+                "Unused2": Unused2[ii],
                 "HVmcpAuto": HVmcpAuto[ii],
                 "HVmcpMan": HVmcpMan[ii],
                 "DeltaEvntCount": DeltaEvntCount[ii],
@@ -467,6 +495,8 @@ def read_binary_data_hk(
         )
     return packets
 
+    # Read the saved file data in a dataframe
+    df = pd.read_csv(save_file_name)
 
 in_file_path = "../data/raw_data/2022_04_21_1431_LEXI_HK_unit_1_mcp_unit_1_eBox_1987_hk_/"
 in_file_name = "2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987.txt"

@@ -8,6 +8,7 @@ import pandas as pd
 
 # Tha packet format of the science and housekeeping packets
 packet_format_sci = ">II4H"
+# signed lower case, unsigned upper case (b)
 packet_format_hk = ">II4H"
 
 sync = b'\xfe\x6b\x28\x40'
@@ -218,10 +219,7 @@ def read_binary_data_sci(
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
-    #df['x_val'] = np.round(df['Channel1'] / (df['Channel1'] + df['Channel3']),
-    #                       decimals=number_of_decimals)
-    #df['y_val'] = np.round(df['Channel2'] / (df['Channel2'] + df['Channel4']),
-    #                       decimals=number_of_decimals)
+
     # Save the dataframe to a csv file and set index to time stamp
     df.to_csv(save_file_name, index=True)
 
@@ -338,11 +336,10 @@ def read_binary_data_hk(
     else:
         # Print warning that unit is defaulted to 1
         print(
-            "\n FileName Warning: \033[91m \nThe unit is defaulted to 1 because the name of the file does not contain "
-            "\"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\". \033[0m \n"
+            "\n FileName Warning: \033[91m \nThe unit is defaulted to 1 because the name of the "
+            "file does not contain \"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\". \033[0m \n"
         )
         lxi_unit = 1
-
 
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
@@ -372,9 +369,9 @@ def read_binary_data_hk(
             AnodeVoltMon[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 8:
             if lxi_unit == 1:
-                V_Imon_28[ii] = (hk_packet.hk_value  * volts_per_count + 0.00747) * 1e3 / 17.94
+                V_Imon_28[ii] = (hk_packet.hk_value * volts_per_count + 0.00747) * 1e3 / 17.94
             elif lxi_unit == 2:
-                V_Imon_28[ii] = (hk_packet.hk_value  * volts_per_count + 0.00747) * 1e3 / 17.94
+                V_Imon_28[ii] = (hk_packet.hk_value * volts_per_count + 0.00747) * 1e3 / 17.94
         elif hk_packet.hk_id == 9:
             ADC_Ground[ii] = hk_packet.hk_value * volts_per_count
         elif hk_packet.hk_id == 10:

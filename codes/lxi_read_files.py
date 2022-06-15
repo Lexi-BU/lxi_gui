@@ -260,7 +260,6 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]
 
-
     x, v1_shift, v3_shift = compute_position(v1=df_slice_sci['Channel1'],
                                              v2=df_slice_sci['Channel3'], n_bins=401, bin_min=0,
                                              bin_max=4)
