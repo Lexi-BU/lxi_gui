@@ -94,7 +94,7 @@ def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnsp
         "columnspan": columnspan,
         "rowspan": rowspan,
         "fig_width": screen_width / (4 * dpi),
-        "fig_height": screen_height / (10 * dpi)
+        "fig_height": screen_height / (6 * dpi)
     }
 
     llpr.load_ts_plots(**inputs)
@@ -246,8 +246,11 @@ sci_file_load_button = tk.Button(sci_tab, text="Load Science File", command=lxrf
                                  font=font_style)
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
-sci_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
-                               fg="black", relief="sunken", borderwidth=2)
+sci_file_name = tk.StringVar()
+sci_file_name.set("No file loaded")
+sci_file_load_entry = tk.Entry(sci_tab,  textvariable=sci_file_name, font=font_style,
+                               justify="left", bg="snow", fg="black", relief="sunken",
+                               borderwidth=2)
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
@@ -258,9 +261,13 @@ sci_file_load_button.config(
 hk_file_load_button = tk.Button(sci_tab, text="Load HK File", command=lxrf.open_file_hk,
                                 font=font_style)
 hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
-hk_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
-                              fg="black", relief="sunken", borderwidth=2)
+
+hk_file_name = tk.StringVar()
+hk_file_name.set("No file loaded")
+hk_file_load_entry = tk.Entry(sci_tab, textvariable=hk_file_name, font=font_style, justify="left",
+                              bg="snow", fg="black", relief="sunken", borderwidth=2)
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
+
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(
     command=lambda: hk_file_load_entry.insert(0, lxrf.open_file_hk()))
@@ -269,19 +276,24 @@ hk_file_load_button.config(
 b_file_load_button = tk.Button(sci_tab, text="Load binary File", command=lxrf.open_file_b,
                                font=font_style)
 b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
-b_file_load_entry = tk.Entry(sci_tab, font=font_style, justify="left", bg="snow",
-                             fg="black", relief="sunken", borderwidth=2)
+
+b_file_name = tk.StringVar()
+b_file_name.set("No file loaded")
+b_file_load_entry = tk.Entry(sci_tab, textvariable=b_file_name, font=font_style, justify="left",
+                             bg="snow", fg="black", relief="sunken", borderwidth=2)
 b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
+
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
 
-# If a new file is loaded, then print its name in the entry box.
-sci_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
-    file_load_entry=sci_file_load_entry, tk=tk, file_name=lxrf.open_file_sci()))
-hk_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
-    file_load_entry=hk_file_load_entry, tk=tk, file_name=lxrf.open_file_hk()))
-b_file_load_button.bind("<Button-1>", lambda event: lmsc.insert_file_name(
-    file_load_entry=b_file_load_entry, tk=tk, file_name=lxrf.open_file_b()))
+# If a new file is loaded, then print its name in the entry box and update the file_name variable.
+sci_file_name.trace("w", lambda *_: sci_file_name.set(lmsc.file_name_update(file_type="sci")))
+hk_file_name.trace("w", lambda *_: hk_file_name.set(lmsc.file_name_update(file_type="hk")))
+
+# If a new binary file is loaded, then update the name of all three files.
+b_file_name.trace("w", lambda *_: b_file_name.set(lmsc.file_name_update(file_type="b")))
+b_file_name.trace("w", lambda *_: sci_file_name.set(lmsc.file_name_update(file_type="sci")))
+b_file_name.trace("w", lambda *_: hk_file_name.set(lmsc.file_name_update(file_type="hk")))
 
 # If the global_variables.all_file_details["df_slice_hk"] is not empty, then set the comlumn names
 # to the columns in the dataframe
