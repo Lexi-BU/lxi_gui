@@ -180,16 +180,20 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     x, v1_shift, v3_shift = compute_position(v1=df_slice_sci['Channel1'],
                                              v2=df_slice_sci['Channel3'], n_bins=401, bin_min=0,
                                              bin_max=4)
-    df_slice_sci['x_val'] = x
-    df_slice_sci['v1_shift'] = v1_shift
-    df_slice_sci['v3_shift'] = v3_shift
+
+    # Add the x-coordinate to the dataframe
+    df_slice_sci.loc[:, 'x'] = x
+    df_slice_sci.loc[:, 'v1_shift'] = v1_shift
+    df_slice_sci.loc[:, 'v3_shift'] = v3_shift
 
     y, v4_shift, v2_shift = compute_position(v1=df_slice_sci['Channel4'],
                                              v2=df_slice_sci['Channel2'], n_bins=401, bin_min=0,
                                              bin_max=4)
-    df_slice_sci['y_val'] = y
-    df_slice_sci['v4_shift'] = v4_shift
-    df_slice_sci['v2_shift'] = v2_shift
+    
+    # Add the y-coordinate to the dataframe
+    df_slice_sci.loc[:, 'y_val'] = y
+    df_slice_sci.loc[:, 'v4_shift'] = v4_shift
+    df_slice_sci.loc[:, 'v2_shift'] = v2_shift
 
     return df, df_slice_sci
 

@@ -110,3 +110,48 @@ def fwhm(x, y):
 def ts_option_update():
     print(global_variables.all_file_details["df_slice_hk"].columns.tolist())
     return global_variables.all_file_details["df_slice_hk"].columns.tolist()
+
+
+def diff_file_warnings():
+    """
+    Warn the user if the hk and sci files do not have the same time values
+    """
+    try:
+        hk_t_min = global_variables.all_file_details["df_all_hk"].index.min()
+        hk_t_max = global_variables.all_file_details["df_all_hk"].index.max()
+        sci_t_min = global_variables.all_file_details["df_all_sci"].index.min()
+        sci_t_max = global_variables.all_file_details["df_all_sci"].index.max()
+        if  hk_t_min != sci_t_min:
+            print(f"\n \x1b[1;31;255m WARNING: The hk file does not have the same minimum time "
+                    "values as the sci file \x1b[0m")
+            print(f"The hk file has the minimum time value of \x1b[1;32;255m{hk_t_min} \x1b[0m"
+                  f"and the sci file has the minimum time value of \x1b[1;32;255m{sci_t_min}"
+                  f"\x1b[0m")
+        if hk_t_max != sci_t_max:
+            print(f"\n \x1b[1;31;255m WARNING: The hk file does not have the same maximum time "
+                    "values as the sci file \x1b[0m")
+            print(f"The hk file has the maximum time value of \x1b[1;32;255m{hk_t_max} \x1b[0m"
+                    f"and the sci file has the maximum time value of \x1b[1;32;255m{sci_t_max}"
+                    f"\x1b[0m")
+    except Exception:
+        pass
+
+
+def file_name_update(file_name=None, file_type=None):
+    """
+    Update the file name in the global variables
+
+    Parameters
+    ----------
+    file_name : str
+        The file name to be updated
+    """
+    if file_type == "sci":
+        file_name = global_variables.all_file_details["file_name_sci"].split('/')[-1]
+    elif file_type == "hk":
+        file_name = global_variables.all_file_details["file_name_hk"].split('/')[-1]
+    elif file_type == "b":
+        file_name = global_variables.all_file_details["file_name_b"].split('/')[-1]
+    diff_file_warnings()
+
+    return file_name
