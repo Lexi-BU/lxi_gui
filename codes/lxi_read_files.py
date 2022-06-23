@@ -189,7 +189,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     y, v4_shift, v2_shift = compute_position(v1=df_slice_sci['Channel4'],
                                              v2=df_slice_sci['Channel2'], n_bins=401, bin_min=0,
                                              bin_max=4)
-    
+
     # Add the y-coordinate to the dataframe
     df_slice_sci.loc[:, 'y_val'] = y
     df_slice_sci.loc[:, 'v4_shift'] = v4_shift
@@ -261,6 +261,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         t_end = df_sci.index.max()
 
     # Select dataframe from timestamp t_start to t_end
+    print(df_hk.index.min(), df_hk.index.max())
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]
 

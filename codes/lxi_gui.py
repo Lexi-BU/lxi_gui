@@ -110,8 +110,8 @@ def ts_button_val_change():
                         '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon',
                         '+28V_Imon', 'DeltaEvntCount', 'DeltaDroppedCount']
     plot_opt_entry_list = [plot_opt_entry_1, plot_opt_entry_2, plot_opt_entry_3,
-                            plot_opt_entry_4, plot_opt_entry_5, plot_opt_entry_6,
-                            plot_opt_entry_7, plot_opt_entry_8, plot_opt_entry_9]
+                           plot_opt_entry_4, plot_opt_entry_5, plot_opt_entry_6,
+                           plot_opt_entry_7, plot_opt_entry_8, plot_opt_entry_9]
 
     if default_opt_var.get() == True:
         for i in range(len(default_key_list)):
@@ -131,7 +131,7 @@ def refresh_ts_plot():
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1, columnspan=3)
     except Exception:
         pass
-    
+
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1, columnspan=3)
     except Exception:
@@ -141,12 +141,12 @@ def refresh_ts_plot():
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1, columnspan=3)
     except Exception:
         pass
-    
+
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1, columnspan=3)
     except Exception:
         pass
-    
+
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1, columnspan=3)
     except Exception:
@@ -166,6 +166,7 @@ def refresh_ts_plot():
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3)
     except Exception:
         pass
+
 
 # Create the main window.
 root = tk.Tk()
@@ -190,7 +191,7 @@ print("If the GUI size is messed up, check comment on line #107 of the code 'lxi
 root.title("LEXI GUI")
 # Add the lxi logo
 # NOTE: This doesn't work on UNIX system. Couldn't find a solution.
-#root.iconbitmap("../figures/lxi_icon.ico")
+# root.iconbitmap("../figures/lxi_icon.ico")
 # set size of you window here is example for screen height and width
 root.geometry(f"{int(screen_width * 0.9)}x{int(screen_height * 0.9)}")
 
@@ -248,7 +249,7 @@ sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
 sci_file_name = tk.StringVar()
 sci_file_name.set("No file loaded")
-sci_file_load_entry = tk.Entry(sci_tab,  textvariable=sci_file_name, font=font_style,
+sci_file_load_entry = tk.Entry(sci_tab, textvariable=sci_file_name, font=font_style,
                                justify="left", bg="snow", fg="black", relief="sunken",
                                borderwidth=2)
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
@@ -303,7 +304,7 @@ else:
     ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp',
                   '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon',
                   'ADC_Ground', 'Cmd_count', 'Pinpuller_Armed', 'HVmcpAuto', 'HVmcpMan',
-                  'DeltaEvntCount', 'DeltaDroppedCount', 'DeltaLostevntCount']
+                  'DeltaEvntCount', 'DeltaDroppedCount', 'DeltaLostEvntCount']
 
 # Plot options for the first plot
 plot_opt_label_1 = tk.Label(hk_tab, text="Plot options:", font=font_style_box)
@@ -487,27 +488,27 @@ plot_opt_entry_3.trace(
 
 plot_opt_entry_4.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1,
-                                      columnspan=3))
+                                   columnspan=3))
 
 plot_opt_entry_5.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1,
-                                      columnspan=3))
+                                   columnspan=3))
 
 plot_opt_entry_6.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1,
-                                        columnspan=3))
+                                   columnspan=3))
 
 plot_opt_entry_7.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1,
-                                        columnspan=3))
+                                   columnspan=3))
 
 plot_opt_entry_8.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1,
-                                        columnspan=3))
+                                   columnspan=3))
 
 plot_opt_entry_9.trace(
     "w", lambda *_: ts_plot_inputs(plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1,
-                                        columnspan=3))
+                                   columnspan=3))
 
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, justify="center",
@@ -531,7 +532,7 @@ quit_button_sci.grid(row=12, column=0, columnspan=1, rowspan=1, sticky="n")
 default_opt_var = tk.BooleanVar()
 default_opt_var.set(False)
 default_opt_checkbox = tk.Checkbutton(hk_tab, text="Default Options", font=font_style_box,
-                                        variable=default_opt_var, bg="white", fg="black")
+                                      variable=default_opt_var, bg="white", fg="black")
 default_opt_checkbox.grid(row=12, column=1, columnspan=1, sticky="n")
 
 default_opt_var.trace("w", lambda *_: ts_button_val_change())

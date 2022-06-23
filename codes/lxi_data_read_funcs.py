@@ -495,8 +495,6 @@ def read_binary_data_hk(
         )
     return packets
 
-    # Read the saved file data in a dataframe
-    df = pd.read_csv(save_file_name)
 
 in_file_path = "../data/raw_data/2022_04_21_1431_LEXI_HK_unit_1_mcp_unit_1_eBox_1987_hk_/"
 in_file_name = "2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987.txt"
