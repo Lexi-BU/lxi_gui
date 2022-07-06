@@ -18,8 +18,8 @@
 
 Please let me know if you have any trouble in using the program.
 
-![Science Front](https://raw.githubusercontent.com/qudsiramiz/lxi_gui/exp/figures/luigi_hist_sci.png?token=GHSAT0AAAAAABOWV7JZSEL4NPS7MRBQXGEWYVLNOLQ)
+![Science Front](https://raw.githubusercontent.com/qudsiramiz/lxi_gui/main/figures/luigi_hist_sci.png?token=GHSAT0AAAAAABWKAY5TRG62KFO7YRIL5NLCYWF4XOQ)
 ### <center>The Science histograms</center>
 
-![Housekeeping Front](https://raw.githubusercontent.com/qudsiramiz/lxi_gui/exp/figures/luigi_ts_hk.png?token=GHSAT0AAAAAABOWV7JYNZBWK5CWHLZZ2ZGAYVLNOLA)
+![Housekeeping Front](https://raw.githubusercontent.com/qudsiramiz/lxi_gui/main/figures/luigi_ts_hk.png?token=GHSAT0AAAAAABWKAY5STAEPAPQJ6TKI4MEKYWF4YBA)
 ### <center>The Housekeeping Time series</center>
