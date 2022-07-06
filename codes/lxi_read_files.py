@@ -20,7 +20,7 @@ def open_file_sci(start_time=None, end_time=None):
                                           )
     # Cut path to the file off
     file_name_sci = file_val.split('/')[-1]
-    global_variables.all_file_details['file_name_sci'] = file_name_sci
+    global_variables.all_file_details['file_name_sci'] = file_val
 
     df_all_sci, df_slice_sci = read_csv_sci(file_val=file_val, t_start=start_time, t_end=end_time)
     global_variables.all_file_details['df_slice_sci'] = df_slice_sci
@@ -39,7 +39,7 @@ def open_file_hk():
                                           )
     # Cut path to the file off
     file_name_hk = file_val.split('/')[-1]
-    global_variables.all_file_details['file_name_hk'] = file_name_hk
+    global_variables.all_file_details['file_name_hk'] = file_val
 
     df_all_hk, df_slice_hk = read_csv_hk(file_val)
     global_variables.all_file_details['df_slice_hk'] = df_slice_hk
@@ -57,7 +57,7 @@ def open_file_b():
                                           )
 
     # Cut path to the file off
-    file_name_b = file_val.split('/')[-1]
+    file_name_b = file_val
     (df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_all_hk, df_all_sci
      ) = read_binary_file(file_val)
     global_variables.all_file_details["file_name_b"] = file_name_b
@@ -176,24 +176,39 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Select dataframe from timestamp t_start to t_end
     df_slice_sci = df.loc[t_start:t_end]
 
-    # TODO: Add comments here
-    x, v1_shift, v3_shift = compute_position(v1=df_slice_sci['Channel1'],
-                                             v2=df_slice_sci['Channel3'], n_bins=401, bin_min=0,
-                                             bin_max=4)
+    # For both the sliced and entire dataframes, compute the x and y-coordinates and the shift in
+    # the voltages
+    x_slice, v1_shift_slice, v3_shift_slice = compute_position(v1=df_slice_sci['Channel1'],
+                                                               v2=df_slice_sci['Channel3'],
+                                                               n_bins=401, bin_min=0, bin_max=4)
+
+    x, v1_shift, v3_shift = compute_position(v1=df['Channel1'], v2=df['Channel3'], n_bins=401,
+                                             bin_min=0, bin_max=4)
 
     # Add the x-coordinate to the dataframe
-    df_slice_sci.loc[:, 'x'] = x
-    df_slice_sci.loc[:, 'v1_shift'] = v1_shift
-    df_slice_sci.loc[:, 'v3_shift'] = v3_shift
+    df_slice_sci.loc[:, 'x_val'] = x_slice
+    df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
+    df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
 
-    y, v4_shift, v2_shift = compute_position(v1=df_slice_sci['Channel4'],
-                                             v2=df_slice_sci['Channel2'], n_bins=401, bin_min=0,
-                                             bin_max=4)
+    df.loc[:, 'x_val'] = x
+    df.loc[:, 'v1_shift'] = v1_shift
+    df.loc[:, 'v3_shift'] = v3_shift
+
+    y_slice, v4_shift_slice, v2_shift_slice = compute_position(v1=df_slice_sci['Channel4'],
+                                                               v2=df_slice_sci['Channel2'],
+                                                               n_bins=401, bin_min=0, bin_max=4)
+
+    y, v4_shift, v2_shift = compute_position(v1=df['Channel4'], v2=df['Channel2'], n_bins=401,
+                                             bin_min=0, bin_max=4)
 
     # Add the y-coordinate to the dataframe
-    df_slice_sci.loc[:, 'y_val'] = y
-    df_slice_sci.loc[:, 'v4_shift'] = v4_shift
-    df_slice_sci.loc[:, 'v2_shift'] = v2_shift
+    df_slice_sci.loc[:, 'y_val'] = y_slice
+    df_slice_sci.loc[:, 'v4_shift'] = v4_shift_slice
+    df_slice_sci.loc[:, 'v2_shift'] = v2_shift_slice
+
+    df.loc[:, 'y_val'] = y
+    df.loc[:, 'v4_shift'] = v4_shift
+    df.loc[:, 'v2_shift'] = v2_shift
 
     return df, df_slice_sci
 
@@ -216,9 +231,15 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
     global df_slice_hk
     df = pd.read_csv(file_val)
 
-    # Replace index with timestamp
+    # Check all the keys and find out which one has the word "time" in it
+    for key in df.keys():
+        if "time" in key.lower():
+            time_col = key
+            break
+    # Rename the time column to TimeStamp
+    df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
+    # Set the index to the time column
     df.set_index('TimeStamp', inplace=True)
-
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
@@ -234,13 +255,43 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
 
 def read_binary_file(file_val=None, t_start=None, t_end=None):
+    """
+    Reads the binary file using functions saved in the file "lxi_read_binary_data.py" and returns
+    a pandas dataframe for the selected time range along with x and y-coordinates.
 
+    Parameters
+    ----------
+    file_val : str
+        Path to the input file. Default is None.
+    t_start : float
+        Start time of the data. Default is None.
+    t_end : float
+        End time of the data. Default is None.
+
+    Returns
+    -------
+    df_slice_hk : pandas.DataFrame
+        The Housekeeping dataframe for the selected time range.
+    df_slice_sci : pandas.DataFrame
+        The Science dataframe for the selected time range.
+    df_hk : pandas.DataFrame
+        The Housekeeping dataframe for the entire time range in the file.
+    df_sci : pandas.DataFrame
+        The Science dataframe for the entire time range in the file.
+    file_name_hk : str
+        The name of the Housekeeping file.
+    file_name_sci : str
+        The name of the Science file.
+    """
+
+    # Read the housekeeping data
     df_hk, file_name_hk = lxrb.read_binary_data_hk(
         in_file_name=file_val,
         save_file_name=None,
         number_of_decimals=6
     )
 
+    # Read the science data
     df_sci, file_name_sci = lxrb.read_binary_data_sci(
         in_file_name=file_val,
         save_file_name=None,
@@ -261,22 +312,41 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         t_end = df_sci.index.max()
 
     # Select dataframe from timestamp t_start to t_end
-    print(df_hk.index.min(), df_hk.index.max())
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]
 
-    x, v1_shift, v3_shift = compute_position(v1=df_slice_sci['Channel1'],
-                                             v2=df_slice_sci['Channel3'], n_bins=401, bin_min=0,
-                                             bin_max=4)
-    df_slice_sci['x_val'] = x
-    df_slice_sci['v1_shift'] = v1_shift
-    df_slice_sci['v3_shift'] = v3_shift
+    # For both the sliced and entire dataframes, compute the x and y-coordinates and the shift in
+    # the voltages
+    x_slice, v1_shift_slice, v3_shift_slice = compute_position(v1=df_slice_sci['Channel1'],
+                                                               v2=df_slice_sci['Channel3'],
+                                                               n_bins=401, bin_min=0, bin_max=4)
 
-    y, v4_shift, v2_shift = compute_position(v1=df_slice_sci['Channel4'],
-                                             v2=df_slice_sci['Channel2'], n_bins=401, bin_min=0,
-                                             bin_max=4)
-    df_slice_sci['y_val'] = y
-    df_slice_sci['v4_shift'] = v4_shift
-    df_slice_sci['v2_shift'] = v2_shift
+    x, v1_shift, v3_shift = compute_position(v1=df_sci['Channel1'], v2=df_sci['Channel3'],
+                                             n_bins=401, bin_min=0, bin_max=4)
+
+    # Add the x-coordinate to the dataframe
+    df_slice_sci.loc[:, 'x_val'] = x_slice
+    df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
+    df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
+
+    df_sci.loc[:, 'x_val'] = x
+    df_sci.loc[:, 'v1_shift'] = v1_shift
+    df_sci.loc[:, 'v3_shift'] = v3_shift
+
+    y_slice, v4_shift_slice, v2_shift_slice = compute_position(v1=df_slice_sci['Channel4'],
+                                                               v2=df_slice_sci['Channel2'],
+                                                               n_bins=401, bin_min=0, bin_max=4)
+
+    y, v4_shift, v2_shift = compute_position(v1=df_sci['Channel4'], v2=df_sci['Channel2'],
+                                             n_bins=401, bin_min=0, bin_max=4)
+
+    # Add the y-coordinate to the dataframe
+    df_slice_sci.loc[:, 'y_val'] = y_slice
+    df_slice_sci.loc[:, 'v4_shift'] = v4_shift_slice
+    df_slice_sci.loc[:, 'v2_shift'] = v2_shift_slice
+
+    df_sci.loc[:, 'y_val'] = y
+    df_sci.loc[:, 'v4_shift'] = v4_shift
+    df_sci.loc[:, 'v2_shift'] = v2_shift
 
     return df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_hk, df_sci

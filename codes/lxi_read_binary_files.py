@@ -212,7 +212,7 @@ def read_binary_data_sci(
         dict_writer.writeheader()
         dict_writer.writerows(
             {
-                'TimeStamp': sci_packet.timestamp,
+                'TimeStamp': sci_packet.timestamp / 1e3,
                 'IsCommanded': sci_packet.is_commanded,
                 'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
                 'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
@@ -359,7 +359,8 @@ def read_binary_data_hk(
 
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
-        all_data_dict["TimeStamp"][ii] = hk_packet.timestamp
+        # Convert to seconds from milliseconds for the timestamp
+        all_data_dict["TimeStamp"][ii] = hk_packet.timestamp / 1e3
         all_data_dict["HK_id"][ii] = hk_packet.hk_id
         key = str(hk_packet.hk_id)
         if key in selected_keys:
