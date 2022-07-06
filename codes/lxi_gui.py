@@ -9,6 +9,7 @@ import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
 import lxi_read_files as lxrf
+import lxi_csv_to_cdf as lctc
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -16,10 +17,29 @@ importlib.reload(global_variables)
 importlib.reload(llpr)
 importlib.reload(lgeb)
 importlib.reload(lmsc)
+importlib.reload(lctc)
 
 # Initialize the global variables. This is necessary because the global variables is where all the
 # data and name of the files are stored.
 global_variables.init()
+
+
+def save_cdf():
+    """
+    The function, upon clicking the "Save CDF" button, saves the data in the csv file to a cdf file.
+    """
+    try:
+        inputs = {
+            "df": global_variables.all_file_details["df_all_sci"],
+            "csv_file": global_variables.all_file_details["file_name_sci"],
+        }
+
+        lctc.lxi_csv_to_cdf(**inputs)
+    except Exception as e:
+        print(f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
+              f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+              f"Science csv file is loaded. \n")
+        pass
 
 
 def hist_plot_inputs(dpi=100):
@@ -185,7 +205,7 @@ if platform.system() == "Linux":
 else:
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 
-print("If the GUI size is messed up, check comment on line #107 of the code 'lxi_gui.py'.")
+print("If the GUI size is messed up, check comment on line #177 of the code 'lxi_gui.py'.")
 
 # Set the title of the main window.
 root.title("LEXI GUI")
@@ -437,12 +457,11 @@ v_sum_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=12, column=4, entry_la
 v_sum_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=13, column=4, entry_label="V sum Max",
                                         entry_val=8, font_style=font_style_box)
 
-# Choose whether to plot probability density or the number of data points in each bin (is Bool)
+# Choose whether to plot curve fit or not (is Bool)
 curve_fit_label = tk.Label(sci_tab, text="Curve Fit", font=font_style_box, bg="white", fg="black")
 curve_fit_label.grid(row=14, column=5, columnspan=1, sticky="n")
 
-# Add a checkbox to choose whether to plot probability density or the number of data points in each
-# bin
+# Add a checkbox to choose whether to plot curve fit or not
 curve_fit_status_var = tk.BooleanVar()
 curve_fit_status_var.set(False)
 curve_fit_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
@@ -450,6 +469,14 @@ curve_fit_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
 curve_fit_checkbox.grid(row=14, column=4, columnspan=1, sticky="n")
 
 curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
+
+# Add a button to save the data to a cdf file
+cdf_save_button = tk.Button(
+    sci_tab, text="Save CDF", command=lambda: save_cdf(), font=font_style_box,
+    justify="center", bg="snow", fg="green", pady=5, padx=5, borderwidth=2,
+    relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
+)
+cdf_save_button.grid(row=12, column=7, columnspan=2, sticky="n")
 
 # Label for plot times
 start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="white", fg="black")
