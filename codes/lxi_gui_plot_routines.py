@@ -249,13 +249,14 @@ class plot_data_class():
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
 
+        x_axs_val = self.df_slice_hk.index - t_start
         axs1 = plt.subplot(gs[:])
-        axs1.plot(self.df_slice_hk.index, self.df_slice_hk[self.plot_key], '.', color="darkred",
+        axs1.plot(x_axs_val, self.df_slice_hk[self.plot_key], '.', color="darkred",
                   alpha=alpha, ms=ms, label=self.plot_key)
-        axs1.set_xlim(t_start, t_end)
+        axs1.set_xlim(0, t_end - t_start)
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
-        axs1.set_xlabel('Time (s)')
+        axs1.set_xlabel(f'Time since {t_start} (s)')
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")
         axs1.legend(loc='best')
@@ -475,9 +476,9 @@ class plot_data_class():
                 # Print the fit values on the plot
                 x_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_x[1]),
                             transform=x_hist.transAxes, verticalalignment='top')
-                x_hist.text(0.05, 0.80, '$\sigma$ = {:.3f}'.format(popt_x[2]),
+                x_hist.text(0.05, 0.70, '$\sigma$ = {:.3f}'.format(popt_x[2]),
                             transform=x_hist.transAxes, verticalalignment='top')
-                x_hist.text(0.05, 0.65, '$FWHM$ = {:.3f}'.format(x_fwhm),
+                x_hist.text(0.05, 0.45, '$FWHM$ = {:.3f}'.format(x_fwhm),
                             transform=x_hist.transAxes, verticalalignment='top')
                 y_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_y[1]),
                             transform=y_hist.transAxes, verticalalignment='top')

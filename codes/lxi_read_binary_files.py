@@ -5,6 +5,11 @@ from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
+import importlib
+
+import lxi_misc_codes as lmsc
+
+importlib.reload(lmsc)
 
 # Tha packet format of the science and housekeeping packets
 packet_format_sci = ">II4H"
@@ -207,7 +212,7 @@ def read_binary_data_sci(
         dict_writer.writeheader()
         dict_writer.writerows(
             {
-                'TimeStamp': sci_packet.timestamp,
+                'TimeStamp': sci_packet.timestamp / 1e3,
                 'IsCommanded': sci_packet.is_commanded,
                 'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
                 'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
@@ -326,7 +331,18 @@ def read_binary_data_hk(
     HVmcpMan = np.full(len(hk_idx), np.nan)
     DeltaEvntCount = np.full(len(hk_idx), np.nan)
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
-    DeltaLostevntCount = np.full(len(hk_idx), np.nan)
+    DeltaLostEvntCount = np.full(len(hk_idx), np.nan)
+
+    all_data_dict = {"TimeStamp": TimeStamp, "HK_id": HK_id,
+                     "0": PinPullerTemp, "1": OpticsTemp, "2": LEXIbaseTemp, "3": HVsupplyTemp,
+                     "4": V_Imon_5_2, "5": V_Imon_10, "6": V_Imon_3_3, "7": AnodeVoltMon,
+                     "8": V_Imon_28, "9": ADC_Ground, "10": Cmd_count, "11": Pinpuller_Armed,
+                     "12": Unused1, "13": Unused2, "14": HVmcpAuto, "15": HVmcpMan,
+                     "DeltaEvntCount": DeltaEvntCount, "DeltaDroppedCount": DeltaDroppedCount,
+                     "DeltaLostEvntCount": DeltaLostEvntCount}
+
+    selected_keys = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
+                     "15"]
 
     # Check if "unit_1" or "unit1" is in the file name, if so then the data is from the unit 1
     if "unit_1" in input_file_name or "unit1" in input_file_name:
@@ -343,90 +359,42 @@ def read_binary_data_hk(
 
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
-        TimeStamp[ii] = hk_packet.timestamp
-        HK_id[ii] = hk_packet.hk_id
-        if hk_packet.hk_id == 0:
-            PinPullerTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
-        elif hk_packet.hk_id == 1:
-            OpticsTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
-        elif hk_packet.hk_id == 2:
-            LEXIbaseTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
-        elif hk_packet.hk_id == 3:
-            HVsupplyTemp[ii] = (hk_packet.hk_value * volts_per_count - 2.73) * 100
-        elif hk_packet.hk_id == 4:
-            if lxi_unit == 1:
-                V_Imon_5_2[ii] = (hk_packet.hk_value * volts_per_count) * 1e3 / 18
-            elif lxi_unit == 2:
-                V_Imon_5_2[ii] = (hk_packet.hk_value - 1.129) / 21.456
-        elif hk_packet.hk_id == 5:
-            V_Imon_10[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id == 6:
-            if lxi_unit == 1:
-                V_Imon_3_3[ii] = (hk_packet.hk_value * volts_per_count + 0.0178) * 1e3 / 9.131
-            elif lxi_unit == 2:
-                V_Imon_3_3[ii] = (hk_packet.hk_value * volts_per_count + 0.029) * 1e3 / 18
-        elif hk_packet.hk_id == 7:
-            AnodeVoltMon[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id == 8:
-            if lxi_unit == 1:
-                V_Imon_28[ii] = (hk_packet.hk_value * volts_per_count + 0.00747) * 1e3 / 17.94
-            elif lxi_unit == 2:
-                V_Imon_28[ii] = (hk_packet.hk_value * volts_per_count + 0.00747) * 1e3 / 17.94
-        elif hk_packet.hk_id == 9:
-            ADC_Ground[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id == 10:
-            Cmd_count[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id == 11:
-            Pinpuller_Armed[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id == 12:
-            Unused1[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id == 13:
-            Unused2[ii] = hk_packet.hk_value
-        elif hk_packet.hk_id == 14:
-            HVmcpAuto[ii] = hk_packet.hk_value * volts_per_count
-        elif hk_packet.hk_id == 15:
-            HVmcpMan[ii] = hk_packet.hk_value * volts_per_count
+        # Convert to seconds from milliseconds for the timestamp
+        all_data_dict["TimeStamp"][ii] = hk_packet.timestamp / 1e3
+        all_data_dict["HK_id"][ii] = hk_packet.hk_id
+        key = str(hk_packet.hk_id)
+        if key in selected_keys:
+            all_data_dict[key][ii] = lmsc.hk_value_comp(ii=ii,
+                                                        vpc=volts_per_count,
+                                                        hk_value=hk_packet.hk_value,
+                                                        hk_id=hk_packet.hk_id,
+                                                        lxi_unit=lxi_unit
+                                                        )
 
-        DeltaEvntCount[ii] = hk_packet.delta_event_count
-        DeltaDroppedCount[ii] = hk_packet.delta_drop_event_count
-        DeltaLostevntCount[ii] = hk_packet.delta_lost_event_count
+        all_data_dict["DeltaEvntCount"][ii] = hk_packet.delta_event_count
+        all_data_dict["DeltaDroppedCount"][ii] = hk_packet.delta_drop_event_count
+        all_data_dict["DeltaLostEvntCount"][ii] = hk_packet.delta_lost_event_count
 
-    # For observations which get their values from "HK_value", go through the whole array and
-    # replace the nans at any index with the value from the previous index.
+    # Create a dataframe with the data
+    df_key_list = ["TimeStamp", "HK_id", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp",
+                   "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon",
+                   "+28V_Imon", "ADC_Ground", "Cmd_count", "Pinpuller_Armed", "Unused1", "Unused2",
+                   "HVmcpAuto", "HVmcpMan", "DeltaEvntCount", "DeltaDroppedCount",
+                   "DeltaLostEvntCount"]
+
+    df = pd.DataFrame(columns=df_key_list)
+    for ii, key in enumerate(df_key_list):
+        df[key] = all_data_dict[list(all_data_dict.keys())[ii]]
+
+    # For the dataframe, replace the nans with the value from the previous index.
     # This is to make sure that the file isn't inundated with nans.
-    for ii in range(1, len(TimeStamp)):
-        if np.isnan(PinPullerTemp[ii]):
-            PinPullerTemp[ii] = PinPullerTemp[ii - 1]
-        if np.isnan(OpticsTemp[ii]):
-            OpticsTemp[ii] = OpticsTemp[ii - 1]
-        if np.isnan(LEXIbaseTemp[ii]):
-            LEXIbaseTemp[ii] = LEXIbaseTemp[ii - 1]
-        if np.isnan(HVsupplyTemp[ii]):
-            HVsupplyTemp[ii] = HVsupplyTemp[ii - 1]
-        if np.isnan(V_Imon_5_2[ii]):
-            V_Imon_5_2[ii] = V_Imon_5_2[ii - 1]
-        if np.isnan(V_Imon_10[ii]):
-            V_Imon_10[ii] = V_Imon_10[ii - 1]
-        if np.isnan(V_Imon_3_3[ii]):
-            V_Imon_3_3[ii] = V_Imon_3_3[ii - 1]
-        if np.isnan(AnodeVoltMon[ii]):
-            AnodeVoltMon[ii] = AnodeVoltMon[ii - 1]
-        if np.isnan(V_Imon_28[ii]):
-            V_Imon_28[ii] = V_Imon_28[ii - 1]
-        if np.isnan(ADC_Ground[ii]):
-            ADC_Ground[ii] = ADC_Ground[ii - 1]
-        if np.isnan(Cmd_count[ii]):
-            Cmd_count[ii] = Cmd_count[ii - 1]
-        if np.isnan(Pinpuller_Armed[ii]):
-            Pinpuller_Armed[ii] = Pinpuller_Armed[ii - 1]
-        if np.isnan(Unused1[ii]):
-            Unused1[ii] = Unused1[ii - 1]
-        if np.isnan(Unused2[ii]):
-            Unused2[ii] = Unused2[ii - 1]
-        if np.isnan(HVmcpAuto[ii]):
-            HVmcpAuto[ii] = HVmcpAuto[ii - 1]
-        if np.isnan(HVmcpMan[ii]):
-            HVmcpMan[ii] = HVmcpMan[ii - 1]
+    for key in df.keys():
+        for ii in range(1, len(df[key])):
+            if np.isnan(df[key][ii]):
+                df[key][ii] = df[key][ii - 1]
+
+    # Set the index to the TimeStamp
+    df.set_index("TimeStamp", inplace=False)
 
     # Split the file name in a folder and a file name
     output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_hk_output.csv"
@@ -438,63 +406,7 @@ def read_binary_data_hk(
     if not Path(output_folder_name).exists():
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
-    with open(save_file_name, 'w', newline='') as file:
-        dict_writer = csv.DictWriter(
-            file,
-            fieldnames=(
-                "TimeStamp",
-                "HK_id",
-                "PinPullerTemp",
-                "OpticsTemp",
-                "LEXIbaseTemp",
-                "HVsupplyTemp",
-                "+5.2V_Imon",
-                "+10V_Imon",
-                "+3.3V_Imon",
-                "AnodeVoltMon",
-                "+28V_Imon",
-                "ADC_Ground",
-                "Cmd_count",
-                "Pinpuller_Armed",
-                "Unused1",
-                "Unused2",
-                "HVmcpAuto",
-                "HVmcpMan",
-                "DeltaEvntCount",
-                "DeltaDroppedCount",
-                "DeltaLostevntCount"
-            ),
-        )
-        dict_writer.writeheader()
-
-        dict_writer.writerows(
-            {
-                "TimeStamp": TimeStamp[ii],
-                "HK_id": HK_id[ii],
-                "PinPullerTemp": PinPullerTemp[ii],
-                "OpticsTemp": OpticsTemp[ii],
-                "LEXIbaseTemp": LEXIbaseTemp[ii],
-                "HVsupplyTemp": HVsupplyTemp[ii],
-                "+5.2V_Imon": V_Imon_5_2[ii],
-                "+10V_Imon": V_Imon_10[ii],
-                "+3.3V_Imon": V_Imon_3_3[ii],
-                "AnodeVoltMon": AnodeVoltMon[ii],
-                "+28V_Imon": V_Imon_28[ii],
-                "ADC_Ground": ADC_Ground[ii],
-                "Cmd_count": Cmd_count[ii],
-                "Pinpuller_Armed": Pinpuller_Armed[ii],
-                "Unused1": Unused1[ii],
-                "Unused2": Unused2[ii],
-                "HVmcpAuto": HVmcpAuto[ii],
-                "HVmcpMan": HVmcpMan[ii],
-                "DeltaEvntCount": DeltaEvntCount[ii],
-                "DeltaDroppedCount": DeltaDroppedCount[ii],
-                "DeltaLostevntCount": DeltaLostevntCount[ii],
-            }
-            for ii in range(len(hk_idx))
-        )
-
-    # Read the saved file data in a dataframe
-    df = pd.read_csv(save_file_name)
+    # Save the dataframe to a csv file
+    df.to_csv(save_file_name, index=True)
 
     return df, save_file_name
