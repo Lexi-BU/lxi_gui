@@ -577,11 +577,11 @@ elif platform.system() == 'Linux':
     # Get the system resolution and size for an ubuntu machine and save it to a variable
     os.system('xrandr | grep "mm" > screen_info.txt')
     #xx = os.system('xrandr')
-"""
+
 
 # Use lambda function to pass the function as an argument
 lambda_func = lambda x, y: test_func(x, y)
-"""
+
 
 from tkinter import *
 
@@ -622,3 +622,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""
