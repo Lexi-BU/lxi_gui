@@ -12,7 +12,7 @@ import lxi_read_files as lxrf
 importlib.reload(lxrf)
 
 
-def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None,  cdf_file=None, cdf_folder=None):
+def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_folder=None):
     """
     Convert a CSV file to a CDF file.
 
@@ -63,7 +63,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None,  cdf_file=None, cdf_
         else:
             cdf_file = cdf_folder + "/" + cdf_file
             print("Creating CDF file: " + cdf_file)
-        
+
         # If the cdf file already exists, overwrite it
         if Path(cdf_file).exists():
             # Raise a warning saying the file already exists and ask the user if they want to

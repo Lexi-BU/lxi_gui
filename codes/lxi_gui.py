@@ -319,6 +319,7 @@ b_file_name.trace("w", lambda *_: hk_file_name.set(lmsc.file_name_update(file_ty
 # If the global_variables.all_file_details["df_slice_hk"] is not empty, then set the comlumn names
 # to the columns in the dataframe
 if bool("df_slice_hk" in global_variables.all_file_details.keys()):
+    ts_options = global_variables.all_file_details["df_slice_hk"].columns.tolist()
 else:
     ts_options = ['HK_id', 'PinPullerTemp', 'OpticsTemp', 'LEXIbaseTemp', 'HVsupplyTemp',
                   '+5.2V_Imon', '+10V_Imon', '+3.3V_Imon', 'AnodeVoltMon', '+28V_Imon',
