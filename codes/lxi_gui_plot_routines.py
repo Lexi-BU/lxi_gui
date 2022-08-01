@@ -390,7 +390,7 @@ class plot_data_class():
         # Drop all nans in the data
         self.df_slice_sci = self.df_slice_sci.dropna()
         # Remove rows where IsCommanded key is False
-        self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"] == True]
+        #self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"] == True]
         # Plot the histogram on axs1
         counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
                                                  self.df_slice_sci["y_val"], bins=bins,
