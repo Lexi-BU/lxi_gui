@@ -12,7 +12,7 @@ import lxi_read_files as lxrf
 importlib.reload(lxrf)
 
 
-def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None,  cdf_file=None, cdf_folder=None):
+def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_folder=None):
     """
     Convert a CSV file to a CDF file.
 

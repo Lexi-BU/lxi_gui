@@ -494,26 +494,3 @@ def read_binary_data_hk(
             for ii in range(len(hk_idx))
         )
     return packets
-
-
-in_file_path = "../data/raw_data/2022_04_21_1431_LEXI_HK_unit_1_mcp_unit_1_eBox_1987_hk_/"
-in_file_name = "2022_04_21_1431_LEXI_raw_LEXI_unit_1_mcp_unit_1_eBox-1987.txt"
-save_file_path_sci = "../data/processed_data/sci/"
-save_file_path_hk = "../data/processed_data/hk/"
-save_file_name = f"{in_file_name[:-4]}_qudsi.csv"
-
-pkts = read_binary_data_hk(
-    in_file_path=in_file_path,
-    in_file_name=in_file_name,
-    save_file_path=save_file_path_hk,
-    save_file_name=save_file_name,
-    number_of_decimals=6
-)
-
-pkts = read_binary_data_sci(
-    in_file_path=in_file_path,
-    in_file_name=in_file_name,
-    save_file_path=save_file_path_sci,
-    save_file_name=save_file_name,
-    number_of_decimals=6
-)
