@@ -133,3 +133,6 @@ documents/
 
 # Ignore temporary lock files
 .~lock.*
+
+# Ignore the data folder
+data/
