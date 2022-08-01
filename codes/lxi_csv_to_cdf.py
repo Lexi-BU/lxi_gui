@@ -48,7 +48,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None,  cdf_file=None, cdf_
             df.index = pd.to_datetime(df.index)
         else:
             df = df
-            df.index = pd.to_datetime(df.index)
+            df.index = pd.to_datetime((df.index).astype("int64"), utc=True)
 
         # If the cdf_folder does not exist, create it
         if cdf_folder is not None:
@@ -63,7 +63,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None,  cdf_file=None, cdf_
         else:
             cdf_file = cdf_folder + "/" + cdf_file
             print("Creating CDF file: " + cdf_file)
-        
+
         # If the cdf file already exists, overwrite it
         if Path(cdf_file).exists():
             # Raise a warning saying the file already exists and ask the user if they want to
@@ -88,7 +88,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None,  cdf_file=None, cdf_
 
         # Convert index to datetime
         # Set the timezone to UTC
-        df.index = df.index.tz_localize(pytz.timezone("UTC"))
+        #df.index = df.index.tz_localize(pytz.timezone("UTC"))
         # Convert the index to a CDF time
         cdf_data["Epoch"] = df.index.to_pydatetime()
         for col in df.columns:
