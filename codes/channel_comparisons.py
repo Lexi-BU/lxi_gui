@@ -1,4 +1,5 @@
 key_list = ["Channel1", "Channel2", "Channel3", "Channel4"]
+file_name = f"{global_variables.all_file_details['file_name_b'][68:84]}"
 try:
     df_sci_q = df_sci_q[df_sci_q.IsCommanded==True]
 except:
@@ -13,7 +14,7 @@ for key in df_sci_n.keys():
 
         plt.legend()
         plt.title(f"Comparison for {key} voltages")
-        plt.savefig(f"../figures/{key}_comparison_v4.png")
+        plt.savefig(f"../figures/{file_name}{key}_comparison_v01.png")
         plt.close("all")
         print(f"Saved {key} comparison figure")
     except:
@@ -29,7 +30,7 @@ for key in df_hk_n.keys():
 
         plt.legend()
         plt.title(f"Comparison for {key}")
-        plt.savefig(f"../figures/{key}_comparison_v4.png")
+        plt.savefig(f"../figures/{file_name}{key}_comparison_v01.png")
         plt.close("all")
         print(f"Saved {key} comparison figure")
     except:
