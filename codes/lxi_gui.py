@@ -198,15 +198,13 @@ dpi = root.winfo_fpixels('1i')
 # a different machine.
 # Check whether the operating system is windows or linux, and assign the correct screen width and
 # height.
-#if platform.system() == "Windows":
-#    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
-#if platform.system() == "Linux":
-#    screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
-#else:
-#    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+if platform.system() == "Windows":
+    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+if platform.system() == "Linux":
+    screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.8 * root.winfo_screenheight()
+else:
+    screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 
-screen_width = 2000
-screen_height = 1000
 
 print("If the GUI size is messed up, check comment on line #201 of the code 'lxi_gui.py'.")
 
