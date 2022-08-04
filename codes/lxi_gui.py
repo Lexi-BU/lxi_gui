@@ -8,7 +8,7 @@ import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
-import lxi_read_files as lxrf
+import lxi_file_read_funcs as lxrf
 import lxi_csv_to_cdf as lctc
 
 importlib.reload(lgpr)
@@ -205,7 +205,8 @@ if platform.system() == "Linux":
 else:
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 
-
+screen_width = 2000
+screen_height = 1000
 print("If the GUI size is messed up, check comment on line #201 of the code 'lxi_gui.py'.")
 
 # Set the title of the main window.

@@ -7,7 +7,7 @@ import pandas as pd
 import pytz
 from spacepy.pycdf import CDF as cdf
 
-import lxi_read_files as lxrf
+import lxi_file_read_funcs as lxrf
 
 importlib.reload(lxrf)
 
