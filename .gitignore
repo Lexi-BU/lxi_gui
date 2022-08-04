@@ -136,3 +136,4 @@ documents/
 
 # Ignore the data folder
 data/*
+figures/*
