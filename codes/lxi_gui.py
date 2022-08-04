@@ -8,7 +8,7 @@ import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
-import lxi_read_files as lxrf
+import lxi_file_read_funcs as lxrf
 import lxi_csv_to_cdf as lctc
 
 importlib.reload(lgpr)
@@ -201,11 +201,13 @@ dpi = root.winfo_fpixels('1i')
 if platform.system() == "Windows":
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 if platform.system() == "Linux":
-    screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
+    screen_width, screen_height = 0.45 * root.winfo_screenwidth(), 0.8 * root.winfo_screenheight()
 else:
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 
-print("If the GUI size is messed up, check comment on line #177 of the code 'lxi_gui.py'.")
+screen_width = 2000
+screen_height = 1000
+print("If the GUI size is messed up, check comment on line #201 of the code 'lxi_gui.py'.")
 
 # Set the title of the main window.
 root.title("LEXI GUI")

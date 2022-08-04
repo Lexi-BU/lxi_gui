@@ -386,6 +386,13 @@ class plot_data_class():
         y_hist = fig.add_subplot(gs[:-1, 0], sharey=axs1)
         x_hist = fig.add_subplot(gs[-1, 1:], sharex=axs1)
 
+        # Drop all nans in the data
+        self.df_slice_sci = self.df_slice_sci.dropna()
+        # Try to select only rows where "IsCommanded" is False
+        try:
+            self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"] == False]
+        except Exception:
+            pass
         # Plot the histogram on axs1
         counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
                                                  self.df_slice_sci["y_val"], bins=bins,

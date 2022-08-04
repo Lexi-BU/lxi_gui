@@ -7,7 +7,7 @@ import pandas as pd
 import pytz
 from spacepy.pycdf import CDF as cdf
 
-import lxi_read_files as lxrf
+import lxi_file_read_funcs as lxrf
 
 importlib.reload(lxrf)
 
@@ -48,7 +48,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
             df.index = pd.to_datetime(df.index)
         else:
             df = df
-            df.index = pd.to_datetime(df.index)
+            df.index = pd.to_datetime((df.index).astype("int64"), utc=True)
 
         # If the cdf_folder does not exist, create it
         if cdf_folder is not None:
@@ -88,7 +88,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
 
         # Convert index to datetime
         # Set the timezone to UTC
-        df.index = df.index.tz_localize(pytz.timezone("UTC"))
+        #df.index = df.index.tz_localize(pytz.timezone("UTC"))
         # Convert the index to a CDF time
         cdf_data["Epoch"] = df.index.to_pydatetime()
         for col in df.columns:
