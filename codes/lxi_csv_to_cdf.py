@@ -1,11 +1,9 @@
-import datetime
 import glob
 import importlib
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pytz
 from spacepy.pycdf import CDF as cdf
 
 import lxi_file_read_funcs as lxrf

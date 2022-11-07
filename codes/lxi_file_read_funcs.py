@@ -21,6 +21,7 @@ packet_format_hk = ">II4H"
 sync = b'\xfe\x6b\x28\x40'
 volts_per_count = 4.5126 / 65536  # volts per increment of digitization
 
+
 class sci_packet(NamedTuple):
     """
     Class for the science packet.
@@ -411,6 +412,7 @@ def read_binary_data_hk(
     df.to_csv(save_file_name, index=True)
 
     return df, save_file_name
+
 
 def open_file_sci(start_time=None, end_time=None):
     # define a global variable for the file name
