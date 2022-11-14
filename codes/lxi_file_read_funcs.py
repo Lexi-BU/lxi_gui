@@ -1,4 +1,5 @@
 import csv
+import datetime
 import importlib
 import struct
 from pathlib import Path
@@ -18,9 +19,13 @@ packet_format_sci = ">II4H"
 # signed lower case, unsigned upper case (b)
 packet_format_hk = ">II4H"
 
-sync = b'\xfe\x6b\x28\x40'
-volts_per_count = 4.5126 / 65536  # volts per increment of digitization
+# double precision format for time stamp from pit
+packet_format_pit = ">d"
 
+sync_lxi = b'\xfe\x6b\x28\x40'
+sync_pit = b'\x54\x53'
+
+volts_per_count = 4.5126 / 65536  # volts per increment of digitization
 
 class sci_packet(NamedTuple):
     """
@@ -55,6 +60,31 @@ class sci_packet(NamedTuple):
             channel2=structure[3] * volts_per_count,
             channel3=structure[4] * volts_per_count,
             channel4=structure[5] * volts_per_count,
+        )
+
+
+class pit_packet(NamedTuple):
+    """
+    Class for the pit packet (time stamp).
+    The code unpacks the pit packet into a named tuple. Based on the packet format, each packet
+    is unpacked into following parameters:
+    - pit_time: float (8 byte)
+
+    Pit_time is the time stamp of the packet in seconds as received from PIT in UNIX time format
+    (seconds since 1970).
+    """
+    pit_time : int
+
+    @classmethod
+    def from_bytes(cls, data: bytes):
+        """
+        Unpacks the science packet from the bytes.
+        :param data: bytes
+        :return: sci_packet
+        """
+        struct_data = struct.unpack(">d", data)
+        return cls(
+            pit_time = struct_data[0],
         )
 
 
@@ -179,15 +209,21 @@ def read_binary_data_sci(
         raw = file.read()
 
     index = 0
+    pit_time_list = []
     packets = []
 
-    while index < len(raw) - 16:
-        if raw[index:index + 4] == sync:
-            packets.append(sci_packet.from_bytes(raw[index:index + 16]))
-            index += 16
+    while index < len(raw) - 28:
+        if raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi:
+            pit_time_list.append(pit_packet.from_bytes(raw[index + 2:index + 10]))
+            packets.append(sci_packet.from_bytes(raw[index + 12:index + 28]))
+            index += 28
             continue
 
         index += 1
+
+    # For each element in pit_timer_list, convert it from uniox time to datetime
+    pit_time_list = [datetime.datetime.utcfromtimestamp(x.pit_time) for x in pit_time_list]
+
 
     # Split the file name in a folder and a file name
     output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_sci_output.csv"
@@ -203,6 +239,7 @@ def read_binary_data_sci(
         dict_writer = csv.DictWriter(
             file,
             fieldnames=(
+                'pit_time',
                 'TimeStamp',
                 'IsCommanded',
                 'Channel1',
@@ -214,6 +251,7 @@ def read_binary_data_sci(
         dict_writer.writeheader()
         dict_writer.writerows(
             {
+                'pit_time': pit_time,
                 'TimeStamp': sci_packet.timestamp / 1e3,
                 'IsCommanded': sci_packet.is_commanded,
                 'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
@@ -221,14 +259,14 @@ def read_binary_data_sci(
                 'Channel3': np.round(sci_packet.channel3, decimals=number_of_decimals),
                 'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals)
             }
-            for sci_packet in packets
+            for (pit_time, sci_packet) in zip(pit_time_list, packets)
         )
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
 
     # Save the dataframe to a csv file and set index to time stamp
-    df.to_csv(save_file_name, index=True)
+    df.to_csv(save_file_name, index=False)
 
     return df, save_file_name
 
@@ -300,7 +338,7 @@ def read_binary_data_hk(
     packets = []
 
     while index < len(raw) - 16:
-        if raw[index:index + 4] == sync:
+        if raw[index:index + 4] == sync_lxi:
             packets.append(hk_packet_cls.from_bytes(raw[index:index + 16]))
             index += 16
             continue
@@ -412,7 +450,6 @@ def read_binary_data_hk(
     df.to_csv(save_file_name, index=True)
 
     return df, save_file_name
-
 
 def open_file_sci(start_time=None, end_time=None):
     # define a global variable for the file name
