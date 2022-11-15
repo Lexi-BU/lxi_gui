@@ -33,7 +33,7 @@ class sci_packet(NamedTuple):
     Class for the science packet.
     The code unpacks the science packet into a named tuple. Based on the packet format, each packet
     is unpacked into following parameters:
-    - pit_time: time of the packet as received from the PIT
+    - Date: time of the packet as received from the PIT
     - timestamp: int (32 bit)
     - IsCommanded: bool (1 bit)
     - voltage channel1: float (16 bit)
@@ -45,7 +45,7 @@ class sci_packet(NamedTuple):
     IsCommand tells you if the packet was commanded.
     Voltages 1 to 4 are the voltages of corresponding different channels.
     """
-    pit_time: float
+    Date: float
     is_commanded: bool
     timestamp: int
     channel1: float
@@ -58,7 +58,7 @@ class sci_packet(NamedTuple):
         structure_time = struct.unpack(">d", bytes_[2:10])
         structure = struct.unpack(packet_format_sci, bytes_[12:])
         return cls(
-            pit_time=structure_time[0],
+            Date=structure_time[0],
             is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
             timestamp=structure[1] & 0x3fffffff,           # mask for getting all timestamp bits
             channel1=structure[2] * volts_per_count,
@@ -73,7 +73,7 @@ class hk_packet_cls(NamedTuple):
     Class for the housekeeping packet.
     The code unpacks the HK packet into a named tuple. Based on the document and data structure,
     each packet is unpacked into
-    - pit_time: time of the packet as received from the PIT
+    - Date: time of the packet as received from the PIT
     - "timestamp",
     - "hk_id" (this tells us what "hk_value" stores inside it),
     - "hk_value",
@@ -100,7 +100,7 @@ class hk_packet_cls(NamedTuple):
     14: MCP HV after auto change
     15: MCP HV after manual change
     """
-    pit_time : int
+    Date : int
     timestamp: int
     hk_id: int
     hk_value: float
@@ -115,7 +115,7 @@ class hk_packet_cls(NamedTuple):
         # Check if the present packet is the house-keeping packet. Only the house-keeping packets
         # are processed.
         if structure[1] & 0x80000000:
-            pit_time = structure_time[0]
+            Date = structure_time[0]
             timestamp = structure[1] & 0x3fffffff  # mask for getting all timestamp bits
             hk_id = (structure[2] & 0xf000) >> 12  # Down-shift 12 bits to get the hk_id
             if hk_id == 10 or hk_id == 11:
@@ -127,7 +127,7 @@ class hk_packet_cls(NamedTuple):
             delta_lost_event_count = structure[5]
 
             return cls(
-                pit_time = pit_time,
+                Date = Date,
                 timestamp=timestamp,
                 hk_id=hk_id,
                 hk_value=hk_value,
@@ -204,10 +204,6 @@ def read_binary_data_sci(
 
         index += 1
 
-    # For each element in pit_timer_list, convert it from uniox time to datetime
-    # pit_time_list = [datetime.datetime.utcfromtimestamp(x.pit_time) for x in pit_time_list]
-
-
     # Split the file name in a folder and a file name
     output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_sci_output.csv"
     output_folder_name = "/".join(in_file_name.split("/")[:-2]) + "/processed_data/sci"
@@ -222,7 +218,7 @@ def read_binary_data_sci(
         dict_writer = csv.DictWriter(
             file,
             fieldnames=(
-                'pit_time',
+                'Date',
                 'TimeStamp',
                 'IsCommanded',
                 'Channel1',
@@ -234,7 +230,7 @@ def read_binary_data_sci(
         dict_writer.writeheader()
         dict_writer.writerows(
             {
-                'pit_time': datetime.datetime.utcfromtimestamp(sci_packet.pit_time),
+                'Date': datetime.datetime.utcfromtimestamp(sci_packet.Date),
                 'TimeStamp': sci_packet.timestamp / 1e3,
                 'IsCommanded': sci_packet.is_commanded,
                 'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
@@ -318,7 +314,6 @@ def read_binary_data_hk(
         raw = file.read()
 
     index = 0
-    # pit_time_list = []
     packets = []
 
     while index < len(raw) - 28:
@@ -329,16 +324,13 @@ def read_binary_data_hk(
 
         index += 1
 
-    # For each element in pit_timer_list, convert it from uniox time to datetime
-    #pit_time_list = [datetime.datetime.utcfromtimestamp(x.pit_time) for x in pit_time_list]
-
     # Get only those packets that have the HK data
     hk_idx = []
     for idx, hk_packet in enumerate(packets):
         if hk_packet is not None:
             hk_idx.append(idx)
 
-    pit_time  = np.full(len(hk_idx), np.nan)
+    Date  = np.full(len(hk_idx), np.nan)
     TimeStamp = np.full(len(hk_idx), np.nan)
     HK_id = np.full(len(hk_idx), np.nan)
     PinPullerTemp = np.full(len(hk_idx), np.nan)
@@ -361,7 +353,7 @@ def read_binary_data_hk(
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
     DeltaLostEvntCount = np.full(len(hk_idx), np.nan)
 
-    all_data_dict = {"pit_time":pit_time, "TimeStamp": TimeStamp, "HK_id": HK_id,
+    all_data_dict = {"Date":Date, "TimeStamp": TimeStamp, "HK_id": HK_id,
                      "0": PinPullerTemp, "1": OpticsTemp, "2": LEXIbaseTemp, "3": HVsupplyTemp,
                      "4": V_Imon_5_2, "5": V_Imon_10, "6": V_Imon_3_3, "7": AnodeVoltMon,
                      "8": V_Imon_28, "9": ADC_Ground, "10": Cmd_count, "11": Pinpuller_Armed,
@@ -388,8 +380,7 @@ def read_binary_data_hk(
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
         # Convert to seconds from milliseconds for the timestamp
-        # all_data_dict["pit_time"][ii] = datetime.datetime.utcfromtimestamp(hk_packet.pit_time)
-        all_data_dict["pit_time"][ii] = hk_packet.pit_time
+        all_data_dict["Date"][ii] = hk_packet.Date
         all_data_dict["TimeStamp"][ii] = hk_packet.timestamp / 1e3
         all_data_dict["HK_id"][ii] = hk_packet.hk_id
         key = str(hk_packet.hk_id)
@@ -406,13 +397,13 @@ def read_binary_data_hk(
         all_data_dict["DeltaLostEvntCount"][ii] = hk_packet.delta_lost_event_count
 
     # Create a dataframe with the data
-    df_key_list = ["pit_time", "TimeStamp", "HK_id", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp",
+    df_key_list = ["Date", "TimeStamp", "HK_id", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp",
                    "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon",
                    "+28V_Imon", "ADC_Ground", "Cmd_count", "Pinpuller_Armed", "Unused1", "Unused2",
                    "HVmcpAuto", "HVmcpMan", "DeltaEvntCount", "DeltaDroppedCount",
                    "DeltaLostEvntCount"]
 
-    pit_time_datetime = [datetime.datetime.utcfromtimestamp(x) for x in all_data_dict["pit_time"]]
+    Date_datetime = [datetime.datetime.utcfromtimestamp(x) for x in all_data_dict["Date"]]
 
     df = pd.DataFrame(columns=df_key_list)
     for ii, key in enumerate(df_key_list):
@@ -426,8 +417,7 @@ def read_binary_data_hk(
                 df[key][ii] = df[key][ii - 1]
 
     # Set the index to the TimeStamp
-    df["pit_time"] = pit_time_datetime
-    # df.set_index("TimeStamp", inplace=False)
+    df["Date"] = Date_datetime
 
     # Split the file name in a folder and a file name
     output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_hk_output.csv"
@@ -599,7 +589,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Rename the time column to TimeStamp
     df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
     # Set the index to the time column
-    df.set_index('TimeStamp', inplace=True)
+    df.set_index('Date', inplace=True)
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
@@ -674,7 +664,7 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
     # Rename the time column to TimeStamp
     df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
     # Set the index to the time column
-    df.set_index('TimeStamp', inplace=True)
+    df.set_index('Date', inplace=True)
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
@@ -734,8 +724,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
     )
 
     # Replace index with timestamp
-    df_hk.set_index('TimeStamp', inplace=True)
-    df_sci.set_index('TimeStamp', inplace=True)
+    df_hk.set_index('Date', inplace=True)
+    df_sci.set_index('Date', inplace=True)
 
     # Sort the dataframe by timestamp
     df_hk = df_hk.sort_index()
