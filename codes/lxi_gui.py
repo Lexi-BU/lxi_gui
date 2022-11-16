@@ -385,19 +385,19 @@ ts_menu_9 = tk.OptionMenu(hk_tab, plot_opt_entry_9, *ts_options)
 ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
 
 # The minimum value of x-axis for histogram plot
-x_min_entry = lgeb.entry_box(root=sci_tab, row=0, column=4, entry_label="X-min", entry_val=0.35,
+x_min_entry = lgeb.entry_box(root=sci_tab, row=0, column=4, entry_label="X-min", entry_val=0.00,
                              font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-max", entry_val=0.62,
+x_max_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-max", entry_val=1.00,
                              font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = lgeb.entry_box(root=sci_tab, row=2, column=4, entry_label="Y-min", entry_val=0.35,
+y_min_entry = lgeb.entry_box(root=sci_tab, row=2, column=4, entry_label="Y-min", entry_val=0.00,
                              font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = lgeb.entry_box(root=sci_tab, row=3, column=4, entry_label="Y-max", entry_val=0.62,
+y_max_entry = lgeb.entry_box(root=sci_tab, row=3, column=4, entry_label="Y-max", entry_val=1.00,
                              font_style=font_style_box)
 
 # The number of bins for histogram plot
@@ -447,17 +447,17 @@ norm_type_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=10, column=4, entry_label="V Min",
-                                    entry_val=1.2, font_style=font_style_box)
+                                    entry_val=0.0, font_style=font_style_box)
 
 # Maximum threshold for the voltage to be considered
 v_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=11, column=4, entry_label="V Max",
-                                    entry_val=4, font_style=font_style_box)
+                                    entry_val=5, font_style=font_style_box)
 
 # Sum of minimum and maximum threshold for the voltage to be considered
 v_sum_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=12, column=4, entry_label="V sum Min",
-                                        entry_val=3, font_style=font_style_box)
+                                        entry_val=0, font_style=font_style_box)
 v_sum_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=13, column=4, entry_label="V sum Max",
-                                        entry_val=8, font_style=font_style_box)
+                                        entry_val=16, font_style=font_style_box)
 
 # Choose whether to plot curve fit or not (is Bool)
 curve_fit_label = tk.Label(sci_tab, text="Curve Fit", font=font_style_box, bg="white", fg="black")

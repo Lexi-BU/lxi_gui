@@ -20,7 +20,7 @@ packet_format_sci = ">II4H"
 packet_format_hk = ">II4H"
 
 # double precision format for time stamp from pit
-packet_format_pit = ">d"
+packet_format_pit = "<d"
 
 sync_lxi = b'\xfe\x6b\x28\x40'
 sync_pit = b'\x54\x53'
@@ -477,8 +477,8 @@ def open_file_b():
     # define a global variable for the file name
     file_val = filedialog.askopenfilename(initialdir="../data/raw_data/",
                                           title="Select file",
-                                          filetypes=(("text files", "*.txt"),
-                                                     ("all files", "*.*"))
+                                          filetypes=(("all files", "*.*"),
+                                                     ("text files", "*.txt"))
                                           )
 
     # Cut path to the file off
@@ -588,6 +588,10 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
             break
     # Rename the time column to TimeStamp
     df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
+
+    # Convert the Date column from string to datetime in utc
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)
+
     # Set the index to the time column
     df.set_index('Date', inplace=True)
     # Sort the dataframe by timestamp
@@ -663,6 +667,10 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
             break
     # Rename the time column to TimeStamp
     df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
+
+    # Convert the Date column from string to datetime in utc
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)
+
     # Set the index to the time column
     df.set_index('Date', inplace=True)
     # Sort the dataframe by timestamp
@@ -675,6 +683,7 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df.loc[t_start:t_end]
+
 
     return df, df_slice_hk
 
@@ -735,7 +744,9 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         t_start = df_sci.index.min()
     if t_end is None:
         t_end = df_sci.index.max()
-
+    print(f"\n\n\n tstart is {t_start}, {type(t_start)}")
+    print(f"\n\n\n tend is {t_end}, {type(t_end)}")
+ 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]

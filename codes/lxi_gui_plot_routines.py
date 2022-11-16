@@ -1,4 +1,5 @@
 import importlib
+import datetime
 
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
@@ -210,12 +211,12 @@ class plot_data_class():
         """
         # Try to convert the start_time and end_time to float or int
         try:
-            t_start = int(self.start_time)
+            t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
         except Exception:
             t_start = self.df_slice_hk.index.min()
             pass
         try:
-            t_end = int(self.end_time)
+            t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
         except Exception:
             t_end = self.df_slice_hk.index.max()
             pass
@@ -249,11 +250,13 @@ class plot_data_class():
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
 
-        x_axs_val = self.df_slice_hk.index - t_start
+        # Set the df_slice_hk to the time range specified by the user in the GUI and plot it
+        self.df_slice_hk = self.df_slice_hk.loc[t_start:t_end]
+        x_axs_val = (self.df_slice_hk.index - t_start).total_seconds()
         axs1 = plt.subplot(gs[:])
         axs1.plot(x_axs_val, self.df_slice_hk[self.plot_key], '.', color="darkred",
                   alpha=alpha, ms=ms, label=self.plot_key)
-        axs1.set_xlim(0, t_end - t_start)
+        axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
         axs1.set_xlabel(f'Time since {t_start} (s)')
@@ -278,12 +281,12 @@ class plot_data_class():
 
         # Try to convert the start_time and end_time to float or int
         try:
-            t_start = int(self.start_time)
+            t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
         except Exception:
             t_start = self.df_slice_sci.index.min()
             pass
         try:
-            t_end = int(self.end_time)
+            t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass
@@ -517,12 +520,12 @@ class plot_data_class():
         """
         # Try to convert the start_time and end_time to float or int
         try:
-            t_start = int(self.start_time)
+            t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
         except Exception:
             t_start = self.df_slice_sci.index.min()
             pass
         try:
-            t_end = int(self.end_time)
+            t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass
@@ -584,6 +587,10 @@ class plot_data_class():
                                                   (self.df_slice_sci["Channel4"] >= v_min) &
                                                   (self.df_slice_sci["Channel4"] <= v_max)]
 
+        print(f"\033[1m\033[4m\033[94m{self.df_slice_sci.index >= t_start)}\033[0m")
+        # Select channel1 corresponding to the start_time and end_time
+        self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci.index >= t_start) &
+                                              (self.df_slice_sci.index <= t_end)]
         v1 = self.df_slice_sci[self.channel1][
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
         v2 = self.df_slice_sci[self.channel2][
