@@ -244,7 +244,13 @@ def read_binary_data_sci(
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
 
-    # Save the dataframe to a csv file and set index to time stamp
+    # Convert the date column to datetime
+    df['Date'] = pd.to_datetime(df['Date'])
+
+    # Set index to the date
+    df.set_index('Date', inplace=False)
+
+    # Save the dataframe to a csv file
     df.to_csv(save_file_name, index=False)
 
     return df, save_file_name
@@ -744,9 +750,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         t_start = df_sci.index.min()
     if t_end is None:
         t_end = df_sci.index.max()
-    print(f"\n\n\n tstart is {t_start}, {type(t_start)}")
-    print(f"\n\n\n tend is {t_end}, {type(t_end)}")
- 
+
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end]
     df_slice_sci = df_sci.loc[t_start:t_end]

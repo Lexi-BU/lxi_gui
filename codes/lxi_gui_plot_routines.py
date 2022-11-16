@@ -355,7 +355,6 @@ class plot_data_class():
 
         # Remove rows with duplicate indices
         self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
-
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
         # Exclude channel1 to channel4 data based on v_min and v_max
@@ -587,7 +586,6 @@ class plot_data_class():
                                                   (self.df_slice_sci["Channel4"] >= v_min) &
                                                   (self.df_slice_sci["Channel4"] <= v_max)]
 
-        print(f"\033[1m\033[4m\033[94m{self.df_slice_sci.index >= t_start)}\033[0m")
         # Select channel1 corresponding to the start_time and end_time
         self.df_slice_sci = self.df_slice_sci[(self.df_slice_sci.index >= t_start) &
                                               (self.df_slice_sci.index <= t_end)]
