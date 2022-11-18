@@ -509,6 +509,18 @@ def open_file_b():
     return file_val
 
 
+
+def nonlin_correction(x, y, M_inv=np.array([[1.1275, 0.0000],[0.0000, 1.1293]])):
+    """
+    Function to apply nonlinearity correction to MCP position x/y data
+    # TODO: Add correct M_inv matrix and the offsets
+    """
+    x_non_lin = (x * M_inv[0,0] + y * M_inv[0,1])
+    y_non_lin = (x * M_inv[1,0] + y * M_inv[1,1])
+
+    return x_non_lin, y_non_lin
+
+
 def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
     """
     The function computes the position of the particle in the xy-plane. The ratios to compute
@@ -596,7 +608,11 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
 
     # Convert the Date column from string to datetime in utc
-    df['Date'] = pd.to_datetime(df['Date'], utc=True)
+    try:
+        df['Date'] = pd.to_datetime(df['Date'], utc=True)
+    except Exception:
+        # Convert timestamp to datetime and set it to Date
+        df['Date'] = pd.to_datetime(df['TimeStamp'], unit='s', utc=True)
 
     # Set the index to the time column
     df.set_index('Date', inplace=True)
@@ -620,15 +636,6 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     x, v1_shift, v3_shift = compute_position(v1=df['Channel1'], v2=df['Channel3'], n_bins=401,
                                              bin_min=0, bin_max=4)
 
-    # Add the x-coordinate to the dataframe
-    df_slice_sci.loc[:, 'x_val'] = x_slice
-    df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
-    df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
-
-    df.loc[:, 'x_val'] = x
-    df.loc[:, 'v1_shift'] = v1_shift
-    df.loc[:, 'v3_shift'] = v3_shift
-
     y_slice, v4_shift_slice, v2_shift_slice = compute_position(v1=df_slice_sci['Channel4'],
                                                                v2=df_slice_sci['Channel2'],
                                                                n_bins=401, bin_min=0, bin_max=4)
@@ -636,12 +643,29 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     y, v4_shift, v2_shift = compute_position(v1=df['Channel4'], v2=df['Channel2'], n_bins=401,
                                              bin_min=0, bin_max=4)
 
+    # Correct for the non-linearity in the positions
+    x_non_lin_slice, y_non_lin_slice = nonlin_correction(x_slice, y_slice)
+    x_non_lin, y_non_lin = nonlin_correction(x, y)
+
+    # Add the x-coordinate to the dataframe
+    df_slice_sci.loc[:, 'x_val'] = x_slice
+    df_slice_sci.loc[:, 'x_val_nlin'] = x_non_lin_slice
+    df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
+    df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
+
+    df.loc[:, 'x_val'] = x
+    df.loc[:, 'x_val_nlin'] = x_non_lin
+    df.loc[:, 'v1_shift'] = v1_shift
+    df.loc[:, 'v3_shift'] = v3_shift
+
     # Add the y-coordinate to the dataframe
     df_slice_sci.loc[:, 'y_val'] = y_slice
+    df_slice_sci.loc[:, 'y_val_nlin'] = y_non_lin_slice
     df_slice_sci.loc[:, 'v4_shift'] = v4_shift_slice
     df_slice_sci.loc[:, 'v2_shift'] = v2_shift_slice
 
     df.loc[:, 'y_val'] = y
+    df.loc[:, 'y_val_nlin'] = y_non_lin
     df.loc[:, 'v4_shift'] = v4_shift
     df.loc[:, 'v2_shift'] = v2_shift
 
@@ -675,7 +699,12 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
     df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
 
     # Convert the Date column from string to datetime in utc
-    df['Date'] = pd.to_datetime(df['Date'], utc=True)
+    try:
+        df['Date'] = pd.to_datetime(df['Date'], utc=True)
+    except Exception:
+        # Convert timestamp to datetime and set it to Date
+        df['Date'] = pd.to_datetime(df['TimeStamp'], unit='s', utc=True)
+
 
     # Set the index to the time column
     df.set_index('Date', inplace=True)

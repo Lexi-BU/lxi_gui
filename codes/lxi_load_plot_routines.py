@@ -67,7 +67,7 @@ def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None
                     cmin=None, cmax=None, x_min=None, x_max=None, y_min=None, y_max=None,
                     density=None, norm=None, row=3, column=1, fig_width=5, fig_height=5,
                     columnspan=2, rowspan=2, v_min=2.2, v_max=3.9, v_sum_min=3, v_sum_max=12,
-                    crv_fit=False, use_fig_size=False):
+                    crv_fit=False, nonlin_corr=False, use_fig_size=False):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI.
 
@@ -125,7 +125,8 @@ def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None
                                     density=density, norm=norm, hist_fig_height=fig_height,
                                     hist_fig_width=fig_width, v_min=v_min, v_max=v_max,
                                     v_sum_min=v_sum_min, v_sum_max=v_sum_max, crv_fit=crv_fit,
-                                    use_fig_size=use_fig_size).hist_plots()
+                                    nonlin_corr=nonlin_corr, use_fig_size=use_fig_size
+                                    ).hist_plots()
     frame = tk.Frame(root)
     frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky='nsew')
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
@@ -200,7 +201,7 @@ def load_all_hist_plots(
         column_span_channel24=None, hist_fig_height=None, hist_fig_width=None, hist_colspan=None,
         hist_rowspan=None, channel13_fig_height=None, channel13_fig_width=None,
         channel24_fig_height=None, channel24_fig_width=None, v_min=None, v_max=None,
-        v_sum_min=None, v_sum_max=None, crv_fit=None, use_fig_size=False
+        v_sum_min=None, v_sum_max=None, crv_fit=None, nonlin_corr=None, use_fig_size=False
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -281,7 +282,7 @@ def load_all_hist_plots(
                     column=col_hist, fig_height=hist_fig_height, fig_width=hist_fig_width,
                     columnspan=hist_colspan, rowspan=hist_rowspan, v_min=v_min, v_max=v_max,
                     v_sum_min=v_sum_min, v_sum_max=v_sum_max, crv_fit=crv_fit,
-                    use_fig_size=use_fig_size)
+                    nonlin_corr=nonlin_corr, use_fig_size=use_fig_size)
 
     load_hist_plots_volt(root=root[1], df_slice_sci=df_slice_sci, start_time=start_time,
                          end_time=end_time, bins=bins, cmin=cmin, cmax=cmax, density=density,

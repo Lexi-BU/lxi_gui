@@ -170,6 +170,7 @@ class plot_data_class():
                  v_sum_min=None,
                  v_sum_max=None,
                  crv_fit=None,
+                 nonlin_corr=None,
                  use_fig_size=None,
                  ):
         self.df_slice_hk = df_slice_hk
@@ -199,6 +200,7 @@ class plot_data_class():
         self.v_sum_min = v_sum_min
         self.v_sum_max = v_sum_max
         self.crv_fit = crv_fit
+        self.nonlin_corr = nonlin_corr
         self.use_fig_size = use_fig_size
 
     def ts_plots(self):
@@ -396,12 +398,20 @@ class plot_data_class():
         except Exception:
             pass
         # Plot the histogram on axs1
-        counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
-                                                 self.df_slice_sci["y_val"], bins=bins,
-                                                 cmap='Spectral', norm=norm,
-                                                 range=[x_range, y_range], cmin=cmin,
-                                                 density=density)
-
+        if self.nonlin_corr == False:
+            print(f"\033[1;32m Plotting histogram without nonlinearity correction\033[0m")
+            counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
+                                                     self.df_slice_sci["y_val"], bins=bins,
+                                                     cmap='Spectral', norm=norm,
+                                                     range=[x_range, y_range], cmin=cmin,
+                                                     density=density)
+        elif self.nonlin_corr == True:
+            print(f"\033[1;32m Plotting histogram with nonlinearity correction\033[0m")
+            counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val_nlin"],
+                                         self.df_slice_sci["y_val_nlin"], bins=bins,
+                                         cmap='Spectral', norm=norm,
+                                         range=[x_range, y_range], cmin=cmin,
+                                         density=density)
         # Find the index of the maximum value in counts, ignoring NaNs
         max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
