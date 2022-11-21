@@ -169,6 +169,7 @@ class plot_data_class():
                  v_max=None,
                  v_sum_min=None,
                  v_sum_max=None,
+                 cut_status_var=None,
                  crv_fit=None,
                  nonlin_corr=None,
                  use_fig_size=None,
@@ -199,6 +200,7 @@ class plot_data_class():
         self.v_max = v_max
         self.v_sum_min = v_sum_min
         self.v_sum_max = v_sum_max
+        self.cut_status_var = cut_status_var
         self.crv_fit = crv_fit
         self.nonlin_corr = nonlin_corr
         self.use_fig_size = use_fig_size
@@ -386,9 +388,8 @@ class plot_data_class():
 
         fig.subplots_adjust(wspace=0., hspace=1)
         gs = plt.GridSpec(6, 6)
+
         axs1 = fig.add_subplot(gs[:-1, 1:], aspect=1)
-        y_hist = fig.add_subplot(gs[:-1, 0], sharey=axs1)
-        x_hist = fig.add_subplot(gs[-1, 1:], sharex=axs1)
 
         # Drop all nans in the data
         self.df_slice_sci = self.df_slice_sci.dropna()
@@ -402,25 +403,32 @@ class plot_data_class():
             print(f"\033[1;32m Plotting histogram without nonlinearity correction\033[0m")
             counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
                                                      self.df_slice_sci["y_val"], bins=bins,
-                                                     cmap='Spectral', norm=norm,
+                                                     cmap='Reds', norm=norm,
                                                      range=[x_range, y_range], cmin=cmin,
                                                      density=density)
         elif self.nonlin_corr == True:
             print(f"\033[1;32m Plotting histogram with nonlinearity correction\033[0m")
             counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val_nlin"],
                                          self.df_slice_sci["y_val_nlin"], bins=bins,
-                                         cmap='Spectral', norm=norm,
+                                         cmap='Reds', norm=norm,
                                          range=[x_range, y_range], cmin=cmin,
                                          density=density)
         # Find the index of the maximum value in counts, ignoring NaNs
         max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
-        # Draw a horizontal adn vertical line at the maximum value
-        axs1.axvline(x=(xedges[max_index[0]] + xedges[max_index[0] + 1]) / 2, color='k',
-                     linestyle='--', linewidth=1)
-        axs1.axhline(y=(yedges[max_index[1]] + yedges[max_index[1] + 1]) / 2, color='k',
-                     linestyle='--', linewidth=1)
+        if self.cut_status_var == True:
+            # Draw a horizontal and vertical line at the maximum value
+            axs1.axvline(x=(xedges[max_index[0]] + xedges[max_index[0] + 1]) / 2, color='k',
+                         linestyle='--', linewidth=1, alpha=0.5)
+            axs1.axhline(y=(yedges[max_index[1]] + yedges[max_index[1] + 1]) / 2, color='k',
+                         linestyle='--', linewidth=1, alpha=0.5)
 
+        # Show the minor ticks on the x and y axes
+        axs1.minorticks_on()
+
+        # Set the grid on for both axes for major and minor ticks
+        axs1.grid(which='major', linestyle='-', linewidth='0.2', color='black')
+        axs1.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
         # Number of data points in each bin along the x- and y-axes
         yn = counts[max_index[0], :]
         xn = counts[:, max_index[1]]
@@ -428,16 +436,21 @@ class plot_data_class():
         x_step = (xedges[1:] + xedges[0:-1]) / 2
         y_step = (yedges[1:] + yedges[0:-1]) / 2
 
-        # Make step plot between xedges and xn
-        x_hist.step(x_step, xn, color='k', where='post')
-        x_hist.plot(xedges[1:], xn, 'ko', markerfacecolor='none', markeredgecolor='gray')
+        print(f"\033[1;32m The cut status is {self.cut_status_var}\033[0m")
 
-        x_hist.set_xlabel('Vertical Cut')
-        # Make step plot between yedges and yn
-        y_hist.step(yn, y_step, color='k', where='post')
-        y_hist.plot(yn, yedges[:-1], 'ko', markerfacecolor='none', markeredgecolor='gray')
-        y_hist.invert_xaxis()
-        y_hist.set_xlabel('Horizontal Cut')
+        if self.cut_status_var == True:
+            y_hist = fig.add_subplot(gs[:-1, 0], sharey=axs1)
+            x_hist = fig.add_subplot(gs[-1, 1:], sharex=axs1)
+            # Make step plot between xedges and xn
+            x_hist.step(x_step, xn, color='k', where='post')
+            x_hist.plot(xedges[1:], xn, 'ko', markerfacecolor='none', markeredgecolor='gray')
+# 
+            x_hist.set_xlabel('Vertical Cut')
+            # Make step plot between yedges and yn
+            y_hist.step(yn, y_step, color='k', where='post')
+            y_hist.plot(yn, yedges[:-1], 'ko', markerfacecolor='none', markeredgecolor='gray')
+            y_hist.invert_xaxis()
+            y_hist.set_xlabel('Horizontal Cut')
 
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
@@ -465,7 +478,7 @@ class plot_data_class():
         axs1.tick_params(axis="both", which="major")
 
         # If curve fit option is chosen, fit a Gaussian to the data and plot it
-        if self.crv_fit:
+        if self.crv_fit and self.cut_status_var:
             try:
                 from scipy.optimize import curve_fit
                 x_vals = (xedges[max_index[0] - 10:max_index[0] + 10] +
@@ -512,8 +525,9 @@ class plot_data_class():
 
         # Set tight layout
         axs1.set_aspect('equal', anchor="C")
-        y_hist.set_aspect('auto', anchor="SW")
-        x_hist.set_aspect('auto', anchor="C")
+        if self.cut_status_var:
+            y_hist.set_aspect('auto', anchor="SW")
+            x_hist.set_aspect('auto', anchor="C")
 
         plt.close("all")
         # fig.tight_layout()

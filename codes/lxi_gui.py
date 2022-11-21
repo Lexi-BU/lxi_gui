@@ -90,6 +90,7 @@ def hist_plot_inputs(dpi=100):
         "v_max": v_max_thresh_entry.get(),
         "v_sum_min": v_sum_min_thresh_entry.get(),
         "v_sum_max": v_sum_max_thresh_entry.get(),
+        "cut_status_var": cut_status_var.get(),
         "crv_fit": curve_fit_status_var.get(),
         "nonlin_corr": non_lin_corr_status_var.get(),
         "use_fig_size": True
@@ -385,33 +386,52 @@ plot_opt_entry_9.set("Select a column")
 ts_menu_9 = tk.OptionMenu(hk_tab, plot_opt_entry_9, *ts_options)
 ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
 
+# Default plot options
+default_opt_dict = {'x_min_entry': 0.41,
+                    'x_max_entry': 0.65,
+                    'y_min_entry': 0.45,
+                    'y_max_entry': 0.65,
+                    'hist_bin_entry': 200,
+                    'c_min_entry': 1,
+                    'c_max_entry': 5,
+                    'density_status': False,
+                    'norm_type': 'lin',
+                    'v_min_thresh_entry': 0,
+                    'v_max_thresh_entry': 5,
+                    'v_sum_min_thresh_entry': 5,
+                    'v_sum_max_thresh_entry': 6,
+                    'cut_status': False,
+                    'curve_fit_status': False,
+                    'non_lin_corr_status': False}
+
 # The minimum value of x-axis for histogram plot
-x_min_entry = lgeb.entry_box(root=sci_tab, row=0, column=4, entry_label="X-min", entry_val=0.40,
-                             font_style=font_style_box)
+x_min_entry = lgeb.entry_box(root=sci_tab, row=0, column=4, entry_label="X-min",
+                            entry_val=default_opt_dict['x_min_entry'], font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
-x_max_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-max", entry_val=0.60,
-                             font_style=font_style_box)
+x_max_entry = lgeb.entry_box(root=sci_tab, row=1, column=4, entry_label="X-max",
+                             entry_val=default_opt_dict['x_max_entry'], font_style=font_style_box)
 
 # The minimum value of y-axis for histogram plot
-y_min_entry = lgeb.entry_box(root=sci_tab, row=2, column=4, entry_label="Y-min", entry_val=0.40,
-                             font_style=font_style_box)
+y_min_entry = lgeb.entry_box(root=sci_tab, row=2, column=4, entry_label="Y-min",
+                             entry_val=default_opt_dict['y_min_entry'], font_style=font_style_box)
 
 # The maximum value of y-axis for histogram plot
-y_max_entry = lgeb.entry_box(root=sci_tab, row=3, column=4, entry_label="Y-max", entry_val=0.60,
-                             font_style=font_style_box)
+y_max_entry = lgeb.entry_box(root=sci_tab, row=3, column=4, entry_label="Y-max",
+                             entry_val=default_opt_dict['y_max_entry'], font_style=font_style_box)
 
 # The number of bins for histogram plot
-hist_bins_entry = lgeb.entry_box(root=sci_tab, row=4, column=4, entry_label="Bins", entry_val=100,
+hist_bins_entry = lgeb.entry_box(root=sci_tab, row=4, column=4, entry_label="Bins",
+                                 entry_val=default_opt_dict['hist_bin_entry'],\
                                  font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
-c_min_entry = lgeb.entry_box(root=sci_tab, row=5, column=4, entry_label="C Min", entry_val=1,
-                             font_style=font_style_box)
+c_min_entry = lgeb.entry_box(root=sci_tab, row=5, column=4, entry_label="C Min",
+                             entry_val=default_opt_dict['c_min_entry'], font_style=font_style_box)
 
 # Maximum number of data points in each bin for the histogram plot
-c_max_entry = lgeb.entry_box(root=sci_tab, row=6, column=4, entry_label="C Max", entry_val="None",
-                             font_style=font_style_box)
+c_max_entry = lgeb.entry_box(root=sci_tab, row=6, column=4, entry_label="C Max",
+                             entry_val=default_opt_dict['c_max_entry'], font_style=font_style_box)
 
 # Choose whether to plot probability density or the number of data points in each bin (is Bool)
 density_label = tk.Label(sci_tab, text="Density", font=font_style_box, bg="white")
@@ -420,7 +440,7 @@ density_label.grid(row=7, column=5, columnspan=1, sticky="n")
 # Add a checkbox to choose whether to plot probability density or the number of data points in each
 # bin
 density_status_var = tk.BooleanVar()
-density_status_var.set(False)
+density_status_var.set(default_opt_dict['density_status'])
 density_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
                                   variable=density_status_var, bg="white", fg="black")
 density_checkbox.grid(row=7, column=4, columnspan=1, sticky="n")
@@ -434,7 +454,7 @@ norm_label.grid(row=8, column=5, columnspan=1, sticky="n")
 
 # Add radio button for the norm type (default is 'log', other option is 'linear')
 norm_type_var = tk.StringVar()
-norm_type_var.set("log")
+norm_type_var.set(default_opt_dict['norm_type'])
 norm_type_1 = tk.Radiobutton(sci_tab, text="Log", variable=norm_type_var, value="log", bg="white",
                              fg="black")
 norm_type_1.grid(row=8, column=4, columnspan=1, sticky="new")
@@ -448,42 +468,60 @@ norm_type_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Minimum threshold for the voltage to be considered
 v_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=10, column=4, entry_label="V Min",
-                                    entry_val=1.2, font_style=font_style_box)
+                                    entry_val=default_opt_dict['v_min_thresh_entry'],
+                                    font_style=font_style_box)
 
 # Maximum threshold for the voltage to be considered
 v_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=11, column=4, entry_label="V Max",
-                                    entry_val=3.5, font_style=font_style_box)
+                                    entry_val=default_opt_dict['v_max_thresh_entry'],
+                                    font_style=font_style_box)
 
 # Sum of minimum and maximum threshold for the voltage to be considered
 v_sum_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=12, column=4, entry_label="V sum Min",
-                                        entry_val=5, font_style=font_style_box)
+                                        entry_val=default_opt_dict['v_sum_min_thresh_entry'],
+                                        font_style=font_style_box)
 v_sum_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=13, column=4, entry_label="V sum Max",
-                                        entry_val=7, font_style=font_style_box)
+                                        entry_val=default_opt_dict['v_sum_max_thresh_entry'],
+                                        font_style=font_style_box)
+
+# Choose whether to plot the horizontal and vertical lines on the hist plot
+cut_v_labels = tk.Label(sci_tab, text="Plot crosswire", font=font_style_box, bg="white", fg="black")
+cut_v_labels.grid(row=14, column=5, columnspan=1, sticky="n")
+
+# Add a checkbox to choose whether to plot the vertical and horizontal cuts or not
+cut_status_var = tk.BooleanVar()
+cut_status_var.set(default_opt_dict['cut_status'])
+cut_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
+                                variable=cut_status_var, bg="white", fg="black")
+cut_checkbox.grid(row=14, column=4, columnspan=1, sticky="n")
+
+cut_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
+
 
 # Choose whether to plot curve fit or not (is Bool)
 curve_fit_label = tk.Label(sci_tab, text="Curve Fit", font=font_style_box, bg="white", fg="black")
-curve_fit_label.grid(row=14, column=5, columnspan=1, sticky="n")
+curve_fit_label.grid(row=15, column=5, columnspan=1, sticky="n")
 
 # Add a checkbox to choose whether to plot curve fit or not
 curve_fit_status_var = tk.BooleanVar()
-curve_fit_status_var.set(False)
+curve_fit_status_var.set(default_opt_dict['curve_fit_status'])
 curve_fit_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
                                     variable=curve_fit_status_var, bg="white", fg="black")
-curve_fit_checkbox.grid(row=14, column=4, columnspan=1, sticky="n")
+curve_fit_checkbox.grid(row=15, column=4, columnspan=1, sticky="n")
 
 curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
-# Choose whether to implement non-linearity correction or not (is Bool)
-non_lin_corr_label = tk.Label(sci_tab, text="Non-Lin Correction", font=font_style_box, bg="white",
+# Choose whether to implement linear correction or not (is Bool)
+non_lin_corr_label = tk.Label(sci_tab, text="Lin Correction", font=font_style_box, bg="white",
                               fg="black")
-non_lin_corr_label.grid(row=15, column=5, columnspan=1, sticky="n")
+non_lin_corr_label.grid(row=16, column=5, columnspan=1, sticky="n")
 
 # Add a checkbox to choose whether to implement non-linearity correction or not
 non_lin_corr_status_var = tk.BooleanVar()
-non_lin_corr_status_var.set(False)
+non_lin_corr_status_var.set(default_opt_dict['non_lin_corr_status'])
 non_lin_corr_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
                                         variable=non_lin_corr_status_var, bg="white", fg="black")
-non_lin_corr_checkbox.grid(row=15, column=4, columnspan=1, sticky="n")
+non_lin_corr_checkbox.grid(row=16, column=4, columnspan=1, sticky="n")
 
 non_lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 

@@ -510,7 +510,8 @@ def open_file_b():
 
 
 
-def nonlin_correction(x, y, M_inv=np.array([[1.1275, 0.0000],[0.0000, 1.1293]])):
+def nonlin_correction(x, y, M_inv=np.array([[0.98678, 0.16204], [0.11392, 0.99349]]),
+                      b=np.array([0.54535, 0.56355])):
     """
     Function to apply nonlinearity correction to MCP position x/y data
     # TODO: Add correct M_inv matrix and the offsets
