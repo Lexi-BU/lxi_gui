@@ -100,7 +100,7 @@ class hk_packet_cls(NamedTuple):
     14: MCP HV after auto change
     15: MCP HV after manual change
     """
-    Date : int
+    Date: int
     timestamp: int
     hk_id: int
     hk_value: float
@@ -127,7 +127,7 @@ class hk_packet_cls(NamedTuple):
             delta_lost_event_count = structure[5]
 
             return cls(
-                Date = Date,
+                Date=Date,
                 timestamp=timestamp,
                 hk_id=hk_id,
                 hk_value=hk_value,
@@ -336,7 +336,7 @@ def read_binary_data_hk(
         if hk_packet is not None:
             hk_idx.append(idx)
 
-    Date  = np.full(len(hk_idx), np.nan)
+    Date = np.full(len(hk_idx), np.nan)
     TimeStamp = np.full(len(hk_idx), np.nan)
     HK_id = np.full(len(hk_idx), np.nan)
     PinPullerTemp = np.full(len(hk_idx), np.nan)
@@ -359,7 +359,7 @@ def read_binary_data_hk(
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
     DeltaLostEvntCount = np.full(len(hk_idx), np.nan)
 
-    all_data_dict = {"Date":Date, "TimeStamp": TimeStamp, "HK_id": HK_id,
+    all_data_dict = {"Date": Date, "TimeStamp": TimeStamp, "HK_id": HK_id,
                      "0": PinPullerTemp, "1": OpticsTemp, "2": LEXIbaseTemp, "3": HVsupplyTemp,
                      "4": V_Imon_5_2, "5": V_Imon_10, "6": V_Imon_3_3, "7": AnodeVoltMon,
                      "8": V_Imon_28, "9": ADC_Ground, "10": Cmd_count, "11": Pinpuller_Armed,
@@ -509,18 +509,27 @@ def open_file_b():
     return file_val
 
 
-
-def nonlin_correction(x, y, M_inv=np.array([[0.98678, 0.16204],
-                                            [0.11385, 0.993497]]),
-                      b=np.array([0.00195, 0.56355])):
+def lin_correction(x, y, M_inv=np.array([[0.98678, 0.16204],
+                                         [0.11385, 0.993497]]),
+                   b=np.array([0.00195, 0.56355])):
     """
     Function to apply nonlinearity correction to MCP position x/y data
     # TODO: Add correct M_inv matrix and the offsets
     """
-    x_non_lin = (x * M_inv[0,0] + y * M_inv[0,1]) - b[0]
-    y_non_lin = (x * M_inv[1,0] + y * M_inv[1,1])
+    x_lin = (x * M_inv[0, 0] + y * M_inv[0, 1]) - b[0]
+    y_lin = (x * M_inv[1, 0] + y * M_inv[1, 1])
 
-    return x_non_lin, y_non_lin
+    return x_lin, y_lin
+
+
+def volt_to_mcp(x, y):
+    """
+    Function to convert voltage coordinates to MCP coordinates
+    """
+    x_mcp = (x - 0.544) * 78.55
+    y_mcp = (y - 0.564) * 78.55
+
+    return x_mcp, y_mcp
 
 
 def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
@@ -646,28 +655,42 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
                                              bin_min=0, bin_max=4)
 
     # Correct for the non-linearity in the positions
-    x_non_lin_slice, y_non_lin_slice = nonlin_correction(x_slice, y_slice)
-    x_non_lin, y_non_lin = nonlin_correction(x, y)
+    x_lin_slice, y_lin_slice = lin_correction(x_slice, y_slice)
+    x_lin, y_lin = lin_correction(x, y)
+
+    # Get the x,y value in mcp units
+    x_mcp_slice, y_mcp_slice = volt_to_mcp(x_slice, y_slice)
+    x_mcp, y_mcp = volt_to_mcp(x, y)
+    x_mcp_lin_slice, y_mcp_lin_slice = volt_to_mcp(x_lin_slice, y_lin_slice)
+    x_mcp_lin, y_mcp_lin = volt_to_mcp(x_lin, y_lin)
 
     # Add the x-coordinate to the dataframe
     df_slice_sci.loc[:, 'x_val'] = x_slice
-    df_slice_sci.loc[:, 'x_val_nlin'] = x_non_lin_slice
+    df_slice_sci.loc[:, 'x_val_lin'] = x_lin_slice
+    df_slice_sci.loc[:, 'x_mcp'] = x_mcp_slice
+    df_slice_sci.loc[:, 'x_mcp_lin'] = x_mcp_lin_slice
     df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
     df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
 
     df.loc[:, 'x_val'] = x
-    df.loc[:, 'x_val_nlin'] = x_non_lin
+    df.loc[:, 'x_val_lin'] = x_lin
+    df.loc[:, 'x_mcp'] = x_mcp
+    df.loc[:, 'x_mcp_lin'] = x_mcp_lin
     df.loc[:, 'v1_shift'] = v1_shift
     df.loc[:, 'v3_shift'] = v3_shift
 
     # Add the y-coordinate to the dataframe
     df_slice_sci.loc[:, 'y_val'] = y_slice
-    df_slice_sci.loc[:, 'y_val_nlin'] = y_non_lin_slice
+    df_slice_sci.loc[:, 'y_val_lin'] = y_lin_slice
+    df_slice_sci.loc[:, 'y_mcp'] = y_mcp_slice
+    df_slice_sci.loc[:, 'y_mcp_lin'] = y_mcp_lin_slice
     df_slice_sci.loc[:, 'v4_shift'] = v4_shift_slice
     df_slice_sci.loc[:, 'v2_shift'] = v2_shift_slice
 
     df.loc[:, 'y_val'] = y
-    df.loc[:, 'y_val_nlin'] = y_non_lin
+    df.loc[:, 'y_val_lin'] = y_lin
+    df.loc[:, 'y_mcp'] = y_mcp
+    df.loc[:, 'y_mcp_lin'] = y_mcp_lin
     df.loc[:, 'v4_shift'] = v4_shift
     df.loc[:, 'v2_shift'] = v2_shift
 
@@ -707,7 +730,6 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
         # Convert timestamp to datetime and set it to Date
         df['Date'] = pd.to_datetime(df['TimeStamp'], unit='s', utc=True)
 
-
     # Set the index to the time column
     df.set_index('Date', inplace=True)
     # Sort the dataframe by timestamp
@@ -720,7 +742,6 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df.loc[t_start:t_end]
-
 
     return df, df_slice_hk
 

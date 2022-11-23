@@ -159,6 +159,7 @@ class plot_data_class():
                  y_max=None,
                  density=None,
                  norm=None,
+                 unit=None,
                  ts_fig_height=None,
                  ts_fig_width=None,
                  hist_fig_height=None,
@@ -191,6 +192,7 @@ class plot_data_class():
         self.y_max = y_max
         self.density = density
         self.norm = norm
+        self.unit = unit
         self.ts_fig_height = ts_fig_height
         self.ts_fig_width = ts_fig_width
         self.hist_fig_height = hist_fig_height
@@ -345,7 +347,7 @@ class plot_data_class():
         except Exception:
             v_sum_max = 16
 
-        # Check if norm is an instance of mpl.colors.Normalize
+        # Check if norm is 'log' or 'linear'
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
         else:
@@ -355,6 +357,12 @@ class plot_data_class():
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
         elif norm == 'linear':
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
+
+        # Check whether the axes units are 'volt' or 'mcp'
+        if (self.unit == 'volt' or self.unit == 'mcp'):
+            unit = self.unit
+        else:
+            unit = 'mcp'
 
         # Check if cmap is an instance of mpl.colors.Colormap
         if self.cmap in mpl.pyplot.colormaps():
@@ -396,7 +404,7 @@ class plot_data_class():
         else:
             fig = plt.figure(num=None, facecolor='k', edgecolor='k')
 
-        #fig.subplots_adjust(wspace=0., hspace=0.1)
+        # fig.subplots_adjust(wspace=0., hspace=0.1)
         gs = plt.GridSpec(21, 21)
 
         axs1 = fig.add_subplot(gs[:-3, 3:], aspect=1)
@@ -410,23 +418,33 @@ class plot_data_class():
             pass
         # Plot the histogram on axs1
         if self.lin_corr == False:
-            print(f"\033[1;31m Plotting histogram without nonlinearity correction\033[0m")
-            counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
-                                                     self.df_slice_sci["y_val"], bins=bins,
-                                                     cmap=self.cmap, norm=norm,
-                                                     range=[x_range, y_range], cmin=cmin,
-                                                     density=density)
-            # Add histogram data detauls to the global dictionary
+            if self.unit =='volt':
+                x_key = "x_val"
+                y_key = "y_val"
+            elif self.unit == 'mcp':
+                x_key = "x_mcp"
+                y_key = "y_mcp"
+        elif self.lin_corr == True:
+            if self.unit =='volt':
+                x_key = "x_val_lin"
+                y_key = "y_val_lin"
+            elif self.unit == 'mcp':
+                x_key = "x_mcp_lin"
+                y_key = "y_mcp_lin"
+
+        print("\033[1;32m Plotting histogram with linearity correction set to "
+              f"{self.lin_corr} and axes units set to {self.unit}\033[0m")
+        counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci[x_key],
+                                                 self.df_slice_sci[y_key], bins=bins,
+                                                 cmap=self.cmap, norm=norm,
+                                                 range=[x_range, y_range], cmin=cmin,
+                                                 density=density)
+        # Add histogram data detauls to the global dictionary
+        if self.lin_corr == False:
             global_variables.data_org["counts"] = counts
             global_variables.data_org["xedges"] = xedges
             global_variables.data_org["yedges"] = yedges
         elif self.lin_corr == True:
-            print(f"\033[1;32m Plotting histogram with nonlinearity correction\033[0m")
-            counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val_nlin"],
-                                         self.df_slice_sci["y_val_nlin"], bins=bins,
-                                         cmap=self.cmap, norm=norm,
-                                         range=[x_range, y_range], cmin=cmin,
-                                         density=density)
             # Add histogram data details to the global dictionary
             global_variables.data_lin["counts"] = counts
             global_variables.data_lin["xedges"] = xedges
@@ -491,8 +509,14 @@ class plot_data_class():
         else:
             axs1.yaxis.tick_left()
             axs1.yaxis.set_label_position('left')
-        axs1.set_xlabel('Strip = V3/(V1+V3)')
-        axs1.set_ylabel('Wedge = V4/(V2+V4)')
+        if self.unit == 'volt':
+            x_label = 'Strip = V3/(V1+V3)'
+            y_label = 'Wedge = V4/(V2+V4)'
+        elif self.unit == 'mcp':
+            x_label = 'X (cm)'
+            y_label = 'Y (cm)'
+        axs1.set_xlabel(x_label)
+        axs1.set_ylabel(y_label)
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
         axs1.tick_params(axis="both", which="major")
@@ -553,16 +577,12 @@ class plot_data_class():
             x_hist.set_aspect('auto', anchor="C")
 
         # Save tge figure
-        if self.lin_corr == False:
-            plt.savefig("../figures/not_corrected.png", dpi=300, bbox_inches='tight', format='png',
-                        transparent=False)
-        elif self.lin_corr == True:
-            plt.savefig("../figures/lin_corrected.png", dpi=300, bbox_inches='tight', format='png',
-                        transparent=False)
+        fig_format = "png"
+        fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
+        plt.savefig(fig_name, dpi=300, bbox_inches='tight', format=fig_format, transparent=True)
         plt.close("all")
 
-
-        fig.tight_layout()
+        # fig.tight_layout()
         return fig
 
     def hist_plots_volt(self):
@@ -657,7 +677,7 @@ class plot_data_class():
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
 
         fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
-                         facecolor='w', edgecolor='k')
+                         facecolor='gray', edgecolor='k')
 
         x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
         y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]

@@ -1,8 +1,6 @@
 import importlib
-import os
 import platform
 import tkinter as tk
-from configparser import ConfigParser
 from tkinter import font, ttk
 
 import global_variables
@@ -11,7 +9,8 @@ import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
 import lxi_file_read_funcs as lxrf
-import lxi_csv_to_cdf as lctc
+import lxi_gui_config as lgcf
+# import lxi_csv_to_cdf as lctc
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -19,7 +18,8 @@ importlib.reload(global_variables)
 importlib.reload(llpr)
 importlib.reload(lgeb)
 importlib.reload(lmsc)
-importlib.reload(lctc)
+importlib.reload(lgcf)
+# importlib.reload(lctc)
 
 # Initialize the global variables. This is necessary because the global variables is where all the
 # data and name of the files are stored.
@@ -64,6 +64,7 @@ def hist_plot_inputs(dpi=100):
         "y_max": y_max_entry.get(),
         "density": density_status_var.get(),
         "norm": norm_type_var.get(),
+        "unit": unit_type_var.get(),
         "row_hist": 0,
         "col_hist": 2,
         "channel1": "Channel1",
@@ -389,44 +390,14 @@ plot_opt_entry_9.set("Select a column")
 ts_menu_9 = tk.OptionMenu(hk_tab, plot_opt_entry_9, *ts_options)
 ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
 
-# Default plot options
-# Check if a configuration file exists with extension .cfg
-# If it does, then load the configuration file
-# If it does not, then create a new configuration file
-if os.path.isfile("luigi.cfg"):
-    gui_config = ConfigParser()
-    x_min_entry_val = gui_config.get("sci_plot_options", "x_min")
-    x_max_entry_val = gui_config.get("sci_plot_options", "x_max")
-    y_min_entry_val = gui_config.get("sci_plot_options", "y_min")
-    y_max_entry_val = gui_config.get("sci_plot_options", "y_max")
-    hist_bin_entry_val = gui_config.get("sci_plot_options", "hist_bin_entry")
-    c_min_entry_val = gui_config.get("sci_plot_options", "c_min_entry")
-
-default_opt_dict = {'x_min_entry': gui_config.get("sci_plot_options", "x_min"),
-                    'x_max_entry': gui_config.get("sci_plot_options", "x_max"),
-                    'y_min_entry': gui_config.get("sci_plot_options", "y_min"),
-                    'y_max_entry': gui_config.get("sci_plot_options", "y_max"),
-                    'hist_bin_entry': gui_config.get("sci_plot_options", "hist_bin_entry"),
-                    'c_min_entry': gui_config.get("sci_plot_options", "c_min_entry")}
-                    'c_max_entry': gui_config.get("sci_plot_options", "c_max_entry"),
-                    'density_status': gui_config.get("sci_plot_options", "density_status"),
-                    'norm_type': gui_config.get("sci_plot_options", "norm_type"),
-                    'v_min_thresh_entry': gui_config.get("sci_plot_options", "v_min_thresh_entry"),
-                    'v_max_thresh_entry': gui_config.get("sci_plot_options", "v_max_thresh_entry"),
-                    'v_sum_min_thresh_entry': gui_config.get("sci_plot_options",
-                                                             "v_sum_min_thresh_entry"),
-                    'v_sum_max_thresh_entry': gui_config.get("sci_plot_options",
-                                                              "v_sum_max_thresh_entry"),
-                    'cut_status': gui_config.get("sci_plot_options", "cut_status"),
-                    'curve_fit_status': gui_config.get("sci_plot_options", "curve_fit_status"),
-                    'lin_corr_status': gui_config.get("sci_plot_options", "lin_corr_status"),
-                    'cmap': gui_config.get("sci_plot_options", "cmap"),}
+# Get the default config options
+default_opt_dict = lgcf.get_config_entry()
 
 # The minimum value of x-axis for histogram plot
 opt_col_num = 9
 opt_col_num2 = 10
 x_min_entry = lgeb.entry_box(root=sci_tab, row=0, column=opt_col_num, entry_label="X-min",
-                            entry_val=default_opt_dict['x_min_entry'], font_style=font_style_box)
+                             entry_val=default_opt_dict['x_min_entry'], font_style=font_style_box)
 
 # The maximum value of x-axis for histogram plot
 x_max_entry = lgeb.entry_box(root=sci_tab, row=1, column=opt_col_num, entry_label="X-max",
@@ -442,7 +413,7 @@ y_max_entry = lgeb.entry_box(root=sci_tab, row=3, column=opt_col_num, entry_labe
 
 # The number of bins for histogram plot
 hist_bins_entry = lgeb.entry_box(root=sci_tab, row=4, column=opt_col_num, entry_label="Bins",
-                                 entry_val=default_opt_dict['hist_bin_entry'],\
+                                 entry_val=default_opt_dict['hist_bin_entry'],
                                  font_style=font_style_box)
 
 # Mimimum number of data points in each bin for the histogram plot
@@ -486,71 +457,88 @@ norm_type_2.grid(row=9, column=opt_col_num, columnspan=1, sticky="new")
 # Redo the histogram plot when the norm type is changed
 norm_type_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
+# Key for the unit in which x and y axis are plotted
+unit_label = tk.Label(sci_tab, text="Unit", font=font_style_box, bg="white", fg="black")
+unit_label.grid(row=10, column=opt_col_num2, columnspan=1, sticky="n")
+
+# Add radio button for the Unit type (default is 'volt', other option is 'mcp')
+unit_type_var = tk.StringVar()
+unit_type_var.set(default_opt_dict['unit_type'])
+unit_type_1 = tk.Radiobutton(sci_tab, text="volt", variable=unit_type_var, value="volt", bg="white",
+                             fg="black")
+unit_type_1.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
+
+unit_type_2 = tk.Radiobutton(sci_tab, text="mcp", variable=unit_type_var, value="mcp",
+                             bg="white", fg="black")
+unit_type_2.grid(row=11, column=opt_col_num, columnspan=1, sticky="new")
+
+# Redo the histogram plot when the unit type is changed
+unit_type_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
+
 # Minimum threshold for the voltage to be considered
-v_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=10, column=opt_col_num, entry_label="V Min",
+v_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=12, column=opt_col_num, entry_label="V Min",
                                     entry_val=default_opt_dict['v_min_thresh_entry'],
                                     font_style=font_style_box)
 
 # Maximum threshold for the voltage to be considered
-v_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=11, column=opt_col_num, entry_label="V Max",
+v_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=13, column=opt_col_num, entry_label="V Max",
                                     entry_val=default_opt_dict['v_max_thresh_entry'],
                                     font_style=font_style_box)
 
 # Sum of minimum and maximum threshold for the voltage to be considered
-v_sum_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=12, column=opt_col_num,
+v_sum_min_thresh_entry = lgeb.entry_box(root=sci_tab, row=14, column=opt_col_num,
                                         entry_label="V sum Min",
                                         entry_val=default_opt_dict['v_sum_min_thresh_entry'],
                                         font_style=font_style_box)
 
-v_sum_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=13, column=opt_col_num,
+v_sum_max_thresh_entry = lgeb.entry_box(root=sci_tab, row=15, column=opt_col_num,
                                         entry_label="V sum Max",
                                         entry_val=default_opt_dict['v_sum_max_thresh_entry'],
                                         font_style=font_style_box)
 
 # Choose whether to plot the horizontal and vertical lines on the hist plot
 cut_v_labels = tk.Label(sci_tab, text="crosswire", font=font_style_box, bg="white", fg="black")
-cut_v_labels.grid(row=14, column=opt_col_num2, columnspan=1, sticky="n")
+cut_v_labels.grid(row=16, column=opt_col_num2, columnspan=1, sticky="n")
 
 # Add a checkbox to choose whether to plot the vertical and horizontal cuts or not
 cut_status_var = tk.BooleanVar()
 cut_status_var.set(default_opt_dict['cut_status'])
 cut_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
-                                variable=cut_status_var, bg="white", fg="black")
-cut_checkbox.grid(row=14, column=opt_col_num, columnspan=1, sticky="n")
+                              variable=cut_status_var, bg="white", fg="black")
+cut_checkbox.grid(row=16, column=opt_col_num, columnspan=1, sticky="n")
 
 cut_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 
 # Choose whether to plot curve fit or not (is Bool)
 curve_fit_label = tk.Label(sci_tab, text="Curve Fit", font=font_style_box, bg="white", fg="black")
-curve_fit_label.grid(row=15, column=opt_col_num2, columnspan=1, sticky="n")
+curve_fit_label.grid(row=17, column=opt_col_num2, columnspan=1, sticky="n")
 
 # Add a checkbox to choose whether to plot curve fit or not
 curve_fit_status_var = tk.BooleanVar()
 curve_fit_status_var.set(default_opt_dict['curve_fit_status'])
 curve_fit_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
                                     variable=curve_fit_status_var, bg="white", fg="black")
-curve_fit_checkbox.grid(row=15, column=opt_col_num, columnspan=1, sticky="n")
+curve_fit_checkbox.grid(row=17, column=opt_col_num, columnspan=1, sticky="n")
 
 curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Choose whether to implement linear correction or not (is Bool)
-lin_corr_label = tk.Label(sci_tab, text="Correction", font=font_style_box, bg="white",
-                              fg="black")
-lin_corr_label.grid(row=16, column=opt_col_num2, columnspan=1, sticky="n")
+lin_corr_label = tk.Label(sci_tab, text="Correction", font=font_style_box, bg="white", fg="black")
+lin_corr_label.grid(row=18, column=opt_col_num2, columnspan=1, sticky="n")
 
 # Add a checkbox to choose whether to implement non-linearity correction or not
 lin_corr_status_var = tk.BooleanVar()
 lin_corr_status_var.set(default_opt_dict['lin_corr_status'])
 lin_corr_checkbox = tk.Checkbutton(sci_tab, text="", font=font_style_box,
-                                        variable=lin_corr_status_var, bg="white", fg="black")
-lin_corr_checkbox.grid(row=16, column=opt_col_num, columnspan=1, sticky="n")
+                                   variable=lin_corr_status_var, bg="white", fg="black")
+lin_corr_checkbox.grid(row=18, column=opt_col_num, columnspan=1, sticky="n")
 
 lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Choose the colorbar
-cmap_option = lgeb.entry_box(root=sci_tab, row=17, column=opt_col_num, entry_label="Cmap",
-                            entry_val=default_opt_dict['cmap'], font_style=font_style_box)
+cmap_option = lgeb.entry_box(root=sci_tab, row=19, column=opt_col_num, entry_label="Cmap",
+                             entry_val=default_opt_dict['cmap'], font_style=font_style_box)
 
 # Add a button to save the data to a cdf file
 cdf_save_button = tk.Button(
@@ -565,8 +553,9 @@ start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="whi
 start_time_label.grid(row=6, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for start time
+default_time_dict = lgcf.get_config_time()
 start_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
-start_time.insert(0, "YYYY-MM-DD HH:MM:SS")
+start_time.insert(0, default_time_dict['start_time'])
 start_time.grid(row=7, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(sci_tab, text="Start Time", font=font_style, bg="white", fg="black")
 start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
@@ -576,8 +565,9 @@ start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 #                                                 entry_label="End Time", width=30,
 #                                                 entry_val="YYYY-MM-DD HH:MM:SS",
 #                                                 font_style=font_style)
+
 end_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
-end_time.insert(0, "YYYY-MM-DD HH:MM:SS")
+end_time.insert(0, default_time_dict['end_time'])
 end_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
 end_time_label = tk.Label(sci_tab, text="End Time", font=font_style, bg="white", fg="black")
 end_time_label.grid(row=10, column=0, columnspan=2)
@@ -629,16 +619,26 @@ plot_button.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=
 plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
                                                                      end_time=end_time.get()))
 
-
 # If the plot button is pressed then all the histogram plots are redrawn
 refresh_button = tk.Button(sci_tab, text="Refresh Histogram", font=font_style_box, justify="center",
-                        command=lambda: hist_plot_inputs(dpi=dpi))
+                           command=lambda: hist_plot_inputs(dpi=dpi))
 
 refresh_button.grid(row=12, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # If the plot button is pressed, then print the current time
 refresh_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
-                                                                     end_time=end_time.get()))
+                                                                        end_time=end_time.get()))
+
+# Add a button to save the configuration file
+entry_list = [x_min_entry, x_max_entry, y_min_entry, y_max_entry, hist_bins_entry, c_min_entry,
+              c_max_entry, density_status_var, norm_type_var, unit_type_var, v_min_thresh_entry,
+              v_max_thresh_entry, v_sum_min_thresh_entry, v_sum_max_thresh_entry, cut_status_var,
+              curve_fit_status_var, lin_corr_status_var, cmap_option, start_time, end_time]
+save_config_button = tk.Button(sci_tab, text="Save Config", font=font_style_box, justify="center",
+                               command=lambda: lgcf.save_config(entry_list=entry_list,
+                                                                entry_sec=["sci_plot_options",
+                                                                           "time_options"]))
+save_config_button.grid(row=13, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # Add a quit button
 quit_button_sci = tk.Button(
