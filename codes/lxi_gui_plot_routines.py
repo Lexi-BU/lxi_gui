@@ -171,7 +171,8 @@ class plot_data_class():
                  v_sum_max=None,
                  cut_status_var=None,
                  crv_fit=None,
-                 nonlin_corr=None,
+                 lin_corr=None,
+                 cmap=None,
                  use_fig_size=None,
                  ):
         self.df_slice_hk = df_slice_hk
@@ -202,7 +203,8 @@ class plot_data_class():
         self.v_sum_max = v_sum_max
         self.cut_status_var = cut_status_var
         self.crv_fit = crv_fit
-        self.nonlin_corr = nonlin_corr
+        self.lin_corr = lin_corr
+        self.cmap = cmap
         self.use_fig_size = use_fig_size
 
     def ts_plots(self):
@@ -354,6 +356,13 @@ class plot_data_class():
         elif norm == 'linear':
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
 
+        # Check if cmap is an instance of mpl.colors.Colormap
+        if self.cmap in mpl.pyplot.colormaps():
+            self.cmap = self.cmap
+        else:
+            print(f"Invalid cmap: {self.cmap}. Using default cmap: 'viridis'")
+            self.cmap = 'viridis'
+
         x_range = [x_min, x_max]
         y_range = [y_min, y_max]
 
@@ -382,14 +391,15 @@ class plot_data_class():
 
         if self.use_fig_size:
             fig = plt.figure(num=None, figsize=(self.hist_fig_width, self.hist_fig_height),
-                             facecolor='w', edgecolor='k')
+                             facecolor='gray', edgecolor='k')
+            fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0., hspace=0.)
         else:
-            fig = plt.figure(num=None, facecolor='w', edgecolor='k')
+            fig = plt.figure(num=None, facecolor='k', edgecolor='k')
 
-        fig.subplots_adjust(wspace=0., hspace=1)
-        gs = plt.GridSpec(6, 6)
+        #fig.subplots_adjust(wspace=0., hspace=0.1)
+        gs = plt.GridSpec(21, 21)
 
-        axs1 = fig.add_subplot(gs[:-1, 1:], aspect=1)
+        axs1 = fig.add_subplot(gs[:-3, 3:], aspect=1)
 
         # Drop all nans in the data
         self.df_slice_sci = self.df_slice_sci.dropna()
@@ -399,20 +409,28 @@ class plot_data_class():
         except Exception:
             pass
         # Plot the histogram on axs1
-        if self.nonlin_corr == False:
-            print(f"\033[1;32m Plotting histogram without nonlinearity correction\033[0m")
+        if self.lin_corr == False:
+            print(f"\033[1;31m Plotting histogram without nonlinearity correction\033[0m")
             counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
                                                      self.df_slice_sci["y_val"], bins=bins,
-                                                     cmap='Reds', norm=norm,
+                                                     cmap=self.cmap, norm=norm,
                                                      range=[x_range, y_range], cmin=cmin,
                                                      density=density)
-        elif self.nonlin_corr == True:
+            # Add histogram data detauls to the global dictionary
+            global_variables.data_org["counts"] = counts
+            global_variables.data_org["xedges"] = xedges
+            global_variables.data_org["yedges"] = yedges
+        elif self.lin_corr == True:
             print(f"\033[1;32m Plotting histogram with nonlinearity correction\033[0m")
             counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val_nlin"],
                                          self.df_slice_sci["y_val_nlin"], bins=bins,
-                                         cmap='Reds', norm=norm,
+                                         cmap=self.cmap, norm=norm,
                                          range=[x_range, y_range], cmin=cmin,
                                          density=density)
+            # Add histogram data details to the global dictionary
+            global_variables.data_lin["counts"] = counts
+            global_variables.data_lin["xedges"] = xedges
+            global_variables.data_lin["yedges"] = yedges
         # Find the index of the maximum value in counts, ignoring NaNs
         max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
@@ -427,8 +445,8 @@ class plot_data_class():
         axs1.minorticks_on()
 
         # Set the grid on for both axes for major and minor ticks
-        axs1.grid(which='major', linestyle='-', linewidth='0.2', color='black')
-        axs1.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
+        axs1.grid(which='major', linestyle='--', linewidth='0.1', color='black', alpha=0.2)
+        # axs1.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
         # Number of data points in each bin along the x- and y-axes
         yn = counts[max_index[0], :]
         xn = counts[:, max_index[1]]
@@ -436,11 +454,9 @@ class plot_data_class():
         x_step = (xedges[1:] + xedges[0:-1]) / 2
         y_step = (yedges[1:] + yedges[0:-1]) / 2
 
-        print(f"\033[1;32m The cut status is {self.cut_status_var}\033[0m")
-
         if self.cut_status_var == True:
-            y_hist = fig.add_subplot(gs[:-1, 0], sharey=axs1)
-            x_hist = fig.add_subplot(gs[-1, 1:], sharex=axs1)
+            y_hist = fig.add_subplot(gs[1:-4, 0:3], sharey=axs1)
+            x_hist = fig.add_subplot(gs[-3:-1, 3:], sharex=axs1)
             # Make step plot between xedges and xn
             x_hist.step(x_step, xn, color='k', where='post')
             x_hist.plot(xedges[1:], xn, 'ko', markerfacecolor='none', markeredgecolor='gray')
@@ -450,7 +466,7 @@ class plot_data_class():
             y_hist.step(yn, y_step, color='k', where='post')
             y_hist.plot(yn, yedges[:-1], 'ko', markerfacecolor='none', markeredgecolor='gray')
             y_hist.invert_xaxis()
-            y_hist.set_xlabel('Horizontal Cut')
+            y_hist.set_ylabel('Horizontal Cut')
 
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.02)
@@ -469,13 +485,20 @@ class plot_data_class():
             cbar1.set_label('N', labelpad=0.0, rotation=0)
 
         # Put y-label and tickmarks on right side
-        axs1.yaxis.tick_right()
-        axs1.yaxis.set_label_position('right')
+        if self.cut_status_var == True:
+            axs1.yaxis.tick_right()
+            axs1.yaxis.set_label_position('right')
+        else:
+            axs1.yaxis.tick_left()
+            axs1.yaxis.set_label_position('left')
         axs1.set_xlabel('Strip = V3/(V1+V3)')
         axs1.set_ylabel('Wedge = V4/(V2+V4)')
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
         axs1.tick_params(axis="both", which="major")
+        # Show ticks on both sides of the plot
+        axs1.tick_params(axis='both', which='both', direction='in', left=True, right=True, top=True,
+                         bottom=True)
 
         # If curve fit option is chosen, fit a Gaussian to the data and plot it
         if self.crv_fit and self.cut_status_var:
@@ -529,8 +552,17 @@ class plot_data_class():
             y_hist.set_aspect('auto', anchor="SW")
             x_hist.set_aspect('auto', anchor="C")
 
+        # Save tge figure
+        if self.lin_corr == False:
+            plt.savefig("../figures/not_corrected.png", dpi=300, bbox_inches='tight', format='png',
+                        transparent=False)
+        elif self.lin_corr == True:
+            plt.savefig("../figures/lin_corrected.png", dpi=300, bbox_inches='tight', format='png',
+                        transparent=False)
         plt.close("all")
-        # fig.tight_layout()
+
+
+        fig.tight_layout()
         return fig
 
     def hist_plots_volt(self):
@@ -589,13 +621,19 @@ class plot_data_class():
             norm = None
 
         # If density is true, set cmin to None
-        if density is True:
-            cmin = None
+        # if density is True:
+        #     cmin = None
 
         if norm == 'log':
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
         elif norm == 'linear':
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
+
+        # Check if cmap is an instance of mpl.colors.Colormap
+        if self.cmap in mpl.pyplot.colormaps():
+            self.cmap = self.cmap
+        else:
+            self.cmap = 'viridis'
 
         self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep='first')]
 
@@ -626,7 +664,7 @@ class plot_data_class():
 
         gs = gridspec.GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
         axs1 = fig.add_subplot(gs[0, 0], aspect=1)
-        _, _, _, im = axs1.hist2d(v1, v2, bins=bins, cmap='Spectral', norm=norm,
+        _, _, _, im = axs1.hist2d(v1, v2, bins=bins, cmap=self.cmap, norm=norm,
                                   range=[x_range, y_range], cmin=cmin, density=density)
         divider1 = make_axes_locatable(axs1)
         cax1 = divider1.append_axes("top", size="5%", pad=0.01)
