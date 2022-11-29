@@ -2,46 +2,76 @@ import os
 from configparser import ConfigParser
 
 
-def create_config_file():
+def create_config_file(default_vals=False):
+    """Create a configuration file if it does not exist."""
     # If the configuration file doesn't exist, then create a new one
     # with default options
-    if not os.path.isfile("luigi.cfg"):
-        gui_config = ConfigParser()
-        gui_config.add_section("sci_plot_options")
-        gui_config.set("sci_plot_options", "x_min_entry", "0")
-        gui_config.set("sci_plot_options", "x_max_entry", "0")
-        gui_config.set("sci_plot_options", "y_min_entry", "0")
-        gui_config.set("sci_plot_options", "y_max_entry", "0")
-        gui_config.set("sci_plot_options", "hist_bin_entry", "0")
-        gui_config.set("sci_plot_options", "c_min_entry", "0")
-        gui_config.set("sci_plot_options", "c_max_entry", "0")
-        gui_config.set("sci_plot_options", "density_status", "0")
-        gui_config.set("sci_plot_options", "norm_type", "0")
-        gui_config.set("sci_plot_options", "unit_type", "0")
-        gui_config.set("sci_plot_options", "v_min_thresh_entry", "0")
-        gui_config.set("sci_plot_options", "v_max_thresh_entry", "0")
-        gui_config.set("sci_plot_options", "v_sum_min_thresh_entry", "0")
-        gui_config.set("sci_plot_options", "v_sum_max_thresh_entry", "0")
-        gui_config.set("sci_plot_options", "cut_status", "0")
-        gui_config.set("sci_plot_options", "curve_fit_status", "0")
-        gui_config.set("sci_plot_options", "lin_corr_status", "0")
-        gui_config.set("sci_plot_options", "cmap", "0")
+    if not default_vals:
+        if not os.path.isfile("luigi.cfg"):
+            gui_config = ConfigParser()
+            gui_config.add_section("sci_plot_options")
+            gui_config.set("sci_plot_options", "x_min_entry", "0")
+            gui_config.set("sci_plot_options", "x_max_entry", "0")
+            gui_config.set("sci_plot_options", "y_min_entry", "0")
+            gui_config.set("sci_plot_options", "y_max_entry", "0")
+            gui_config.set("sci_plot_options", "hist_bin_entry", "0")
+            gui_config.set("sci_plot_options", "c_min_entry", "0")
+            gui_config.set("sci_plot_options", "c_max_entry", "0")
+            gui_config.set("sci_plot_options", "density_status", "0")
+            gui_config.set("sci_plot_options", "norm_type", "0")
+            gui_config.set("sci_plot_options", "unit_type", "0")
+            gui_config.set("sci_plot_options", "v_min_thresh_entry", "0")
+            gui_config.set("sci_plot_options", "v_max_thresh_entry", "0")
+            gui_config.set("sci_plot_options", "v_sum_min_thresh_entry", "0")
+            gui_config.set("sci_plot_options", "v_sum_max_thresh_entry", "0")
+            gui_config.set("sci_plot_options", "cut_status", "0")
+            gui_config.set("sci_plot_options", "curve_fit_status", "0")
+            gui_config.set("sci_plot_options", "lin_corr_status", "0")
+            gui_config.set("sci_plot_options", "cmap", "0")
 
-        gui_config.add_section("time_options")
-        gui_config.set("time_options", "start_time", "YYYY-MM-DD HH:MM:SS")
-        gui_config.set("time_options", "end_time", "YYYY-MM-DD HH:MM:SS")
-        with open("luigi.cfg", "w") as config_file:
-            gui_config.write(config_file)
-        print("\033[1;32mConfiguration file 'luigi.cfg' created.\033[0m")
+            gui_config.add_section("time_options")
+            gui_config.set("time_options", "start_time", "YYYY-MM-DD HH:MM:SS")
+            gui_config.set("time_options", "end_time", "YYYY-MM-DD HH:MM:SS")
+            with open("luigi.cfg", "w") as config_file:
+                gui_config.write(config_file)
+            print("\033[1;32mConfiguration file 'luigi.cfg' created.\033[0m")
+    elif default_vals:
+            gui_config = ConfigParser()
+            gui_config.add_section("sci_plot_options")
+            gui_config.set("sci_plot_options", "x_min_entry", "-5")
+            gui_config.set("sci_plot_options", "x_max_entry", "5")
+            gui_config.set("sci_plot_options", "y_min_entry", "-5")
+            gui_config.set("sci_plot_options", "y_max_entry", "5")
+            gui_config.set("sci_plot_options", "hist_bin_entry", "200")
+            gui_config.set("sci_plot_options", "c_min_entry", "1")
+            gui_config.set("sci_plot_options", "c_max_entry", "None")
+            gui_config.set("sci_plot_options", "density_status", "0")
+            gui_config.set("sci_plot_options", "norm_type", "log")
+            gui_config.set("sci_plot_options", "unit_type", "mcp")
+            gui_config.set("sci_plot_options", "v_min_thresh_entry", "1.2")
+            gui_config.set("sci_plot_options", "v_max_thresh_entry", "3.4")
+            gui_config.set("sci_plot_options", "v_sum_min_thresh_entry", "5")
+            gui_config.set("sci_plot_options", "v_sum_max_thresh_entry", "7")
+            gui_config.set("sci_plot_options", "cut_status", "0")
+            gui_config.set("sci_plot_options", "curve_fit_status", "0")
+            gui_config.set("sci_plot_options", "lin_corr_status", "1")
+            gui_config.set("sci_plot_options", "cmap", "viridis")
+
+            gui_config.add_section("time_options")
+            gui_config.set("time_options", "start_time", "YYYY-MM-DD HH:MM:SS")
+            gui_config.set("time_options", "end_time", "YYYY-MM-DD HH:MM:SS")
+            with open("luigi.cfg", "w") as config_file:
+                gui_config.write(config_file)
     return None
 
 
 def get_config_entry():
+    """Get the configuration file entries"""
     # Default plot options
     # Check if a configuration file exists with extension .cfg
     # If it does, then load the configuration file
     # If it does not, then create a new configuration file
-    create_config_file()
+    create_config_file(default_vals=False)
     entry_sec = "sci_plot_options"
     # if os.path.isfile("luigi.cfg"):
     gui_config = ConfigParser()
@@ -118,6 +148,7 @@ def get_config_entry():
 
 
 def get_config_time():
+    """Get the time of the last configuration file modification."""
     entry_sec = "time_options"
     create_config_file()
     gui_config = ConfigParser()

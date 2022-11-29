@@ -399,7 +399,7 @@ class plot_data_class():
 
         if self.use_fig_size:
             fig = plt.figure(num=None, figsize=(self.hist_fig_width, self.hist_fig_height),
-                             facecolor='gray', edgecolor='k')
+                             facecolor='w', edgecolor='k')
             fig.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0., hspace=0.)
         else:
             fig = plt.figure(num=None, facecolor='k', edgecolor='k')
@@ -677,7 +677,7 @@ class plot_data_class():
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)]
 
         fig = plt.figure(num=None, figsize=(self.volt_fig_width, self.volt_fig_height),
-                         facecolor='gray', edgecolor='k')
+                         facecolor='w', edgecolor='k')
 
         x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]
         y_range = [0.9 * np.nanmin(v2), 1.1 * np.nanmax(v2)]
