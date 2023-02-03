@@ -439,6 +439,20 @@ class plot_data_class():
                                                  cmap=self.cmap, norm=norm,
                                                  range=[x_range, y_range], cmin=cmin,
                                                  density=density)
+
+        # If all values of counts are NaN, then redo the histogram with different norm and cmin
+        if np.isnan(counts).all():
+            print(f"\033[1;31m For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
+                  "Redoing the histogram with different norm and cmin\033[0m")
+            new_norm = mpl.colors.LogNorm()
+            counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci[x_key],
+                                                     self.df_slice_sci[y_key], bins=bins,
+                                                     cmap=self.cmap, norm=new_norm,
+                                                     range=[x_range, y_range], density=density)
+            # Print the new cmin and cmax values, greater than 0, to 2 decimal places
+            print(f"\033[1;32m New cmin={np.nanmin(counts[counts > 0]):.2f} and "
+                  f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m")
+
         # Add histogram data detauls to the global dictionary
         if self.lin_corr == False:
             global_variables.data_org["counts"] = counts
@@ -578,6 +592,10 @@ class plot_data_class():
 
         # Save tge figure
         fig_format = "png"
+        fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
+        plt.savefig(fig_name, dpi=300, bbox_inches='tight', format=fig_format, transparent=True)
+
+        fig_format = "pdf"
         fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
         plt.savefig(fig_name, dpi=300, bbox_inches='tight', format=fig_format, transparent=True)
         plt.close("all")
