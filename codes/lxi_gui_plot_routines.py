@@ -1,5 +1,6 @@
 import importlib
 import datetime
+import os
 
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
@@ -359,10 +360,10 @@ class plot_data_class():
             norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
 
         # Check whether the axes units are 'volt' or 'mcp'
-        if (self.unit == 'volt' or self.unit == 'mcp'):
-            unit = self.unit
-        else:
-            unit = 'mcp'
+        # if (self.unit == 'volt' or self.unit == 'mcp'):
+        #     unit = self.unit
+        # else:
+        #     unit = 'mcp'
 
         # Check if cmap is an instance of mpl.colors.Colormap
         if self.cmap in mpl.pyplot.colormaps():
@@ -413,19 +414,19 @@ class plot_data_class():
         self.df_slice_sci = self.df_slice_sci.dropna()
         # Try to select only rows where "IsCommanded" is False
         try:
-            self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"] == False]
+            self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"]==False]
         except Exception:
             pass
         # Plot the histogram on axs1
-        if self.lin_corr == False:
-            if self.unit =='volt':
+        if self.lin_corr is False:
+            if self.unit == 'volt':
                 x_key = "x_val"
                 y_key = "y_val"
             elif self.unit == 'mcp':
                 x_key = "x_mcp"
                 y_key = "y_mcp"
-        elif self.lin_corr == True:
-            if self.unit =='volt':
+        elif self.lin_corr is True:
+            if self.unit == 'volt':
                 x_key = "x_val_lin"
                 y_key = "y_val_lin"
             elif self.unit == 'mcp':
@@ -454,11 +455,11 @@ class plot_data_class():
                   f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m")
 
         # Add histogram data detauls to the global dictionary
-        if self.lin_corr == False:
+        if self.lin_corr is False:
             global_variables.data_org["counts"] = counts
             global_variables.data_org["xedges"] = xedges
             global_variables.data_org["yedges"] = yedges
-        elif self.lin_corr == True:
+        elif self.lin_corr is True:
             # Add histogram data details to the global dictionary
             global_variables.data_lin["counts"] = counts
             global_variables.data_lin["xedges"] = xedges
@@ -466,7 +467,7 @@ class plot_data_class():
         # Find the index of the maximum value in counts, ignoring NaNs
         max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
-        if self.cut_status_var == True:
+        if self.cut_status_var is True:
             # Draw a horizontal and vertical line at the maximum value
             axs1.axvline(x=(xedges[max_index[0]] + xedges[max_index[0] + 1]) / 2, color='k',
                          linestyle='--', linewidth=1, alpha=0.5)
@@ -486,13 +487,13 @@ class plot_data_class():
         x_step = (xedges[1:] + xedges[0:-1]) / 2
         y_step = (yedges[1:] + yedges[0:-1]) / 2
 
-        if self.cut_status_var == True:
+        if self.cut_status_var is True:
             y_hist = fig.add_subplot(gs[1:-4, 0:3], sharey=axs1)
             x_hist = fig.add_subplot(gs[-3:-1, 3:], sharex=axs1)
             # Make step plot between xedges and xn
             x_hist.step(x_step, xn, color='k', where='post')
             x_hist.plot(xedges[1:], xn, 'ko', markerfacecolor='none', markeredgecolor='gray')
-# 
+
             x_hist.set_xlabel('Vertical Cut')
             # Make step plot between yedges and yn
             y_hist.step(yn, y_step, color='k', where='post')
@@ -517,7 +518,7 @@ class plot_data_class():
             cbar1.set_label('N', labelpad=0.0, rotation=0)
 
         # Put y-label and tickmarks on right side
-        if self.cut_status_var == True:
+        if self.cut_status_var is True:
             axs1.yaxis.tick_right()
             axs1.yaxis.set_label_position('right')
         else:
@@ -567,15 +568,15 @@ class plot_data_class():
                 x_fwhm = lmsc.fwhm(x_vals, lmsc.curve_fit_func(x_vals, *popt_x))
                 y_fwhm = lmsc.fwhm(y_vals, lmsc.curve_fit_func(y_vals, *popt_y))
                 # Print the fit values on the plot
-                x_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_x[1]),
+                x_hist.text(0.05, 0.95, '$\\mu$ = {:.3f}'.format(popt_x[1]),
                             transform=x_hist.transAxes, verticalalignment='top')
-                x_hist.text(0.05, 0.70, '$\sigma$ = {:.3f}'.format(popt_x[2]),
+                x_hist.text(0.05, 0.70, '$\\sigma$ = {:.3f}'.format(popt_x[2]),
                             transform=x_hist.transAxes, verticalalignment='top')
                 x_hist.text(0.05, 0.45, '$FWHM$ = {:.3f}'.format(x_fwhm),
                             transform=x_hist.transAxes, verticalalignment='top')
-                y_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_y[1]),
+                y_hist.text(0.05, 0.95, '$\\mu$ = {:.3f}'.format(popt_y[1]),
                             transform=y_hist.transAxes, verticalalignment='top')
-                y_hist.text(0.05, 0.90, '$\sigma$ = {:.3f}'.format(popt_y[2]),
+                y_hist.text(0.05, 0.90, '$\\sigma$ = {:.3f}'.format(popt_y[2]),
                             transform=y_hist.transAxes, verticalalignment='top')
                 y_hist.text(0.05, 0.85, '$FWHM$ = {:.3f}'.format(y_fwhm),
                             transform=y_hist.transAxes, verticalalignment='top')
@@ -590,7 +591,10 @@ class plot_data_class():
             y_hist.set_aspect('auto', anchor="SW")
             x_hist.set_aspect('auto', anchor="C")
 
-        # Save tge figure
+        # Save the figure
+        # Check if folder exists, if not create it
+        if not os.path.exists('../figures'):
+            os.makedirs('../figures')
         fig_format = "png"
         fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
         plt.savefig(fig_name, dpi=300, bbox_inches='tight', format=fig_format, transparent=True)

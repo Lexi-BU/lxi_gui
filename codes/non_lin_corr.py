@@ -10,7 +10,6 @@ with wand.image.Image.from_array(img_i) as img:
 
 
 with wand.image.Image.from_array(img_i) as img:
-    
     # Set background color to transparent
     img.background_color = wand.color.Color("transparent")
     # img.background_color = img[0, 0]
@@ -33,7 +32,7 @@ with wand.image.Image.from_array(img_i) as img:
     # img.alpha_channel = "remove"
 
     img.virtual_pixel = "background"
-    
+
     args = (0.0, 0.1, -0.1, 1.1)
     img.distort('barrel', args)
 

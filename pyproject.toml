@@ -12,6 +12,7 @@ tabulate = "^0.8.9"
 pyinstaller = "^5.1"
 tk = "^0.1.0"
 Wand = "^0.6.10"
+spacepy = "^0.4.1"
 
 [tool.poetry.dev-dependencies]
 

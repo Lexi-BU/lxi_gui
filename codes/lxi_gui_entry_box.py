@@ -87,7 +87,7 @@ def entry_box(root=None,
     return main_entry
 
 
-def populate_entries(root=None):
+def populate_entries(root=None, default_vals=False):
     """
     Populates the entry boxes in the GUI for the Sci Tab.
 
@@ -108,9 +108,8 @@ def populate_entries(root=None):
     if root is None:
         raise ValueError("Root is not specified.")
 
-
     # Get the default values from the config file
-    default_opt_dict = lgcf.get_config_entry()
+    default_opt_dict = lgcf.get_config_entry(default_vals=default_vals)
 
     # The minimum value of x-axis for histogram plot
     opt_col_num = 9
@@ -155,7 +154,7 @@ def populate_entries(root=None):
     density_status_var = tk.BooleanVar()
     density_status_var.set(default_opt_dict['density_status'])
     density_checkbox = tk.Checkbutton(root, text="", font=font_style_box,
-                                    variable=density_status_var, bg="white", fg="black")
+                                      variable=density_status_var, bg="white", fg="black")
     density_checkbox.grid(row=7, column=opt_col_num, columnspan=1, sticky="n")
 
     # Key for the norm of the colorbar
@@ -166,11 +165,11 @@ def populate_entries(root=None):
     norm_type_var = tk.StringVar()
     norm_type_var.set(default_opt_dict['norm_type'])
     norm_type_1 = tk.Radiobutton(root, text="Log", variable=norm_type_var, value="log", bg="white",
-                                fg="black")
+                                 fg="black")
     norm_type_1.grid(row=8, column=opt_col_num, columnspan=1, sticky="new")
 
     norm_type_2 = tk.Radiobutton(root, text="Lin", variable=norm_type_var, value="linear",
-                                bg="white", fg="black")
+                                 bg="white", fg="black")
     norm_type_2.grid(row=9, column=opt_col_num, columnspan=1, sticky="new")
 
     # Key for the unit in which x and y axis are plotted
@@ -180,34 +179,34 @@ def populate_entries(root=None):
     # Add radio button for the Unit type (default is 'volt', other option is 'mcp')
     unit_type_var = tk.StringVar()
     unit_type_var.set(default_opt_dict['unit_type'])
-    unit_type_1 = tk.Radiobutton(root, text="volt", variable=unit_type_var, value="volt", bg="white",
-                                fg="black")
+    unit_type_1 = tk.Radiobutton(root, text="volt", variable=unit_type_var, value="volt",
+                                 bg="white", fg="black")
     unit_type_1.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
 
     unit_type_2 = tk.Radiobutton(root, text="mcp", variable=unit_type_var, value="mcp",
-                                bg="white", fg="black")
+                                 bg="white", fg="black")
     unit_type_2.grid(row=11, column=opt_col_num, columnspan=1, sticky="new")
 
     # Minimum threshold for the voltage to be considered
     v_min_thresh_entry = entry_box(root=root, row=12, column=opt_col_num, entry_label="V Min",
-                                        entry_val=default_opt_dict['v_min_thresh_entry'],
-                                        font_style=font_style_box)
+                                   entry_val=default_opt_dict['v_min_thresh_entry'],
+                                   font_style=font_style_box)
 
     # Maximum threshold for the voltage to be considered
     v_max_thresh_entry = entry_box(root=root, row=13, column=opt_col_num, entry_label="V Max",
-                                        entry_val=default_opt_dict['v_max_thresh_entry'],
-                                        font_style=font_style_box)
+                                   entry_val=default_opt_dict['v_max_thresh_entry'],
+                                   font_style=font_style_box)
 
     # Sum of minimum and maximum threshold for the voltage to be considered
     v_sum_min_thresh_entry = entry_box(root=root, row=14, column=opt_col_num,
-                                            entry_label="V sum Min",
-                                            entry_val=default_opt_dict['v_sum_min_thresh_entry'],
-                                            font_style=font_style_box)
+                                       entry_label="V sum Min",
+                                       entry_val=default_opt_dict['v_sum_min_thresh_entry'],
+                                       font_style=font_style_box)
 
     v_sum_max_thresh_entry = entry_box(root=root, row=15, column=opt_col_num,
-                                            entry_label="V sum Max",
-                                            entry_val=default_opt_dict['v_sum_max_thresh_entry'],
-                                            font_style=font_style_box)
+                                       entry_label="V sum Max",
+                                       entry_val=default_opt_dict['v_sum_max_thresh_entry'],
+                                       font_style=font_style_box)
 
     # Choose whether to plot the horizontal and vertical lines on the hist plot
     cut_v_labels = tk.Label(root, text="crosswire", font=font_style_box, bg="white", fg="black")
@@ -217,7 +216,7 @@ def populate_entries(root=None):
     cut_status_var = tk.BooleanVar()
     cut_status_var.set(default_opt_dict['cut_status'])
     cut_checkbox = tk.Checkbutton(root, text="", font=font_style_box,
-                                variable=cut_status_var, bg="white", fg="black")
+                                  variable=cut_status_var, bg="white", fg="black")
     cut_checkbox.grid(row=16, column=opt_col_num, columnspan=1, sticky="n")
 
     # Choose whether to plot curve fit or not (is Bool)
@@ -239,15 +238,14 @@ def populate_entries(root=None):
     lin_corr_status_var = tk.BooleanVar()
     lin_corr_status_var.set(default_opt_dict['lin_corr_status'])
     lin_corr_checkbox = tk.Checkbutton(root, text="", font=font_style_box,
-                                    variable=lin_corr_status_var, bg="white", fg="black")
+                                       variable=lin_corr_status_var, bg="white", fg="black")
     lin_corr_checkbox.grid(row=18, column=opt_col_num, columnspan=1, sticky="n")
 
     # Choose the colorbar
     cmap_option = entry_box(root=root, row=19, column=opt_col_num, entry_label="Cmap",
-                                entry_val=default_opt_dict['cmap'], font_style=font_style_box)
-
+                            entry_val=default_opt_dict['cmap'], font_style=font_style_box)
 
     return x_min_entry, x_max_entry, y_min_entry, y_max_entry, hist_bins_entry, c_min_entry,\
-           c_max_entry, density_status_var, norm_type_var, unit_type_var, v_min_thresh_entry,\
-           v_max_thresh_entry, v_sum_min_thresh_entry, v_sum_max_thresh_entry, cut_status_var,\
-           curve_fit_status_var, lin_corr_status_var, cmap_option
+        c_max_entry, density_status_var, norm_type_var, unit_type_var, v_min_thresh_entry,\
+        v_max_thresh_entry, v_sum_min_thresh_entry, v_sum_max_thresh_entry, cut_status_var,\
+        curve_fit_status_var, lin_corr_status_var, cmap_option
