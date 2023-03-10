@@ -221,17 +221,17 @@ class plot_data_class():
             pass
 
         # Make a dictionary of all the plot options and their units
-        unit_dict = {"HK_id": "(#)",
+        unit_dict = {"HK_id": "#",
                      "PinPullerTemp": "(K)",
                      "OpticsTemp": "(K)",
                      "LEXIbaseTemp": "(C)",
                      "HVsupplyTemp": "(K)",
-                     "+5.2V_Imon": "(A)",
-                     "+10V_Imon": "(A)",
-                     "+3.3V_Imon": "(A)",
+                     "+5.2V_Imon": "(mA)",
+                     "+10V_Imon": "(mA)",
+                     "+3.3V_Imon": "(mA)",
                      "AnodeVoltMon": "(V)",
-                     "+28 V_Imon": "A",
-                     "ADC_Ground": "V",
+                     "+28V_Imon": "(mA)",
+                     "ADC_Ground": "(V)",
                      "Cmd_count": "#",
                      "Pinpuller_Armed": "",
                      "HVmcpAuto": "",
@@ -244,18 +244,19 @@ class plot_data_class():
         alpha = 0.4
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(self.ts_fig_width * 1.5, self.ts_fig_height), edgecolor='k',
-                         facecolor='w')
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width * 1.5, self.ts_fig_height),
+                         edgecolor='k', facecolor='w')
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
 
+        x_axs_val = self.df_slice_hk.index - t_start
         axs1 = plt.subplot(gs[:])
-        axs1.plot(self.df_slice_hk.index, self.df_slice_hk[self.plot_key], '.', color="darkred",
+        axs1.plot(x_axs_val, self.df_slice_hk[self.plot_key], '.', color="darkred",
                   alpha=alpha, ms=ms, label=self.plot_key)
-        axs1.set_xlim(t_start, t_end)
+        axs1.set_xlim(0, t_end - t_start)
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
-        axs1.set_xlabel('Time (s)')
+        axs1.set_xlabel(f'Time since {t_start} (s)')
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")
         axs1.legend(loc='best')
@@ -385,6 +386,13 @@ class plot_data_class():
         y_hist = fig.add_subplot(gs[:-1, 0], sharey=axs1)
         x_hist = fig.add_subplot(gs[-1, 1:], sharex=axs1)
 
+        # Drop all nans in the data
+        self.df_slice_sci = self.df_slice_sci.dropna()
+        # Try to select only rows where "IsCommanded" is False
+        try:
+            self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"] == False]
+        except Exception:
+            pass
         # Plot the histogram on axs1
         counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci["x_val"],
                                                  self.df_slice_sci["y_val"], bins=bins,
@@ -475,9 +483,9 @@ class plot_data_class():
                 # Print the fit values on the plot
                 x_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_x[1]),
                             transform=x_hist.transAxes, verticalalignment='top')
-                x_hist.text(0.05, 0.80, '$\sigma$ = {:.3f}'.format(popt_x[2]),
+                x_hist.text(0.05, 0.70, '$\sigma$ = {:.3f}'.format(popt_x[2]),
                             transform=x_hist.transAxes, verticalalignment='top')
-                x_hist.text(0.05, 0.65, '$FWHM$ = {:.3f}'.format(x_fwhm),
+                x_hist.text(0.05, 0.45, '$FWHM$ = {:.3f}'.format(x_fwhm),
                             transform=x_hist.transAxes, verticalalignment='top')
                 y_hist.text(0.05, 0.95, '$\mu$ = {:.3f}'.format(popt_y[1]),
                             transform=y_hist.transAxes, verticalalignment='top')
@@ -496,7 +504,7 @@ class plot_data_class():
         x_hist.set_aspect('auto', anchor="C")
 
         plt.close("all")
-        #fig.tight_layout()
+        # fig.tight_layout()
         return fig
 
     def hist_plots_volt(self):

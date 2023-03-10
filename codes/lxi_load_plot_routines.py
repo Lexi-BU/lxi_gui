@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import global_variables
 import lxi_gui_plot_routines as lgpr
-import lxi_read_files as lxrf
+import lxi_file_read_funcs as lxrf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
