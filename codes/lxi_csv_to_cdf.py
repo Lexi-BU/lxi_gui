@@ -4,7 +4,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pytz
 from spacepy.pycdf import CDF as cdf
 
 import lxi_file_read_funcs as lxrf
@@ -45,17 +44,33 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
     for csv_file in csv_file_list:
         if df is None:
             df, _ = lxrf.read_csv_sci(csv_file)
-            df.index = pd.to_datetime(df.index)
+            csv_file_secs = int(csv_file.split("_")[-4])
+            csv_file_subsecs = int(csv_file.split("_")[-3])
+            # Create a datetime array for the CSV file with datetime objects as type
+            csv_file_datetime = np.full(len(df.index), np.nan)
+            for xx, time_ind in enumerate(df.index):
+                csv_file_datetime[xx] = csv_file_secs + csv_file_subsecs / 1e3 + time_ind
+            df.index = csv_file_datetime
         else:
             df = df
-            df.index = pd.to_datetime((df.index).astype("int64"), utc=True)
+            csv_file_secs = int(csv_file.split("_")[-4])
+            csv_file_subsecs = int(csv_file.split("_")[-3])
+            # Create a datetime array for the CSV file with datetime objects as type
+            csv_file_datetime = np.full(len(df.index), dtype=object, fill_value=np.nan)
+            for xx, time_ind in enumerate(df.index):
+                csv_file_datetime[xx] = csv_file_secs + csv_file_subsecs / 1e3 + time_ind
+            df.index = csv_file_datetime
 
         # If the cdf_folder does not exist, create it
         if cdf_folder is not None:
             if not Path(cdf_folder).exists():
                 Path(cdf_folder).mkdir(parents=True, exist_ok=True)
+                print(f"\n \033[1;32mCreated folder {cdf_folder}\033[0m \n")
         else:
             cdf_folder = "/".join(csv_file.split("/")[0:-2]) + "/cdf"
+            if not Path(cdf_folder).exists():
+                Path(cdf_folder).mkdir(parents=True, exist_ok=True)
+                print(f"\n \033[1;32mCreated folder {cdf_folder}\033[0m \n")
 
         # If the cdf_file does not exist, create it
         if cdf_file is None:
@@ -72,6 +87,7 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
                   f" {cdf_file} \x1b[0m")
             Path(cdf_file).unlink()
 
+        print(f"Creating CDF file: {cdf_file}")
         cdf_data = cdf(cdf_file, "")
         cdf_data.attrs["title"] = csv_file.split("/")[-1].split(".")[0]
         cdf_data.attrs["created"] = str(pd.Timestamp.now())
@@ -86,11 +102,9 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
         cdf_data.attrs["source_description_email"] = "qudsira@bu.edu"
         cdf_data.attrs["source_description_institution"] = "BU"
 
-        # Convert index to datetime
-        # Set the timezone to UTC
-        #df.index = df.index.tz_localize(pytz.timezone("UTC"))
-        # Convert the index to a CDF time
-        cdf_data["Epoch"] = df.index.to_pydatetime()
+        # Convert the array to datetime objects in UTC
+        df.index = pd.to_datetime(df.index, utc=True, unit="s")
+        cdf_data["Epoch"] = df.index
         for col in df.columns:
             cdf_data[col] = df[col]
         cdf_data.close()
