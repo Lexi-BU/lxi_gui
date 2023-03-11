@@ -493,6 +493,7 @@ save_config_button = tk.Button(sci_tab, text="Save Config", font=font_style_box,
                                                                            "time_options"]))
 save_config_button.grid(row=13, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
+# FIXME: Default config button doesn't work
 # Add a default button to reset the configuration file
 default_config_button = tk.Button(sci_tab, text="Default Config", font=font_style_box,
                                   justify="center",
