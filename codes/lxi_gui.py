@@ -10,7 +10,6 @@ import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
 import lxi_file_read_funcs as lxrf
 import lxi_gui_config as lgcf
-# import lxi_csv_to_cdf as lctc
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -19,29 +18,10 @@ importlib.reload(llpr)
 importlib.reload(lgeb)
 importlib.reload(lmsc)
 importlib.reload(lgcf)
-# importlib.reload(lctc)
 
 # Initialize the global variables. This is necessary because the global variables is where all the
 # data and name of the files are stored.
 global_variables.init()
-
-
-def save_cdf():
-    """
-    The function, upon clicking the "Save CDF" button, saves the data in the csv file to a cdf file.
-    """
-    try:
-        inputs = {
-            "df": global_variables.all_file_details["df_all_sci"],
-            "csv_file": global_variables.all_file_details["file_name_sci"],
-        }
-
-        lctc.lxi_csv_to_cdf(**inputs)
-    except Exception as e:
-        print(f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
-              f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
-              f"Science csv file is loaded. \n")
-        pass
 
 
 def hist_plot_inputs(dpi=100):
@@ -139,7 +119,7 @@ def ts_button_val_change(default_opt_var):
                            plot_opt_entry_4, plot_opt_entry_5, plot_opt_entry_6,
                            plot_opt_entry_7, plot_opt_entry_8, plot_opt_entry_9]
 
-    if default_opt_var.get() == True:
+    if default_opt_var.get() is True:
         for i in range(len(default_key_list)):
             plot_opt_entry_list[i].set(default_key_list[i])
 
@@ -412,11 +392,19 @@ lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Add a button to save the data to a cdf file
 cdf_save_button = tk.Button(
-    sci_tab, text="Save CDF", command=lambda: save_cdf(), font=font_style_box,
+    sci_tab, text="Save CDF", command=lambda: lmsc.save_cdf(), font=font_style_box,
     justify="center", bg="snow", fg="green", pady=5, padx=5, borderwidth=2,
     relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
 )
 cdf_save_button.grid(row=18, column=11, columnspan=1, sticky="nw")
+
+# Add a button to save the data to a csv file
+csv_save_button = tk.Button(
+    sci_tab, text="Save CSV", command=lambda: lmsc.save_csv(root=sci_tab), font=font_style_box,
+    justify="center", bg="snow", fg="green", pady=5, padx=5, borderwidth=2,
+    relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
+)
+csv_save_button.grid(row=18, column=12, columnspan=1, sticky="nw")
 
 # Label for plot times
 start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="white", fg="black")
@@ -429,12 +417,6 @@ start_time.insert(0, default_time_dict['start_time'])
 start_time.grid(row=7, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(sci_tab, text="Start Time", font=font_style, bg="white", fg="black")
 start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
-
-# Add an input box with a label for end time
-# end_time_entry, end_time_label = lgeb.entry_box(root=sci_tab, row=17, column=3,
-#                                                 entry_label="End Time", width=30,
-#                                                 entry_val="YYYY-MM-DD HH:MM:SS",
-#                                                 font_style=font_style)
 
 end_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 end_time.insert(0, default_time_dict['end_time'])
@@ -504,17 +486,20 @@ entry_list = [x_min_entry, x_max_entry, y_min_entry, y_max_entry, hist_bins_entr
               c_max_entry, density_status_var, norm_type_var, unit_type_var, v_min_thresh_entry,
               v_max_thresh_entry, v_sum_min_thresh_entry, v_sum_max_thresh_entry, cut_status_var,
               curve_fit_status_var, lin_corr_status_var, cmap_option, start_time, end_time]
+
 save_config_button = tk.Button(sci_tab, text="Save Config", font=font_style_box, justify="center",
                                command=lambda: lgcf.save_config(entry_list=entry_list,
                                                                 entry_sec=["sci_plot_options",
                                                                            "time_options"]))
 save_config_button.grid(row=13, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
+# FIXME: Default config button doesn't work
 # Add a default button to reset the configuration file
 default_config_button = tk.Button(sci_tab, text="Default Config", font=font_style_box,
                                   justify="center",
                                   command=lambda: lgcf.create_config_file(default_vals=True))
 default_config_button.grid(row=14, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+
 
 # Dsiable the default config button
 default_config_button.config(state="disabled")
@@ -524,7 +509,7 @@ quit_button_sci = tk.Button(
     sci_tab, text="Quit", command=root.destroy, font=font_style_box, justify="center", bg="snow",
     fg="red", pady=5, padx=5, borderwidth=2, relief="raised", highlightthickness=2,
     highlightbackground="red", highlightcolor="red")
-quit_button_sci.grid(row=18, column=12, columnspan=1, rowspan=1, sticky="ne")
+quit_button_sci.grid(row=18, column=13, columnspan=1, rowspan=1, sticky="ne")
 
 # Add a default option check box
 default_opt_var = tk.BooleanVar()
@@ -549,15 +534,5 @@ quit_button_hk = tk.Button(
     highlightbackground="red", highlightcolor="red"
 )
 quit_button_hk.grid(row=12, column=10, columnspan=2, rowspan=1, sticky="n")
-
-# blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
-# for row in range(10):
-#     blank_label.grid(row=11 + row, column=0, columnspan=2, sticky="nsew")
-#     blank_label.grid(row=12 + row, column=opt_col_num, columnspan=5, sticky="nsew")
-
-# blank_label = tk.Label(sci_tab, text="", font=font_style_box, bg="white")
-# for row in range(10):
-#     blank_label.grid(row=11+row, column=0, columnspan=2, sticky="nsew")
-#     blank_label.grid(row=12+row, column=opt_col_num, columnspan=5, sticky="nsew")
 
 root.mainloop()

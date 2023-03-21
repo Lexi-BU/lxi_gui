@@ -1,6 +1,14 @@
+import importlib
 from tabulate import tabulate
 import global_variables
 import numpy as np
+import lxi_csv_to_cdf as lctc
+import lxi_csv_to_csv as lctcsv
+import lxi_gui_entry_box as lgeb
+
+importlib.reload(lctc)
+importlib.reload(lgeb)
+importlib.reload(lctcsv)
 
 
 def print_time_details(file_type=None, start_time=None, end_time=None):
@@ -114,20 +122,20 @@ def ts_option_update():
 
 def diff_file_warnings():
     """
-    Warn the user if the hk and sci files do not have the same time values
+    Warn the user if the hk and sci files do not have the same time values (within 1 second)
     """
     try:
         hk_t_min = global_variables.all_file_details["df_all_hk"].index.min()
         hk_t_max = global_variables.all_file_details["df_all_hk"].index.max()
         sci_t_min = global_variables.all_file_details["df_all_sci"].index.min()
         sci_t_max = global_variables.all_file_details["df_all_sci"].index.max()
-        if hk_t_min != sci_t_min:
+        if abs((hk_t_min - sci_t_min).total_seconds()) > 1:
             print("\n \x1b[1;31;255m WARNING: The hk file does not have the same minimum time "
                   "values as the sci file \x1b[0m")
             print(f"The hk file has the minimum time value of \x1b[1;32;255m{hk_t_min} \x1b[0m"
                   f"and the sci file has the minimum time value of \x1b[1;32;255m{sci_t_min}"
                   f"\x1b[0m")
-        if hk_t_max != sci_t_max:
+        if abs((hk_t_max - sci_t_max).total_seconds()) > 1:
             print("\n \x1b[1;31;255m WARNING: The hk file does not have the same maximum time "
                   "values as the sci file \x1b[0m")
             print(f"The hk file has the maximum time value of \x1b[1;32;255m{hk_t_max} \x1b[0m"
@@ -267,3 +275,70 @@ def hk_value_comp(ii=None, vpc=None, hk_value=None, hk_id=None, lxi_unit=None):
     }
     chosen_func = ops.get(str(hk_id))
     return chosen_func(vpc, hk_value, lxi_unit)
+
+
+def save_csv(root=None, number_of_decimals=3):
+    """
+    The function, upon clicking the "Save CSV" button, saves the data in the csv file format in a
+    folder names "csv". The name of the csv file is the same as the name of the input file, with
+    "_updated" appended to it.
+    """
+
+    # NOTE: As of now this part of the code doesn't serve any purpose. However, it is kept here in
+    # case we implement a thresholding feature in the future for the csv file.
+    # (x_min_entry, x_max_entry, y_min_entry, y_max_entry, hist_bins_entry, c_min_entry,
+    #  c_max_entry,
+    #  density_status_var, norm_type_var, unit_type_var, v_min_thresh_entry, v_max_thresh_entry,
+    #  v_sum_min_thresh_entry, v_sum_max_thresh_entry, cut_status_var, curve_fit_status_var,
+    #  lin_corr_status_var, cmap_option) = lgeb.populate_entries(root=root)
+
+    # x_min_entry_value = float(x_min_entry.get())
+    # x_max_entry_value = float(x_max_entry.get())
+    # y_min_entry_value = float(y_min_entry.get())
+    # y_max_entry_value = float(y_max_entry.get())
+    # hist_bins_entry_value = int(hist_bins_entry.get())
+    # c_min_entry_value = float(c_min_entry.get())
+    # c_max_entry_value = float(c_max_entry.get())
+    # density_status_var_value = density_status_var.get()
+    # norm_type_var_value = norm_type_var.get()
+    # unit_type_var_value = unit_type_var.get()
+    # v_min_thresh_entry_value = float(v_min_thresh_entry.get())
+    # v_max_thresh_entry_value = float(v_max_thresh_entry.get())
+    # v_sum_min_thresh_entry_value = float(v_sum_min_thresh_entry.get())
+    # v_sum_max_thresh_entry_value = float(v_sum_max_thresh_entry.get())
+    # cut_status_var_value = cut_status_var.get()
+    # curve_fit_status_var_value = curve_fit_status_var.get()
+    # lin_corr_status_var_value = lin_corr_status_var.get()
+    # cmap_option_value = cmap_option.get()
+
+    try:
+        inputs = {
+            "df": global_variables.all_file_details["df_all_sci"],
+            "csv_file": global_variables.all_file_details["file_name_sci"],
+        }
+
+        lctcsv.lxi_csv_to_csv(**inputs)
+    except Exception as e:
+        print(f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the csv file. Following exception"
+              f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+              f"Science csv file is loaded. \n")
+
+
+def save_cdf():
+    """
+    The function, upon clicking the "Save CDF" button, saves the data in the csv file to a cdf file
+    in a folder named "cdf". The name of the cdf file is the same as the name of the input file,
+    with "cdf" appended to it.
+    """
+    try:
+        inputs = {
+            "df": global_variables.all_file_details["df_all_sci"],
+            "csv_file": global_variables.all_file_details["file_name_sci"],
+        }
+
+        lctc.lxi_csv_to_cdf(**inputs)
+    except Exception as e:
+        print(f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
+              f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+              f"Science csv file is loaded. \n")
+        pass

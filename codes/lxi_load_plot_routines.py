@@ -125,7 +125,7 @@ def load_hist_plots(root=None, df_slice_sci=None, start_time=None, end_time=None
     fig_hist = lgpr.plot_data_class(df_slice_sci=df_slice_sci, start_time=start_time,
                                     end_time=end_time, bins=bins, cmin=cmin, cmax=cmax,
                                     x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                                    density=density, norm=norm, unit=unit, 
+                                    density=density, norm=norm, unit=unit,
                                     hist_fig_height=fig_height, hist_fig_width=fig_width,
                                     v_min=v_min, v_max=v_max, v_sum_min=v_sum_min,
                                     v_sum_max=v_sum_max, cut_status_var=cut_status_var,

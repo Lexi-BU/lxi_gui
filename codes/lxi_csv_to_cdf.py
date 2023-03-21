@@ -1,12 +1,9 @@
-import glob
 import importlib
 from pathlib import Path
 
-import numpy as np
+import lxi_file_read_funcs as lxrf
 import pandas as pd
 from spacepy.pycdf import CDF as cdf
-
-import lxi_file_read_funcs as lxrf
 
 importlib.reload(lxrf)
 
@@ -32,45 +29,49 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
         Path to the CDF file.
     """
 
-    if csv_folder is not None:
-        if csv_file is not None:
-            csv_file_list = [csv_folder + "/" + csv_file]
-        else:
-            # Find all the CSV files in the folder
-            csv_file_list = np.sort(glob.glob(csv_folder + "*.csv"))
-    elif csv_folder is None and csv_file is not None:
-        csv_file_list = [csv_file]
+    # NOTE: This part is for future when we want to convert multiple CSV files to a single CDF file
+    # if csv_folder is not None:
+    #     if csv_file is not None:
+    #         csv_file_list = [csv_folder + "/" + csv_file]
+    #     else:
+    #         # Find all the CSV files in the folder
+    #         csv_file_list = np.sort(glob.glob(csv_folder + "*.csv"))
+    # elif csv_folder is None and csv_file is not None:
+    #     csv_file_list = [csv_file]
 
-    for csv_file in csv_file_list:
-        if df is None:
-            df, _ = lxrf.read_csv_sci(csv_file)
-            csv_file_secs = int(csv_file.split("_")[-4])
-            csv_file_subsecs = int(csv_file.split("_")[-3])
-            # Create a datetime array for the CSV file with datetime objects as type
-            csv_file_datetime = np.full(len(df.index), np.nan)
-            for xx, time_ind in enumerate(df.index):
-                csv_file_datetime[xx] = csv_file_secs + csv_file_subsecs / 1e3 + time_ind
-            df.index = csv_file_datetime
-        else:
-            df = df
-            csv_file_secs = int(csv_file.split("_")[-4])
-            csv_file_subsecs = int(csv_file.split("_")[-3])
-            # Create a datetime array for the CSV file with datetime objects as type
-            csv_file_datetime = np.full(len(df.index), dtype=object, fill_value=np.nan)
-            for xx, time_ind in enumerate(df.index):
-                csv_file_datetime[xx] = csv_file_secs + csv_file_subsecs / 1e3 + time_ind
-            df.index = csv_file_datetime
+    # NOTE: This loop was implemented so that CDF creation would work for the GSFC file. However,
+    # given that the PIT files have time stamps correctly ordered in thier indices, this is no
+    # longer necessary and thus has been commented out.
+    # for csv_file in csv_file_list:
+    #     if df is None:
+    #         df, _ = lxrf.read_csv_sci(csv_file)
+    #         csv_file_secs = int(csv_file.split("_")[-4])
+    #         csv_file_subsecs = int(csv_file.split("_")[-3])
+    #         # Create a datetime array for the CSV file with datetime objects as type
+    #         csv_file_datetime = np.full(len(df.index), np.nan)
+    #         for xx, time_ind in enumerate(df.index):
+    #             csv_file_datetime[xx] = csv_file_secs + csv_file_subsecs / 1e3 + time_ind
+    #         df.index = csv_file_datetime
+    #     else:
+    #         df = df
+    #         csv_file_secs = int(csv_file.split("_")[-4])
+    #         csv_file_subsecs = int(csv_file.split("_")[-3])
+    #         # Create a datetime array for the CSV file with datetime objects as type
+    #         csv_file_datetime = np.full(len(df.index), dtype=object, fill_value=np.nan)
+    #         for xx, time_ind in enumerate(df.index):
+    #             csv_file_datetime[xx] = csv_file_secs + csv_file_subsecs / 1e3 + time_ind
+    #         df.index = csv_file_datetime
 
-        # If the cdf_folder does not exist, create it
-        if cdf_folder is not None:
-            if not Path(cdf_folder).exists():
-                Path(cdf_folder).mkdir(parents=True, exist_ok=True)
-                print(f"\n \033[1;32mCreated folder {cdf_folder}\033[0m \n")
-        else:
-            cdf_folder = "/".join(csv_file.split("/")[0:-2]) + "/cdf"
-            if not Path(cdf_folder).exists():
-                Path(cdf_folder).mkdir(parents=True, exist_ok=True)
-                print(f"\n \033[1;32mCreated folder {cdf_folder}\033[0m \n")
+    # If the cdf_folder does not exist, create it
+    if cdf_folder is not None:
+        if not Path(cdf_folder).exists():
+            Path(cdf_folder).mkdir(parents=True, exist_ok=True)
+            print(f"\n \033[1;32mCreated folder {cdf_folder}\033[0m \n")
+    else:
+        cdf_folder = "/".join(csv_file.split("/")[0:-2]) + "/cdf"
+        if not Path(cdf_folder).exists():
+            Path(cdf_folder).mkdir(parents=True, exist_ok=True)
+            print(f"\n \033[1;32mCreated folder {cdf_folder}\033[0m \n")
 
         # If the cdf_file does not exist, create it
         if cdf_file is None:
