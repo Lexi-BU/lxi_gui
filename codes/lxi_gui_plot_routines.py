@@ -1,6 +1,7 @@
 import importlib
 import datetime
 import os
+import pytz
 
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
@@ -221,11 +222,17 @@ class plot_data_class():
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
+            #  Check if t_start is time-zone aware, if not, make it time-zone aware
+            if t_start.tzinfo is None:
+                t_start = t_start.replace(tzinfo=pytz.utc)
         except Exception:
             t_start = self.df_slice_hk.index.min()
             pass
         try:
             t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
+            #  Check if t_end is time-zone aware, if not, make it time-zone aware
+            if t_end.tzinfo is None:
+                t_end = t_end.replace(tzinfo=pytz.utc)
         except Exception:
             t_end = self.df_slice_hk.index.max()
             pass
@@ -291,11 +298,15 @@ class plot_data_class():
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
+            # Make the t_start time-zone aware
+            t_start = t_start.replace(tzinfo=pytz.UTC)
         except Exception:
             t_start = self.df_slice_sci.index.min()
             pass
         try:
             t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
+            # Make the t_end time-zone aware
+            t_end = t_end.replace(tzinfo=pytz.UTC)
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass
@@ -618,11 +629,17 @@ class plot_data_class():
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
+            # Check if t_start is time-zone aware, if not make it aware
+            if t_start.tzinfo is None:
+                t_start = t_start.replace(tzinfo=datetime.timezone.utc)
         except Exception:
             t_start = self.df_slice_sci.index.min()
             pass
         try:
             t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
+            # Check if t_end is time-zone aware, if not make it aware
+            if t_end.tzinfo is None:
+                t_end = t_end.replace(tzinfo=datetime.timezone.utc)
         except Exception:
             t_end = self.df_slice_sci.index.max()
             pass

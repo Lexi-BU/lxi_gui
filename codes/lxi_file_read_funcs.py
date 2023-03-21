@@ -6,11 +6,11 @@ from pathlib import Path
 from tkinter import filedialog
 from typing import NamedTuple
 
-import numpy as np
-import pandas as pd
-
 import global_variables
 import lxi_misc_codes as lmsc
+import numpy as np
+import pandas as pd
+import pytz
 
 importlib.reload(lmsc)
 
@@ -327,6 +327,7 @@ def read_binary_data_sci(
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
     if "mcp" in in_file_name:
+        default_time = datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('UTC'))
         with open(save_file_name, 'w', newline='') as file:
             dict_writer = csv.DictWriter(
                 file,
@@ -343,7 +344,7 @@ def read_binary_data_sci(
             dict_writer.writeheader()
             dict_writer.writerows(
                 {
-                    'Date': datetime.datetime.now(),
+                    'Date': default_time + datetime.timedelta(milliseconds=sci_packet.timestamp),
                     'TimeStamp': sci_packet.timestamp,
                     'IsCommanded': sci_packet.is_commanded,
                     'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
@@ -535,8 +536,10 @@ def read_binary_data_hk(
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
         # Convert to seconds from milliseconds for the timestamp
-        if "mc" in input_file_name:
-            all_data_dict["Date"][ii] = datetime.datetime.now().timestamp()
+        if "mcp" in input_file_name:
+            default_time = datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('UTC'))
+            new_time = default_time + datetime.timedelta(milliseconds=hk_packet.timestamp)
+            all_data_dict["Date"][ii] = new_time.timestamp()
         else:
             all_data_dict["Date"][ii] = hk_packet.Date
         all_data_dict["TimeStamp"][ii] = hk_packet.timestamp / 1e3
@@ -633,7 +636,7 @@ def open_file_hk():
 
 def open_file_b():
     # define a global variable for the file name
-    file_val = filedialog.askopenfilename(initialdir="../data/raw_data/",
+    file_val = filedialog.askopenfilename(initialdir="../data/GSFC/2022_05_02_1104_LEXI_Raw_unit_1_mcp_unit_1_eBox_2300V/",
                                           title="Select file",
                                           filetypes=(("all files", "*.*"),
                                                      ("text files", "*.txt"))
@@ -784,11 +787,19 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
 
     if t_start is None:
         t_start = df.index.min()
+    else:
+        # Check if t_start is time-zone aware. If not, make it time-zone aware
+        if t_start.tzinfo is None:
+            t_start = t_start.replace(tzinfo=pytz.utc)
     if t_end is None:
         t_end = df.index.max()
+    else:
+        # Check if t_end is time-zone aware. If not, make it time-zone aware
+        if t_end.tzinfo is None:
+            t_end = t_end.replace(tzinfo=pytz.utc)
 
     # Select dataframe from timestamp t_start to t_end
-    df_slice_sci = df.loc[t_start:t_end]
+    df_slice_sci = df.loc[t_start:t_end].copy()
 
     # For both the sliced and entire dataframes, compute the x and y-coordinates and the shift in
     # the voltages
@@ -817,7 +828,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     x_mcp_lin, y_mcp_lin = volt_to_mcp(x_lin, y_lin)
 
     # Add the x-coordinate to the dataframe
-    df_slice_sci.loc[:, 'x_val'] = x_slice
+    df_slice_sci['x_val'] = x_slice
     df_slice_sci.loc[:, 'x_val_lin'] = x_lin_slice
     df_slice_sci.loc[:, 'x_mcp'] = x_mcp_slice
     df_slice_sci.loc[:, 'x_mcp_lin'] = x_mcp_lin_slice
@@ -893,7 +904,7 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
         t_end = df.index.max()
 
     # Select dataframe from timestamp t_start to t_end
-    df_slice_hk = df.loc[t_start:t_end]
+    df_slice_hk = df.loc[t_start:t_end].copy()
 
     return df, df_slice_hk
 
@@ -966,8 +977,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
     df_sci = df_sci[df_sci['IsCommanded']==False]
 
     # Select dataframe from timestamp t_start to t_end
-    df_slice_hk = df_hk.loc[t_start:t_end]
-    df_slice_sci = df_sci.loc[t_start:t_end]
+    df_slice_hk = df_hk.loc[t_start:t_end].copy()
+    df_slice_sci = df_sci.loc[t_start:t_end].copy()
 
     # For both the sliced and entire dataframes, compute the x and y-coordinates and the shift in
     # the voltages

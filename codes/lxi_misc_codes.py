@@ -122,20 +122,20 @@ def ts_option_update():
 
 def diff_file_warnings():
     """
-    Warn the user if the hk and sci files do not have the same time values
+    Warn the user if the hk and sci files do not have the same time values (within 1 second)
     """
     try:
         hk_t_min = global_variables.all_file_details["df_all_hk"].index.min()
         hk_t_max = global_variables.all_file_details["df_all_hk"].index.max()
         sci_t_min = global_variables.all_file_details["df_all_sci"].index.min()
         sci_t_max = global_variables.all_file_details["df_all_sci"].index.max()
-        if hk_t_min != sci_t_min:
+        if abs((hk_t_min - sci_t_min).total_seconds()) > 1:
             print("\n \x1b[1;31;255m WARNING: The hk file does not have the same minimum time "
                   "values as the sci file \x1b[0m")
             print(f"The hk file has the minimum time value of \x1b[1;32;255m{hk_t_min} \x1b[0m"
                   f"and the sci file has the minimum time value of \x1b[1;32;255m{sci_t_min}"
                   f"\x1b[0m")
-        if hk_t_max != sci_t_max:
+        if abs((hk_t_max - sci_t_max).total_seconds()) > 1:
             print("\n \x1b[1;31;255m WARNING: The hk file does not have the same maximum time "
                   "values as the sci file \x1b[0m")
             print(f"The hk file has the maximum time value of \x1b[1;32;255m{hk_t_max} \x1b[0m"
