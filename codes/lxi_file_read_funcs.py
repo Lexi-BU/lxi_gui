@@ -982,7 +982,6 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         )
 
     else:
-        
         # If only one of t_start and t_end is None, raise an error
         if (t_start is None and t_end is not None) or (t_start is not None and t_end is None):
             raise ValueError("when multiple_files is True, both t_start and t_end must either be"
@@ -1002,9 +1001,13 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             t_start = pd.to_datetime(t_start, utc=True)
             t_end = pd.to_datetime(t_end, utc=True)
 
-            # Convert t_start and t_end from string to unix time in seconds in UTC timezone
-            t_start_unix = t_start.timestamp()
-            t_end_unix = t_end.timestamp()
+            try:
+                # Convert t_start and t_end from string to unix time in seconds in UTC timezone
+                t_start_unix = t_start.timestamp()
+                t_end_unix = t_end.timestamp()
+            except Exception:
+                t_start_unix = None
+                t_end_unix = None
 
         # Define a list in which the dataframes will be stored
         df_hk_list = []
@@ -1024,7 +1027,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         if len(file_list) == 0:
             raise ValueError("No files found in the directory.")
 
-        if t_start is not None and t_end is not None:
+        if t_start_unix is not None and t_end_unix is not None:
             # In file_list, select only those files which are within the time range
             file_list = [file_name for file_name in file_list if t_start_unix <=
                          float(os.path.basename(file_name).split("_")[2]) <= t_end_unix]
@@ -1079,10 +1082,11 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
 
         print(f"file_name_hk =\x1b[1;32;255m {file_name_hk} \x1b[0m,"
-                f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
+              f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
         # Save the dataframe to a csv file
-        df_hk.to_csv(file_name_hk)
-        df_sci.to_csv(file_name_sci)
+        df_hk.to_csv(file_name_hk, index=False)
+        df_sci.to_csv(file_name_sci, index=False)
+
         print(f"Saved the dataframes to csv files."
               f"file_name_hk =\x1b[1;32;255m {file_name_hk} \x1b[0m,"
               f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
@@ -1096,6 +1100,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
     if t_start is None:
         t_start = df_sci.index.min()
+        print(f"t_start is None. Setting t_start = {t_start}")
     if t_end is None:
         t_end = df_sci.index.max()
 
@@ -1106,8 +1111,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         file_val=file_name_hk, t_start=t_start, t_end=t_end)
 
     # Select only those where "IsCommanded" is True
-    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==False]
-    df_sci = df_sci[df_sci['IsCommanded']==False]
+    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==True]
+    df_sci = df_sci[df_sci['IsCommanded']==True]
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end].copy()

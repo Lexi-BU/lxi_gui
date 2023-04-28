@@ -419,8 +419,13 @@ multi_file_status.grid(row=6, column=0, columnspan=1, sticky="nw")
 # If the multiple file status is selected, then disable the "sci_file_load_button",
 # "hk_file_load_button", and "b_file_load_button" buttons
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=sci_file_load_button))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=sci_file_load_entry))
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=hk_file_load_button))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=hk_file_load_entry))
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=b_file_load_button))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=b_file_load_entry))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_load_button))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_path))
 
 # Print the status of the multiple file status
 # multi_file_status_var.trace("w", lambda *_: print(multi_file_status_var.get()))
@@ -432,6 +437,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Set the default folder name in the text box
 # folder_path.insert(1, "For multiple files, enter the folder path here")
 folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230414/not_Sent")
+folder_path.config(state="disabled")
 
 # Add a button to load all the files in the folder_path
 folder_load_button = tk.Button(
@@ -444,6 +450,7 @@ folder_load_button = tk.Button(
     relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
 )
 folder_load_button.grid(row=6, column=1, columnspan=1, sticky="nw")
+folder_load_button.config(state="disabled")
 
 # Label for plot times
 start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="white", fg="black")
