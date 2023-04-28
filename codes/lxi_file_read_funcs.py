@@ -666,6 +666,31 @@ def open_file_b():
     return file_val
 
 
+def open_file_b_multiple(file_val=None, t_start=None, t_end=None, multiple_files=True):
+
+    # Cut path to the file off
+    file_name_b = file_val
+    (df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_all_hk, df_all_sci
+     ) = read_binary_file(file_val=file_val, t_start=t_start, t_end=t_end,
+                          multiple_files=multiple_files)
+    global_variables.all_file_details["file_name_b"] = file_name_b
+    global_variables.all_file_details["file_name_hk"] = file_name_hk
+    global_variables.all_file_details["file_name_sci"] = file_name_sci
+
+    global_variables.all_file_details["df_slice_hk"] = df_slice_hk
+    global_variables.all_file_details["df_slice_sci"] = df_slice_sci
+    global_variables.all_file_details["df_all_hk"] = df_all_hk
+    global_variables.all_file_details["df_all_sci"] = df_all_sci
+
+    print(
+        f"\n Loaded \x1b[1;32;255m{file_name_b}\x1b[0m in the data base,\n  and the csv file for "
+        f"\x1b[1;32;255m HK \x1b[0m and \x1b[1;32;255m SCI \x1b[0m data have been saved to \n "
+        f"HK File : \x1b[1;32;255m{file_name_hk} \x1b[0m \n and \n Sci File: "
+        f"\x1b[1;32;255m{file_name_sci}\x1b[0m")
+
+    return file_val
+
+
 def lin_correction(x, y, M_inv=np.array([[0.98678, 0.16204],
                                          [0.11385, 0.993497]]),
                    b=np.array([0.00195, 0.56355])):
@@ -957,6 +982,30 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         )
 
     else:
+        
+        # If only one of t_start and t_end is None, raise an error
+        if (t_start is None and t_end is not None) or (t_start is not None and t_end is None):
+            raise ValueError("when multiple_files is True, both t_start and t_end must either be"
+                             f"None or a valid time value. The vlaues provided are t_start ="
+                             f"{t_start} and t_end = {t_end}.")
+        # If both t_start and t_end are None, raise a warning stating that the times are set to none
+        if t_start is None and t_end is None:
+            print("\n \x1b[1;31;255m WARNING: Both the start and end time values provided were None"
+                  "setting both of them to None \x1b[0m")
+            t_start = None
+            t_end = None
+
+        if t_start is not None and t_end is not None:
+
+            print(f"\n \x1b[1;31;255m Value of t_start={t_start}, and t_end={t_end} \x1b[0m")
+            # Convert t_start and t_end from string to datetime in UTC timezone
+            t_start = pd.to_datetime(t_start, utc=True)
+            t_end = pd.to_datetime(t_end, utc=True)
+
+            # Convert t_start and t_end from string to unix time in seconds in UTC timezone
+            t_start_unix = t_start.timestamp()
+            t_end_unix = t_end.timestamp()
+
         # Define a list in which the dataframes will be stored
         df_hk_list = []
         file_name_hk_list = []
@@ -970,6 +1019,15 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         # Get the names of all the files in the directory
         file_list = np.sort(glob.glob(os.path.join(file_val, "*.dat")))
+
+        # If file list is empty, raise an error and exit
+        if len(file_list) == 0:
+            raise ValueError("No files found in the directory.")
+
+        if t_start is not None and t_end is not None:
+            # In file_list, select only those files which are within the time range
+            file_list = [file_name for file_name in file_list if t_start_unix <=
+                         float(os.path.basename(file_name).split("_")[2]) <= t_end_unix]
 
         # Loop through all the files
         for file_name in file_list:
@@ -999,10 +1057,35 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         df_sci = pd.concat(df_sci_list)
 
         # Set file_names_hk and file_names_sci to dates of first and last files
-        file_name_hk = file_name_hk_list[0].split('/')[-1].split('.')[0] + '_' + \
-            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-2] + '_' + \
-            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-1] + '.csv'
+        save_dir = os.path.dirname(file_val) + '/'
+        # If save_dir does not exist, create it
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
 
+        file_name_hk = save_dir + "processed_data/hk/" + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[0] + '_' + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[1] + '_' + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[2] + '_' + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[3] + '_' + \
+            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-4] + '_' + \
+            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+
+        file_name_sci = save_dir + "processed_data/sci/" + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[0] + '_' + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[1] + '_' + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[2] + '_' + \
+            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[3] + '_' + \
+            file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-4] + '_' + \
+            file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+
+        print(f"file_name_hk =\x1b[1;32;255m {file_name_hk} \x1b[0m,"
+                f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
+        # Save the dataframe to a csv file
+        df_hk.to_csv(file_name_hk)
+        df_sci.to_csv(file_name_sci)
+        print(f"Saved the dataframes to csv files."
+              f"file_name_hk =\x1b[1;32;255m {file_name_hk} \x1b[0m,"
+              f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
     # Replace index with timestamp
     df_hk.set_index('Date', inplace=True)
     df_sci.set_index('Date', inplace=True)

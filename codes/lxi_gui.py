@@ -258,7 +258,7 @@ sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 sci_file_name = tk.StringVar()
 sci_file_name.set("No file loaded")
 sci_file_load_entry = tk.Entry(sci_tab, textvariable=sci_file_name, font=font_style,
-                               justify="left", bg="snow", fg="black", relief="sunken",
+                               justify="left", bg="snow", fg="red", relief="sunken",
                                borderwidth=2)
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
 
@@ -274,7 +274,7 @@ hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
 hk_file_name = tk.StringVar()
 hk_file_name.set("No file loaded")
 hk_file_load_entry = tk.Entry(sci_tab, textvariable=hk_file_name, font=font_style, justify="left",
-                              bg="snow", fg="black", relief="sunken", borderwidth=2)
+                              bg="snow", fg="red", relief="sunken", borderwidth=2)
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
 
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
@@ -289,7 +289,7 @@ b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
 b_file_name = tk.StringVar()
 b_file_name.set("No file loaded")
 b_file_load_entry = tk.Entry(sci_tab, textvariable=b_file_name, font=font_style, justify="left",
-                             bg="snow", fg="black", relief="sunken", borderwidth=2)
+                             bg="snow", fg="red", relief="sunken", borderwidth=2)
 b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
 
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
@@ -406,23 +406,62 @@ csv_save_button = tk.Button(
 )
 csv_save_button.grid(row=18, column=12, columnspan=1, sticky="nw")
 
+# Add a checkox to enable/disable the multiple file selection option
+multi_file_status_var = tk.IntVar()
+multi_file_status_var.set(0)
+multi_file_status = tk.Checkbutton(
+    sci_tab, text="Multiple Files", variable=multi_file_status_var, font=font_style_box,
+    justify="center", bg="white", fg="black", pady=5, padx=5, borderwidth=2,
+    relief="raised", highlightthickness=2, highlightbackground="black", highlightcolor="black"
+)
+multi_file_status.grid(row=6, column=0, columnspan=1, sticky="nw")
+
+# If the multiple file status is selected, then disable the "sci_file_load_button",
+# "hk_file_load_button", and "b_file_load_button" buttons
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=sci_file_load_button))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=hk_file_load_button))
+multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=b_file_load_button))
+
+# Print the status of the multiple file status
+# multi_file_status_var.trace("w", lambda *_: print(multi_file_status_var.get()))
+
+# Add a text box to enter the folder path
+folder_path = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
+folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
+
+# Set the default folder name in the text box
+# folder_path.insert(1, "For multiple files, enter the folder path here")
+folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230414/not_Sent")
+
+# Add a button to load all the files in the folder_path
+folder_load_button = tk.Button(
+    sci_tab, text="Load Files", command=lambda: lmsc.load_folder(file_val=folder_path.get(),
+                                                                 t_start=start_time.get(),
+                                                                 t_end=end_time.get(),
+                                                                 multiple_files=multi_file_status_var.get()
+                                                                 ), font=font_style_box,
+    justify="center", bg="snow", fg="green", pady=5, padx=5, borderwidth=2,
+    relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
+)
+folder_load_button.grid(row=6, column=1, columnspan=1, sticky="nw")
+
 # Label for plot times
 start_time_label = tk.Label(sci_tab, text="Plot Times", font=font_style, bg="white", fg="black")
-start_time_label.grid(row=6, column=0, columnspan=2, sticky="nsew")
+start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for start time
 default_time_dict = lgcf.get_config_time()
 start_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 start_time.insert(0, default_time_dict['start_time'])
-start_time.grid(row=7, column=0, columnspan=2, sticky="nsew")
+start_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(sci_tab, text="Start Time", font=font_style, bg="white", fg="black")
-start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
+start_time_label.grid(row=10, column=0, columnspan=2, sticky="nsew")
 
 end_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 end_time.insert(0, default_time_dict['end_time'])
-end_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
+end_time.grid(row=11, column=0, columnspan=2, sticky="nsew")
 end_time_label = tk.Label(sci_tab, text="End Time", font=font_style, bg="white", fg="black")
-end_time_label.grid(row=10, column=0, columnspan=2)
+end_time_label.grid(row=12, column=0, columnspan=2)
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
@@ -465,7 +504,7 @@ plot_opt_entry_9.trace(
 plot_button = tk.Button(sci_tab, text="Plot Histogram", font=font_style_box, justify="center",
                         command=lambda: hist_plot_inputs(dpi=dpi))
 
-plot_button.grid(row=11, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+plot_button.grid(row=13, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # If the plot button is pressed, then print the current time
 plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
@@ -475,7 +514,7 @@ plot_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=
 refresh_button = tk.Button(sci_tab, text="Refresh Histogram", font=font_style_box, justify="center",
                            command=lambda: hist_plot_inputs(dpi=dpi))
 
-refresh_button.grid(row=12, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+refresh_button.grid(row=14, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # If the plot button is pressed, then print the current time
 refresh_button.bind("<Button-1>", lambda event: lmsc.print_time_details(start_time=start_time.get(),
@@ -491,14 +530,14 @@ save_config_button = tk.Button(sci_tab, text="Save Config", font=font_style_box,
                                command=lambda: lgcf.save_config(entry_list=entry_list,
                                                                 entry_sec=["sci_plot_options",
                                                                            "time_options"]))
-save_config_button.grid(row=13, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+save_config_button.grid(row=15, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # FIXME: Default config button doesn't work
 # Add a default button to reset the configuration file
 default_config_button = tk.Button(sci_tab, text="Default Config", font=font_style_box,
                                   justify="center",
                                   command=lambda: lgcf.create_config_file(default_vals=True))
-default_config_button.grid(row=14, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
+default_config_button.grid(row=16, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 
 # Dsiable the default config button

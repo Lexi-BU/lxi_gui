@@ -5,10 +5,12 @@ import numpy as np
 import lxi_csv_to_cdf as lctc
 import lxi_csv_to_csv as lctcsv
 import lxi_gui_entry_box as lgeb
+import lxi_file_read_funcs as lxrf
 
 importlib.reload(lctc)
 importlib.reload(lgeb)
 importlib.reload(lctcsv)
+importlib.reload(lxrf)
 
 
 def print_time_details(file_type=None, start_time=None, end_time=None):
@@ -78,6 +80,39 @@ def insert_file_name(file_load_entry=None, tk=None, file_name=None):
     file_name_short = file_name.split('/')[-1]
     file_load_entry.delete(0, tk.END)
     file_load_entry.insert(0, file_name_short)
+
+
+# Write a function to change the state of a button to disabled if it was enabled and vice versa
+def change_state(button=None):
+    """
+    Change the state of a button
+
+    Parameters
+    ----------
+    button : tkinter.Button
+        The button whose state is to be changed
+
+    Returns
+    -------
+        None
+    """
+    state = button.cget("state")
+    if state == "disabled":
+        button.config(state="normal")
+    elif state == "normal":
+        button.config(state="disabled")
+
+
+def load_folder(file_val=None, t_start=None, t_end=None, multiple_files=True):
+    print(f"Value of t_start is {t_start}, \n Value of t_end is {t_end}, \n Value of file_val is "
+          f"{file_val}\n Value of multiple_files is {multiple_files}")
+
+    print(f"Type of t_start is {type(t_start)}, \n Type of t_end is {type(t_end)}, \n Type of "
+          f"file_val is {type(file_val)}\n Type of multiple_files is {type(multiple_files)}")
+    lxrf.open_file_b_multiple(file_val=file_val, t_start=t_start, t_end=t_end,
+                              multiple_files=multiple_files)
+
+    return None
 
 
 def curve_fit_func(x, a, b, c):
