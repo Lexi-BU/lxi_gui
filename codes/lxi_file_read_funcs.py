@@ -1,6 +1,8 @@
 import csv
 import datetime
+import glob
 import importlib
+import os
 import struct
 from pathlib import Path
 from tkinter import filedialog
@@ -636,7 +638,7 @@ def open_file_hk():
 
 def open_file_b():
     # define a global variable for the file name
-    file_val = filedialog.askopenfilename(initialdir="../data/GSFC/2022_05_02_1104_LEXI_Raw_unit_1_mcp_unit_1_eBox_2300V/",
+    file_val = filedialog.askopenfilename(initialdir="/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230414/not_Sent/",
                                           title="Select file",
                                           filetypes=(("all files", "*.*"),
                                                      ("text files", "*.txt"))
@@ -909,7 +911,7 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
     return df, df_slice_hk
 
 
-def read_binary_file(file_val=None, t_start=None, t_end=None):
+def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=False):
     """
     Reads the binary file using functions saved in the file "lxi_read_binary_data.py" and returns
     a pandas dataframe for the selected time range along with x and y-coordinates.
@@ -939,19 +941,67 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         The name of the Science file.
     """
 
-    # Read the housekeeping data
-    df_hk, file_name_hk = read_binary_data_hk(
-        in_file_name=file_val,
-        save_file_name=None,
-        number_of_decimals=6
-    )
+    if multiple_files is False:
+        # Read the housekeeping data
+        df_hk, file_name_hk = read_binary_data_hk(
+            in_file_name=file_val,
+            save_file_name=None,
+            number_of_decimals=6
+        )
 
-    # Read the science data
-    df_sci, file_name_sci = read_binary_data_sci(
-        in_file_name=file_val,
-        save_file_name=None,
-        number_of_decimals=6
-    )
+        # Read the science data
+        df_sci, file_name_sci = read_binary_data_sci(
+            in_file_name=file_val,
+            save_file_name=None,
+            number_of_decimals=6
+        )
+
+    else:
+        # Define a list in which the dataframes will be stored
+        df_hk_list = []
+        file_name_hk_list = []
+
+        df_sci_list = []
+        file_name_sci_list = []
+
+        # Make sure that file_val is a directory
+        if not os.path.isdir(file_val):
+            raise ValueError("file_val should be a directory.")
+
+        # Get the names of all the files in the directory
+        file_list = np.sort(glob.glob(os.path.join(file_val, "*.dat")))
+
+        # Loop through all the files
+        for file_name in file_list:
+            # Read the housekeeping data
+            df_hk, file_name_hk = read_binary_data_hk(
+                in_file_name=file_name,
+                save_file_name=None,
+                number_of_decimals=6
+            )
+
+            # Read the science data
+            df_sci, file_name_sci = read_binary_data_sci(
+                in_file_name=file_name,
+                save_file_name=None,
+                number_of_decimals=6
+            )
+
+            # Append the dataframes to the list
+            df_hk_list.append(df_hk)
+            file_name_hk_list.append(file_name_hk)
+
+            df_sci_list.append(df_sci)
+            file_name_sci_list.append(file_name_sci)
+
+        # Concatenate all the dataframes
+        df_hk = pd.concat(df_hk_list)
+        df_sci = pd.concat(df_sci_list)
+
+        # Set file_names_hk and file_names_sci to dates of first and last files
+        file_name_hk = file_name_hk_list[0].split('/')[-1].split('.')[0] + '_' + \
+            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-2] + '_' + \
+            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-1] + '.csv'
 
     # Replace index with timestamp
     df_hk.set_index('Date', inplace=True)
@@ -980,8 +1030,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
     df_slice_hk = df_hk.loc[t_start:t_end].copy()
     df_slice_sci = df_sci.loc[t_start:t_end].copy()
 
-    # For both the sliced and entire dataframes, compute the x and y-coordinates and the shift in
-    # the voltages
+    # For both the sliced and entire dataframes, compute the x and y-coordinates and the
+    # shift in the voltages
     x_slice, v1_shift_slice, v3_shift_slice = compute_position(v1=df_slice_sci['Channel1'],
                                                                v2=df_slice_sci['Channel3'],
                                                                n_bins=401, bin_min=0, bin_max=4)
