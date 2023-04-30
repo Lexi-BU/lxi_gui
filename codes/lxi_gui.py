@@ -428,9 +428,6 @@ multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=b_file_load
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_load_button))
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_path))
 
-# Print the status of the multiple file status
-# multi_file_status_var.trace("w", lambda *_: print(multi_file_status_var.get()))
-
 # Add a text box to enter the folder path
 folder_path = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
 folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
@@ -442,11 +439,12 @@ folder_path.config(state="disabled")
 
 # Add a button to load all the files in the folder_path
 folder_load_button = tk.Button(
-    sci_tab, text="Load Files", command=lambda: lmsc.load_folder(file_val=folder_path.get(),
-                                                                 t_start=start_time.get(),
-                                                                 t_end=end_time.get(),
-                                                                 multiple_files=multi_file_status_var.get()
-                                                                 ), font=font_style_box,
+    sci_tab, text="Load Files",
+    command=lambda: lmsc.load_folder(file_val=folder_path.get(),
+                                     t_start=start_time.get(),
+                                     t_end=end_time.get(),
+                                     multiple_files=multi_file_status_var.get()
+                                     ), font=font_style_box,
     justify="center", bg="snow", fg="green", pady=5, padx=5, borderwidth=2,
     relief="raised", highlightthickness=2, highlightbackground="green", highlightcolor="green"
 )

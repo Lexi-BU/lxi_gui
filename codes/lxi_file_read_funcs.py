@@ -1,6 +1,5 @@
 import csv
 import datetime
-import glob
 import importlib
 import os
 import struct
@@ -638,7 +637,8 @@ def open_file_hk():
 
 def open_file_b(t_start=None, t_end=None):
     # define a global variable for the file name
-    file_val = filedialog.askopenfilename(initialdir="/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230414/not_Sent/",
+    file_val = filedialog.askopenfilename(initialdir="/home/vetinari/Desktop/git/Lexi-Bu/" +
+                                          "lxi_gui/data/PIT/20230414/not_Sent/",
                                           title="Select file",
                                           filetypes=(("all files", "*.*"),
                                                      ("text files", "*.txt"))
@@ -1136,14 +1136,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         file_val=file_name_hk, t_start=t_start, t_end=t_end)
 
     # Select only those where "IsCommanded" is True
-    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==True]
-    df_sci = df_sci[df_sci['IsCommanded']==True]
-
-    # Check if t_start and t_end are timezones aware, if not, make them timezone aware
-    if t_start.tzinfo is None:
-        t_start = t_start.tz_localize('UTC')
-    if t_end.tzinfo is None:
-        t_end = t_end.tz_localize('UTC')
+    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded'] is True]
+    df_sci = df_sci[df_sci['IsCommanded'] is True]
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end].copy()

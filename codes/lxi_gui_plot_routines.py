@@ -425,7 +425,7 @@ class plot_data_class():
         self.df_slice_sci = self.df_slice_sci.dropna()
         # Try to select only rows where "IsCommanded" is False
         try:
-            self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"]==False]
+            self.df_slice_sci = self.df_slice_sci[self.df_slice_sci["IsCommanded"] is False]
         except Exception:
             pass
         # Plot the histogram on axs1
