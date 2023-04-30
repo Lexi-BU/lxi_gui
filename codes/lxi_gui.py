@@ -293,7 +293,8 @@ b_file_load_entry = tk.Entry(sci_tab, textvariable=b_file_name, font=font_style,
 b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
 
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
-b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b()))
+b_file_load_button.config(command=lambda: b_file_load_entry.insert(0, lxrf.open_file_b(
+    t_start=start_time.get(), t_end=end_time.get())))
 
 # If a new file is loaded, then print its name in the entry box and update the file_name variable.
 sci_file_name.trace("w", lambda *_: sci_file_name.set(lmsc.file_name_update(file_type="sci")))
@@ -565,6 +566,13 @@ default_opt_checkbox = tk.Checkbutton(hk_tab, text="Default Options", font=font_
 default_opt_checkbox.grid(row=12, column=1, columnspan=1, sticky="n")
 
 default_opt_var.trace("w", lambda *_: ts_button_val_change(default_opt_var))
+
+# Add a clickable button to display the time values in the terminal
+time_button = tk.Button(sci_tab, text="Print Time", font=font_style_box, justify="center",
+                        command=lambda: lmsc.print_time_details(start_time=start_time.get(),
+                                                                end_time=end_time.get())
+                        )
+time_button.grid(row=17, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5)
 
 # Add a refresh button to reload all the time series plots
 refresh_ts_hk_button = tk.Button(

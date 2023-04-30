@@ -636,7 +636,7 @@ def open_file_hk():
     return file_val
 
 
-def open_file_b():
+def open_file_b(t_start=None, t_end=None):
     # define a global variable for the file name
     file_val = filedialog.askopenfilename(initialdir="/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230414/not_Sent/",
                                           title="Select file",
@@ -644,10 +644,27 @@ def open_file_b():
                                                      ("text files", "*.txt"))
                                           )
 
+    # Check if t_start and t_end are datetime objects, if not, convert them to datetime objects and
+    # set the timezone to UTC
+    if not isinstance(t_start, datetime.datetime):
+        t_start = datetime.datetime.strptime(t_start, '%Y-%m-%d %H:%M:%S')
+        # Set timezone to UTC
+        t_start = t_start.replace(tzinfo=pytz.UTC)
+    if not isinstance(t_end, datetime.datetime):
+        t_end = datetime.datetime.strptime(t_end, '%Y-%m-%d %H:%M:%S')
+        # Set timezone to UTC
+        t_end = t_end.replace(tzinfo=pytz.UTC)
+
+    # Check if t_start and t_end are timezones aware, if not, make them timezone aware
+    if t_start.tzinfo is None:
+        t_start = t_start.tz_localize('UTC')
+    if t_end.tzinfo is None:
+        t_end = t_end.tz_localize('UTC')
+
     # Cut path to the file off
     file_name_b = file_val
     (df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_all_hk, df_all_sci
-     ) = read_binary_file(file_val)
+     ) = read_binary_file(file_val=file_val, t_start=t_start, t_end=t_end)
     global_variables.all_file_details["file_name_b"] = file_name_b
     global_variables.all_file_details["file_name_hk"] = file_name_hk
     global_variables.all_file_details["file_name_sci"] = file_name_sci
@@ -815,6 +832,11 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     if t_start is None:
         t_start = df.index.min()
     else:
+        # Check if t_start and t_end are datetime objects. If not, convert them to datetime
+        if not isinstance(t_start, datetime.datetime):
+            t_start = datetime.datetime.strptime(t_start, '%Y-%m-%d %H:%M:%S')
+        if not isinstance(t_end, datetime.datetime):
+            t_end = datetime.datetime.strptime(t_end, '%Y-%m-%d %H:%M:%S')
         # Check if t_start is time-zone aware. If not, make it time-zone aware
         if t_start.tzinfo is None:
             t_start = t_start.replace(tzinfo=pytz.utc)
@@ -995,8 +1017,6 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             t_end = None
 
         if t_start is not None and t_end is not None:
-
-            print(f"\n \x1b[1;31;255m Value of t_start={t_start}, and t_end={t_end} \x1b[0m")
             # Convert t_start and t_end from string to datetime in UTC timezone
             t_start = pd.to_datetime(t_start, utc=True)
             t_end = pd.to_datetime(t_end, utc=True)
@@ -1020,17 +1040,22 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         if not os.path.isdir(file_val):
             raise ValueError("file_val should be a directory.")
 
-        # Get the names of all the files in the directory
-        file_list = np.sort(glob.glob(os.path.join(file_val, "*.dat")))
+        # Get the names of all the files in the directory with*.dat or *.txt extension
+        file_list = np.sort([os.path.join(file_val, f) for f in os.listdir(file_val)
+                             if f.endswith(('.dat', '.txt'))])
 
         # If file list is empty, raise an error and exit
         if len(file_list) == 0:
             raise ValueError("No files found in the directory.")
+        else:
+            print(f"Found total \x1b[1;32;255m {len(file_list)} \x1b[0m files in the directory.")
 
         if t_start_unix is not None and t_end_unix is not None:
             # In file_list, select only those files which are within the time range
             file_list = [file_name for file_name in file_list if t_start_unix <=
                          float(os.path.basename(file_name).split("_")[2]) <= t_end_unix]
+            print(f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
+                  f"{t_start} to {t_end}.")
 
         # Loop through all the files
         for file_name in file_list:
@@ -1081,15 +1106,15 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-4] + '_' + \
             file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
 
-        print(f"file_name_hk =\x1b[1;32;255m {file_name_hk} \x1b[0m,"
-              f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
+        print(f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n"
+              f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n")
         # Save the dataframe to a csv file
         df_hk.to_csv(file_name_hk, index=False)
         df_sci.to_csv(file_name_sci, index=False)
 
-        print(f"Saved the dataframes to csv files."
-              f"file_name_hk =\x1b[1;32;255m {file_name_hk} \x1b[0m,"
-              f"file_name_sci =\x1b[1;32;255m{file_name_sci} \x1b[0m")
+        print(f"Saved the dataframes to csv files. \n"
+              f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m,\n"
+              f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n")
     # Replace index with timestamp
     df_hk.set_index('Date', inplace=True)
     df_sci.set_index('Date', inplace=True)
@@ -1113,6 +1138,12 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
     # Select only those where "IsCommanded" is True
     df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded']==True]
     df_sci = df_sci[df_sci['IsCommanded']==True]
+
+    # Check if t_start and t_end are timezones aware, if not, make them timezone aware
+    if t_start.tzinfo is None:
+        t_start = t_start.tz_localize('UTC')
+    if t_end.tzinfo is None:
+        t_end = t_end.tz_localize('UTC')
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end].copy()

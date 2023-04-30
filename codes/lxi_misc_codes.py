@@ -104,11 +104,27 @@ def change_state(button=None):
 
 
 def load_folder(file_val=None, t_start=None, t_end=None, multiple_files=True):
-    print(f"Value of t_start is {t_start}, \n Value of t_end is {t_end}, \n Value of file_val is "
-          f"{file_val}\n Value of multiple_files is {multiple_files}")
+    """
+    Load a folder of files
 
-    print(f"Type of t_start is {type(t_start)}, \n Type of t_end is {type(t_end)}, \n Type of "
-          f"file_val is {type(file_val)}\n Type of multiple_files is {type(multiple_files)}")
+    Parameters
+    ----------
+    file_val : str
+        The folder name
+
+    t_start : float
+        The start time
+
+    t_end : float
+        The end time
+
+    multiple_files : bool
+        If True, then load multiple files. Default is True.
+
+    Returns
+    -------
+        None
+    """
     lxrf.open_file_b_multiple(file_val=file_val, t_start=t_start, t_end=t_end,
                               multiple_files=multiple_files)
 
