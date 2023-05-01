@@ -1,4 +1,5 @@
 import importlib
+import logging
 from tabulate import tabulate
 import global_variables
 import numpy as np
@@ -11,6 +12,15 @@ importlib.reload(lctc)
 importlib.reload(lgeb)
 importlib.reload(lctcsv)
 importlib.reload(lxrf)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+file_handler = logging.FileHandler('lxi_misc_codes.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 def print_time_details(file_type=None, start_time=None, end_time=None):
@@ -56,7 +66,9 @@ def print_time_details(file_type=None, start_time=None, end_time=None):
                  ["End time from widget", end_time]],
                 headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
                 numalign="center"))
+            logger.info(f"Time details for {file_type} file printed")
         except Exception:
+            logger.exception(f"Error in printing time details for {file_type} file")
             pass
 
 

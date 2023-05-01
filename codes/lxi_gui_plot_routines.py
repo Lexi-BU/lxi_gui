@@ -1,5 +1,6 @@
 import importlib
 import datetime
+import logging
 import os
 import pytz
 
@@ -14,6 +15,19 @@ import lxi_misc_codes as lmsc
 
 importlib.reload(global_variables)
 importlib.reload(lmsc)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+file_handler = logging.FileHandler('lxi_gui.log')
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 
 class plot_data_class():
@@ -227,6 +241,8 @@ class plot_data_class():
                 t_start = t_start.replace(tzinfo=pytz.utc)
         except Exception:
             t_start = self.df_slice_hk.index.min()
+            logger.warning("Invalid start time. Setting start time to the first time in the "
+                           "dataframe.")
             pass
         try:
             t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
@@ -235,6 +251,8 @@ class plot_data_class():
                 t_end = t_end.replace(tzinfo=pytz.utc)
         except Exception:
             t_end = self.df_slice_hk.index.max()
+            logger.warning("Invalid end time. Setting end time to the last time in the "
+                           "dataframe.")
             pass
 
         # Make a dictionary of all the plot options and their units
@@ -261,7 +279,7 @@ class plot_data_class():
         alpha = 0.4
         ms = 2
         # Plot the data
-        fig = plt.figure(num=None, figsize=(self.ts_fig_width * 1.5, self.ts_fig_height),
+        fig = plt.figure(num=None, figsize=(self.ts_fig_width, self.ts_fig_height),
                          edgecolor='k', facecolor='w')
         fig.subplots_adjust(left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0)
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[1, 1, 1], height_ratios=[1])
@@ -302,6 +320,8 @@ class plot_data_class():
             t_start = t_start.replace(tzinfo=pytz.UTC)
         except Exception:
             t_start = self.df_slice_sci.index.min()
+            logger.exception("Invalid start time. Setting start time to the first time in the "
+                             "dataframe.")
             pass
         try:
             t_end = datetime.datetime.strptime(self.end_time, "%Y-%m-%d %H:%M:%S")
@@ -309,61 +329,80 @@ class plot_data_class():
             t_end = t_end.replace(tzinfo=pytz.UTC)
         except Exception:
             t_end = self.df_slice_sci.index.max()
+            logger.exception("Invalid end time. Setting end time to the last time in the "
+                             "dataframe.")
             pass
         try:
             bins = int(self.bins)
         except Exception:
             bins = 50
+            logger.exception("Invalid bin value. Setting bin value to 50.")
         try:
             cmin = float(self.cmin)
         except Exception:
             cmin = 1
+            logger.exception("Invalid cmin value. Setting cmin value to 1.")
         try:
             cmax = float(self.cmax)
         except Exception:
             cmax = None
+            logger.exception("Invalid cmax value. Setting cmax value to None.")
         try:
             x_min = float(self.x_min)
         except Exception:
             x_min = self.df_slice_sci["x_val"].min()
+            logger.exception("Invalid x_min value. Setting x_min value to the minimum value in "
+                             "the dataframe.")
         try:
             x_max = float(self.x_max)
         except Exception:
             x_max = self.df_slice_sci["x_val"].max()
+            logger.exception("Invalid x_max value. Setting x_max value to the maximum value in "
+                             "the dataframe.")
         try:
             y_min = float(self.y_min)
         except Exception:
             y_min = self.df_slice_sci["y_val"].min()
+            logger.exception("Invalid y_min value. Setting y_min value to the minimum value in "
+                             "the dataframe.")
         try:
             y_max = float(self.y_max)
         except Exception:
             y_max = self.df_slice_sci["y_val"].max()
+            logger.exception("Invalid y_max value. Setting y_max value to the maximum value in "
+                             "the dataframe.")
         try:
             density = self.density
         except Exception:
             density = None
+            logger.exception("Invalid density value. Setting density value to None.")
         try:
             v_min = float(self.v_min)
         except Exception:
             v_min = 0
+            logger.exception("Invalid v_min value. Setting v_min value to 0.")
         try:
             v_max = float(self.v_max)
         except Exception:
             v_max = 4
+            logger.exception("Invalid v_max value. Setting v_max value to 4.")
         try:
             v_sum_min = float(self.v_sum_min)
         except Exception:
             v_sum_min = 0
+            logger.exception("Invalid v_sum_min value. Setting v_sum_min value to 0.")
         try:
             v_sum_max = float(self.v_sum_max)
         except Exception:
             v_sum_max = 16
+            logger.exception("Invalid v_sum_max value. Setting v_sum_max value to 16.")
 
         # Check if norm is 'log' or 'linear'
         if (self.norm == 'log' or self.norm == 'linear'):
             norm = self.norm
         else:
             norm = None
+            logger.warning("Invalid norm value. Setting norm value to None.")
 
         if norm == 'log':
             norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
@@ -456,6 +495,8 @@ class plot_data_class():
         if np.isnan(counts).all():
             print(f"\033[1;31m For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
                   "Redoing the histogram with different norm and cmin\033[0m")
+            logger.warning(f"For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
+                           "Redoing the histogram with different norm and cmin")
             new_norm = mpl.colors.LogNorm()
             counts, xedges, yedges, im = axs1.hist2d(self.df_slice_sci[x_key],
                                                      self.df_slice_sci[y_key], bins=bins,
@@ -464,6 +505,8 @@ class plot_data_class():
             # Print the new cmin and cmax values, greater than 0, to 2 decimal places
             print(f"\033[1;32m New cmin={np.nanmin(counts[counts > 0]):.2f} and "
                   f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m")
+            logger.info(f"New cmin={np.nanmin(counts[counts > 0]):.2f} and "
+                        f"cmax={np.nanmax(counts[counts > 0]):.2f}")
 
         # Add histogram data detauls to the global dictionary
         if self.lin_corr is False:
@@ -594,6 +637,7 @@ class plot_data_class():
 
             except Exception:
                 print('Error: Could not fit Gaussian to data.')
+                logger.exception('Error: Could not fit Gaussian to data.')
                 pass
 
         # Set tight layout

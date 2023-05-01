@@ -2,6 +2,7 @@ import csv
 import datetime
 import importlib
 import os
+import logging
 import struct
 from pathlib import Path
 from tkinter import filedialog
@@ -14,6 +15,19 @@ import pandas as pd
 import pytz
 
 importlib.reload(lmsc)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+
+file_handler = logging.FileHandler('lxi_file_read_funcs.log')
+file_handler.setFormatter(formatter)
+
+# stream_handler = logging.StreamHandler()
+
+logger.addHandler(file_handler)
+# logger.addHandler(stream_handler)
 
 # Tha packet format of the science and housekeeping packets
 packet_format_sci = ">II4H"
@@ -527,11 +541,9 @@ def read_binary_data_hk(
     elif "unit_2" in input_file_name or "unit2" in input_file_name:
         lxi_unit = 2
     else:
-        # Print warning that unit is defaulted to 1
-        print(
-            "\n FileName Warning: \033[91m \nThe unit is defaulted to 1 because the name of the "
-            "file does not contain \"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\". \033[0m \n"
-        )
+        # Log warning that unit is defaulted to 1
+        logger.warning("The unit is defaulted to 1 because the name of the file does not contain "
+                       "\"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\".")
         lxi_unit = 1
 
     for ii, idx in enumerate(hk_idx):
@@ -617,7 +629,7 @@ def open_file_sci(start_time=None, end_time=None):
     return file_val
 
 
-def open_file_hk():
+def open_file_hk(start_time=None, end_time=None):
     # define a global variable for the file name
     file_val = filedialog.askopenfilename(initialdir="../data/processed_data/hk/",
                                           title="Select file",
@@ -628,7 +640,7 @@ def open_file_hk():
     file_name_hk = file_val.split('/')[-1]
     global_variables.all_file_details['file_name_hk'] = file_val
 
-    df_all_hk, df_slice_hk = read_csv_hk(file_val)
+    df_all_hk, df_slice_hk = read_csv_hk(file_va=file_val, t_start=start_time, t_end=end_time)
     global_variables.all_file_details['df_slice_hk'] = df_slice_hk
     global_variables.all_file_details['df_all_hk'] = df_all_hk
     print(f"\n \x1b[1;32;255m Loaded {file_name_hk} in the data base \x1b[0m")
@@ -675,7 +687,7 @@ def open_file_b(t_start=None, t_end=None):
     global_variables.all_file_details["df_all_sci"] = df_all_sci
 
     print(
-        f"\n Loaded \x1b[1;32;255m{file_name_b}\x1b[0m in the data base,\n  and the csv file for "
+        f"\n Loaded \x1b[1;32;255m{file_name_b}\x1b[0m in the data base,\n and the csv file for "
         f"\x1b[1;32;255m HK \x1b[0m and \x1b[1;32;255m SCI \x1b[0m data have been saved to \n "
         f"HK File : \x1b[1;32;255m{file_name_hk} \x1b[0m \n and \n Sci File: "
         f"\x1b[1;32;255m{file_name_sci}\x1b[0m")

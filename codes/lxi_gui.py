@@ -1,5 +1,6 @@
 import importlib
 import platform
+import logging
 import tkinter as tk
 from tkinter import font, ttk
 
@@ -18,6 +19,19 @@ importlib.reload(llpr)
 importlib.reload(lgeb)
 importlib.reload(lmsc)
 importlib.reload(lgcf)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+file_handler = logging.FileHandler('lxi_gui.log')
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 # Initialize the global variables. This is necessary because the global variables is where all the
 # data and name of the files are stored.
@@ -99,8 +113,8 @@ def ts_plot_inputs(plot_opt_entry=None, dpi=100, row=None, column=None, columnsp
         "column": column,
         "columnspan": columnspan,
         "rowspan": rowspan,
-        "fig_width": screen_width / (4 * dpi),
-        "fig_height": screen_height / (6 * dpi)
+        "fig_width": screen_width / (8 * dpi),
+        "fig_height": screen_height / (12 * dpi)
     }
 
     llpr.load_ts_plots(**inputs)
@@ -131,46 +145,64 @@ def refresh_ts_plot():
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_1, row=1, column=0, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_1.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_2.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_3.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_4.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_5.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_6.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_7.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_8.get()}")
         pass
 
     try:
         ts_plot_inputs(plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3)
     except Exception:
+        logger.exception("Exception occurred while refreshing the time series plot for"
+                         f"{plot_opt_entry_9.get()}")
         pass
 
 
@@ -191,9 +223,9 @@ if platform.system() == "Linux":
 else:
     screen_width, screen_height = 0.9 * root.winfo_screenwidth(), 0.9 * root.winfo_screenheight()
 
-screen_width = 2000
-screen_height = 1000
-print("If the GUI size is messed up, check comment on line #201 of the code 'lxi_gui.py'.")
+# screen_width = 1200
+# screen_height = 800
+print("If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'.")
 
 # Set the title of the main window.
 root.title("LEXI GUI")
