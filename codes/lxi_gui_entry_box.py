@@ -117,7 +117,7 @@ def populate_entries(root=None, default_vals=False):
 
     font_style_box = font.Font(family="serif", size=12, weight="bold")
 
-    # The minimum value of x-axis for the histogram plor
+    # The minimum value of x-axis for the histogram plot
     x_min_entry = entry_box(root=root, row=0, column=opt_col_num, entry_label="X-min",
                             entry_val=default_opt_dict['x_min_entry'], font_style=font_style_box)
 

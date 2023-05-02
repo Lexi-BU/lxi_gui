@@ -137,3 +137,9 @@ documents/
 # Ignore the data folder
 data/*
 figures/*
+
+# Ignore the config file
+luigi.cfg
+
+# Ignore the poetry lock file
+poetry.lock
