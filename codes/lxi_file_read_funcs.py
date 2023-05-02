@@ -1071,6 +1071,10 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         # Loop through all the files
         for file_name in file_list:
+            # Print in cyan color that file number is being read from the directory conatining total
+            # number of files
+            print(f"\nReading file \x1b[1;36;255m {file_list.index(file_name) + 1} \x1b[0m of "
+                  f"total \x1b[1;36;255m {len(file_list)} \x1b[0m files.")
             # Read the housekeeping data
             df_hk, file_name_hk = read_binary_data_hk(
                 in_file_name=file_name,
