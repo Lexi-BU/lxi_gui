@@ -16,8 +16,8 @@ importlib.reload(lxrf)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
-file_handler = logging.FileHandler('lxi_misc_codes.log')
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
+file_handler = logging.FileHandler("lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
@@ -42,9 +42,9 @@ def print_time_details(file_type=None, start_time=None, end_time=None):
         None
     """
     if file_type is None:
-        file_type_list = ['sci', 'hk']
+        file_type_list = ["sci", "hk"]
     else:
-        if hasattr(file_type, '__len__'):
+        if hasattr(file_type, "__len__"):
             file_type_list = file_type
             file_type = []
         else:
@@ -56,16 +56,25 @@ def print_time_details(file_type=None, start_time=None, end_time=None):
             df_all = global_variables.all_file_details[f"df_all_{file_type}"]
             # df_slice = global_variables.all_file_details[f"df_all_{file_type}"]
             file_name = global_variables.all_file_details[f"file_name_{file_type}"]
-            print(f"\n Displaying values for \x1b[1;32;255m {file_name.split('/')[-1]} \x1b[0m")
-            print(tabulate(
-                [[f"Minimum time in the {file_type} file", df_all.index.min()],
-                 [f"Maximum time in the  {file_type} file", df_all.index.max()],
-                 # [f"Minimum time in the sliced  {file_type} file", df_slice.index.min()],
-                 # [f"Maximum time in the sliced  {file_type} file", df_slice.index.max()],
-                 ["Start time from widget", start_time],
-                 ["End time from widget", end_time]],
-                headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
-                numalign="center"))
+            print(
+                f"\n Displaying values for \x1b[1;32;255m {file_name.split('/')[-1]} \x1b[0m"
+            )
+            print(
+                tabulate(
+                    [
+                        [f"Minimum time in the {file_type} file", df_all.index.min()],
+                        [f"Maximum time in the  {file_type} file", df_all.index.max()],
+                        # [f"Minimum time in the sliced  {file_type} file", df_slice.index.min()],
+                        # [f"Maximum time in the sliced  {file_type} file", df_slice.index.max()],
+                        ["Start time from widget", start_time],
+                        ["End time from widget", end_time],
+                    ],
+                    headers=["Parameter", "Value"],
+                    tablefmt="fancy_grid",
+                    floatfmt=".2f",
+                    numalign="center",
+                )
+            )
             logger.info(f"Time details for {file_type} file printed")
         except Exception:
             logger.exception(f"Error in printing time details for {file_type} file")
@@ -89,7 +98,7 @@ def insert_file_name(file_load_entry=None, tk=None, file_name=None):
     -------
         None
     """
-    file_name_short = file_name.split('/')[-1]
+    file_name_short = file_name.split("/")[-1]
     file_load_entry.delete(0, tk.END)
     file_load_entry.insert(0, file_name_short)
 
@@ -137,8 +146,9 @@ def load_folder(file_val=None, t_start=None, t_end=None, multiple_files=True):
     -------
         None
     """
-    lxrf.open_file_b_multiple(file_val=file_val, t_start=t_start, t_end=t_end,
-                              multiple_files=multiple_files)
+    lxrf.open_file_b_multiple(
+        file_val=file_val, t_start=t_start, t_end=t_end, multiple_files=multiple_files
+    )
 
     return None
 
@@ -158,7 +168,7 @@ def curve_fit_func(x, a, b, c):
     c : float
         The standard deviation of the curve
     """
-    return a * np.exp(-(x - b) ** 2 / (2 * c ** 2))
+    return a * np.exp(-((x - b) ** 2) / (2 * c**2))
 
 
 def fwhm(x, y):
@@ -172,7 +182,7 @@ def fwhm(x, y):
     y : numpy.ndarray
         The y values
     """
-    half_max = np.max(y) / 2.
+    half_max = np.max(y) / 2.0
     left_idx = np.where(y > half_max)[0][0]
     right_idx = np.where(y > half_max)[0][-1]
     return x[right_idx] - x[left_idx]
@@ -193,17 +203,25 @@ def diff_file_warnings():
         sci_t_min = global_variables.all_file_details["df_all_sci"].index.min()
         sci_t_max = global_variables.all_file_details["df_all_sci"].index.max()
         if abs((hk_t_min - sci_t_min).total_seconds()) > 1:
-            print("\n \x1b[1;31;255m WARNING: The hk file does not have the same minimum time "
-                  "values as the sci file \x1b[0m")
-            print(f"The hk file has the minimum time value of \x1b[1;32;255m{hk_t_min} \x1b[0m"
-                  f"and the sci file has the minimum time value of \x1b[1;32;255m{sci_t_min}"
-                  f"\x1b[0m")
+            print(
+                "\n \x1b[1;31;255m WARNING: The hk file does not have the same minimum time "
+                "values as the sci file \x1b[0m"
+            )
+            print(
+                f"The hk file has the minimum time value of \x1b[1;32;255m{hk_t_min} \x1b[0m"
+                f"and the sci file has the minimum time value of \x1b[1;32;255m{sci_t_min}"
+                f"\x1b[0m"
+            )
         if abs((hk_t_max - sci_t_max).total_seconds()) > 1:
-            print("\n \x1b[1;31;255m WARNING: The hk file does not have the same maximum time "
-                  "values as the sci file \x1b[0m")
-            print(f"The hk file has the maximum time value of \x1b[1;32;255m{hk_t_max} \x1b[0m"
-                  f"and the sci file has the maximum time value of \x1b[1;32;255m{sci_t_max}"
-                  f"\x1b[0m")
+            print(
+                "\n \x1b[1;31;255m WARNING: The hk file does not have the same maximum time "
+                "values as the sci file \x1b[0m"
+            )
+            print(
+                f"The hk file has the maximum time value of \x1b[1;32;255m{hk_t_max} \x1b[0m"
+                f"and the sci file has the maximum time value of \x1b[1;32;255m{sci_t_max}"
+                f"\x1b[0m"
+            )
     except Exception:
         pass
 
@@ -218,11 +236,11 @@ def file_name_update(file_name=None, file_type=None):
         The file name to be updated
     """
     if file_type == "sci":
-        file_name = global_variables.all_file_details["file_name_sci"].split('/')[-1]
+        file_name = global_variables.all_file_details["file_name_sci"].split("/")[-1]
     elif file_type == "hk":
-        file_name = global_variables.all_file_details["file_name_hk"].split('/')[-1]
+        file_name = global_variables.all_file_details["file_name_hk"].split("/")[-1]
     elif file_type == "b":
-        file_name = global_variables.all_file_details["file_name_b"].split('/')[-1]
+        file_name = global_variables.all_file_details["file_name_b"].split("/")[-1]
     diff_file_warnings()
 
     return file_name
@@ -382,9 +400,11 @@ def save_csv(root=None, number_of_decimals=3):
 
         lctcsv.lxi_csv_to_csv(**inputs)
     except Exception as e:
-        print(f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the csv file. Following exception"
-              f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
-              f"Science csv file is loaded. \n")
+        print(
+            f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the csv file. Following exception"
+            f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+            f"Science csv file is loaded. \n"
+        )
 
 
 def save_cdf():
@@ -401,7 +421,9 @@ def save_cdf():
 
         lctc.lxi_csv_to_cdf(**inputs)
     except Exception as e:
-        print(f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
-              f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
-              f"Science csv file is loaded. \n")
+        print(
+            f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
+            f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+            f"Science csv file is loaded. \n"
+        )
         pass

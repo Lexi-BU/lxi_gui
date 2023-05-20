@@ -6,7 +6,9 @@ import lxi_file_read_funcs as lxrf
 importlib.reload(lxrf)
 
 
-def lxi_csv_to_csv(df=None, csv_file=None, csv_folder=None, csvs_file=None, csvs_folder=None):
+def lxi_csv_to_csv(
+    df=None, csv_file=None, csv_folder=None, csvs_file=None, csvs_folder=None
+):
     """
     Convert a CSV file to a CDF file.
 
@@ -73,7 +75,9 @@ def lxi_csv_to_csv(df=None, csv_file=None, csv_folder=None, csvs_file=None, csvs
 
         # If the csvs_file does not exist, create it
         if csvs_file is None:
-            csvs_file = csvs_folder + "/" + csv_file.split("/")[-1].split(".")[0] + ".csv"
+            csvs_file = (
+                csvs_folder + "/" + csv_file.split("/")[-1].split(".")[0] + ".csv"
+            )
         else:
             csvs_file = csvs_folder + "/" + csvs_file
             print("Creating csv file: " + csvs_file)
@@ -82,8 +86,10 @@ def lxi_csv_to_csv(df=None, csv_file=None, csv_folder=None, csvs_file=None, csvs
         if Path(csvs_file).exists():
             # Raise a warning saying the file already exists and ask the user if they want to
             # overwrite it
-            print(f"\n \x1b[1;31;255m WARNING: The csv file already exists and will be overwritten:"
-                  f" {csvs_file} \x1b[0m")
+            print(
+                f"\n \x1b[1;31;255m WARNING: The csv file already exists and will be overwritten:"
+                f" {csvs_file} \x1b[0m"
+            )
             Path(csvs_file).unlink()
 
         print(f"Creating csv file: {csvs_file}")

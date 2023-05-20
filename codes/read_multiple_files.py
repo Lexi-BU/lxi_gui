@@ -12,8 +12,16 @@ dir_name = "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230426"
 t_start = "2024-05-23 21:46:42.132525"
 t_end = "2024-05-23 22:06:42.132525"
 
-df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_hk, df_sci = lxrf.read_binary_file(
-    file_val=dir_name, multiple_files=True, t_start=t_start, t_end=t_end)
+(
+    df_slice_hk,
+    file_name_hk,
+    df_slice_sci,
+    file_name_sci,
+    df_hk,
+    df_sci,
+) = lxrf.read_binary_file(
+    file_val=dir_name, multiple_files=True, t_start=t_start, t_end=t_end
+)
 
 
 '''

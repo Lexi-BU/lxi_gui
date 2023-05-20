@@ -8,7 +8,9 @@ from spacepy.pycdf import CDF as cdf
 importlib.reload(lxrf)
 
 
-def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_folder=None):
+def lxi_csv_to_cdf(
+    df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_folder=None
+):
     """
     Convert a CSV file to a CDF file.
 
@@ -84,8 +86,10 @@ def lxi_csv_to_cdf(df=None, csv_file=None, csv_folder=None, cdf_file=None, cdf_f
         if Path(cdf_file).exists():
             # Raise a warning saying the file already exists and ask the user if they want to
             # overwrite it
-            print(f"\n \x1b[1;31;255m WARNING: The CDF file already exists and will be overwritten:"
-                  f" {cdf_file} \x1b[0m")
+            print(
+                f"\n \x1b[1;31;255m WARNING: The CDF file already exists and will be overwritten:"
+                f" {cdf_file} \x1b[0m"
+            )
             Path(cdf_file).unlink()
 
         print(f"Creating CDF file: {cdf_file}")

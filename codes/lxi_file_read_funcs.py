@@ -19,9 +19,9 @@ importlib.reload(lmsc)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
-file_handler = logging.FileHandler('lxi_file_read_funcs.log')
+file_handler = logging.FileHandler("lxi_file_read_funcs.log")
 file_handler.setFormatter(formatter)
 
 # stream_handler = logging.StreamHandler()
@@ -38,8 +38,8 @@ packet_format_hk = ">II4H"
 packet_format_pit = "<d"
 
 
-sync_lxi = b'\xfe\x6b\x28\x40'
-sync_pit = b'\x54\x53'
+sync_lxi = b"\xfe\x6b\x28\x40"
+sync_pit = b"\x54\x53"
 
 volts_per_count = 4.5126 / 65536  # volts per increment of digitization
 
@@ -61,6 +61,7 @@ class sci_packet(NamedTuple):
     IsCommand tells you if the packet was commanded.
     Voltages 1 to 4 are the voltages of corresponding different channels.
     """
+
     Date: float
     is_commanded: bool
     timestamp: int
@@ -75,8 +76,10 @@ class sci_packet(NamedTuple):
         structure = struct.unpack(packet_format_sci, bytes_[12:])
         return cls(
             Date=structure_time[0],
-            is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
-            timestamp=structure[1] & 0x3fffffff,           # mask for getting all timestamp bits
+            is_commanded=bool(
+                structure[1] & 0x40000000
+            ),  # mask to test for commanded event type
+            timestamp=structure[1] & 0x3FFFFFFF,  # mask for getting all timestamp bits
             channel1=structure[2] * volts_per_count,
             channel2=structure[3] * volts_per_count,
             channel3=structure[4] * volts_per_count,
@@ -100,6 +103,7 @@ class sci_packet_gsfc(NamedTuple):
     IsCommand tells you if the packet was commanded.
     Voltages 1 to 4 are the voltages of corresponding different channels.
     """
+
     is_commanded: bool
     timestamp: int
     channel1: float
@@ -111,8 +115,10 @@ class sci_packet_gsfc(NamedTuple):
     def from_bytes(cls, bytes_: bytes):
         structure = struct.unpack(packet_format_sci, bytes_)
         return cls(
-            is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
-            timestamp=structure[1] & 0x3fffffff,           # mask for getting all timestamp bits
+            is_commanded=bool(
+                structure[1] & 0x40000000
+            ),  # mask to test for commanded event type
+            timestamp=structure[1] & 0x3FFFFFFF,  # mask for getting all timestamp bits
             channel1=structure[2] * volts_per_count,
             channel2=structure[3] * volts_per_count,
             channel3=structure[4] * volts_per_count,
@@ -152,6 +158,7 @@ class hk_packet_cls(NamedTuple):
     14: MCP HV after auto change
     15: MCP HV after manual change
     """
+
     Date: int
     timestamp: int
     hk_id: int
@@ -168,12 +175,14 @@ class hk_packet_cls(NamedTuple):
         # are processed.
         if structure[1] & 0x80000000:
             Date = structure_time[0]
-            timestamp = structure[1] & 0x3fffffff  # mask for getting all timestamp bits
-            hk_id = (structure[2] & 0xf000) >> 12  # Down-shift 12 bits to get the hk_id
+            timestamp = structure[1] & 0x3FFFFFFF  # mask for getting all timestamp bits
+            hk_id = (structure[2] & 0xF000) >> 12  # Down-shift 12 bits to get the hk_id
             if hk_id == 10 or hk_id == 11:
-                hk_value = structure[2] & 0xfff
+                hk_value = structure[2] & 0xFFF
             else:
-                hk_value = (structure[2] & 0xfff) << 4  # Up-shift 4 bits to get the hk_value
+                hk_value = (
+                    structure[2] & 0xFFF
+                ) << 4  # Up-shift 4 bits to get the hk_value
             delta_event_count = structure[3]
             delta_drop_event_count = structure[4]
             delta_lost_event_count = structure[5]
@@ -220,6 +229,7 @@ class hk_packet_cls_gsfc(NamedTuple):
     14: MCP HV after auto change
     15: MCP HV after manual change
     """
+
     timestamp: int
     hk_id: int
     hk_value: float
@@ -233,12 +243,14 @@ class hk_packet_cls_gsfc(NamedTuple):
         # Check if the present packet is the house-keeping packet. Only the house-keeping packets
         # are processed.
         if structure[1] & 0x80000000:
-            timestamp = structure[1] & 0x3fffffff  # mask for getting all timestamp bits
-            hk_id = (structure[2] & 0xf000) >> 12  # Down-shift 12 bits to get the hk_id
+            timestamp = structure[1] & 0x3FFFFFFF  # mask for getting all timestamp bits
+            hk_id = (structure[2] & 0xF000) >> 12  # Down-shift 12 bits to get the hk_id
             if hk_id == 10 or hk_id == 11:
-                hk_value = structure[2] & 0xfff
+                hk_value = structure[2] & 0xFFF
             else:
-                hk_value = (structure[2] & 0xfff) << 4  # Up-shift 4 bits to get the hk_value
+                hk_value = (
+                    structure[2] & 0xFFF
+                ) << 4  # Up-shift 4 bits to get the hk_value
             delta_event_count = structure[3]
             delta_drop_event_count = structure[4]
             delta_lost_event_count = structure[5]
@@ -256,7 +268,7 @@ class hk_packet_cls_gsfc(NamedTuple):
 def read_binary_data_sci(
     in_file_name=None,
     save_file_name="../data/processed/sci/output_sci.csv",
-    number_of_decimals=6
+    number_of_decimals=6,
 ):
     """
     Reads science packet of the binary data from a file and saves it to a csv file.
@@ -285,28 +297,24 @@ def read_binary_data_sci(
             Name of the output file.
     """
     if in_file_name is None:
-        in_file_name = "../data/raw_data/2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
+        in_file_name = (
+            "../data/raw_data/2022_03_03_1030_LEXI_raw_2100_newMCP_copper.txt"
+        )
 
     # Check if the file exists, if does not exist raise an error
     if not Path(in_file_name).is_file():
-        raise FileNotFoundError(
-            "The file " + in_file_name + " does not exist."
-        )
+        raise FileNotFoundError("The file " + in_file_name + " does not exist.")
     # Check if the file name and folder name are strings, if not then raise an error
     if not isinstance(in_file_name, str):
-        raise TypeError(
-            "The file name must be a string."
-        )
+        raise TypeError("The file name must be a string.")
 
     # Check the number of decimals to save
     if not isinstance(number_of_decimals, int):
-        raise TypeError(
-            "The number of decimals to save must be an integer."
-        )
+        raise TypeError("The number of decimals to save must be an integer.")
 
     input_file_name = in_file_name
 
-    with open(input_file_name, 'rb') as file:
+    with open(input_file_name, "rb") as file:
         raw = file.read()
 
     index = 0
@@ -315,8 +323,8 @@ def read_binary_data_sci(
     # Check if the word 'mcp' is present in the file name
     if "mcp" in in_file_name:
         while index < len(raw) - 16:
-            if raw[index:index + 4] == sync_lxi:
-                packets.append(sci_packet_gsfc.from_bytes(raw[index:index + 16]))
+            if raw[index : index + 4] == sync_lxi:
+                packets.append(sci_packet_gsfc.from_bytes(raw[index : index + 16]))
                 index += 16
                 continue
 
@@ -324,8 +332,11 @@ def read_binary_data_sci(
 
     else:
         while index < len(raw) - 28:
-            if raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi:
-                packets.append(sci_packet.from_bytes(raw[index:index + 28]))
+            if (
+                raw[index : index + 2] == sync_pit
+                and raw[index + 12 : index + 16] == sync_lxi
+            ):
+                packets.append(sci_packet.from_bytes(raw[index : index + 28]))
                 index += 28
                 continue
 
@@ -342,57 +353,76 @@ def read_binary_data_sci(
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
     if "mcp" in in_file_name:
-        default_time = datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('UTC'))
-        with open(save_file_name, 'w', newline='') as file:
+        default_time = datetime.datetime(
+            2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone("UTC")
+        )
+        with open(save_file_name, "w", newline="") as file:
             dict_writer = csv.DictWriter(
                 file,
                 fieldnames=(
-                    'Date',
-                    'TimeStamp',
-                    'IsCommanded',
-                    'Channel1',
-                    'Channel2',
-                    'Channel3',
-                    'Channel4'
+                    "Date",
+                    "TimeStamp",
+                    "IsCommanded",
+                    "Channel1",
+                    "Channel2",
+                    "Channel3",
+                    "Channel4",
                 ),
             )
             dict_writer.writeheader()
             dict_writer.writerows(
                 {
-                    'Date': default_time + datetime.timedelta(milliseconds=sci_packet.timestamp),
-                    'TimeStamp': sci_packet.timestamp,
-                    'IsCommanded': sci_packet.is_commanded,
-                    'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
-                    'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
-                    'Channel3': np.round(sci_packet.channel3, decimals=number_of_decimals),
-                    'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals)
+                    "Date": default_time
+                    + datetime.timedelta(milliseconds=sci_packet.timestamp),
+                    "TimeStamp": sci_packet.timestamp,
+                    "IsCommanded": sci_packet.is_commanded,
+                    "Channel1": np.round(
+                        sci_packet.channel1, decimals=number_of_decimals
+                    ),
+                    "Channel2": np.round(
+                        sci_packet.channel2, decimals=number_of_decimals
+                    ),
+                    "Channel3": np.round(
+                        sci_packet.channel3, decimals=number_of_decimals
+                    ),
+                    "Channel4": np.round(
+                        sci_packet.channel4, decimals=number_of_decimals
+                    ),
                 }
                 for sci_packet in packets
             )
     else:
-        with open(save_file_name, 'w', newline='') as file:
+        with open(save_file_name, "w", newline="") as file:
             dict_writer = csv.DictWriter(
                 file,
                 fieldnames=(
-                    'Date',
-                    'TimeStamp',
-                    'IsCommanded',
-                    'Channel1',
-                    'Channel2',
-                    'Channel3',
-                    'Channel4'
+                    "Date",
+                    "TimeStamp",
+                    "IsCommanded",
+                    "Channel1",
+                    "Channel2",
+                    "Channel3",
+                    "Channel4",
                 ),
             )
             dict_writer.writeheader()
             dict_writer.writerows(
                 {
-                    'Date': datetime.datetime.utcfromtimestamp(sci_packet.Date),
-                    'TimeStamp': sci_packet.timestamp / 1e3,
-                    'IsCommanded': sci_packet.is_commanded,
-                    'Channel1': np.round(sci_packet.channel1, decimals=number_of_decimals),
-                    'Channel2': np.round(sci_packet.channel2, decimals=number_of_decimals),
-                    'Channel3': np.round(sci_packet.channel3, decimals=number_of_decimals),
-                    'Channel4': np.round(sci_packet.channel4, decimals=number_of_decimals)
+                    "Date": datetime.datetime.utcfromtimestamp(sci_packet.Date),
+                    "TimeStamp": sci_packet.timestamp / 1e3,
+                    "IsCommanded": sci_packet.is_commanded,
+                    "Channel1": np.round(
+                        sci_packet.channel1, decimals=number_of_decimals
+                    ),
+                    "Channel2": np.round(
+                        sci_packet.channel2, decimals=number_of_decimals
+                    ),
+                    "Channel3": np.round(
+                        sci_packet.channel3, decimals=number_of_decimals
+                    ),
+                    "Channel4": np.round(
+                        sci_packet.channel4, decimals=number_of_decimals
+                    ),
                 }
                 for sci_packet in packets
             )
@@ -401,10 +431,10 @@ def read_binary_data_sci(
     df = pd.read_csv(save_file_name)
 
     # Convert the date column to datetime
-    df['Date'] = pd.to_datetime(df['Date'])
+    df["Date"] = pd.to_datetime(df["Date"])
 
     # Set index to the date
-    df.set_index('Date', inplace=False)
+    df.set_index("Date", inplace=False)
 
     # Save the dataframe to a csv file
     df.to_csv(save_file_name, index=False)
@@ -415,7 +445,7 @@ def read_binary_data_sci(
 def read_binary_data_hk(
     in_file_name=None,
     save_file_name="../data/processed/hk/output_hk.csv",
-    number_of_decimals=6
+    number_of_decimals=6,
 ):
     """
     Reads housekeeping packet of the binary data from a file and saves it to a csv file.
@@ -449,30 +479,22 @@ def read_binary_data_hk(
         If the input file does not exist or isn't a specified
     """
     if in_file_name is None:
-        raise FileNotFoundError(
-            "The input file name must be specified."
-        )
+        raise FileNotFoundError("The input file name must be specified.")
 
     # Check if the file exists, if does not exist raise an error
     if not Path(in_file_name).is_file():
-        raise FileNotFoundError(
-            "The file " + in_file_name + " does not exist."
-        )
+        raise FileNotFoundError("The file " + in_file_name + " does not exist.")
     # Check if the file name and folder name are strings, if not then raise an error
     if not isinstance(in_file_name, str):
-        raise TypeError(
-            "The file name must be a string."
-        )
+        raise TypeError("The file name must be a string.")
 
     # Check the number of decimals to save
     if not isinstance(number_of_decimals, int):
-        raise TypeError(
-            "The number of decimals to save must be an integer."
-        )
+        raise TypeError("The number of decimals to save must be an integer.")
 
     input_file_name = in_file_name
 
-    with open(input_file_name, 'rb') as file:
+    with open(input_file_name, "rb") as file:
         raw = file.read()
 
     index = 0
@@ -480,16 +502,19 @@ def read_binary_data_hk(
 
     if "mcp" in in_file_name:
         while index < len(raw) - 16:
-            if raw[index:index + 4] == sync_lxi:
-                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
+            if raw[index : index + 4] == sync_lxi:
+                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index : index + 16]))
                 index += 16
                 continue
 
             index += 1
     else:
         while index < len(raw) - 28:
-            if raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi:
-                packets.append(hk_packet_cls.from_bytes(raw[index:index + 28]))
+            if (
+                raw[index : index + 2] == sync_pit
+                and raw[index + 12 : index + 16] == sync_lxi
+            ):
+                packets.append(hk_packet_cls.from_bytes(raw[index : index + 28]))
                 index += 28
                 continue
 
@@ -524,16 +549,49 @@ def read_binary_data_hk(
     DeltaDroppedCount = np.full(len(hk_idx), np.nan)
     DeltaLostEvntCount = np.full(len(hk_idx), np.nan)
 
-    all_data_dict = {"Date": Date, "TimeStamp": TimeStamp, "HK_id": HK_id,
-                     "0": PinPullerTemp, "1": OpticsTemp, "2": LEXIbaseTemp, "3": HVsupplyTemp,
-                     "4": V_Imon_5_2, "5": V_Imon_10, "6": V_Imon_3_3, "7": AnodeVoltMon,
-                     "8": V_Imon_28, "9": ADC_Ground, "10": Cmd_count, "11": Pinpuller_Armed,
-                     "12": Unused1, "13": Unused2, "14": HVmcpAuto, "15": HVmcpMan,
-                     "DeltaEvntCount": DeltaEvntCount, "DeltaDroppedCount": DeltaDroppedCount,
-                     "DeltaLostEvntCount": DeltaLostEvntCount}
+    all_data_dict = {
+        "Date": Date,
+        "TimeStamp": TimeStamp,
+        "HK_id": HK_id,
+        "0": PinPullerTemp,
+        "1": OpticsTemp,
+        "2": LEXIbaseTemp,
+        "3": HVsupplyTemp,
+        "4": V_Imon_5_2,
+        "5": V_Imon_10,
+        "6": V_Imon_3_3,
+        "7": AnodeVoltMon,
+        "8": V_Imon_28,
+        "9": ADC_Ground,
+        "10": Cmd_count,
+        "11": Pinpuller_Armed,
+        "12": Unused1,
+        "13": Unused2,
+        "14": HVmcpAuto,
+        "15": HVmcpMan,
+        "DeltaEvntCount": DeltaEvntCount,
+        "DeltaDroppedCount": DeltaDroppedCount,
+        "DeltaLostEvntCount": DeltaLostEvntCount,
+    }
 
-    selected_keys = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
-                     "15"]
+    selected_keys = [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+    ]
 
     # Check if "unit_1" or "unit1" is in the file name, if so then the data is from the unit 1
     if "unit_1" in input_file_name or "unit1" in input_file_name:
@@ -542,16 +600,22 @@ def read_binary_data_hk(
         lxi_unit = 2
     else:
         # Log warning that unit is defaulted to 1
-        logger.warning("The unit is defaulted to 1 because the name of the file does not contain "
-                       "\"unit_1\" or \"unit1\" or \"unit_2\" or \"unit2\".")
+        logger.warning(
+            "The unit is defaulted to 1 because the name of the file does not contain "
+            '"unit_1" or "unit1" or "unit_2" or "unit2".'
+        )
         lxi_unit = 1
 
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
         # Convert to seconds from milliseconds for the timestamp
         if "mcp" in input_file_name:
-            default_time = datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('UTC'))
-            new_time = default_time + datetime.timedelta(milliseconds=hk_packet.timestamp)
+            default_time = datetime.datetime(
+                2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone("UTC")
+            )
+            new_time = default_time + datetime.timedelta(
+                milliseconds=hk_packet.timestamp
+            )
             all_data_dict["Date"][ii] = new_time.timestamp()
         else:
             all_data_dict["Date"][ii] = hk_packet.Date
@@ -559,25 +623,47 @@ def read_binary_data_hk(
         all_data_dict["HK_id"][ii] = hk_packet.hk_id
         key = str(hk_packet.hk_id)
         if key in selected_keys:
-            all_data_dict[key][ii] = lmsc.hk_value_comp(ii=ii,
-                                                        vpc=volts_per_count,
-                                                        hk_value=hk_packet.hk_value,
-                                                        hk_id=hk_packet.hk_id,
-                                                        lxi_unit=lxi_unit
-                                                        )
+            all_data_dict[key][ii] = lmsc.hk_value_comp(
+                ii=ii,
+                vpc=volts_per_count,
+                hk_value=hk_packet.hk_value,
+                hk_id=hk_packet.hk_id,
+                lxi_unit=lxi_unit,
+            )
 
         all_data_dict["DeltaEvntCount"][ii] = hk_packet.delta_event_count
         all_data_dict["DeltaDroppedCount"][ii] = hk_packet.delta_drop_event_count
         all_data_dict["DeltaLostEvntCount"][ii] = hk_packet.delta_lost_event_count
 
     # Create a dataframe with the data
-    df_key_list = ["Date", "TimeStamp", "HK_id", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp",
-                   "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon",
-                   "+28V_Imon", "ADC_Ground", "Cmd_count", "Pinpuller_Armed", "Unused1", "Unused2",
-                   "HVmcpAuto", "HVmcpMan", "DeltaEvntCount", "DeltaDroppedCount",
-                   "DeltaLostEvntCount"]
+    df_key_list = [
+        "Date",
+        "TimeStamp",
+        "HK_id",
+        "PinPullerTemp",
+        "OpticsTemp",
+        "LEXIbaseTemp",
+        "HVsupplyTemp",
+        "+5.2V_Imon",
+        "+10V_Imon",
+        "+3.3V_Imon",
+        "AnodeVoltMon",
+        "+28V_Imon",
+        "ADC_Ground",
+        "Cmd_count",
+        "Pinpuller_Armed",
+        "Unused1",
+        "Unused2",
+        "HVmcpAuto",
+        "HVmcpMan",
+        "DeltaEvntCount",
+        "DeltaDroppedCount",
+        "DeltaLostEvntCount",
+    ]
 
-    Date_datetime = [datetime.datetime.utcfromtimestamp(x) for x in all_data_dict["Date"]]
+    Date_datetime = [
+        datetime.datetime.utcfromtimestamp(x) for x in all_data_dict["Date"]
+    ]
 
     df = pd.DataFrame(columns=df_key_list)
     for ii, key in enumerate(df_key_list):
@@ -612,18 +698,20 @@ def read_binary_data_hk(
 def open_file_sci(start_time=None, end_time=None):
     # define a global variable for the file name
 
-    file_val = filedialog.askopenfilename(initialdir="../data/processed_data/sci/",
-                                          title="Select file",
-                                          filetypes=(("csv files", "*.csv"),
-                                                     ("all files", "*.*"))
-                                          )
+    file_val = filedialog.askopenfilename(
+        initialdir="../data/processed_data/sci/",
+        title="Select file",
+        filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
+    )
     # Cut path to the file off
-    file_name_sci = file_val.split('/')[-1]
-    global_variables.all_file_details['file_name_sci'] = file_val
+    file_name_sci = file_val.split("/")[-1]
+    global_variables.all_file_details["file_name_sci"] = file_val
 
-    df_all_sci, df_slice_sci = read_csv_sci(file_val=file_val, t_start=start_time, t_end=end_time)
-    global_variables.all_file_details['df_slice_sci'] = df_slice_sci
-    global_variables.all_file_details['df_all_sci'] = df_all_sci
+    df_all_sci, df_slice_sci = read_csv_sci(
+        file_val=file_val, t_start=start_time, t_end=end_time
+    )
+    global_variables.all_file_details["df_slice_sci"] = df_slice_sci
+    global_variables.all_file_details["df_all_sci"] = df_all_sci
     print(f"\n \x1b[1;32;255m Loaded {file_name_sci} in the data base \x1b[0m")
 
     return file_val
@@ -631,52 +719,60 @@ def open_file_sci(start_time=None, end_time=None):
 
 def open_file_hk(start_time=None, end_time=None):
     # define a global variable for the file name
-    file_val = filedialog.askopenfilename(initialdir="../data/processed_data/hk/",
-                                          title="Select file",
-                                          filetypes=(("csv files", "*.csv"),
-                                                     ("all files", "*.*"))
-                                          )
+    file_val = filedialog.askopenfilename(
+        initialdir="../data/processed_data/hk/",
+        title="Select file",
+        filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
+    )
     # Cut path to the file off
-    file_name_hk = file_val.split('/')[-1]
-    global_variables.all_file_details['file_name_hk'] = file_val
+    file_name_hk = file_val.split("/")[-1]
+    global_variables.all_file_details["file_name_hk"] = file_val
 
-    df_all_hk, df_slice_hk = read_csv_hk(file_va=file_val, t_start=start_time, t_end=end_time)
-    global_variables.all_file_details['df_slice_hk'] = df_slice_hk
-    global_variables.all_file_details['df_all_hk'] = df_all_hk
+    df_all_hk, df_slice_hk = read_csv_hk(
+        file_val=file_val, t_start=start_time, t_end=end_time
+    )
+    global_variables.all_file_details["df_slice_hk"] = df_slice_hk
+    global_variables.all_file_details["df_all_hk"] = df_all_hk
     print(f"\n \x1b[1;32;255m Loaded {file_name_hk} in the data base \x1b[0m")
     return file_val
 
 
 def open_file_b(t_start=None, t_end=None):
     # define a global variable for the file name
-    file_val = filedialog.askopenfilename(initialdir="/home/vetinari/Desktop/git/Lexi-Bu/" +
-                                          "lxi_gui/data/PIT/20230414/not_Sent/",
-                                          title="Select file",
-                                          filetypes=(("all files", "*.*"),
-                                                     ("text files", "*.txt"))
-                                          )
+    file_val = filedialog.askopenfilename(
+        initialdir="/home/vetinari/Desktop/git/Lexi-Bu/"
+        + "lxi_gui/data/PIT/20230414/not_Sent/",
+        title="Select file",
+        filetypes=(("all files", "*.*"), ("text files", "*.txt")),
+    )
 
     # Check if t_start and t_end are datetime objects, if not, convert them to datetime objects and
     # set the timezone to UTC
     if not isinstance(t_start, datetime.datetime):
-        t_start = datetime.datetime.strptime(t_start, '%Y-%m-%d %H:%M:%S')
+        t_start = datetime.datetime.strptime(t_start, "%Y-%m-%d %H:%M:%S")
         # Set timezone to UTC
         t_start = t_start.replace(tzinfo=pytz.UTC)
     if not isinstance(t_end, datetime.datetime):
-        t_end = datetime.datetime.strptime(t_end, '%Y-%m-%d %H:%M:%S')
+        t_end = datetime.datetime.strptime(t_end, "%Y-%m-%d %H:%M:%S")
         # Set timezone to UTC
         t_end = t_end.replace(tzinfo=pytz.UTC)
 
     # Check if t_start and t_end are timezones aware, if not, make them timezone aware
     if t_start.tzinfo is None:
-        t_start = t_start.tz_localize('UTC')
+        t_start = t_start.tz_localize("UTC")
     if t_end.tzinfo is None:
-        t_end = t_end.tz_localize('UTC')
+        t_end = t_end.tz_localize("UTC")
 
     # Cut path to the file off
     file_name_b = file_val
-    (df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_all_hk, df_all_sci
-     ) = read_binary_file(file_val=file_val, t_start=t_start, t_end=t_end)
+    (
+        df_slice_hk,
+        file_name_hk,
+        df_slice_sci,
+        file_name_sci,
+        df_all_hk,
+        df_all_sci,
+    ) = read_binary_file(file_val=file_val, t_start=t_start, t_end=t_end)
     global_variables.all_file_details["file_name_b"] = file_name_b
     global_variables.all_file_details["file_name_hk"] = file_name_hk
     global_variables.all_file_details["file_name_sci"] = file_name_sci
@@ -690,18 +786,25 @@ def open_file_b(t_start=None, t_end=None):
         f"\n Loaded \x1b[1;32;255m{file_name_b}\x1b[0m in the data base,\n and the csv file for "
         f"\x1b[1;32;255m HK \x1b[0m and \x1b[1;32;255m SCI \x1b[0m data have been saved to \n "
         f"HK File : \x1b[1;32;255m{file_name_hk} \x1b[0m \n and \n Sci File: "
-        f"\x1b[1;32;255m{file_name_sci}\x1b[0m")
+        f"\x1b[1;32;255m{file_name_sci}\x1b[0m"
+    )
 
     return file_val
 
 
 def open_file_b_multiple(file_val=None, t_start=None, t_end=None, multiple_files=True):
-
     # Cut path to the file off
     file_name_b = file_val
-    (df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_all_hk, df_all_sci
-     ) = read_binary_file(file_val=file_val, t_start=t_start, t_end=t_end,
-                          multiple_files=multiple_files)
+    (
+        df_slice_hk,
+        file_name_hk,
+        df_slice_sci,
+        file_name_sci,
+        df_all_hk,
+        df_all_sci,
+    ) = read_binary_file(
+        file_val=file_val, t_start=t_start, t_end=t_end, multiple_files=multiple_files
+    )
     global_variables.all_file_details["file_name_b"] = file_name_b
     global_variables.all_file_details["file_name_hk"] = file_name_hk
     global_variables.all_file_details["file_name_sci"] = file_name_sci
@@ -715,20 +818,24 @@ def open_file_b_multiple(file_val=None, t_start=None, t_end=None, multiple_files
         f"\n Loaded \x1b[1;32;255m{file_name_b}\x1b[0m in the data base,\n  and the csv file for "
         f"\x1b[1;32;255m HK \x1b[0m and \x1b[1;32;255m SCI \x1b[0m data have been saved to \n "
         f"HK File : \x1b[1;32;255m{file_name_hk} \x1b[0m \n and \n Sci File: "
-        f"\x1b[1;32;255m{file_name_sci}\x1b[0m")
+        f"\x1b[1;32;255m{file_name_sci}\x1b[0m"
+    )
 
     return file_val
 
 
-def lin_correction(x, y, M_inv=np.array([[0.98678, 0.16204],
-                                         [0.11385, 0.993497]]),
-                   b=np.array([0.00195, 0.56355])):
+def lin_correction(
+    x,
+    y,
+    M_inv=np.array([[0.98678, 0.16204], [0.11385, 0.993497]]),
+    b=np.array([0.00195, 0.56355]),
+):
     """
     Function to apply nonlinearity correction to MCP position x/y data
     # TODO: Add correct M_inv matrix and the offsets
     """
     x_lin = (x * M_inv[0, 0] + y * M_inv[0, 1]) - b[0]
-    y_lin = (x * M_inv[1, 0] + y * M_inv[1, 1])
+    y_lin = x * M_inv[1, 0] + y * M_inv[1, 1]
 
     return x_lin, y_lin
 
@@ -787,8 +894,8 @@ def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
     # Find the index where the histogram is the maximum
     # NOTE/TODO: I don't quite understand why the offset is computed this way. Need to talk to
     # Dennis about this and get an engineering/physics reason for it.
-    max_index_v1 = np.argmax(hist_v1[0][0:int(n_bins / 2)])
-    max_index_v2 = np.argmax(hist_v2[0][0:int(n_bins / 2)])
+    max_index_v1 = np.argmax(hist_v1[0][0 : int(n_bins / 2)])
+    max_index_v2 = np.argmax(hist_v2[0][0 : int(n_bins / 2)])
 
     z1_min = 1000 * xx[max_index_v1]
     z2_min = 1000 * xx[max_index_v2]
@@ -827,17 +934,17 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
             time_col = key
             break
     # Rename the time column to TimeStamp
-    df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
+    df.rename(columns={time_col: "TimeStamp"}, inplace=True)
 
     # Convert the Date column from string to datetime in utc
     try:
-        df['Date'] = pd.to_datetime(df['Date'], utc=True)
+        df["Date"] = pd.to_datetime(df["Date"], utc=True)
     except Exception:
         # Convert timestamp to datetime and set it to Date
-        df['Date'] = pd.to_datetime(df['TimeStamp'], unit='s', utc=True)
+        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True)
 
     # Set the index to the time column
-    df.set_index('Date', inplace=True)
+    df.set_index("Date", inplace=True)
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
@@ -846,9 +953,9 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     else:
         # Check if t_start and t_end are datetime objects. If not, convert them to datetime
         if not isinstance(t_start, datetime.datetime):
-            t_start = datetime.datetime.strptime(t_start, '%Y-%m-%d %H:%M:%S')
+            t_start = datetime.datetime.strptime(t_start, "%Y-%m-%d %H:%M:%S")
         if not isinstance(t_end, datetime.datetime):
-            t_end = datetime.datetime.strptime(t_end, '%Y-%m-%d %H:%M:%S')
+            t_end = datetime.datetime.strptime(t_end, "%Y-%m-%d %H:%M:%S")
         # Check if t_start is time-zone aware. If not, make it time-zone aware
         if t_start.tzinfo is None:
             t_start = t_start.replace(tzinfo=pytz.utc)
@@ -864,19 +971,29 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
 
     # For both the sliced and entire dataframes, compute the x and y-coordinates and the shift in
     # the voltages
-    x_slice, v1_shift_slice, v3_shift_slice = compute_position(v1=df_slice_sci['Channel1'],
-                                                               v2=df_slice_sci['Channel3'],
-                                                               n_bins=401, bin_min=0, bin_max=4)
+    x_slice, v1_shift_slice, v3_shift_slice = compute_position(
+        v1=df_slice_sci["Channel1"],
+        v2=df_slice_sci["Channel3"],
+        n_bins=401,
+        bin_min=0,
+        bin_max=4,
+    )
 
-    x, v1_shift, v3_shift = compute_position(v1=df['Channel1'], v2=df['Channel3'], n_bins=401,
-                                             bin_min=0, bin_max=4)
+    x, v1_shift, v3_shift = compute_position(
+        v1=df["Channel1"], v2=df["Channel3"], n_bins=401, bin_min=0, bin_max=4
+    )
 
-    y_slice, v4_shift_slice, v2_shift_slice = compute_position(v1=df_slice_sci['Channel4'],
-                                                               v2=df_slice_sci['Channel2'],
-                                                               n_bins=401, bin_min=0, bin_max=4)
+    y_slice, v4_shift_slice, v2_shift_slice = compute_position(
+        v1=df_slice_sci["Channel4"],
+        v2=df_slice_sci["Channel2"],
+        n_bins=401,
+        bin_min=0,
+        bin_max=4,
+    )
 
-    y, v4_shift, v2_shift = compute_position(v1=df['Channel4'], v2=df['Channel2'], n_bins=401,
-                                             bin_min=0, bin_max=4)
+    y, v4_shift, v2_shift = compute_position(
+        v1=df["Channel4"], v2=df["Channel2"], n_bins=401, bin_min=0, bin_max=4
+    )
 
     # Correct for the non-linearity in the positions
     x_lin_slice, y_lin_slice = lin_correction(x_slice, y_slice)
@@ -889,34 +1006,34 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     x_mcp_lin, y_mcp_lin = volt_to_mcp(x_lin, y_lin)
 
     # Add the x-coordinate to the dataframe
-    df_slice_sci['x_val'] = x_slice
-    df_slice_sci.loc[:, 'x_val_lin'] = x_lin_slice
-    df_slice_sci.loc[:, 'x_mcp'] = x_mcp_slice
-    df_slice_sci.loc[:, 'x_mcp_lin'] = x_mcp_lin_slice
-    df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
-    df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
+    df_slice_sci["x_val"] = x_slice
+    df_slice_sci.loc[:, "x_val_lin"] = x_lin_slice
+    df_slice_sci.loc[:, "x_mcp"] = x_mcp_slice
+    df_slice_sci.loc[:, "x_mcp_lin"] = x_mcp_lin_slice
+    df_slice_sci.loc[:, "v1_shift"] = v1_shift_slice
+    df_slice_sci.loc[:, "v3_shift"] = v3_shift_slice
 
-    df.loc[:, 'x_val'] = x
-    df.loc[:, 'x_val_lin'] = x_lin
-    df.loc[:, 'x_mcp'] = x_mcp
-    df.loc[:, 'x_mcp_lin'] = x_mcp_lin
-    df.loc[:, 'v1_shift'] = v1_shift
-    df.loc[:, 'v3_shift'] = v3_shift
+    df.loc[:, "x_val"] = x
+    df.loc[:, "x_val_lin"] = x_lin
+    df.loc[:, "x_mcp"] = x_mcp
+    df.loc[:, "x_mcp_lin"] = x_mcp_lin
+    df.loc[:, "v1_shift"] = v1_shift
+    df.loc[:, "v3_shift"] = v3_shift
 
     # Add the y-coordinate to the dataframe
-    df_slice_sci.loc[:, 'y_val'] = y_slice
-    df_slice_sci.loc[:, 'y_val_lin'] = y_lin_slice
-    df_slice_sci.loc[:, 'y_mcp'] = y_mcp_slice
-    df_slice_sci.loc[:, 'y_mcp_lin'] = y_mcp_lin_slice
-    df_slice_sci.loc[:, 'v4_shift'] = v4_shift_slice
-    df_slice_sci.loc[:, 'v2_shift'] = v2_shift_slice
+    df_slice_sci.loc[:, "y_val"] = y_slice
+    df_slice_sci.loc[:, "y_val_lin"] = y_lin_slice
+    df_slice_sci.loc[:, "y_mcp"] = y_mcp_slice
+    df_slice_sci.loc[:, "y_mcp_lin"] = y_mcp_lin_slice
+    df_slice_sci.loc[:, "v4_shift"] = v4_shift_slice
+    df_slice_sci.loc[:, "v2_shift"] = v2_shift_slice
 
-    df.loc[:, 'y_val'] = y
-    df.loc[:, 'y_val_lin'] = y_lin
-    df.loc[:, 'y_mcp'] = y_mcp
-    df.loc[:, 'y_mcp_lin'] = y_mcp_lin
-    df.loc[:, 'v4_shift'] = v4_shift
-    df.loc[:, 'v2_shift'] = v2_shift
+    df.loc[:, "y_val"] = y
+    df.loc[:, "y_val_lin"] = y_lin
+    df.loc[:, "y_mcp"] = y_mcp
+    df.loc[:, "y_mcp_lin"] = y_mcp_lin
+    df.loc[:, "v4_shift"] = v4_shift
+    df.loc[:, "v2_shift"] = v2_shift
 
     return df, df_slice_sci
 
@@ -945,17 +1062,17 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
             time_col = key
             break
     # Rename the time column to TimeStamp
-    df.rename(columns={time_col: 'TimeStamp'}, inplace=True)
+    df.rename(columns={time_col: "TimeStamp"}, inplace=True)
 
     # Convert the Date column from string to datetime in utc
     try:
-        df['Date'] = pd.to_datetime(df['Date'], utc=True)
+        df["Date"] = pd.to_datetime(df["Date"], utc=True)
     except Exception:
         # Convert timestamp to datetime and set it to Date
-        df['Date'] = pd.to_datetime(df['TimeStamp'], unit='s', utc=True)
+        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True)
 
     # Set the index to the time column
-    df.set_index('Date', inplace=True)
+    df.set_index("Date", inplace=True)
     # Sort the dataframe by timestamp
     df = df.sort_index()
 
@@ -1003,28 +1120,30 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
     if multiple_files is False:
         # Read the housekeeping data
         df_hk, file_name_hk = read_binary_data_hk(
-            in_file_name=file_val,
-            save_file_name=None,
-            number_of_decimals=6
+            in_file_name=file_val, save_file_name=None, number_of_decimals=6
         )
 
         # Read the science data
         df_sci, file_name_sci = read_binary_data_sci(
-            in_file_name=file_val,
-            save_file_name=None,
-            number_of_decimals=6
+            in_file_name=file_val, save_file_name=None, number_of_decimals=6
         )
 
     else:
         # If only one of t_start and t_end is None, raise an error
-        if (t_start is None and t_end is not None) or (t_start is not None and t_end is None):
-            raise ValueError("when multiple_files is True, both t_start and t_end must either be"
-                             f"None or a valid time value. The vlaues provided are t_start ="
-                             f"{t_start} and t_end = {t_end}.")
+        if (t_start is None and t_end is not None) or (
+            t_start is not None and t_end is None
+        ):
+            raise ValueError(
+                "when multiple_files is True, both t_start and t_end must either be"
+                f"None or a valid time value. The vlaues provided are t_start ="
+                f"{t_start} and t_end = {t_end}."
+            )
         # If both t_start and t_end are None, raise a warning stating that the times are set to none
         if t_start is None and t_end is None:
-            print("\n \x1b[1;31;255m WARNING: Both the start and end time values provided were None"
-                  "setting both of them to None \x1b[0m")
+            print(
+                "\n \x1b[1;31;255m WARNING: Both the start and end time values provided were None"
+                "setting both of them to None \x1b[0m"
+            )
             t_start = None
             t_end = None
 
@@ -1053,40 +1172,52 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             raise ValueError("file_val should be a directory.")
 
         # Get the names of all the files in the directory with*.dat or *.txt extension
-        file_list = np.sort([os.path.join(file_val, f) for f in os.listdir(file_val)
-                             if f.endswith(('.dat', '.txt'))])
+        file_list = np.sort(
+            [
+                os.path.join(file_val, f)
+                for f in os.listdir(file_val)
+                if f.endswith((".dat", ".txt"))
+            ]
+        )
 
         # If file list is empty, raise an error and exit
         if len(file_list) == 0:
             raise ValueError("No files found in the directory.")
         else:
-            print(f"Found total \x1b[1;32;255m {len(file_list)} \x1b[0m files in the directory.")
+            print(
+                f"Found total \x1b[1;32;255m {len(file_list)} \x1b[0m files in the directory."
+            )
 
         if t_start_unix is not None and t_end_unix is not None:
             # In file_list, select only those files which are within the time range
-            file_list = [file_name for file_name in file_list if t_start_unix <=
-                         float(os.path.basename(file_name).split("_")[2]) <= t_end_unix]
-            print(f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
-                  f"{t_start} to {t_end}.")
+            file_list = [
+                file_name
+                for file_name in file_list
+                if t_start_unix
+                <= float(os.path.basename(file_name).split("_")[2])
+                <= t_end_unix
+            ]
+            print(
+                f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
+                f"{t_start} to {t_end}."
+            )
 
         # Loop through all the files
         for file_name in file_list:
             # Print in cyan color that file number is being read from the directory conatining total
             # number of files
-            print(f"\nReading file \x1b[1;36;255m {file_list.index(file_name) + 1} \x1b[0m of "
-                  f"total \x1b[1;36;255m {len(file_list)} \x1b[0m files.")
+            print(
+                f"\nReading file \x1b[1;36;255m {file_list.index(file_name) + 1} \x1b[0m of "
+                f"total \x1b[1;36;255m {len(file_list)} \x1b[0m files."
+            )
             # Read the housekeeping data
             df_hk, file_name_hk = read_binary_data_hk(
-                in_file_name=file_name,
-                save_file_name=None,
-                number_of_decimals=6
+                in_file_name=file_name, save_file_name=None, number_of_decimals=6
             )
 
             # Read the science data
             df_sci, file_name_sci = read_binary_data_sci(
-                in_file_name=file_name,
-                save_file_name=None,
-                number_of_decimals=6
+                in_file_name=file_name, save_file_name=None, number_of_decimals=6
             )
 
             # Append the dataframes to the list
@@ -1101,39 +1232,61 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         df_sci = pd.concat(df_sci_list)
 
         # Set file_names_hk and file_names_sci to dates of first and last files
-        save_dir = os.path.dirname(file_val) + '/'
+        save_dir = os.path.dirname(file_val) + "/"
         # If save_dir does not exist, create it
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        file_name_hk = save_dir + "processed_data/hk/" + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[0] + '_' + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[1] + '_' + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[2] + '_' + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[3] + '_' + \
-            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-4] + '_' + \
-            file_name_hk_list[-1].split('/')[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+        file_name_hk = (
+            save_dir
+            + "processed_data/hk/"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[0]
+            + "_"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[1]
+            + "_"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[2]
+            + "_"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[3]
+            + "_"
+            + file_name_hk_list[-1].split("/")[-1].split(".")[0].split("_")[-4]
+            + "_"
+            + file_name_hk_list[-1].split("/")[-1].split(".")[0].split("_")[-3]
+            + "_hk_output.csv"
+        )
 
-        file_name_sci = save_dir + "processed_data/sci/" + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[0] + '_' + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[1] + '_' + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[2] + '_' + \
-            file_name_hk_list[0].split('/')[-1].split('.')[0].split('_')[3] + '_' + \
-            file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-4] + '_' + \
-            file_name_sci_list[-1].split('/')[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+        file_name_sci = (
+            save_dir
+            + "processed_data/sci/"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[0]
+            + "_"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[1]
+            + "_"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[2]
+            + "_"
+            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[3]
+            + "_"
+            + file_name_sci_list[-1].split("/")[-1].split(".")[0].split("_")[-4]
+            + "_"
+            + file_name_sci_list[-1].split("/")[-1].split(".")[0].split("_")[-3]
+            + "_sci_output.csv"
+        )
 
-        print(f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n"
-              f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n")
+        print(
+            f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n"
+            f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n"
+        )
         # Save the dataframe to a csv file
         df_hk.to_csv(file_name_hk, index=False)
         df_sci.to_csv(file_name_sci, index=False)
 
-        print(f"Saved the dataframes to csv files. \n"
-              f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m,\n"
-              f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n")
+        print(
+            f"Saved the dataframes to csv files. \n"
+            f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m,\n"
+            f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n"
+        )
     # Replace index with timestamp
-    df_hk.set_index('Date', inplace=True)
-    df_sci.set_index('Date', inplace=True)
+    df_hk.set_index("Date", inplace=True)
+    df_sci.set_index("Date", inplace=True)
 
     # Sort the dataframe by timestamp
     df_hk = df_hk.sort_index()
@@ -1146,14 +1299,16 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         t_end = df_sci.index.max()
 
     df_sci, df_slice_sci = read_csv_sci(
-        file_val=file_name_sci, t_start=t_start, t_end=t_end)
+        file_val=file_name_sci, t_start=t_start, t_end=t_end
+    )
 
     df_hk, df_slice_hk = read_csv_hk(
-        file_val=file_name_hk, t_start=t_start, t_end=t_end)
+        file_val=file_name_hk, t_start=t_start, t_end=t_end
+    )
 
     # Select only those where "IsCommanded" is True
-    df_slice_sci = df_slice_sci[df_slice_sci['IsCommanded'] == True]
-    df_sci = df_sci[df_sci['IsCommanded'] == True]
+    df_slice_sci = df_slice_sci[df_slice_sci["IsCommanded"] == True]
+    df_sci = df_sci[df_sci["IsCommanded"] == True]
 
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end].copy()
@@ -1161,36 +1316,46 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
     # For both the sliced and entire dataframes, compute the x and y-coordinates and the
     # shift in the voltages
-    x_slice, v1_shift_slice, v3_shift_slice = compute_position(v1=df_slice_sci['Channel1'],
-                                                               v2=df_slice_sci['Channel3'],
-                                                               n_bins=401, bin_min=0, bin_max=4)
+    x_slice, v1_shift_slice, v3_shift_slice = compute_position(
+        v1=df_slice_sci["Channel1"],
+        v2=df_slice_sci["Channel3"],
+        n_bins=401,
+        bin_min=0,
+        bin_max=4,
+    )
 
-    x, v1_shift, v3_shift = compute_position(v1=df_sci['Channel1'], v2=df_sci['Channel3'],
-                                             n_bins=401, bin_min=0, bin_max=4)
+    x, v1_shift, v3_shift = compute_position(
+        v1=df_sci["Channel1"], v2=df_sci["Channel3"], n_bins=401, bin_min=0, bin_max=4
+    )
 
     # Add the x-coordinate to the dataframe
-    df_slice_sci.loc[:, 'x_val'] = x_slice
-    df_slice_sci.loc[:, 'v1_shift'] = v1_shift_slice
-    df_slice_sci.loc[:, 'v3_shift'] = v3_shift_slice
+    df_slice_sci.loc[:, "x_val"] = x_slice
+    df_slice_sci.loc[:, "v1_shift"] = v1_shift_slice
+    df_slice_sci.loc[:, "v3_shift"] = v3_shift_slice
 
-    df_sci.loc[:, 'x_val'] = x
-    df_sci.loc[:, 'v1_shift'] = v1_shift
-    df_sci.loc[:, 'v3_shift'] = v3_shift
+    df_sci.loc[:, "x_val"] = x
+    df_sci.loc[:, "v1_shift"] = v1_shift
+    df_sci.loc[:, "v3_shift"] = v3_shift
 
-    y_slice, v4_shift_slice, v2_shift_slice = compute_position(v1=df_slice_sci['Channel4'],
-                                                               v2=df_slice_sci['Channel2'],
-                                                               n_bins=401, bin_min=0, bin_max=4)
+    y_slice, v4_shift_slice, v2_shift_slice = compute_position(
+        v1=df_slice_sci["Channel4"],
+        v2=df_slice_sci["Channel2"],
+        n_bins=401,
+        bin_min=0,
+        bin_max=4,
+    )
 
-    y, v4_shift, v2_shift = compute_position(v1=df_sci['Channel4'], v2=df_sci['Channel2'],
-                                             n_bins=401, bin_min=0, bin_max=4)
+    y, v4_shift, v2_shift = compute_position(
+        v1=df_sci["Channel4"], v2=df_sci["Channel2"], n_bins=401, bin_min=0, bin_max=4
+    )
 
     # Add the y-coordinate to the dataframe
-    df_slice_sci.loc[:, 'y_val'] = y_slice
-    df_slice_sci.loc[:, 'v4_shift'] = v4_shift_slice
-    df_slice_sci.loc[:, 'v2_shift'] = v2_shift_slice
+    df_slice_sci.loc[:, "y_val"] = y_slice
+    df_slice_sci.loc[:, "v4_shift"] = v4_shift_slice
+    df_slice_sci.loc[:, "v2_shift"] = v2_shift_slice
 
-    df_sci.loc[:, 'y_val'] = y
-    df_sci.loc[:, 'v4_shift'] = v4_shift
-    df_sci.loc[:, 'v2_shift'] = v2_shift
+    df_sci.loc[:, "y_val"] = y
+    df_sci.loc[:, "v4_shift"] = v4_shift
+    df_sci.loc[:, "v2_shift"] = v2_shift
 
     return df_slice_hk, file_name_hk, df_slice_sci, file_name_sci, df_hk, df_sci
