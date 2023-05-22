@@ -266,6 +266,10 @@ def refresh_ts_plot():
 
 
 def load_and_copy_files():
+    """
+    This function is called when the "Load Files" button is clicked. It copies the LEXI data files 
+    from PIT to the local computer and loads the data.
+    """
     lmsc.copy_pit_files()
     lmsc.load_folder(
         file_val=folder_path.get(),
@@ -929,7 +933,7 @@ time_button.grid(
 
 copy_button = tk.Button(
     sci_tab,
-    text="Coppy PIT Files",
+    text="Copy PIT Files",
     font=font_style_box,
     justify="center",
     command=lambda: lmsc.copy_pit_files(),

@@ -432,6 +432,9 @@ def save_cdf():
 
 
 def copy_pit_files():
+    """
+    The function, upon clicking the "Load Files" or "Copy PIT Files" button, copies the LEXI data files from PIT.
+    """
     # SSH connection settings
     host = "10.10.1.1"
     port = 22
@@ -470,6 +473,9 @@ def copy_pit_files():
 
 
 def copy_recursively(sftp, remote_path, local_path):
+    """
+    Helper function to recursively copy files and folders from a remote path to a local path.
+    """
     try:
         # Create local directories if they don't exist
         os.makedirs(local_path, exist_ok=True)
