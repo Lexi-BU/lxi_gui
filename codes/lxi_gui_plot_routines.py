@@ -358,82 +358,89 @@ class plot_data_class:
             )
             pass
         try:
-            try:
-                bins = int(self.bins)
-            except Exception:
-                bins = 50
-                logger.exception("Invalid bin value. Setting bin value to 50.")
-            try:
-                cmin = float(self.cmin)
-            except Exception:
-                cmin = 1
-                try:
-                    cmin = float(self.cmin)
-                except Exception:
-                    cmin = 1
-                    logger.exception("Invalid cmin value. Setting cmin value to 1.")
-                try:
-                    cmax = float(self.cmax)
-                except Exception:
-                    cmax = None
-                    logger.exception("Invalid cmax value. Setting cmax value to None.")
-                try:
-                    x_min = float(self.x_min)
-                except Exception:
-                    x_min = self.df_slice_sci["x_val"].min()
-                    logger.exception("Invalid x_min value. Setting x_min value to the minimum value in the dataframe.")
-                try:
-                    x_max = float(self.x_max)
-                except Exception:
-                    x_max = self.df_slice_sci["x_val"].max()
-                    logger.exception("Invalid x_max value. Setting x_max value to the maximum value in the dataframe.")
-                try:
-                    y_min = float(self.y_min)
-                except Exception:
-                    y_min = self.df_slice_sci["y_val"].min()
-                    logger.exception("Invalid y_min value. Setting y_min value to the minimum value in the dataframe.")
-                try:
-                    y_max = float(self.y_max)
-                except Exception:
-                    y_max = self.df_slice_sci["y_val"].max()
-                    logger.exception("Invalid y_max value. Setting y_max value to the maximum value in the dataframe.")
-                try:
-                    density = self.density
-                except Exception:
-                    density = None
-                    logger.exception("Invalid density value. Setting density value to None.")
-                try:
-                    v_min = float(self.v_min)
-                except Exception:
-                    v_min = 0
-                    logger.exception("Invalid v_min value. Setting v_min value to 0.")
-                try:
-                    v_max = float(self.v_max)
-                except Exception:
-                    v_max = 4
-                    logger.exception("Invalid v_max value. Setting v_max value to 4.")
-                try:
-                    v_sum_min = float(self.v_sum_min)
-                except Exception:
-                    v_sum_min = 0
-                    logger.exception("Invalid v_sum_min value. Setting v_sum_min value to 0.")
-                try:
-                    v_sum_max = float(self.v_sum_max)
-                except Exception:
-                    v_sum_max = 16
-                    logger.exception("Invalid v_sum_max value. Setting v_sum_max value to 16.")
+            bins = int(self.bins)
+        except Exception:
+            bins = 50
+            logger.exception("Invalid bin value. Setting bin value to 50.")
+        try:
+            cmin = float(self.cmin)
+        except Exception:
+            cmin = 1
+            logger.exception("Invalid cmin value. Setting cmin value to 1.")
+        try:
+            cmax = float(self.cmax)
+        except Exception:
+            cmax = None
+            logger.exception("Invalid cmax value. Setting cmax value to None.")
+        try:
+            x_min = float(self.x_min)
+        except Exception:
+            x_min = self.df_slice_sci["x_val"].min()
+            logger.exception(
+                "Invalid x_min value. Setting x_min value to the minimum value in "
+                "the dataframe."
+            )
+        try:
+            x_max = float(self.x_max)
+        except Exception:
+            x_max = self.df_slice_sci["x_val"].max()
+            logger.exception(
+                "Invalid x_max value. Setting x_max value to the maximum value in "
+                "the dataframe."
+            )
+        try:
+            y_min = float(self.y_min)
+        except Exception:
+            y_min = self.df_slice_sci["y_val"].min()
+            logger.exception(
+                "Invalid y_min value. Setting y_min value to the minimum value in "
+                "the dataframe."
+            )
+        try:
+            y_max = float(self.y_max)
+        except Exception:
+            y_max = self.df_slice_sci["y_val"].max()
+            logger.exception(
+                "Invalid y_max value. Setting y_max value to the maximum value in "
+                "the dataframe."
+            )
+        try:
+            density = self.density
+        except Exception:
+            density = None
+            logger.exception("Invalid density value. Setting density value to None.")
+        try:
+            v_min = float(self.v_min)
+        except Exception:
+            v_min = 0
+            logger.exception("Invalid v_min value. Setting v_min value to 0.")
+        try:
+            v_max = float(self.v_max)
+        except Exception:
+            v_max = 4
+            logger.exception("Invalid v_max value. Setting v_max value to 4.")
+        try:
+            v_sum_min = float(self.v_sum_min)
+        except Exception:
+            v_sum_min = 0
+            logger.exception("Invalid v_sum_min value. Setting v_sum_min value to 0.")
+        try:
+            v_sum_max = float(self.v_sum_max)
+        except Exception:
+            v_sum_max = 16
+            logger.exception("Invalid v_sum_max value. Setting v_sum_max value to 16.")
 
-                # Check if norm is 'log' or 'linear'
-                if self.norm == "log" or self.norm == "linear":
-                    norm = self.norm
-                else:
-                    norm = None
-                    logger.warning("Invalid norm value. Setting norm value to None.")
+        # Check if norm is 'log' or 'linear'
+        if self.norm == "log" or self.norm == "linear":
+            norm = self.norm
+        else:
+            norm = None
+            logger.warning("Invalid norm value. Setting norm value to None.")
 
-                if norm == "log":
-                    norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
-                elif norm == "linear":
-                    norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
+        if norm == "log":
+            norm = mpl.colors.LogNorm(vmin=cmin, vmax=cmax)
+        elif norm == "linear":
+            norm = mpl.colors.Normalize(vmin=cmin, vmax=cmax)
 
         # Check whether the axes units are 'volt' or 'mcp'
         # if (self.unit == 'volt' or self.unit == 'mcp'):
@@ -452,22 +459,14 @@ class plot_data_class:
         y_range = [y_min, y_max]
 
         # Remove rows with duplicate indices
-        self.df_slice_sci = self.df_slice_sci[~self.df_slice_sci.index.duplicated(keep="first")]
+        self.df_slice_sci = self.df_slice_sci[
+            ~self.df_slice_sci.index.duplicated(keep="first")
+        ]
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
         # Exclude channel1 to channel4 data based on v_min and v_max
         # Check if either v_min or v_max or v_sum_min or v_sum_max are None
         self.df_slice_sci = self.df_slice_sci[
-            (self.df_slice_sci["channel1"] >= v_min) & (self.df_slice_sci["channel1"] <= v_max) &
-            (self.df_slice_sci["channel2"] >= v_min) & (self.df_slice_sci["channel2"] <= v_max) &
-            (self.df_slice_sci["channel3"] >= v_min) & (self.df_slice_sci["channel3"] <= v_max) &
-            (self.df_slice_sci["channel4"] >= v_min) & (self.df_slice_sci["channel4"] <= v_max) &
-            (self.df_slice_sci["v_sum"] >= v_sum_min) & (self.df_slice_sci["v_sum"] <= v_sum_max)
-        ]
-            & (self.df_slice_sci["channel3"] >= v_min) & (self.df_slice_sci["channel3"] <= v_max)
-            & (self.df_slice_sci["channel4"] >= v_min) & (self.df_slice_sci["channel4"] <= v_max)
-            & (self.df_slice_sci["v_sum"] >= v_sum_min) & (self.df_slice_sci["v_sum"] <= v_sum_max)
-        ]
             (self.df_slice_sci["Channel1"] >= v_min)
             & (self.df_slice_sci["Channel1"] <= v_max)
             & (self.df_slice_sci["Channel2"] >= v_min)
@@ -477,20 +476,7 @@ class plot_data_class:
             & (self.df_slice_sci["Channel4"] >= v_min)
             & (self.df_slice_sci["Channel4"] <= v_max)
             & (
-                if not (
-                    self.df_slice_sci["channel1"] >= v_min
-                    & self.df_slice_sci["channel1"] <= v_max
-                    & self.df_slice_sci["channel2"] >= v_min
-                    & self.df_slice_sci["channel2"] <= v_max
-                    & self.df_slice_sci["channel3"] >= v_min
-                    & self.df_slice_sci["channel3"] <= v_max
-                    & self.df_slice_sci["channel4"] >= v_min
-                    & self.df_slice_sci["channel4"] <= v_max
-                    & self.df_slice_sci["v_sum"] >= v_sum_min
-                    & self.df_slice_sci["v_sum"] <= v_sum_max
-                ):
-                    logger.warning("No data in the specified range.")
-                    return
+                (
                     self.df_slice_sci["v1_shift"]
                     + self.df_slice_sci["v2_shift"]
                     + self.df_slice_sci["v3_shift"]

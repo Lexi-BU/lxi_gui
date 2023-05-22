@@ -7,6 +7,8 @@ import lxi_csv_to_cdf as lctc
 import lxi_csv_to_csv as lctcsv
 import lxi_gui_entry_box as lgeb
 import lxi_file_read_funcs as lxrf
+import paramiko
+import os
 
 importlib.reload(lctc)
 importlib.reload(lgeb)
@@ -427,3 +429,68 @@ def save_cdf():
             f"Science csv file is loaded. \n"
         )
         pass
+
+
+def copy_pit_files():
+    # SSH connection settings
+    host = "10.10.1.1"
+    port = 22
+    username = "pi"
+    password = "PITpi"
+
+    # SSH directory and local destination
+    ssh_directory = "/home/pi/MAX/Target/rec_tlm/not_sent/"
+    local_destination = r"C:\Users\Lexi-User\Desktop\PIT_softwares\PIT_23_04_26\Target\rec_tlm\not_sent\\"
+
+    # Create SSH client
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        # Connect to the SSH server
+        ssh_client.connect(host, port=port, username=username, password=password)
+
+        # Create SFTP client from the SSH client
+        sftp_client = ssh_client.open_sftp()
+
+        # Recursively copy files and folders
+        copy_recursively(sftp_client, ssh_directory, local_destination)
+
+        # Close the SFTP client
+        sftp_client.close()
+    except paramiko.AuthenticationException:
+        logger.error("Authentication failed, please verify your credentials: %s")
+    except paramiko.SSHException as e:
+        logger.error("An error occurred while connecting to the server: %s", str(e))
+    except Exception as e:
+        logger.error(e)
+    finally:
+        # Close the SSH client
+        ssh_client.close()
+
+
+def copy_recursively(sftp, remote_path, local_path):
+    try:
+        # Create local directories if they don't exist
+        os.makedirs(local_path, exist_ok=True)
+
+        # List files and folders in the remote path
+        files = sftp.listdir_attr(remote_path)
+
+        for file in files:
+            remote_file = remote_path + "/" + file.filename
+            local_file = os.path.join(local_path, file.filename)
+
+            if file.st_mode & 0o040000:  # Directory
+                if not file.filename.startswith("."):  # Exclude hidden directories
+                    copy_recursively(sftp, remote_file, local_file)
+            else:  # File
+                if not file.filename.startswith("."):  # Exclude hidden files
+                    if not os.path.exists(
+                        local_file
+                    ):  # Check if file already exists locally
+                        print("Copying file:", file.filename)
+                        sftp.get(remote_file, local_file)
+
+    except Exception as e:
+        print("An error occurred during file transfer:", str(e))

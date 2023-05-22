@@ -916,6 +916,17 @@ time_button.grid(
     row=17, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
 )
 
+copy_button = tk.Button(
+    sci_tab,
+    text="Coppy PIT Files",
+    font=font_style_box,
+    justify="center",
+    command=lambda: lmsc.copy_pit_files(),
+)
+copy_button.grid(
+    row=18, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
+)
+
 # Add a refresh button to reload all the time series plots
 refresh_ts_hk_button = tk.Button(
     hk_tab,

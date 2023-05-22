@@ -15,6 +15,7 @@ Wand = "^0.6.10"
 spacepy = "^0.4.1"
 bokeh = "^3.1.0"
 matplotlib = "3.5.2"
+paramiko = "^3.1.0"
 
 [tool.poetry.dev-dependencies]
 
