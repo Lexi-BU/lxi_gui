@@ -265,6 +265,16 @@ def refresh_ts_plot():
         pass
 
 
+def load_and_copy_files():
+    lmsc.copy_pit_files()
+    lmsc.load_folder(
+        file_val=folder_path.get(),
+        t_start=start_time.get(),
+        t_end=end_time.get(),
+        multiple_files=multi_file_status_var.get(),
+    )
+
+
 # Create the main window.
 root = tk.Tk()
 
@@ -663,12 +673,13 @@ folder_path.config(state="disabled")
 folder_load_button = tk.Button(
     sci_tab,
     text="Load Files",
-    command=lambda: lmsc.load_folder(
-        file_val=folder_path.get(),
-        t_start=start_time.get(),
-        t_end=end_time.get(),
-        multiple_files=multi_file_status_var.get(),
-    ),
+    command=lambda: load_and_copy_files(),
+    # command=lambda: lmsc.load_folder(
+    #     file_val=folder_path.get(),
+    #     t_start=start_time.get(),
+    #     t_end=end_time.get(),
+    #     multiple_files=multi_file_status_var.get(),
+    # ),
     font=font_style_box,
     justify="center",
     bg="snow",
