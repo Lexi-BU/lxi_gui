@@ -22,8 +22,7 @@ p.grid.visible = False
 r, bins = p.hexbin(x, y, size=0.5, hover_color="pink", hover_alpha=0.8, palette="Cividis256")
 
 # Add a color bar to the bokeh plot
-color_bar = p.hex_tile(q="q", r="r", size=0.5, line_color=None, source=bins,
-        fill_color="color")
+color_bar = p.hex_tile(q="q", r="r", size=0.5, line_color=None, source=bins, fill_color="color")
 
 
 # p.circle(x, y, color="white", size=1)

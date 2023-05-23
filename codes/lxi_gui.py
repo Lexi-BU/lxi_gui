@@ -1,16 +1,16 @@
 import importlib
-import platform
 import logging
+import platform
 import tkinter as tk
 from tkinter import font, ttk
 
 import global_variables
+import lxi_file_read_funcs as lxrf
+import lxi_gui_config as lgcf
 import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
-import lxi_file_read_funcs as lxrf
-import lxi_gui_config as lgcf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -20,11 +20,12 @@ importlib.reload(lgeb)
 importlib.reload(lmsc)
 importlib.reload(lgcf)
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
-file_handler = logging.FileHandler("lxi_gui.log")
+file_handler = logging.FileHandler("../log/lxi_gui.log")
 file_handler.setFormatter(formatter)
 
 stream_handler = logging.StreamHandler()
@@ -120,8 +121,8 @@ def ts_plot_inputs(
         "column": column,
         "columnspan": columnspan,
         "rowspan": rowspan,
-        "fig_width": screen_width / (8 * dpi),
-        "fig_height": screen_height / (12 * dpi),
+        "fig_width": screen_width / (2 * dpi),
+        "fig_height": screen_height / (3 * dpi),
     }
 
     llpr.load_ts_plots(**inputs)
@@ -267,7 +268,7 @@ def refresh_ts_plot():
 
 def load_and_copy_files():
     """
-    This function is called when the "Load Files" button is clicked. It copies the LEXI data files 
+    This function is called when the "Load Files" button is clicked. It copies the LEXI data files
     from PIT to the local computer and loads the data.
     """
     lmsc.copy_pit_files()
@@ -305,8 +306,8 @@ else:
         0.9 * root.winfo_screenheight(),
     )
 
-# screen_width = 1200
-# screen_height = 800
+screen_width = 1200
+screen_height = 800
 print(
     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
 )

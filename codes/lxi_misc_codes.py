@@ -1,14 +1,16 @@
 import importlib
 import logging
-from tabulate import tabulate
+import os
+import socket
+
 import global_variables
-import numpy as np
 import lxi_csv_to_cdf as lctc
 import lxi_csv_to_csv as lctcsv
-import lxi_gui_entry_box as lgeb
 import lxi_file_read_funcs as lxrf
+import lxi_gui_entry_box as lgeb
+import numpy as np
 import paramiko
-import os
+from tabulate import tabulate
 
 importlib.reload(lctc)
 importlib.reload(lgeb)
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
-file_handler = logging.FileHandler("lxi_misc_codes.log")
+file_handler = logging.FileHandler("../log/lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
@@ -100,9 +102,11 @@ def insert_file_name(file_load_entry=None, tk=None, file_name=None):
     -------
         None
     """
-    file_name_short = file_name.split("/")[-1]
-    file_load_entry.delete(0, tk.END)
-    file_load_entry.insert(0, file_name_short)
+    if file_name is not None:
+        file_name_short = file_name.split("/")[-1]
+        if file_load_entry is not None and tk is not None:
+            file_load_entry.delete(0, tk.END)
+            file_load_entry.insert(0, file_name_short)
 
 
 # Write a function to change the state of a button to disabled if it was enabled and vice versa
@@ -119,11 +123,12 @@ def change_state(button=None):
     -------
         None
     """
-    state = button.cget("state")
-    if state == "disabled":
-        button.config(state="normal")
-    elif state == "normal":
-        button.config(state="disabled")
+    if button is not None:
+        state = button.cget("state")
+        if state == "disabled":
+            button.config(state="normal")
+        elif state == "normal":
+            button.config(state="disabled")
 
 
 def load_folder(file_val=None, t_start=None, t_end=None, multiple_files=True):
@@ -273,6 +278,8 @@ def V_Imon_5_2_func(vpc, hk_value, lxi_unit):
         V_Imon_5_2 = (hk_value * vpc) * 1e3 / 18
     elif lxi_unit == 2:
         V_Imon_5_2 = (hk_value * vpc - 1.129) * 1e3 / 21.456
+    else:
+        V_Imon_5_2 = (hk_value * vpc) * 1e3 / 18
     return V_Imon_5_2
 
 
@@ -286,6 +293,8 @@ def V_Imon_3_3_func(vpc, hk_value, lxi_unit):
         V_Imon_3_3 = (hk_value * vpc + 0.0178) * 1e3 / 9.131
     elif lxi_unit == 2:
         V_Imon_3_3 = (hk_value * vpc - 0.029) * 1e3 / 18
+    else:
+        V_Imon_3_3 = (hk_value * vpc + 0.0178) * 1e3 / 9.131
     return V_Imon_3_3
 
 
@@ -298,6 +307,8 @@ def V_Imon_28_func(vpc, hk_value, lxi_unit):
     if lxi_unit == 1:
         V_Imon_28 = (hk_value * vpc + 0.00747) * 1e3 / 17.94
     elif lxi_unit == 2:
+        V_Imon_28 = (hk_value * vpc + 0.00747) * 1e3 / 17.94
+    else:
         V_Imon_28 = (hk_value * vpc + 0.00747) * 1e3 / 17.94
     return V_Imon_28
 
@@ -357,6 +368,8 @@ def hk_value_comp(ii=None, vpc=None, hk_value=None, hk_id=None, lxi_unit=None):
         "15": HVmcpMan_func,
     }
     chosen_func = ops.get(str(hk_id))
+    if chosen_func is None:
+        raise ValueError(f"No function found for hk_id {hk_id}")
     return chosen_func(vpc, hk_value, lxi_unit)
 
 
@@ -433,7 +446,9 @@ def save_cdf():
 
 def copy_pit_files():
     """
-    The function, upon clicking the "Load Files" or "Copy PIT Files" button, copies the LEXI data files from PIT.
+    The function, upon clicking the "Load Files" or "Copy PIT Files" button, copies the LEXI data
+    files from PIT. The code tries to copy files for 2 seconds, after which it will exit the ssh copy
+    attempt and continue with files present in the local directory.
     """
     # SSH connection settings
     host = "10.10.1.1"
@@ -450,8 +465,11 @@ def copy_pit_files():
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     try:
+        # Create an SSH client
+        ssh_client = paramiko.SSHClient()
+
         # Connect to the SSH server
-        ssh_client.connect(host, port=port, username=username, password=password)
+        ssh_client.connect(host, port=port, username=username, password=password, timeout=2)
 
         # Create SFTP client from the SSH client
         sftp_client = ssh_client.open_sftp()
@@ -462,11 +480,13 @@ def copy_pit_files():
         # Close the SFTP client
         sftp_client.close()
     except paramiko.AuthenticationException:
-        logger.error("Authentication failed, please verify your credentials: %s")
+        logger.error("Authentication failed, please verify your credentials")
     except paramiko.SSHException as e:
         logger.error("An error occurred while connecting to the server: %s", str(e))
+    except socket.timeout:
+        logger.error("Connection timed out after 2 seconds")
     except Exception as e:
-        logger.error(e)
+        logger.error(str(e))
     finally:
         # Close the SSH client
         ssh_client.close()

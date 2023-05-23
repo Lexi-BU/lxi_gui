@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
-file_handler = logging.FileHandler("lxi_file_read_funcs.log")
+file_handler = logging.FileHandler("../log/lxi_file_read_funcs.log")
 file_handler.setFormatter(formatter)
 
 # stream_handler = logging.StreamHandler()

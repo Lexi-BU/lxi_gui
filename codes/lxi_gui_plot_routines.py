@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
-file_handler = logging.FileHandler("lxi_gui.log")
+file_handler = logging.FileHandler("../log/lxi_gui_plot.log")
 file_handler.setFormatter(formatter)
 
 stream_handler = logging.StreamHandler()
