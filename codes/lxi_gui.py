@@ -271,7 +271,11 @@ def load_and_copy_files():
     This function is called when the "Load Files" button is clicked. It copies the LEXI data files
     from PIT to the local computer and loads the data.
     """
-    lmsc.copy_pit_files()
+    # try:
+    #     lmsc.copy_pit_files()
+    # except:
+    #    pass
+
     lmsc.load_folder(
         file_val=folder_path.get(),
         t_start=start_time.get(),
@@ -670,7 +674,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Set the default folder name in the text box
 # folder_path.insert(1, "For multiple files, enter the folder path here")
 folder_path.insert(
-    1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230414/not_Sent"
+    1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
 )
 folder_path.config(state="disabled")
 

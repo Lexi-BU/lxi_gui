@@ -343,10 +343,10 @@ def read_binary_data_sci(
             index += 1
 
     # Split the file name in a folder and a file name
-    output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_sci_output.csv"
-    output_folder_name = "/".join(in_file_name.split("/")[:-2]) + "/processed_data/sci"
+    output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_sci_output.csv"
+    output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\sci"
 
-    save_file_name = output_folder_name + "/" + output_file_name
+    save_file_name = output_folder_name + "\\" + output_file_name
 
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
@@ -680,11 +680,10 @@ def read_binary_data_hk(
     df["Date"] = Date_datetime
 
     # Split the file name in a folder and a file name
-    output_file_name = in_file_name.split("/")[-1].split(".")[0] + "_hk_output.csv"
-    output_folder_name = "/".join(in_file_name.split("/")[:-2]) + "/processed_data/hk"
+    output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_hk_output.csv"
+    output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\hk"
 
-    save_file_name = output_folder_name + "/" + output_file_name
-
+    save_file_name = output_folder_name + "\\" + output_file_name
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
@@ -704,8 +703,8 @@ def open_file_sci(start_time=None, end_time=None):
         filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
     )
     # Cut path to the file off
-    file_name_sci = file_val.split("/")[-1]
-    global_variables.all_file_details["file_name_sci"] = file_val
+    file_name_sci = file_val.split("\\")[-1]
+    global_variables.all_file_details['file_name_sci'] = file_val
 
     df_all_sci, df_slice_sci = read_csv_sci(
         file_val=file_val, t_start=start_time, t_end=end_time
@@ -725,8 +724,8 @@ def open_file_hk(start_time=None, end_time=None):
         filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
     )
     # Cut path to the file off
-    file_name_hk = file_val.split("/")[-1]
-    global_variables.all_file_details["file_name_hk"] = file_val
+    file_name_hk = file_val.split("\\")[-1]
+    global_variables.all_file_details['file_name_hk'] = file_val
 
     df_all_hk, df_slice_hk = read_csv_hk(
         file_val=file_val, t_start=start_time, t_end=end_time
@@ -739,12 +738,11 @@ def open_file_hk(start_time=None, end_time=None):
 
 def open_file_b(t_start=None, t_end=None):
     # define a global variable for the file name
-    file_val = filedialog.askopenfilename(
-        initialdir="/home/vetinari/Desktop/git/Lexi-Bu/"
-        + "lxi_gui/data/PIT/20230414/not_Sent/",
-        title="Select file",
-        filetypes=(("all files", "*.*"), ("text files", "*.txt")),
-    )
+    file_val = filedialog.askopenfilename(initialdir="C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\",
+                                          title="Select file",
+                                          filetypes=(("all files", "*.*"),
+                                                     ("text files", "*.txt"))
+                                          )
 
     # Check if t_start and t_end are datetime objects, if not, convert them to datetime objects and
     # set the timezone to UTC
@@ -1207,7 +1205,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             # Print in cyan color that file number is being read from the directory conatining total
             # number of files
             print(
-                f"\nReading file \x1b[1;36;255m {file_list.index(file_name) + 1} \x1b[0m of "
+                f"\n Reading file \x1b[1;36;255m {file_list.index(file_name) + 1} \x1b[0m of "
                 f"total \x1b[1;36;255m {len(file_list)} \x1b[0m files."
             )
             # Read the housekeeping data
@@ -1232,44 +1230,26 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         df_sci = pd.concat(df_sci_list)
 
         # Set file_names_hk and file_names_sci to dates of first and last files
-        save_dir = os.path.dirname(file_val) + "/"
+        save_dir = os.path.dirname(file_val) + "\\"
         # If save_dir does not exist, create it
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        file_name_hk = (
-            save_dir
-            + "processed_data/hk/"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[0]
-            + "_"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[1]
-            + "_"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[2]
-            + "_"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[3]
-            + "_"
-            + file_name_hk_list[-1].split("/")[-1].split(".")[0].split("_")[-4]
-            + "_"
-            + file_name_hk_list[-1].split("/")[-1].split(".")[0].split("_")[-3]
-            + "_hk_output.csv"
-        )
+        file_name_hk = save_dir + "processed_data\\hk\\" + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
+            file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
+            file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
 
-        file_name_sci = (
-            save_dir
-            + "processed_data/sci/"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[0]
-            + "_"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[1]
-            + "_"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[2]
-            + "_"
-            + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[3]
-            + "_"
-            + file_name_sci_list[-1].split("/")[-1].split(".")[0].split("_")[-4]
-            + "_"
-            + file_name_sci_list[-1].split("/")[-1].split(".")[0].split("_")[-3]
-            + "_sci_output.csv"
-        )
+        file_name_sci = save_dir + "processed_data\\sci\\" + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
+            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
+            file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
+            file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
 
         print(
             f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n"

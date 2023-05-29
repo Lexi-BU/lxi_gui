@@ -2,9 +2,10 @@ import importlib
 import logging
 import os
 import socket
+import subprocess
 
 import global_variables
-import lxi_csv_to_cdf as lctc
+#import lxi_csv_to_cdf as lctc
 import lxi_csv_to_csv as lctcsv
 import lxi_file_read_funcs as lxrf
 import lxi_gui_entry_box as lgeb
@@ -12,7 +13,7 @@ import numpy as np
 import paramiko
 from tabulate import tabulate
 
-importlib.reload(lctc)
+# importlib.reload(lctc)
 importlib.reload(lgeb)
 importlib.reload(lctcsv)
 importlib.reload(lxrf)
@@ -450,46 +451,59 @@ def copy_pit_files():
     files from PIT. The code tries to copy files for 2 seconds, after which it will exit the ssh copy
     attempt and continue with files present in the local directory.
     """
+    # Path to private key file on local machine
+    private_key_path = "C:\\Users\\Lexi-User/.ssh/id_rsa"
+
+    # Source and destination paths for the copy operation
+    source_path = "pi@10.10.1.1:/home/pi/MAX/Target/rec_tlm/not_sent/*"
+    dest_path ="C:\\Users/Lexi-User/Desktop/PIT_softwares/PIT_23_05_05/Target/rec_tlm/not_sent/"
+
+    # Construct the scp command
+    command = f"scp -r -i {private_key_path} {source_path} {dest_path}"
+
+    # Run the command
+    subprocess.run(command, shell=True, check=True)
+
     # SSH connection settings
-    host = "10.10.1.1"
-    port = 22
-    username = "pi"
-    password = "PITpi"
+    # host = "10.10.1.1"
+    # port = 22
+    # username = "pi"
+    # password = "PITpi"
 
-    # SSH directory and local destination
-    ssh_directory = "/home/pi/MAX/Target/rec_tlm/not_sent/"
-    local_destination = r"C:\Users\Lexi-User\Desktop\PIT_softwares\PIT_23_04_26\Target\rec_tlm\not_sent\\"
+    # # SSH directory and local destination
+    # ssh_directory = "/home/pi/MAX/Target/rec_tlm/not_sent/"
+    # local_destination = r"C:\Users\Lexi-User\Desktop\PIT_softwares\PIT_23_05_05\Target\rec_tlm\not_sent\\"
 
-    # Create SSH client
-    ssh_client = paramiko.SSHClient()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # # Create SSH client
+    # ssh_client = paramiko.SSHClient()
+    # ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    try:
-        # Create an SSH client
-        ssh_client = paramiko.SSHClient()
+    # try:
+        # # Create an SSH client
+        # ssh_client = paramiko.SSHClient()
 
-        # Connect to the SSH server
-        ssh_client.connect(host, port=port, username=username, password=password, timeout=2)
+        # # Connect to the SSH server
+        # ssh_client.connect(host, port=port, username=username, password=password, timeout=2)
 
-        # Create SFTP client from the SSH client
-        sftp_client = ssh_client.open_sftp()
+        # # Create SFTP client from the SSH client
+        # sftp_client = ssh_client.open_sftp()
 
-        # Recursively copy files and folders
-        copy_recursively(sftp_client, ssh_directory, local_destination)
+        # # Recursively copy files and folders
+        # copy_recursively(sftp_client, ssh_directory, local_destination)
 
-        # Close the SFTP client
-        sftp_client.close()
-    except paramiko.AuthenticationException:
-        logger.error("Authentication failed, please verify your credentials")
-    except paramiko.SSHException as e:
-        logger.error("An error occurred while connecting to the server: %s", str(e))
-    except socket.timeout:
-        logger.error("Connection timed out after 2 seconds")
-    except Exception as e:
-        logger.error(str(e))
-    finally:
-        # Close the SSH client
-        ssh_client.close()
+        # # Close the SFTP client
+        # sftp_client.close()
+    # except paramiko.AuthenticationException:
+        # logger.error("Authentication failed, please verify your credentials")
+    # except paramiko.SSHException as e:
+        # logger.error("An error occurred while connecting to the server: %s", str(e))
+    # except socket.timeout:
+        # logger.error("Connection timed out after 2 seconds")
+    # except Exception as e:
+        # logger.error(str(e))
+    # finally:
+        # # Close the SSH client
+        # ssh_client.close()
 
 
 def copy_recursively(sftp, remote_path, local_path):
@@ -515,7 +529,7 @@ def copy_recursively(sftp, remote_path, local_path):
                     if not os.path.exists(
                         local_file
                     ):  # Check if file already exists locally
-                        print("Copying file:", file.filename)
+                        print(f"Copying file: \x1b[1;36;255m{file.filename}\x1b[0m from \x1b[1;31;255m PIT \x1b[0m\n")
                         sftp.get(remote_file, local_file)
 
     except Exception as e:
