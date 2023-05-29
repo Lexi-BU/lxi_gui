@@ -142,7 +142,7 @@ def ts_button_val_change(default_opt_var):
         "+10V_Imon",
         "+3.3V_Imon",
         "+28V_Imon",
-        "DeltaEvntCount",
+        "AnodeVoltMon",
         "DeltaDroppedCount",
     ]
     plot_opt_entry_list = [
