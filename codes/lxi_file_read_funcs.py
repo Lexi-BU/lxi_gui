@@ -1196,8 +1196,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 <= t_end_unix
             ]
             print(
-                f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
-                f"{t_start} to {t_end}."
+               f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
+               f"\x1b[1;32;255m {t_start.strftime('%Y-%m-%d %H:%M:%S')} \x1b[0m to \x1b[1;32;255m {t_end.strftime('%Y-%m-%d %H:%M:%S')}\x1b[0m"
             )
 
         # Loop through all the files

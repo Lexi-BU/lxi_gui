@@ -201,7 +201,6 @@ def save_config(entry_list=None, entry_sec=["sci_plot_options"]):
     gui_config = ConfigParser()
     gui_config.add_section(entry_sec[0])
     gui_config.set(entry_sec[0], "x_min_entry", config_vals[0])
-    print(config_vals[0])
     gui_config.set(entry_sec[0], "x_max_entry", config_vals[1])
     gui_config.set(entry_sec[0], "y_min_entry", config_vals[2])
     gui_config.set(entry_sec[0], "y_max_entry", config_vals[3])

@@ -271,10 +271,11 @@ def load_and_copy_files():
     This function is called when the "Load Files" button is clicked. It copies the LEXI data files
     from PIT to the local computer and loads the data.
     """
-    # try:
-    #     lmsc.copy_pit_files()
-    # except:
-    #    pass
+    try:
+        lmsc.copy_pit_files()
+    except Exception as e:
+        logger.exception(f"Exception occurred while copying files from PIT: {e}")
+        pass
 
     lmsc.load_folder(
         file_val=folder_path.get(),
@@ -312,9 +313,9 @@ else:
 
 screen_width = 1200
 screen_height = 800
-print(
-    "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
-)
+# print(
+#     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
+# )
 
 # Set the title of the main window.
 root.title("LEXI GUI")
@@ -392,11 +393,13 @@ sci_file_load_entry = tk.Entry(
     borderwidth=2,
 )
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
+sci_file_load_entry.config(state="disabled")
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
 sci_file_load_button.config(
     command=lambda: sci_file_load_entry.insert(0, lxrf.open_file_sci())
 )
+sci_file_load_button.config(state="disabled")
 
 # For housekeeping file
 hk_file_load_button = tk.Button(
@@ -417,11 +420,13 @@ hk_file_load_entry = tk.Entry(
     borderwidth=2,
 )
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
+hk_file_load_entry.config(state="disabled")
 
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(
     command=lambda: hk_file_load_entry.insert(0, lxrf.open_file_hk())
 )
+hk_file_load_button.config(state="disabled")
 
 # For binary file
 b_file_load_button = tk.Button(
@@ -442,6 +447,7 @@ b_file_load_entry = tk.Entry(
     borderwidth=2,
 )
 b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
+b_file_load_entry.config(state="disabled")
 
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(
@@ -449,6 +455,7 @@ b_file_load_button.config(
         0, lxrf.open_file_b(t_start=start_time.get(), t_end=end_time.get())
     )
 )
+b_file_load_button.config(state="disabled")
 
 # If a new file is loaded, then print its name in the entry box and update the file_name variable.
 sci_file_name.trace(
@@ -625,7 +632,7 @@ csv_save_button.grid(row=18, column=12, columnspan=1, sticky="nw")
 
 # Add a checkox to enable/disable the multiple file selection option
 multi_file_status_var = tk.IntVar()
-multi_file_status_var.set(0)
+multi_file_status_var.set(1)
 multi_file_status = tk.Checkbutton(
     sci_tab,
     text="Multiple Files",
@@ -676,7 +683,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 folder_path.insert(
     1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
 )
-folder_path.config(state="disabled")
+folder_path.config(state="normal")
 
 # Add a button to load all the files in the folder_path
 folder_load_button = tk.Button(
@@ -702,7 +709,7 @@ folder_load_button = tk.Button(
     highlightcolor="green",
 )
 folder_load_button.grid(row=6, column=1, columnspan=1, sticky="nw")
-folder_load_button.config(state="disabled")
+folder_load_button.config(state="normal")
 
 # Label for plot times
 start_time_label = tk.Label(
