@@ -506,7 +506,7 @@ class plot_data_class:
             )
         ]
 
-        dark_mode = True
+        dark_mode = False
         if dark_mode:
             plt.style.use('dark_background')
         else:
@@ -622,14 +622,14 @@ class plot_data_class:
             # Draw a horizontal and vertical line at the maximum value
             axs1.axvline(
                 x=(xedges[max_index[0]] + xedges[max_index[0] + 1]) / 2,
-                color="k",
+                color="green",
                 linestyle="--",
                 linewidth=1,
                 alpha=0.5,
             )
             axs1.axhline(
                 y=(yedges[max_index[1]] + yedges[max_index[1] + 1]) / 2,
-                color="k",
+                color="red",
                 linestyle="--",
                 linewidth=1,
                 alpha=0.5,
@@ -640,7 +640,7 @@ class plot_data_class:
 
         # Set the grid on for both axes for major and minor ticks
         axs1.grid(
-            which="major", linestyle="--", linewidth="0.1", color="black", alpha=0.2
+            which="major", linestyle="--", linewidth="0.1", color="c", alpha=0.2
         )
         # axs1.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
         # Number of data points in each bin along the x- and y-axes
@@ -654,16 +654,16 @@ class plot_data_class:
             y_hist = fig.add_subplot(gs[1:-4, 0:3], sharey=axs1)
             x_hist = fig.add_subplot(gs[-3:-1, 3:], sharex=axs1)
             # Make step plot between xedges and xn
-            x_hist.step(x_step, xn, color="k", where="post")
+            x_hist.step(x_step, xn, color="g", where="post")
             x_hist.plot(
-                xedges[1:], xn, "ko", markerfacecolor="none", markeredgecolor="gray"
+                xedges[1:], xn, "o", color="c", markerfacecolor="none", markeredgecolor="gray"
             )
 
             x_hist.set_xlabel("Vertical Cut")
             # Make step plot between yedges and yn
-            y_hist.step(yn, y_step, color="k", where="post")
+            y_hist.step(yn, y_step, color="g", where="post")
             y_hist.plot(
-                yn, yedges[:-1], "ko", markerfacecolor="none", markeredgecolor="gray"
+                yn, yedges[:-1], "o", color="c", markerfacecolor="none", markeredgecolor="gray"
             )
             y_hist.invert_xaxis()
             y_hist.set_ylabel("Horizontal Cut")
@@ -691,9 +691,9 @@ class plot_data_class:
         cbar1.ax.xaxis.set_label_position("top")
 
         if density is True:
-            cbar1.set_label("Density")
+            cbar1.set_label("Density", color="red")
         else:
-            cbar1.set_label("N", labelpad=0.0, rotation=0)
+            cbar1.set_label("N", labelpad=0.0, rotation=0, color="red")
 
         # Put y-label and tickmarks on right side
         if self.cut_status_var is True:
@@ -708,11 +708,11 @@ class plot_data_class:
         elif self.unit == "mcp":
             x_label = "X (cm)"
             y_label = "Y (cm)"
-        axs1.set_xlabel(x_label)
-        axs1.set_ylabel(y_label)
+        axs1.set_xlabel(x_label, color="g")
+        axs1.set_ylabel(y_label, color="g")
         axs1.set_xlim(x_min, x_max)
         axs1.set_ylim(y_min, y_max)
-        axs1.tick_params(axis="both", which="major")
+        axs1.tick_params(axis="both", which="major", color="g")
         # Show ticks on both sides of the plot
         axs1.tick_params(
             axis="both",
@@ -722,6 +722,7 @@ class plot_data_class:
             right=True,
             top=True,
             bottom=True,
+             color="g"
         )
 
         # If curve fit option is chosen, fit a Gaussian to the data and plot it
@@ -936,6 +937,16 @@ class plot_data_class:
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)
         ]
 
+        dark_mode = False
+        if dark_mode:
+            plt.style.use('dark_background')
+        else:
+            plt.style.use('default')
+
+        # Set the fontstyle to Times New Roman
+        font = {'family': 'serif', 'weight': 'normal', 'size': 10}
+        plt.rc('font', **font)
+        plt.rc('text', usetex=False)
         fig = plt.figure(
             num=None,
             figsize=(self.volt_fig_width, self.volt_fig_height),

@@ -361,7 +361,7 @@ sci_tab.columnconfigure(9, {"minsize": 1}, weight=1)
 #     sci_tab.rowconfigure(i, {'minsize': 0}, weight=0)
 
 sci_tab.configure(
-    bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
+    bg="snow", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
 )
 hk_tab.configure(bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
 

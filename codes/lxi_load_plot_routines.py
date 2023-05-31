@@ -160,6 +160,12 @@ def load_hist_plots(
     -------
     None
     """
+
+    dark_mode = True
+    if dark_mode:
+        plt.style.use('dark_background')
+    else:
+        plt.style.use('default')
     # Set the fontstyle to Times New Roman
     font_mpl = {"family": "serif", "weight": "normal"}
     plt.rc("font", **font_mpl)
@@ -197,6 +203,7 @@ def load_hist_plots(
     )
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+    canvas.get_tk_widget().configure(bg="black")
     canvas.draw()
 
 
@@ -283,12 +290,20 @@ def load_hist_plots_volt(
         cmap=cmap,
     ).hist_plots_volt()
     fig_hist.tight_layout()
+    # frame = tk.Frame(root, bg="black")
+    # frame.grid(
+    #     row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky
+    # )
+    # canvas = FigureCanvasTkAgg(fig_hist, master=frame, bg="black")
+    # canvas.draw()
+    # canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+
     frame = tk.Frame(root)
-    frame.grid(
-        row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky
-    )
+    frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky)
+
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.draw()
+    canvas.get_tk_widget().configure(bg="black")
     canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
 
 
