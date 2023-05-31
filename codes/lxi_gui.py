@@ -361,9 +361,9 @@ sci_tab.columnconfigure(9, {"minsize": 1}, weight=1)
 #     sci_tab.rowconfigure(i, {'minsize': 0}, weight=0)
 
 sci_tab.configure(
-    bg="white", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
+    bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
 )
-hk_tab.configure(padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
+hk_tab.configure(bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
 
 # Configure the housekeeping tab rows and columns.
 for i in range(0, 10):
@@ -505,57 +505,68 @@ else:
 # Plot options for the first plot
 plot_opt_label_1 = tk.Label(hk_tab, text="Plot options:", font=font_style_box)
 plot_opt_label_1.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
+plot_opt_label_1.config(foreground="white", background="black")
+
 plot_opt_entry_1 = tk.StringVar(hk_tab)
 plot_opt_entry_1.set("Select a column")
 ts_menu_1 = tk.OptionMenu(hk_tab, plot_opt_entry_1, *ts_options)
+ts_menu_1.config(foreground="white", background="black")
 ts_menu_1.grid(row=0, column=2, columnspan=1, sticky="w")
 
 # Plot options for the second plot
 plot_opt_entry_2 = tk.StringVar(hk_tab)
 plot_opt_entry_2.set("Select a column")
 ts_menu_2 = tk.OptionMenu(hk_tab, plot_opt_entry_2, *ts_options)
+ts_menu_2.config(foreground="white", background="black")
 ts_menu_2.grid(row=0, column=5, columnspan=1, sticky="w")
 
 # Plot optiosn for third plot
 plot_opt_entry_3 = tk.StringVar(hk_tab)
 plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
+ts_menu_3.config(foreground="white", background="black")
 ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
 
 # Plot options for fourth plot (in the second row)
 plot_opt_entry_4 = tk.StringVar(hk_tab)
 plot_opt_entry_4.set("Select a column")
 ts_menu_4 = tk.OptionMenu(hk_tab, plot_opt_entry_4, *ts_options)
+ts_menu_4.config(foreground="white", background="black")
 ts_menu_4.grid(row=2, column=2, columnspan=1, sticky="w")
 
 # Plot options for fifth plot (in the second row)
 plot_opt_entry_5 = tk.StringVar(hk_tab)
 plot_opt_entry_5.set("Select a column")
 ts_menu_5 = tk.OptionMenu(hk_tab, plot_opt_entry_5, *ts_options)
+ts_menu_5.config(foreground="white", background="black")
 ts_menu_5.grid(row=2, column=5, columnspan=1, sticky="w")
 
 # Plot options for sixth plot (in the second row)
 plot_opt_entry_6 = tk.StringVar(hk_tab)
 plot_opt_entry_6.set("Select a column")
 ts_menu_6 = tk.OptionMenu(hk_tab, plot_opt_entry_6, *ts_options)
+ts_menu_6.config(foreground="white", background="black")
 ts_menu_6.grid(row=2, column=8, columnspan=1, sticky="w")
 
 # Plot options for seventh plot (in the third row)
 plot_opt_entry_7 = tk.StringVar(hk_tab)
 plot_opt_entry_7.set("Select a column")
 ts_menu_7 = tk.OptionMenu(hk_tab, plot_opt_entry_7, *ts_options)
+ts_menu_7.config(foreground="white", background="black")
 ts_menu_7.grid(row=4, column=2, columnspan=1, sticky="w")
 
 # Plot options for eighth plot (in the third row)
 plot_opt_entry_8 = tk.StringVar(hk_tab)
 plot_opt_entry_8.set("Select a column")
 ts_menu_8 = tk.OptionMenu(hk_tab, plot_opt_entry_8, *ts_options)
+ts_menu_8.config(foreground="white", background="black")
 ts_menu_8.grid(row=4, column=5, columnspan=1, sticky="w")
 
 # Plot options for ninth plot (in the third row)
 plot_opt_entry_9 = tk.StringVar(hk_tab)
 plot_opt_entry_9.set("Select a column")
 ts_menu_9 = tk.OptionMenu(hk_tab, plot_opt_entry_9, *ts_options)
+ts_menu_9.config(foreground="white", background="black")
 ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
 
 (
@@ -924,8 +935,15 @@ default_opt_checkbox = tk.Checkbutton(
     text="Default Options",
     font=font_style_box,
     variable=default_opt_var,
-    bg="white",
-    fg="black",
+    bg="black",
+    fg="white",
+    pady=5,
+    padx=5,
+    borderwidth=2,
+    relief="raised",
+    highlightthickness=2,
+    highlightbackground="green",
+    highlightcolor="green",
 )
 default_opt_checkbox.grid(row=12, column=1, columnspan=1, sticky="n")
 
@@ -963,7 +981,7 @@ refresh_ts_hk_button = tk.Button(
     command=lambda: refresh_ts_plot(),
     font=font_style_box,
     justify="center",
-    bg="snow",
+    bg="black",
     fg="green",
     pady=5,
     padx=5,
@@ -981,7 +999,7 @@ quit_button_hk = tk.Button(
     command=root.destroy,
     font=font_style_box,
     justify="center",
-    bg="snow",
+    bg="black",
     fg="red",
     pady=5,
     padx=5,

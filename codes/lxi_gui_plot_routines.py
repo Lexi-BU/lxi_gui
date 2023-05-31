@@ -284,12 +284,23 @@ class plot_data_class:
 
         alpha = 0.4
         ms = 2
+        dark_mode = True
+        if dark_mode:
+            plt.style.use('dark_background')
+        else:
+            plt.style.use('default')
+
+        # Set the fontstyle to Times New Roman
+        font = {'family': 'serif', 'weight': 'normal', 'size': 10}
+        plt.rc('font', **font)
+        plt.rc('text', usetex=True)
+        
         # Plot the data
         fig = plt.figure(
             num=None,
             figsize=(self.ts_fig_width, self.ts_fig_height),
             edgecolor="k",
-            facecolor="w",
+            facecolor="k",
         )
         fig.subplots_adjust(
             left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0
@@ -306,7 +317,7 @@ class plot_data_class:
             x_axs_val,
             self.df_slice_hk[self.plot_key],
             ".",
-            color="darkred",
+            color="green",
             alpha=alpha,
             ms=ms,
             label=self.plot_key,
@@ -314,7 +325,7 @@ class plot_data_class:
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
-        axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (M)")
+        axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")
         axs1.legend(loc="best")
