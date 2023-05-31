@@ -320,7 +320,7 @@ def ADC_Ground_func(vpc, hk_value, ADC_Ground):
 
 
 def Cmd_count_func(vpc, hk_value, lxi_unit):
-    Cmd_count = hk_value * vpc
+    Cmd_count = hk_value
     return Cmd_count
 
 

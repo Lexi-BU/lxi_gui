@@ -1,17 +1,17 @@
-import importlib
 import datetime
+import importlib
 import logging
 import os
-import pytz
 
+import global_variables
+import lxi_misc_codes as lmsc
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+import pytz
+from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-import global_variables
-import lxi_misc_codes as lmsc
 
 importlib.reload(global_variables)
 importlib.reload(lmsc)
@@ -294,7 +294,7 @@ class plot_data_class:
         font = {'family': 'serif', 'weight': 'normal', 'size': 10}
         plt.rc('font', **font)
         plt.rc('text', usetex=False)
-        
+
         # Plot the data
         fig = plt.figure(
             num=None,
@@ -328,6 +328,9 @@ class plot_data_class:
         axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")
+        if self.plot_key == "Cmd_count" or self.plot_key == "HK_id":
+            # For this case, make sure all the y-axis ticks are integers
+            axs1.yaxis.set_major_locator(MaxNLocator(integer=True))
         axs1.legend(loc="best")
         legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
         for item in legend_list.legendHandles:
@@ -367,6 +370,13 @@ class plot_data_class:
                 "Invalid end time. Setting end time to the last time in the "
                 "dataframe."
             )
+            pass
+
+        try:
+            # Set the df_slice_sci to the time range specified by the user in the GUI
+            self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
+        except Exception:
+            logger.exception("Invalid time range. Plotting the entire dataframe.")
             pass
         try:
             bins = int(self.bins)

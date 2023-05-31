@@ -286,6 +286,19 @@ def load_and_copy_files():
         multiple_files=multi_file_status_var.get(),
     )
 
+    try:
+        default_opt_var.set(True)
+        ts_button_val_change(default_opt_var)
+        refresh_ts_plot()
+    except Exception as e:
+        logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
+        pass
+
+    try:
+        hist_plot_inputs()
+    except Exception as e:
+        logger.exception(f"Exception occurred while refreshing the histogram plot: {e}")
+        pass
 
 # Create the main window.
 root = tk.Tk()
@@ -929,7 +942,7 @@ quit_button_sci.grid(row=18, column=13, columnspan=1, rowspan=1, sticky="ne")
 
 # Add a default option check box
 default_opt_var = tk.BooleanVar()
-default_opt_var.set(False)
+default_opt_var.set(True)
 default_opt_checkbox = tk.Checkbutton(
     hk_tab,
     text="Default Options",
