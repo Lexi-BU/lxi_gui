@@ -293,7 +293,7 @@ class plot_data_class:
         # Set the fontstyle to Times New Roman
         font = {'family': 'serif', 'weight': 'normal', 'size': 10}
         plt.rc('font', **font)
-        plt.rc('text', usetex=True)
+        plt.rc('text', usetex=False)
         
         # Plot the data
         fig = plt.figure(
@@ -505,6 +505,17 @@ class plot_data_class:
                 <= v_sum_max
             )
         ]
+
+        dark_mode = True
+        if dark_mode:
+            plt.style.use('dark_background')
+        else:
+            plt.style.use('default')
+
+        # Set the fontstyle to Times New Roman
+        font = {'family': 'serif', 'weight': 'normal', 'size': 10}
+        plt.rc('font', **font)
+        plt.rc('text', usetex=False)
 
         if self.use_fig_size:
             fig = plt.figure(
