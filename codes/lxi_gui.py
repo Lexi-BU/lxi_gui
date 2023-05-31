@@ -135,14 +135,16 @@ def ts_button_val_change(default_opt_var):
     """
 
     default_key_list = [
-        "PinPullerTemp",
+        # "PinPullerTemp",
         "OpticsTemp",
         "LEXIbaseTemp",
+        "+3.3V_Imon",
         "+5.2V_Imon",
         "+10V_Imon",
-        "+3.3V_Imon",
         "+28V_Imon",
         "AnodeVoltMon",
+        "DeltaEvntCount",
+        # "DeltaLostEvntCount",
         "DeltaDroppedCount",
     ]
     plot_opt_entry_list = [
