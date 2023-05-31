@@ -300,7 +300,7 @@ class plot_data_class:
 
         # Set the df_slice_hk to the time range specified by the user in the GUI and plot it
         self.df_slice_hk = self.df_slice_hk.loc[t_start:t_end]
-        x_axs_val = (self.df_slice_hk.index - t_start).total_seconds()
+        x_axs_val = (self.df_slice_hk.index - t_start).total_seconds() / 60
         axs1 = plt.subplot(gs[:])
         axs1.plot(
             x_axs_val,
@@ -314,7 +314,7 @@ class plot_data_class:
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
-        axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (s)")
+        axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (M)")
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")
         axs1.legend(loc="best")
