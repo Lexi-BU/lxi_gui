@@ -571,6 +571,7 @@ class plot_data_class:
                 y_key = "y_mcp_lin"
                 # Add a circle centered at (0,0) with radius 4.5 cm
                 circle = plt.Circle((0, 0), 4.5, color="r", fill=False, linewidth=2)
+                circle1 = plt.Circle((0, 0), 3.75, color="c", fill=False, linewidth=2.2)
                 # Make an arrow pointing to the edge of the circle from outside the circle at 45
                 # degrees from the horizontal axis and with text "4.5 cm"
                 axs1.annotate(
@@ -581,7 +582,21 @@ class plot_data_class:
                     color="r",
                     fontsize=12,
                 )
+                # Make an arrow pointing to the edge of the circle from outside the circle at 60
+                # degrees from the horizontal axis and with text "3.75 cm"
+                axs1.annotate(
+                    "Effective Area",
+                    xy=(3.75 * np.cos(np.pi / 2.5), 3.75 * np.sin(np.pi / 2.5)),
+                    xytext=(4.75 * np.cos(np.pi / 2.5), 4.75 * np.sin(np.pi / 2.5)),
+                    arrowprops=dict(arrowstyle="->", color="c", linewidth=2.2),
+                    color="c",
+                    fontsize=12,
+                )
+                # Add the circles to the plot and make sure they are in the foreground
                 axs1.add_artist(circle)
+                axs1.add_artist(circle1)
+                circle.set_zorder(10)
+                circle1.set_zorder(10)
 
         print(
             "\033[1;32m Plotting histogram with linearity correction set to "
