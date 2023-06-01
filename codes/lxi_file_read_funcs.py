@@ -343,13 +343,16 @@ def read_binary_data_sci(
             index += 1
 
     # Split the file name in a folder and a file name
-    output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_sci_output.csv"
-    output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\sci"
-
+    # output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_sci_output.csv"
+    # output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\sci"
+    output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
+    output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\sci"
     save_file_name = output_folder_name + "\\" + output_file_name
 
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
+        # print the message that the folder is created in green
+        print(f"\033[92m The folder {output_folder_name} is created. \033[0m")
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
     if "mcp" in in_file_name:
@@ -494,6 +497,8 @@ def read_binary_data_hk(
 
     input_file_name = in_file_name
 
+    # Print the input file name in green
+    # print("\033[92m" + "Input file name: " + input_file_name + "\033[0m")
     with open(input_file_name, "rb") as file:
         raw = file.read()
 
@@ -680,13 +685,25 @@ def read_binary_data_hk(
     df["Date"] = Date_datetime
 
     # Split the file name in a folder and a file name
-    output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_hk_output.csv"
-    output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\hk"
+    # output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_hk_output.csv"
+    # output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\hk"
 
+    output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+    output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
     save_file_name = output_folder_name + "\\" + output_file_name
-    print(f"Saving file to {save_file_name}")
+    # Print out the file name that is being saved in green
+    print(f"\033[92m The file {output_file_name} is being saved. \033[0m")
+
+    # Print out the folder name that is being saved in green
+    print(f"\033[92m The folder {output_folder_name} is being saved. \033[0m")
+
+    # print save_file_name in cyan
+    print(f"\033[96m {save_file_name} \033[0m")
+
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
+        # print the message that the folder is created in green
+        print(f"\033[92m The folder {output_folder_name} is created. \033[0m")
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
     # Save the dataframe to a csv file
@@ -744,7 +761,6 @@ def open_file_b(t_start=None, t_end=None):
                                           filetypes=(("all files", "*.*"),
                                                      ("text files", "*.txt"))
                                           )
-
     # Check if t_start and t_end are datetime objects, if not, convert them to datetime objects and
     # set the timezone to UTC
     if not isinstance(t_start, datetime.datetime):
@@ -764,6 +780,8 @@ def open_file_b(t_start=None, t_end=None):
 
     # Cut path to the file off
     file_name_b = file_val
+    # Print file_val in green
+    print(f"\n \x1b[1;32;255m Loaded {file_name_b} in the data base \x1b[0m")
     (
         df_slice_hk,
         file_name_hk,
