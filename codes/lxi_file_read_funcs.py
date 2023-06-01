@@ -684,6 +684,7 @@ def read_binary_data_hk(
     output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\hk"
 
     save_file_name = output_folder_name + "\\" + output_file_name
+    print(f"Saving file to {save_file_name}")
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
