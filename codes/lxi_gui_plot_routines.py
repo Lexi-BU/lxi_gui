@@ -569,6 +569,19 @@ class plot_data_class:
             elif self.unit == "mcp":
                 x_key = "x_mcp_lin"
                 y_key = "y_mcp_lin"
+                # Add a circle centered at (0,0) with radius 4.5 cm
+                circle = plt.Circle((0, 0), 4.5, color="r", fill=False, linewidth=2)
+                # Make an arrow pointing to the edge of the circle from outside the circle at 45
+                # degrees from the horizontal axis and with text "4.5 cm"
+                axs1.annotate(
+                    "Detector Size",
+                    xy=(4.5 * np.cos(np.pi / 4), 4.5 * np.sin(np.pi / 4)),
+                    xytext=(5.5 * np.cos(np.pi / 4), 5.5 * np.sin(np.pi / 4)),
+                    arrowprops=dict(arrowstyle="->", color="r", linewidth=2),
+                    color="r",
+                    fontsize=12,
+                )
+                axs1.add_artist(circle)
 
         print(
             "\033[1;32m Plotting histogram with linearity correction set to "
