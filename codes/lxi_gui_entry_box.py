@@ -265,25 +265,6 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
     )
     unit_type_combobox.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
 
-    # Key for the unit in which x and y axis are plotted
-    # unit_label = tk.Label(
-    #     root, text="Unit", font=font_style_box, bg=bg_color, fg=fg_color
-    # )
-    # unit_label.grid(row=10, column=opt_col_num2, columnspan=1, sticky="n")
-
-    # Add radio button for the Unit type (default is 'volt', other option is 'mcp')
-    # unit_type_var = tk.StringVar()
-    # unit_type_var.set(default_opt_dict["unit_type"])
-    # unit_type_1 = tk.Radiobutton(
-    #     root, text="volt", variable=unit_type_var, value="volt", bg=bg_color, fg=fg_color
-    # )
-    # unit_type_1.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
-
-    # unit_type_2 = tk.Radiobutton(
-    #     root, text="mcp", variable=unit_type_var, value="mcp", bg=bg_color, fg=fg_color
-    # )
-    # unit_type_2.grid(row=11, column=opt_col_num, columnspan=1, sticky="new")
-
     # Minimum threshold for the voltage to be considered
     v_min_thresh_entry = entry_box(
         root=root,
