@@ -282,13 +282,17 @@ class plot_data_class:
             "DeltaLostevntCount": "#",
         }
 
-        alpha = 0.4
+        alpha = 1
         ms = 2
         dark_mode = True
         if dark_mode:
-            plt.style.use('dark_background')
+            plt.style.use("dark_background")
+            edgecolor = "white"
+            facecolor = "black"
         else:
-            plt.style.use('default')
+            plt.style.use("default")
+            edgecolor = "black"
+            facecolor = "white"
 
         # Set the fontstyle to Times New Roman
         font = {'family': 'serif', 'weight': 'normal', 'size': 10}
@@ -299,8 +303,8 @@ class plot_data_class:
         fig = plt.figure(
             num=None,
             figsize=(self.ts_fig_width, self.ts_fig_height),
-            edgecolor="k",
-            facecolor="k",
+            edgecolor=edgecolor,
+            facecolor=facecolor,
         )
         fig.subplots_adjust(
             left=0.25, right=0.99, top=0.99, bottom=0.25, wspace=0, hspace=0
@@ -516,11 +520,15 @@ class plot_data_class:
             )
         ]
 
-        dark_mode = False
+        dark_mode = True
         if dark_mode:
-            plt.style.use('dark_background')
+            plt.style.use("dark_background")
+            edge_color = "white"
+            face_color = "black"
         else:
-            plt.style.use('default')
+            plt.style.use("default")
+            edge_color = "black"
+            face_color = "white"
 
         # Set the fontstyle to Times New Roman
         font = {'family': 'serif', 'weight': 'normal', 'size': 10}
@@ -531,14 +539,14 @@ class plot_data_class:
             fig = plt.figure(
                 num=None,
                 figsize=(self.hist_fig_width, self.hist_fig_height),
-                facecolor="w",
-                edgecolor="k",
+                facecolor=face_color,
+                edgecolor=edge_color,
             )
             fig.subplots_adjust(
                 left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.0, hspace=0.0
             )
         else:
-            fig = plt.figure(num=None, facecolor="k", edgecolor="k")
+            fig = plt.figure(num=None, facecolor=face_color, edgecolor=edge_color)
 
         # fig.subplots_adjust(wspace=0., hspace=0.1)
         gs = plt.GridSpec(21, 21)
@@ -575,35 +583,8 @@ class plot_data_class:
             elif self.unit == "deg":
                 x_key = "x_deg_lin"
                 y_key = "y_deg_lin"
-                # Add a circle centered at (0,0) with radius 4.5 cm
-                circle = plt.Circle((0, 0), 4.5, color="r", fill=False, linewidth=2)
-                circle1 = plt.Circle((0, 0), 3.75, color="c", fill=False, linewidth=2.2)
-                # Make an arrow pointing to the edge of the circle from outside the circle at 45
-                # degrees from the horizontal axis and with text "4.5 cm"
-                axs1.annotate(
-                    "Detector Size",
-                    xy=(4.5 * np.cos(np.pi / 4), 4.5 * np.sin(np.pi / 4)),
-                    xytext=(5.5 * np.cos(np.pi / 4), 5.5 * np.sin(np.pi / 4)),
-                    arrowprops=dict(arrowstyle="->", color="r", linewidth=2),
-                    color="r",
-                    fontsize=12,
-                )
-                # Make an arrow pointing to the edge of the circle from outside the circle at 60
-                # degrees from the horizontal axis and with text "3.75 cm"
-                axs1.annotate(
-                    "Effective Area",
-                    xy=(3.75 * np.cos(np.pi / 2.5), 3.75 * np.sin(np.pi / 2.5)),
-                    xytext=(4.75 * np.cos(np.pi / 2.5), 4.75 * np.sin(np.pi / 2.5)),
-                    arrowprops=dict(arrowstyle="->", color="c", linewidth=2.2),
-                    color="c",
-                    fontsize=12,
-                )
-                # Add the circles to the plot and make sure they are in the foreground
-                axs1.add_artist(circle)
-                axs1.add_artist(circle1)
-                circle.set_zorder(10)
-                circle1.set_zorder(10)
-
+            axs1 = lmsc.add_circle(axs=axs1, radius=4, units=self.unit, color=["r", "c"], fill=False,
+                                   linewidth=2, zorder=10, fontsize=12)
         print(
             "\033[1;32m Plotting histogram with linearity correction set to "
             f"{self.lin_corr} and axes units set to {self.unit}\033[0m"
@@ -769,7 +750,7 @@ class plot_data_class:
             right=True,
             top=True,
             bottom=True,
-             color="g"
+            color="g",
         )
 
         # If curve fit option is chosen, fit a Gaussian to the data and plot it
@@ -954,7 +935,7 @@ class plot_data_class:
         if self.cmap in mpl.pyplot.colormaps():
             self.cmap = self.cmap
         else:
-            self.cmap = "viridis"
+            self.cmap = "inferno"
 
         self.df_slice_sci = self.df_slice_sci[
             ~self.df_slice_sci.index.duplicated(keep="first")
@@ -984,9 +965,11 @@ class plot_data_class:
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)
         ]
 
-        dark_mode = False
+        dark_mode = True
         if dark_mode:
-            plt.style.use('dark_background')
+            plt.style.use("dark_background")
+            edge_color = "white"
+            face_color = "black"
         else:
             plt.style.use('default')
 
@@ -997,8 +980,8 @@ class plot_data_class:
         fig = plt.figure(
             num=None,
             figsize=(self.volt_fig_width, self.volt_fig_height),
-            facecolor="w",
-            edgecolor="k",
+            facecolor=face_color,
+            edgecolor=edge_color,
         )
 
         x_range = [0.9 * np.nanmin(v1), 1.1 * np.nanmax(v1)]

@@ -136,7 +136,8 @@ def ts_button_val_change(default_opt_var):
 
     default_key_list = [
         # "PinPullerTemp",
-        "OpticsTemp",
+        # "OpticsTemp",
+        "HVsupplyTemp",
         "LEXIbaseTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
@@ -354,8 +355,8 @@ sci_tab.pack(expand=1, fill="both")
 hk_tab = tk.Frame(tabControl)
 hk_tab.pack(expand=1, fill="both")
 
-tabControl.add(sci_tab, text="Science Stuff")
-tabControl.add(hk_tab, text="Housekeeping Stuff")
+tabControl.add(sci_tab, text="Science Tab")
+tabControl.add(hk_tab, text="Housekeeping Tab")
 
 # Configure the science tab rows and columns.
 sci_tab.columnconfigure(0, {"minsize": 1}, weight=1)
@@ -372,9 +373,16 @@ sci_tab.columnconfigure(9, {"minsize": 1}, weight=1)
 # Configure the sci_tab rows
 # for i in range(0, 20):
 #     sci_tab.rowconfigure(i, {'minsize': 0}, weight=0)
+dark_mode = True
+if dark_mode:
+    bg_color = "black"
+    fg_color = "white"
+else:
+    bg_color = "white"
+    fg_color = "black"
 
 sci_tab.configure(
-    bg="snow", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
+    bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
 )
 hk_tab.configure(bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
 
@@ -391,7 +399,8 @@ font_style_big = font.Font(family="serif", size=25)
 # Insert a file load button
 # For science file
 sci_file_load_button = tk.Button(
-    sci_tab, text="Load Science File", command=lxrf.open_file_sci, font=font_style
+    sci_tab, text="Load Science File", command=lxrf.open_file_sci, font=font_style, bg="black",
+    fg="white"
 )
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -402,13 +411,13 @@ sci_file_load_entry = tk.Entry(
     textvariable=sci_file_name,
     font=font_style,
     justify="left",
-    bg="snow",
+    bg="black",
     fg="red",
     relief="sunken",
     borderwidth=2,
 )
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
-sci_file_load_entry.config(state="disabled")
+sci_file_load_entry.config(state="disabled", disabledbackground="black", disabledforeground="gray")
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
 sci_file_load_button.config(
@@ -418,7 +427,7 @@ sci_file_load_button.config(state="disabled")
 
 # For housekeeping file
 hk_file_load_button = tk.Button(
-    sci_tab, text="Load HK File", command=lxrf.open_file_hk, font=font_style
+    sci_tab, text="Load HK File", command=lxrf.open_file_hk, font=font_style, bg="black", fg="white"
 )
 hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -429,13 +438,13 @@ hk_file_load_entry = tk.Entry(
     textvariable=hk_file_name,
     font=font_style,
     justify="left",
-    bg="snow",
+    bg="black",
     fg="red",
     relief="sunken",
     borderwidth=2,
 )
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
-hk_file_load_entry.config(state="disabled")
+hk_file_load_entry.config(state="disabled", disabledbackground="black", disabledforeground="gray")
 
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(
@@ -445,7 +454,7 @@ hk_file_load_button.config(state="disabled")
 
 # For binary file
 b_file_load_button = tk.Button(
-    sci_tab, text="Load binary File", command=lxrf.open_file_b, font=font_style
+    sci_tab, text="Load binary File", command=lxrf.open_file_b, font=font_style, bg="black", fg="white"
 )
 b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -456,13 +465,13 @@ b_file_load_entry = tk.Entry(
     textvariable=b_file_name,
     font=font_style,
     justify="left",
-    bg="snow",
+    bg="black",
     fg="red",
     relief="sunken",
     borderwidth=2,
 )
 b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
-b_file_load_entry.config(state="disabled")
+b_file_load_entry.config(state="disabled", disabledbackground="black", disabledforeground="gray")
 
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(
@@ -625,7 +634,7 @@ cdf_save_button = tk.Button(
     command=lambda: lmsc.save_cdf(),
     font=font_style_box,
     justify="center",
-    bg="snow",
+    bg="black",
     fg="green",
     pady=5,
     padx=5,
@@ -644,7 +653,7 @@ csv_save_button = tk.Button(
     command=lambda: lmsc.save_csv(root=sci_tab),
     font=font_style_box,
     justify="center",
-    bg="snow",
+    bg="black",
     fg="green",
     pady=5,
     padx=5,
@@ -665,8 +674,8 @@ multi_file_status = tk.Checkbutton(
     variable=multi_file_status_var,
     font=font_style_box,
     justify="center",
-    bg="white",
-    fg="black",
+    bg="black",
+    fg="white",
     pady=5,
     padx=5,
     borderwidth=2,
@@ -674,6 +683,7 @@ multi_file_status = tk.Checkbutton(
     highlightthickness=2,
     highlightbackground="black",
     highlightcolor="black",
+    selectcolor="green",
 )
 multi_file_status.grid(row=6, column=0, columnspan=1, sticky="nw")
 
@@ -701,7 +711,7 @@ multi_file_status_var.trace(
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_path))
 
 # Add a text box to enter the folder path
-folder_path = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
+folder_path = tk.Entry(sci_tab, justify="center", bg="black", fg="green", borderwidth=2)
 folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 
 # Set the default folder name in the text box
@@ -709,7 +719,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 folder_path.insert(
     1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
 )
-folder_path.config(state="normal")
+folder_path.config(state="normal", disabledbackground="black", disabledforeground="gray")
 
 # Add a button to load all the files in the folder_path
 folder_load_button = tk.Button(
@@ -724,7 +734,7 @@ folder_load_button = tk.Button(
     # ),
     font=font_style_box,
     justify="center",
-    bg="snow",
+    bg="black",
     fg="green",
     pady=5,
     padx=5,
@@ -739,25 +749,25 @@ folder_load_button.config(state="normal")
 
 # Label for plot times
 start_time_label = tk.Label(
-    sci_tab, text="Plot Times", font=font_style, bg="white", fg="black"
+    sci_tab, text="Plot Times", font=font_style, bg="black", fg="white"
 )
 start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for start time
 default_time_dict = lgcf.get_config_time()
-start_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
+start_time = tk.Entry(sci_tab, justify="center", bg="black", fg="green", borderwidth=2)
 start_time.insert(0, default_time_dict["start_time"])
 start_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(
-    sci_tab, text="Start Time", font=font_style, bg="white", fg="black"
+    sci_tab, text="Start Time", font=font_style, bg="black", fg="white"
 )
 start_time_label.grid(row=10, column=0, columnspan=2, sticky="nsew")
 
-end_time = tk.Entry(sci_tab, justify="center", bg="snow", fg="green", borderwidth=2)
+end_time = tk.Entry(sci_tab, justify="center", bg="black", fg="green", borderwidth=2)
 end_time.insert(0, default_time_dict["end_time"])
 end_time.grid(row=11, column=0, columnspan=2, sticky="nsew")
 end_time_label = tk.Label(
-    sci_tab, text="End Time", font=font_style, bg="white", fg="black"
+    sci_tab, text="End Time", font=font_style, bg="black", fg="white"
 )
 end_time_label.grid(row=12, column=0, columnspan=2)
 
@@ -828,6 +838,8 @@ plot_opt_entry_9.trace(
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(
     sci_tab,
+    bg="black",
+    fg="white",
     text="Plot Histogram",
     font=font_style_box,
     justify="center",
@@ -849,6 +861,8 @@ plot_button.bind(
 # If the plot button is pressed then all the histogram plots are redrawn
 refresh_button = tk.Button(
     sci_tab,
+    bg="black",
+    fg="white",
     text="Refresh Histogram",
     font=font_style_box,
     justify="center",
@@ -893,6 +907,8 @@ entry_list = [
 
 save_config_button = tk.Button(
     sci_tab,
+    bg="black",
+    fg="white",
     text="Save Config",
     font=font_style_box,
     justify="center",
@@ -908,6 +924,8 @@ save_config_button.grid(
 # Add a default button to reset the configuration file
 default_config_button = tk.Button(
     sci_tab,
+    bg="black",
+    fg="white",
     text="Default Config",
     font=font_style_box,
     justify="center",
@@ -919,7 +937,7 @@ default_config_button.grid(
 
 
 # Dsiable the default config button
-default_config_button.config(state="disabled")
+default_config_button.config(state="disabled", disabledforeground="grey", relief="sunken")
 
 # Add a quit button
 quit_button_sci = tk.Button(
@@ -928,7 +946,7 @@ quit_button_sci = tk.Button(
     command=root.destroy,
     font=font_style_box,
     justify="center",
-    bg="snow",
+    bg="black",
     fg="red",
     pady=5,
     padx=5,
@@ -957,6 +975,7 @@ default_opt_checkbox = tk.Checkbutton(
     highlightthickness=2,
     highlightbackground="green",
     highlightcolor="green",
+    selectcolor="green",
 )
 default_opt_checkbox.grid(row=12, column=1, columnspan=1, sticky="n")
 
@@ -965,6 +984,8 @@ default_opt_var.trace("w", lambda *_: ts_button_val_change(default_opt_var))
 # Add a clickable button to display the time values in the terminal
 time_button = tk.Button(
     sci_tab,
+    bg="black",
+    fg="white",
     text="Print Time",
     font=font_style_box,
     justify="center",
@@ -978,6 +999,8 @@ time_button.grid(
 
 copy_button = tk.Button(
     sci_tab,
+    bg="black",
+    fg="white",
     text="Copy PIT Files",
     font=font_style_box,
     justify="center",

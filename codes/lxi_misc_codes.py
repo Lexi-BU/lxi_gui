@@ -3,6 +3,7 @@ import logging
 import os
 import socket
 import subprocess
+import matplotlib.pyplot as plt
 
 import global_variables
 #import lxi_csv_to_cdf as lctc
@@ -527,3 +528,79 @@ def copy_recursively(sftp, remote_path, local_path):
             print(f"A total of \x1b[1;31;255m {file_num} \x1b[0m files copied from \x1b[1;31;255m PIT \x1b[0m\n")
     except Exception as e:
         print("An error occurred during file transfer:", str(e))
+
+
+def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, linewidth=2, zorder=10,
+               fontsize=12):
+    """
+    The function adds a circle to the histogram plot.
+
+    Parameters
+    ----------
+    axs : matplotlib.axes._subplots.AxesSubplot
+        The axes object to which the circle is to be added.
+    radius : float
+        The radius of the circle in appropriate units.
+    units : str
+        The units of the radius. Default is "mcp".
+    color : list
+        The color of the circle boundary and the text. Default is ["r", "c"].
+    fill : bool
+        If True, the circle is filled with the color. Default is False.
+    linewidth : float
+        The width of the circle boundary. Default is 2.
+    zorder : int
+        The zorder of the circle. Default is 1.
+    fontsize : int
+        The fontsize of the text. Default is 12.
+
+    Returns
+    -------
+    axs : matplotlib.axes._subplots.AxesSubplot
+        The axes object to which the circle is added.
+    """
+    if axs is None:
+        raise ValueError("The axes object is not defined.")
+    else:
+        if units == "mcp":
+            radius1 = radius
+            radius2 = 0.9375 * radius
+        elif units == "deg":
+            radius1 = radius * 9.1 / 8
+            radius2 = radius * 0.9375 * 9.1 / 8
+        elif units == "volt":
+            # Exit the function without adding the circle
+            return axs
+
+        # Add a circle centered at (0,0) with radius 4 cm
+        circle1 = plt.Circle((0, 0), radius1, color=color[0], fill=False, linewidth=linewidth, zorder=zorder)
+        circle2 = plt.Circle((0, 0), radius2, color=color[1], fill=False, linewidth=linewidth, zorder=zorder)
+        # Make an arrow pointing to the edge of the circle from outside the circle at 45
+        # degrees from the horizontal axis and with text "4.5 cm"
+        angle_1 = np.pi / 2.7
+        angle_2 = np.pi / 1.5
+        axs.annotate(
+            "Detector Size",
+            xy=(radius1 * np.cos(angle_1), radius1 * np.sin(angle_1)),
+            xytext=((radius1 + 1) * np.cos(angle_1), (radius1 + 1) * np.sin(angle_1)),
+            arrowprops=dict(arrowstyle="->", color=color[0], linewidth=linewidth),
+            color=color[0],
+            fontsize=fontsize,
+        )
+        # Make an arrow pointing to the edge of the circle from outside the circle at -45
+        # degrees from the horizontal axis and with text "3.75 cm"
+        axs.annotate(
+            "Effective Area",
+            xy=(radius2 * np.cos(angle_2), radius2 * np.sin(angle_2)),
+            xytext=((radius2 + 4) * np.cos(angle_2), (radius2 + 1) * np.sin(angle_2)),
+            arrowprops=dict(arrowstyle="->", color=color[1], linewidth=linewidth),
+            color=color[1],
+            fontsize=fontsize,
+        )
+        # Add the circles to the plot and make sure they are in the foreground
+        axs.add_artist(circle1)
+        axs.add_artist(circle2)
+        circle1.set_zorder(zorder)
+        circle2.set_zorder(zorder)
+
+    return axs

@@ -1,6 +1,6 @@
 import importlib
 import tkinter as tk
-from tkinter import font
+from tkinter import font, ttk
 import lxi_gui_config as lgcf
 
 importlib.reload(lgcf)
@@ -10,8 +10,8 @@ def entry_box(
     root=None,
     width=10,
     justify="center",
-    bg="white",
-    fg="black",
+    bg="black",
+    fg="white",
     borderwidth=2,
     entry_val="",
     entry_label="",
@@ -196,7 +196,7 @@ def populate_entries(root=None, default_vals=False):
     )
 
     # Choose whether to plot probability density or the number of data points in each bin (is Bool)
-    density_label = tk.Label(root, text="Density", font=font_style_box, bg="white")
+    density_label = tk.Label(root, text="Density", font=font_style_box, bg="black", fg="white")
     density_label.grid(row=7, column=opt_col_num2, columnspan=1, sticky="n")
 
     # Add a checkbox to choose whether to plot probability density or the number of data points in
@@ -205,39 +205,35 @@ def populate_entries(root=None, default_vals=False):
     density_status_var.set(default_opt_dict["density_status"])  # type: ignore
     density_checkbox = tk.Checkbutton(
         root,
+        bg="black",
+        fg="white",
         text="",
         font=font_style_box,
         variable=density_status_var,
-        bg="white",
-        fg="black",
     )
     density_checkbox.grid(row=7, column=opt_col_num, columnspan=1, sticky="n")
 
     # Key for the norm of the colorbar
     norm_label = tk.Label(
-        root, text="Norm", font=font_style_box, bg="white", fg="black"
+        root, text="Norm", font=font_style_box, bg="black", fg="white"
     )
     norm_label.grid(row=8, column=opt_col_num2, columnspan=1, sticky="n")
 
-    # Add radio button for the norm type (default is 'log', other option is 'linear')
+    # Add dropdown menu for the norm type (options are log or linear)
     norm_type_var = tk.StringVar()
     norm_type_var.set(default_opt_dict["norm_type"])
-    norm_type_1 = tk.Radiobutton(
-        root, text="Log", variable=norm_type_var, value="log", bg="white", fg="black"
+    norm_type_combobox = ttk.Combobox(
+        root, textvariable=norm_type_var, values=["log", "linear"], state="readonly"
     )
-    norm_type_1.grid(row=8, column=opt_col_num, columnspan=1, sticky="new")
 
-    norm_type_2 = tk.Radiobutton(
-        root, text="Lin", variable=norm_type_var, value="linear", bg="white", fg="black"
-    )
-    norm_type_2.grid(row=9, column=opt_col_num, columnspan=1, sticky="new")
-
-    unit_label = tk.Label(root, text="Unit", font=font_style_box, bg="white", fg="black")
+    norm_type_combobox.grid(row=8, column=opt_col_num, columnspan=1, sticky="new")
+    # Add a dropdown menu for the unit type (options are volt, mcp, deg)
+    unit_label = tk.Label(root, text="Unit", font=font_style_box, bg="black", fg="white")
     unit_label.grid(row=10, column=opt_col_num2, columnspan=1, sticky="n")
 
     unit_type_var = tk.StringVar()
     unit_type_var.set(default_opt_dict["unit_type"])
-    from tkinter import ttk
+
     unit_type_combobox = ttk.Combobox(
         root, textvariable=unit_type_var, values=["volt", "mcp", "deg"], state="readonly"
     )
@@ -245,7 +241,7 @@ def populate_entries(root=None, default_vals=False):
 
     # Key for the unit in which x and y axis are plotted
     # unit_label = tk.Label(
-    #     root, text="Unit", font=font_style_box, bg="white", fg="black"
+    #     root, text="Unit", font=font_style_box, bg="black", fg="white"
     # )
     # unit_label.grid(row=10, column=opt_col_num2, columnspan=1, sticky="n")
 
@@ -253,18 +249,20 @@ def populate_entries(root=None, default_vals=False):
     # unit_type_var = tk.StringVar()
     # unit_type_var.set(default_opt_dict["unit_type"])
     # unit_type_1 = tk.Radiobutton(
-    #     root, text="volt", variable=unit_type_var, value="volt", bg="white", fg="black"
+    #     root, text="volt", variable=unit_type_var, value="volt", bg="black", fg="white"
     # )
     # unit_type_1.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
 
     # unit_type_2 = tk.Radiobutton(
-    #     root, text="mcp", variable=unit_type_var, value="mcp", bg="white", fg="black"
+    #     root, text="mcp", variable=unit_type_var, value="mcp", bg="black", fg="white"
     # )
     # unit_type_2.grid(row=11, column=opt_col_num, columnspan=1, sticky="new")
 
     # Minimum threshold for the voltage to be considered
     v_min_thresh_entry = entry_box(
         root=root,
+        bg="black",
+        fg="white",
         row=12,
         column=opt_col_num,
         entry_label="V Min",
@@ -275,6 +273,8 @@ def populate_entries(root=None, default_vals=False):
     # Maximum threshold for the voltage to be considered
     v_max_thresh_entry = entry_box(
         root=root,
+        bg="black",
+        fg="white",
         row=13,
         column=opt_col_num,
         entry_label="V Max",
@@ -285,6 +285,8 @@ def populate_entries(root=None, default_vals=False):
     # Sum of minimum and maximum threshold for the voltage to be considered
     v_sum_min_thresh_entry = entry_box(
         root=root,
+        bg="black",
+        fg="white",
         row=14,
         column=opt_col_num,
         entry_label="V sum Min",
@@ -294,6 +296,8 @@ def populate_entries(root=None, default_vals=False):
 
     v_sum_max_thresh_entry = entry_box(
         root=root,
+        bg="black",
+        fg="white",
         row=15,
         column=opt_col_num,
         entry_label="V sum Max",
@@ -303,7 +307,7 @@ def populate_entries(root=None, default_vals=False):
 
     # Choose whether to plot the horizontal and vertical lines on the hist plot
     cut_v_labels = tk.Label(
-        root, text="crosswire", font=font_style_box, bg="white", fg="black"
+        root, text="crosswire", font=font_style_box, bg="black", fg="white"
     )
     cut_v_labels.grid(row=16, column=opt_col_num2, columnspan=1, sticky="n")
 
@@ -312,17 +316,17 @@ def populate_entries(root=None, default_vals=False):
     cut_status_var.set(default_opt_dict["cut_status"])  # type: ignore
     cut_checkbox = tk.Checkbutton(
         root,
+        bg="black",
+        fg="white",
         text="",
         font=font_style_box,
         variable=cut_status_var,
-        bg="white",
-        fg="black",
     )
     cut_checkbox.grid(row=16, column=opt_col_num, columnspan=1, sticky="n")
 
     # Choose whether to plot curve fit or not (is Bool)
     curve_fit_label = tk.Label(
-        root, text="Curve Fit", font=font_style_box, bg="white", fg="black"
+        root, text="Curve Fit", font=font_style_box, bg="black", fg="white"
     )
     curve_fit_label.grid(row=17, column=opt_col_num2, columnspan=1, sticky="n")
 
@@ -331,17 +335,17 @@ def populate_entries(root=None, default_vals=False):
     curve_fit_status_var.set(default_opt_dict["curve_fit_status"])  # type: ignore
     curve_fit_checkbox = tk.Checkbutton(
         root,
+        bg="black",
+        fg="white",
         text="",
         font=font_style_box,
         variable=curve_fit_status_var,
-        bg="white",
-        fg="black",
     )
     curve_fit_checkbox.grid(row=17, column=opt_col_num, columnspan=1, sticky="n")
 
     # Choose whether to implement linear correction or not (is Bool)
     lin_corr_label = tk.Label(
-        root, text="Correction", font=font_style_box, bg="white", fg="black"
+        root, text="Correction", font=font_style_box, bg="black", fg="white"
     )
     lin_corr_label.grid(row=18, column=opt_col_num2, columnspan=1, sticky="n")
 
@@ -350,17 +354,19 @@ def populate_entries(root=None, default_vals=False):
     lin_corr_status_var.set(default_opt_dict["lin_corr_status"])  # type: ignore
     lin_corr_checkbox = tk.Checkbutton(
         root,
+        bg="black",
+        fg="white",
         text="",
         font=font_style_box,
         variable=lin_corr_status_var,
-        bg="white",
-        fg="black",
     )
     lin_corr_checkbox.grid(row=18, column=opt_col_num, columnspan=1, sticky="n")
 
     # Choose the colorbar
     cmap_option = entry_box(
         root=root,
+        bg="black",
+        fg="white",
         row=19,
         column=opt_col_num,
         entry_label="Cmap",

@@ -348,17 +348,14 @@ def read_binary_data_sci(
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
         save_file_name = output_folder_name + "/" + output_file_name
-        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
     elif os.name == "nt":
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\sci"
         save_file_name = output_folder_name + "\\" + output_file_name
-        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
     elif os.name == "darwin":
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
         save_file_name = output_folder_name + "/" + output_file_name
-        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
     else:
         raise OSError("The operating system is not supported.")
 
@@ -701,17 +698,14 @@ def read_binary_data_hk(
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
         save_file_name = output_folder_name + "/" + output_file_name
-        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
     elif os.name == "nt":
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
         save_file_name = output_folder_name + "\\" + output_file_name
-        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
     elif os.name == "darwin":
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
         save_file_name = output_folder_name + "/" + output_file_name
-        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
     else:
         raise OSError("Operating system not supported.")
 
@@ -733,8 +727,16 @@ def open_file_sci(start_time=None, end_time=None):
         title="Select file",
         filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
     )
-    # Cut path to the file off
-    file_name_sci = file_val.split("\\")[-1]
+
+    # Get the file name from the file path for different operating systems
+    if os.name == "posix":
+        file_name_sci = file_val.split("/")[-1]
+    elif os.name == "nt":
+        file_name_sci = file_val.split("\\")[-1]
+    elif os.name == "darwin":
+        file_name_sci = file_val.split("/")[-1]
+    else:
+        raise OSError("Operating system not supported.")
     global_variables.all_file_details['file_name_sci'] = file_val
 
     df_all_sci, df_slice_sci = read_csv_sci(
@@ -754,8 +756,16 @@ def open_file_hk(start_time=None, end_time=None):
         title="Select file",
         filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
     )
-    # Cut path to the file off
-    file_name_hk = file_val.split("\\")[-1]
+    
+    # Get the file name from the file path for different operating systems
+    if os.name == "posix":
+        file_name_hk = file_val.split("/")[-1]
+    elif os.name == "nt":
+        file_name_hk = file_val.split("\\")[-1]
+    elif os.name == "darwin":
+        file_name_hk = file_val.split("/")[-1]
+    else:
+        raise OSError("Operating system not supported.")
     global_variables.all_file_details['file_name_hk'] = file_val
 
     df_all_hk, df_slice_hk = read_csv_hk(
