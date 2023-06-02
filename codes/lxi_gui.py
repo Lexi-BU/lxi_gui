@@ -45,57 +45,61 @@ def hist_plot_inputs(dpi=100):
     and plots all the histograms.
     """
 
-    inputs = {
-        "root": [sci_tab, sci_tab],
-        "df_slice_sci": global_variables.all_file_details["df_slice_sci"],
-        "start_time": start_time.get(),
-        "end_time": end_time.get(),
-        "bins": hist_bins_entry.get(),
-        "cmin": c_min_entry.get(),
-        "cmax": c_max_entry.get(),
-        "x_min": x_min_entry.get(),
-        "x_max": x_max_entry.get(),
-        "y_min": y_min_entry.get(),
-        "y_max": y_max_entry.get(),
-        "density": density_status_var.get(),
-        "norm": norm_type_var.get(),
-        "unit": unit_type_var.get(),
-        "row_hist": 0,
-        "col_hist": 2,
-        "channel1": "Channel1",
-        "channel2": "Channel2",
-        "row_channel13": 0,
-        "column_channel13": 11,
-        "sticky_channel13": "nesw",
-        "row_span_channel13": 6,
-        "column_span_channel13": 3,
-        "channel3": "Channel3",
-        "channel4": "Channel4",
-        "row_channel24": 8,
-        "column_channel24": 11,
-        "sticky_channel24": "nesw",
-        "row_span_channel24": 6,
-        "column_span_channel24": 3,
-        "hist_fig_height": screen_height / (2.2 * dpi),
-        "hist_fig_width": screen_width / (2.2 * dpi),
-        "hist_colspan": 7,
-        "hist_rowspan": 20,
-        "channel13_fig_height": screen_height / (3 * dpi),
-        "channel13_fig_width": screen_width / (3 * dpi),
-        "channel24_fig_height": screen_height / (3 * dpi),
-        "channel24_fig_width": screen_width / (3 * dpi),
-        "v_min": v_min_thresh_entry.get(),
-        "v_max": v_max_thresh_entry.get(),
-        "v_sum_min": v_sum_min_thresh_entry.get(),
-        "v_sum_max": v_sum_max_thresh_entry.get(),
-        "cut_status_var": cut_status_var.get(),
-        "crv_fit": curve_fit_status_var.get(),
-        "lin_corr": lin_corr_status_var.get(),
-        "cmap": cmap_option.get(),
-        "use_fig_size": True,
-    }
+    if global_variables.all_file_details:
+        inputs = {
+            "root": [sci_tab, sci_tab],
+            "df_slice_sci": global_variables.all_file_details["df_slice_sci"],
+            "start_time": start_time.get(),
+            "end_time": end_time.get(),
+            "bins": hist_bins_entry.get(),
+            "cmin": c_min_entry.get(),
+            "cmax": c_max_entry.get(),
+            "x_min": x_min_entry.get(),
+            "x_max": x_max_entry.get(),
+            "y_min": y_min_entry.get(),
+            "y_max": y_max_entry.get(),
+            "density": density_status_var.get(),
+            "norm": norm_type_var.get(),
+            "unit": unit_type_var.get(),
+            "row_hist": 0,
+            "col_hist": 2,
+            "channel1": "Channel1",
+            "channel2": "Channel2",
+            "row_channel13": 0,
+            "column_channel13": 11,
+            "sticky_channel13": "nesw",
+            "row_span_channel13": 6,
+            "column_span_channel13": 3,
+            "channel3": "Channel3",
+            "channel4": "Channel4",
+            "row_channel24": 8,
+            "column_channel24": 11,
+            "sticky_channel24": "nesw",
+            "row_span_channel24": 6,
+            "column_span_channel24": 3,
+            "hist_fig_height": screen_height / (2.2 * dpi),
+            "hist_fig_width": screen_width / (2.2 * dpi),
+            "hist_colspan": 7,
+            "hist_rowspan": 20,
+            "channel13_fig_height": screen_height / (3 * dpi),
+            "channel13_fig_width": screen_width / (3 * dpi),
+            "channel24_fig_height": screen_height / (3 * dpi),
+            "channel24_fig_width": screen_width / (3 * dpi),
+            "v_min": v_min_thresh_entry.get(),
+            "v_max": v_max_thresh_entry.get(),
+            "v_sum_min": v_sum_min_thresh_entry.get(),
+            "v_sum_max": v_sum_max_thresh_entry.get(),
+            "cut_status_var": cut_status_var.get(),
+            "crv_fit": curve_fit_status_var.get(),
+            "lin_corr": lin_corr_status_var.get(),
+            "cmap": cmap_option.get(),
+            "use_fig_size": True,
+            "dark_mode": dark_mode_var.get(),
+        }
 
-    llpr.load_all_hist_plots(**inputs)
+        llpr.load_all_hist_plots(**inputs)
+    else:
+        logger.info("No data to plot")
 
 
 def ts_plot_inputs(
@@ -123,6 +127,7 @@ def ts_plot_inputs(
         "rowspan": rowspan,
         "fig_width": screen_width / (2 * dpi),
         "fig_height": screen_height / (3 * dpi),
+        "dark_mode": dark_mode_var.get(),
     }
 
     llpr.load_ts_plots(**inputs)
@@ -160,113 +165,121 @@ def ts_button_val_change(default_opt_var):
         plot_opt_entry_9,
     ]
 
-    if default_opt_var.get() is True:
-        for i in range(len(default_key_list)):
-            plot_opt_entry_list[i].set(default_key_list[i])
+    # Check if global_variables.all_file_details["df_slice_hk"] is empty, if it is then return from
+    # the function without doing anything else refresh the time series plot
+    if global_variables.all_file_details:
+        if default_opt_var.get() is True:
+            for i in range(len(default_key_list)):
+                plot_opt_entry_list[i].set(default_key_list[i])
+    else:
+        logger.info("No time series data to plot")
 
 
 def refresh_ts_plot():
     """
     Refresh the time series plot
     """
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_1, row=1, column=0, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_1.get()}"
-        )
-        pass
+    if global_variables.all_file_details:
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_1, row=1, column=0, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_1.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_2.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_2.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_3.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_3.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_4.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_4.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_5.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_5.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_6.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_6.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_7.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_7.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_8.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_8.get()}"
+            )
+            pass
 
-    try:
-        ts_plot_inputs(
-            plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3
-        )
-    except Exception:
-        logger.exception(
-            "Exception occurred while refreshing the time series plot for"
-            f"{plot_opt_entry_9.get()}"
-        )
-        pass
+        try:
+            ts_plot_inputs(
+                plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3
+            )
+        except Exception:
+            logger.exception(
+                "Exception occurred while refreshing the time series plot for"
+                f"{plot_opt_entry_9.get()}"
+            )
+            pass
+    else:
+        logger.info("No time series data to plot")
 
 
 def load_and_copy_files():
@@ -300,6 +313,100 @@ def load_and_copy_files():
     except Exception as e:
         logger.exception(f"Exception occurred while refreshing the histogram plot: {e}")
         pass
+
+
+def update_time_entry(time_entry, time_entry_other):
+    """
+    This function will take one time entry and update the other
+    """
+    time_entry_other.delete(0, tk.END)
+    time_entry_other.insert(0, time_entry.get())
+
+
+def dark_mode_change():
+    """
+    This function is called when the "Dark Mode" checkbox is clicked. It changes the background and
+    foreground colors of the GUI.
+    """
+    global dark_mode
+    dark_mode = dark_mode_var.get()
+    if dark_mode:
+        bg_color = "black"
+        fg_color = "white"
+        insertbackground_color = "cyan"
+    else:
+        bg_color = "white"
+        fg_color = "black"
+        insertbackground_color = "black"
+
+    root_list = [root, sci_tab, hk_tab]
+    sci_tab.configure(bg=bg_color)
+    hk_tab.configure(bg=bg_color)
+    root.configure(bg=bg_color)
+
+    for root_item in root_list:
+        # try to change the background and foreground colors of the root item
+        try:
+            root_item.configure(bg=bg_color)
+        except Exception:
+            pass
+        try:
+            root_item.configure(fg=fg_color)
+        except Exception:
+            pass
+
+        # try to chhange the color of the buttons
+        for button in root_item.winfo_children():
+            try:
+                button.configure(bg=bg_color, fg=fg_color)
+            except Exception:
+                pass
+
+        # try to change the color of the text boxes
+        for textbox in root_item.winfo_children():
+            try:
+                textbox.configure(bg=bg_color, fg=fg_color, insertbackground=insertbackground_color)
+            except Exception:
+                pass
+
+        # Change the color of the labels
+        for label in root_item.winfo_children():
+            try:
+                label.configure(bg=bg_color, fg=fg_color)
+            except Exception:
+                pass
+        # Select the dropdown boxes and change the color
+        for dropdown in root_item.winfo_children():
+            try:
+                dropdown.configure(bg=bg_color, fg=fg_color)
+            except Exception:
+                pass
+        # Skip the Quit button
+        for button in root_item.winfo_children():
+            try:
+                if button["text"] == "Quit":
+                    button.configure(fg="red")
+            except Exception:
+                pass
+        for button in root_item.winfo_children():
+            try:
+                if button["text"] in ["Dark Mode", "Default Options", "Load Files", "Refresh",
+                                      "Save CDF", "Save CSV"]:
+                    button.configure(fg="green")
+            except Exception:
+                pass
+
+    # Check if global_variables.all_file_details is empty. If not, then refresh the plots
+    if global_variables.all_file_details:
+        try:
+            refresh_ts_plot()
+        except Exception:
+            pass
+
+        try:
+            hist_plot_inputs()
+        except Exception:
+            pass
 
 # Create the main window.
 root = tk.Tk()
@@ -373,34 +480,72 @@ sci_tab.columnconfigure(9, {"minsize": 1}, weight=1)
 # Configure the sci_tab rows
 # for i in range(0, 20):
 #     sci_tab.rowconfigure(i, {'minsize': 0}, weight=0)
-dark_mode = True
+# Choose a font style for GUI
+font_style = font.Font(family="serif", size=12)
+font_style_box = font.Font(family="serif", size=12, weight="bold")
+font_style_big = font.Font(family="serif", size=25)
+
+dark_mode = False
 if dark_mode:
     bg_color = "black"
     fg_color = "white"
+    insertbackground_color = "cyan"
 else:
     bg_color = "white"
     fg_color = "black"
+    insertbackground_color = "black"
+
+# Add a checkbutton to enable/disable dark mode
+dark_mode_var = tk.BooleanVar()
+dark_mode_var.set(dark_mode)
+dark_mode_button = tk.Checkbutton(
+    sci_tab,
+    text="Dark Mode",
+    variable=dark_mode_var,
+    command=dark_mode_change,
+    bg=bg_color,
+    fg=fg_color,
+    font=font_style,
+    relief="raised",
+    highlightthickness=5,
+    highlightcolor=bg_color,
+    selectcolor="#808080",
+    cursor="hand2",
+)
+dark_mode_button.grid(row=19, column=0, sticky="nsew", padx=5, pady=5)
+# add this button on the housekeeping tab as well
+dark_mode_button = tk.Checkbutton(
+    hk_tab,
+    text="Dark Mode",
+    variable=dark_mode_var,
+    command=dark_mode_change,
+    bg=bg_color,
+    fg=fg_color,
+    font=font_style,
+    relief="raised",
+    highlightthickness=5,
+    highlightcolor=bg_color,
+    selectcolor="#808080",
+    cursor="hand2",
+)
+dark_mode_button.grid(row=12, column=6, columnspan=1, sticky="nsew", padx=5, pady=5)
+
 
 sci_tab.configure(
-    bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
+    bg=bg_color, padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
 )
-hk_tab.configure(bg="black", padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
+hk_tab.configure(bg=bg_color, padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
 
 # Configure the housekeeping tab rows and columns.
 for i in range(0, 10):
     hk_tab.rowconfigure(i, {"minsize": 1}, weight=1)
     hk_tab.columnconfigure(i, {"minsize": 1}, weight=1)
 
-# Choose a font style for GUI
-font_style = font.Font(family="serif", size=12)
-font_style_box = font.Font(family="serif", size=12, weight="bold")
-font_style_big = font.Font(family="serif", size=25)
-
 # Insert a file load button
 # For science file
 sci_file_load_button = tk.Button(
-    sci_tab, text="Load Science File", command=lxrf.open_file_sci, font=font_style, bg="black",
-    fg="white"
+    sci_tab, text="Load Science File", command=lxrf.open_file_sci, font=font_style, bg=bg_color,
+    fg=fg_color
 )
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -411,7 +556,7 @@ sci_file_load_entry = tk.Entry(
     textvariable=sci_file_name,
     font=font_style,
     justify="left",
-    bg="black",
+    bg=bg_color,
     fg="red",
     relief="sunken",
     borderwidth=2,
@@ -427,7 +572,7 @@ sci_file_load_button.config(state="disabled")
 
 # For housekeeping file
 hk_file_load_button = tk.Button(
-    sci_tab, text="Load HK File", command=lxrf.open_file_hk, font=font_style, bg="black", fg="white"
+    sci_tab, text="Load HK File", command=lxrf.open_file_hk, font=font_style, bg=bg_color, fg=fg_color
 )
 hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -438,7 +583,7 @@ hk_file_load_entry = tk.Entry(
     textvariable=hk_file_name,
     font=font_style,
     justify="left",
-    bg="black",
+    bg=bg_color,
     fg="red",
     relief="sunken",
     borderwidth=2,
@@ -454,7 +599,7 @@ hk_file_load_button.config(state="disabled")
 
 # For binary file
 b_file_load_button = tk.Button(
-    sci_tab, text="Load binary File", command=lxrf.open_file_b, font=font_style, bg="black", fg="white"
+    sci_tab, text="Load binary File", command=lxrf.open_file_b, font=font_style, bg=bg_color, fg=fg_color
 )
 b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -465,7 +610,7 @@ b_file_load_entry = tk.Entry(
     textvariable=b_file_name,
     font=font_style,
     justify="left",
-    bg="black",
+    bg=bg_color,
     fg="red",
     relief="sunken",
     borderwidth=2,
@@ -527,68 +672,68 @@ else:
 # Plot options for the first plot
 plot_opt_label_1 = tk.Label(hk_tab, text="Plot options:", font=font_style_box)
 plot_opt_label_1.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
-plot_opt_label_1.config(foreground="white", background="black")
+plot_opt_label_1.config(fg=fg_color, bg=bg_color)
 
 plot_opt_entry_1 = tk.StringVar(hk_tab)
 plot_opt_entry_1.set("Select a column")
 ts_menu_1 = tk.OptionMenu(hk_tab, plot_opt_entry_1, *ts_options)
-ts_menu_1.config(foreground="white", background="black")
+ts_menu_1.config(fg=fg_color, bg=bg_color)
 ts_menu_1.grid(row=0, column=2, columnspan=1, sticky="w")
 
 # Plot options for the second plot
 plot_opt_entry_2 = tk.StringVar(hk_tab)
 plot_opt_entry_2.set("Select a column")
 ts_menu_2 = tk.OptionMenu(hk_tab, plot_opt_entry_2, *ts_options)
-ts_menu_2.config(foreground="white", background="black")
+ts_menu_2.config(fg=fg_color, bg=bg_color)
 ts_menu_2.grid(row=0, column=5, columnspan=1, sticky="w")
 
 # Plot optiosn for third plot
 plot_opt_entry_3 = tk.StringVar(hk_tab)
 plot_opt_entry_3.set("Select a column")
 ts_menu_3 = tk.OptionMenu(hk_tab, plot_opt_entry_3, *ts_options)
-ts_menu_3.config(foreground="white", background="black")
+ts_menu_3.config(fg=fg_color, bg=bg_color)
 ts_menu_3.grid(row=0, column=8, columnspan=1, sticky="w")
 
 # Plot options for fourth plot (in the second row)
 plot_opt_entry_4 = tk.StringVar(hk_tab)
 plot_opt_entry_4.set("Select a column")
 ts_menu_4 = tk.OptionMenu(hk_tab, plot_opt_entry_4, *ts_options)
-ts_menu_4.config(foreground="white", background="black")
+ts_menu_4.config(fg=fg_color, bg=bg_color)
 ts_menu_4.grid(row=2, column=2, columnspan=1, sticky="w")
 
 # Plot options for fifth plot (in the second row)
 plot_opt_entry_5 = tk.StringVar(hk_tab)
 plot_opt_entry_5.set("Select a column")
 ts_menu_5 = tk.OptionMenu(hk_tab, plot_opt_entry_5, *ts_options)
-ts_menu_5.config(foreground="white", background="black")
+ts_menu_5.config(fg=fg_color, bg=bg_color)
 ts_menu_5.grid(row=2, column=5, columnspan=1, sticky="w")
 
 # Plot options for sixth plot (in the second row)
 plot_opt_entry_6 = tk.StringVar(hk_tab)
 plot_opt_entry_6.set("Select a column")
 ts_menu_6 = tk.OptionMenu(hk_tab, plot_opt_entry_6, *ts_options)
-ts_menu_6.config(foreground="white", background="black")
+ts_menu_6.config(fg=fg_color, bg=bg_color)
 ts_menu_6.grid(row=2, column=8, columnspan=1, sticky="w")
 
 # Plot options for seventh plot (in the third row)
 plot_opt_entry_7 = tk.StringVar(hk_tab)
 plot_opt_entry_7.set("Select a column")
 ts_menu_7 = tk.OptionMenu(hk_tab, plot_opt_entry_7, *ts_options)
-ts_menu_7.config(foreground="white", background="black")
+ts_menu_7.config(fg=fg_color, bg=bg_color)
 ts_menu_7.grid(row=4, column=2, columnspan=1, sticky="w")
 
 # Plot options for eighth plot (in the third row)
 plot_opt_entry_8 = tk.StringVar(hk_tab)
 plot_opt_entry_8.set("Select a column")
 ts_menu_8 = tk.OptionMenu(hk_tab, plot_opt_entry_8, *ts_options)
-ts_menu_8.config(foreground="white", background="black")
+ts_menu_8.config(fg=fg_color, bg=bg_color)
 ts_menu_8.grid(row=4, column=5, columnspan=1, sticky="w")
 
 # Plot options for ninth plot (in the third row)
 plot_opt_entry_9 = tk.StringVar(hk_tab)
 plot_opt_entry_9.set("Select a column")
 ts_menu_9 = tk.OptionMenu(hk_tab, plot_opt_entry_9, *ts_options)
-ts_menu_9.config(foreground="white", background="black")
+ts_menu_9.config(fg=fg_color, bg=bg_color)
 ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
 
 (
@@ -610,7 +755,7 @@ ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
     curve_fit_status_var,
     lin_corr_status_var,
     cmap_option,
-) = lgeb.populate_entries(root=sci_tab)
+) = lgeb.populate_entries(root=sci_tab, dark_mode=dark_mode)
 
 # Redo the histogram plot if the status of the checkbox is changed
 density_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
@@ -634,7 +779,7 @@ cdf_save_button = tk.Button(
     command=lambda: lmsc.save_cdf(),
     font=font_style_box,
     justify="center",
-    bg="black",
+    bg=bg_color,
     fg="green",
     pady=5,
     padx=5,
@@ -645,6 +790,8 @@ cdf_save_button = tk.Button(
     highlightcolor="green",
 )
 cdf_save_button.grid(row=18, column=11, columnspan=1, sticky="nw")
+# Disable the button until the data is loaded
+cdf_save_button.config(state="disabled")
 
 # Add a button to save the data to a csv file
 csv_save_button = tk.Button(
@@ -653,7 +800,7 @@ csv_save_button = tk.Button(
     command=lambda: lmsc.save_csv(root=sci_tab),
     font=font_style_box,
     justify="center",
-    bg="black",
+    bg=bg_color,
     fg="green",
     pady=5,
     padx=5,
@@ -674,16 +821,17 @@ multi_file_status = tk.Checkbutton(
     variable=multi_file_status_var,
     font=font_style_box,
     justify="center",
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     pady=5,
     padx=5,
     borderwidth=2,
     relief="raised",
     highlightthickness=2,
     highlightbackground="black",
-    highlightcolor="black",
-    selectcolor="green",
+    highlightcolor=bg_color,
+    selectcolor="#808080",
+    cursor="hand2",
 )
 multi_file_status.grid(row=6, column=0, columnspan=1, sticky="nw")
 
@@ -711,7 +859,7 @@ multi_file_status_var.trace(
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_path))
 
 # Add a text box to enter the folder path
-folder_path = tk.Entry(sci_tab, justify="center", bg="black", fg="green", borderwidth=2)
+folder_path = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 
 # Set the default folder name in the text box
@@ -719,6 +867,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 folder_path.insert(
     1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
 )
+folder_path.config(insertbackground=insertbackground_color)
 folder_path.config(state="normal", disabledbackground="black", disabledforeground="gray")
 
 # Add a button to load all the files in the folder_path
@@ -734,7 +883,7 @@ folder_load_button = tk.Button(
     # ),
     font=font_style_box,
     justify="center",
-    bg="black",
+    bg=bg_color,
     fg="green",
     pady=5,
     padx=5,
@@ -747,29 +896,84 @@ folder_load_button = tk.Button(
 folder_load_button.grid(row=6, column=1, columnspan=1, sticky="nw")
 folder_load_button.config(state="normal")
 
+# Add the load files button to hk tab as well
+folder_load_button_hk = tk.Button(
+    hk_tab,
+    text="Load Files",
+    command=lambda: load_and_copy_files(),
+    # command=lambda: lmsc.load_folder(
+    #     file_val=folder_path.get(),
+    #     t_start=start_time.get(),
+    #     t_end=end_time.get(),
+    #     multiple_files=multi_file_status_var.get(),
+    # ),
+    font=font_style_box,
+    justify="center",
+    bg=bg_color,
+    fg="green",
+    pady=5,
+    padx=5,
+    borderwidth=2,
+    relief="raised",
+    highlightthickness=2,
+    highlightbackground="green",
+    highlightcolor="green",
+)
+folder_load_button_hk.grid(row=12, column=7, columnspan=1, sticky="nsew")
+folder_load_button_hk.config(state="normal")
+
 # Label for plot times
 start_time_label = tk.Label(
-    sci_tab, text="Plot Times", font=font_style, bg="black", fg="white"
+    sci_tab, text="Plot Times", font=font_style, bg=bg_color, fg=fg_color
 )
 start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for start time
 default_time_dict = lgcf.get_config_time()
-start_time = tk.Entry(sci_tab, justify="center", bg="black", fg="green", borderwidth=2)
+start_time = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 start_time.insert(0, default_time_dict["start_time"])
+start_time.config(insertbackground=insertbackground_color)
 start_time.grid(row=9, column=0, columnspan=2, sticky="nsew")
 start_time_label = tk.Label(
-    sci_tab, text="Start Time", font=font_style, bg="black", fg="white"
+    sci_tab, text="Start Time", font=font_style, bg=bg_color, fg=fg_color
 )
 start_time_label.grid(row=10, column=0, columnspan=2, sticky="nsew")
 
-end_time = tk.Entry(sci_tab, justify="center", bg="black", fg="green", borderwidth=2)
+end_time = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 end_time.insert(0, default_time_dict["end_time"])
+end_time.config(insertbackground=insertbackground_color)
 end_time.grid(row=11, column=0, columnspan=2, sticky="nsew")
 end_time_label = tk.Label(
-    sci_tab, text="End Time", font=font_style, bg="black", fg="white"
+    sci_tab, text="End Time", font=font_style, bg=bg_color, fg=fg_color
 )
 end_time_label.grid(row=12, column=0, columnspan=2)
+
+# Add the start and end time to hk tab as well
+start_time_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+start_time_hk.insert(0, default_time_dict["start_time"])
+start_time_hk.config(insertbackground=insertbackground_color)
+start_time_hk.grid(row=12, column=1, columnspan=1, sticky="nsew")
+start_time_label_hk = tk.Label(
+    hk_tab, text="Start Time", font=font_style, bg=bg_color, fg=fg_color
+)
+start_time_label_hk.grid(row=12, column=2, columnspan=1, sticky="nsw")
+
+end_time_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+end_time_hk.insert(0, default_time_dict["end_time"])
+end_time_hk.config(insertbackground=insertbackground_color)
+end_time_hk.grid(row=12, column=4, columnspan=1, sticky="nsew")
+end_time_label_hk = tk.Label(
+    hk_tab, text="End Time", font=font_style, bg=bg_color, fg=fg_color
+)
+end_time_label_hk.grid(row=12, column=5, columnspan=1, sticky="nsw")
+
+# If the start time in one tab is changed, update the other tab
+start_time.bind("<FocusOut>", lambda *_: update_time_entry(start_time, start_time_hk))
+start_time_hk.bind("<FocusOut>", lambda *_: update_time_entry(start_time_hk, start_time))
+
+# If the end time in one tab is changed, update the other tab
+end_time.bind("<FocusOut>", lambda *_: update_time_entry(end_time, end_time_hk))
+end_time_hk.bind("<FocusOut>", lambda *_: update_time_entry(end_time_hk, end_time))
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
@@ -838,8 +1042,8 @@ plot_opt_entry_9.trace(
 # If the plot button is pressed then all the histogram plots are redrawn
 plot_button = tk.Button(
     sci_tab,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     text="Plot Histogram",
     font=font_style_box,
     justify="center",
@@ -861,8 +1065,8 @@ plot_button.bind(
 # If the plot button is pressed then all the histogram plots are redrawn
 refresh_button = tk.Button(
     sci_tab,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     text="Refresh Histogram",
     font=font_style_box,
     justify="center",
@@ -907,8 +1111,8 @@ entry_list = [
 
 save_config_button = tk.Button(
     sci_tab,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     text="Save Config",
     font=font_style_box,
     justify="center",
@@ -924,8 +1128,8 @@ save_config_button.grid(
 # Add a default button to reset the configuration file
 default_config_button = tk.Button(
     sci_tab,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     text="Default Config",
     font=font_style_box,
     justify="center",
@@ -946,7 +1150,7 @@ quit_button_sci = tk.Button(
     command=root.destroy,
     font=font_style_box,
     justify="center",
-    bg="black",
+    bg=bg_color,
     fg="red",
     pady=5,
     padx=5,
@@ -966,26 +1170,26 @@ default_opt_checkbox = tk.Checkbutton(
     text="Default Options",
     font=font_style_box,
     variable=default_opt_var,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     pady=5,
     padx=5,
     borderwidth=2,
     relief="raised",
-    highlightthickness=2,
-    highlightbackground="green",
-    highlightcolor="green",
-    selectcolor="green",
+    highlightthickness=5,
+    highlightcolor=bg_color,
+    selectcolor="#808080",
+    cursor="hand2",
 )
-default_opt_checkbox.grid(row=12, column=1, columnspan=1, sticky="n")
+default_opt_checkbox.grid(row=12, column=0, columnspan=1, sticky="nw")
 
 default_opt_var.trace("w", lambda *_: ts_button_val_change(default_opt_var))
 
 # Add a clickable button to display the time values in the terminal
 time_button = tk.Button(
     sci_tab,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     text="Print Time",
     font=font_style_box,
     justify="center",
@@ -999,8 +1203,8 @@ time_button.grid(
 
 copy_button = tk.Button(
     sci_tab,
-    bg="black",
-    fg="white",
+    bg=bg_color,
+    fg=fg_color,
     text="Copy PIT Files",
     font=font_style_box,
     justify="center",
@@ -1017,7 +1221,7 @@ refresh_ts_hk_button = tk.Button(
     command=lambda: refresh_ts_plot(),
     font=font_style_box,
     justify="center",
-    bg="black",
+    bg=bg_color,
     fg="green",
     pady=5,
     padx=5,
@@ -1027,7 +1231,7 @@ refresh_ts_hk_button = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-refresh_ts_hk_button.grid(row=12, column=2, columnspan=2, rowspan=1, sticky="n")
+refresh_ts_hk_button.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
 
 quit_button_hk = tk.Button(
     hk_tab,
@@ -1035,7 +1239,7 @@ quit_button_hk = tk.Button(
     command=root.destroy,
     font=font_style_box,
     justify="center",
-    bg="black",
+    bg=bg_color,
     fg="red",
     pady=5,
     padx=5,
@@ -1045,6 +1249,6 @@ quit_button_hk = tk.Button(
     highlightbackground="red",
     highlightcolor="red",
 )
-quit_button_hk.grid(row=12, column=10, columnspan=2, rowspan=1, sticky="n")
+quit_button_hk.grid(row=12, column=9, columnspan=1, rowspan=1, sticky="new")
 
 root.mainloop()

@@ -27,6 +27,7 @@ def load_ts_plots(
     rowspan=2,
     fig_width=None,
     fig_height=None,
+    dark_mode=True,
 ):
     """
     Loads the time series plots for the selected time range and displays them in the GUI.
@@ -53,6 +54,8 @@ def load_ts_plots(
         The width of the figure.
     fig_height : float
         The height of the figure.
+    dark_mode : bool
+        Whether or not the plots should be displayed in dark mode.
 
     Returns
     -------
@@ -75,6 +78,7 @@ def load_ts_plots(
         end_time=end_time,
         ts_fig_height=fig_height,
         ts_fig_width=fig_width,
+        dark_mode=dark_mode,
     ).ts_plots()
     canvas = FigureCanvasTkAgg(fig_ts, master=frame)
     canvas.get_tk_widget().pack(side="left", fill="both", expand=False)
@@ -111,6 +115,7 @@ def load_hist_plots(
     lin_corr=False,
     cmap=None,
     use_fig_size=False,
+    dark_mode=True,
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI.
@@ -155,17 +160,32 @@ def load_hist_plots(
         The number of columns the plots should span.
     rowspan : int
         The number of rows the plots should span.
+    v_min : float
+        The minimum value of the voltage axis.
+    v_max : float
+        The maximum value of the voltage axis.
+    v_sum_min : float
+        Minimum value of the sum of the voltages for thresholding.
+    v_sum_max : float
+        Maximum value of the sum of the voltages for thresholding.
+    cut_status_var : bool
+        Whether or not plot the vertical and horizontal lines for the cut status.
+    crv_fit : bool
+        If cut_status_var is True, whether or not to plot the curve fit for the cut status.
+    lin_corr : bool
+        Whether to plot the data without or with linear correlation.
+    cmap : str
+        The colormap to be used for the histogram. If None, the default colormap is used.
+    use_fig_size : bool
+        Whether or not to use the figure size specified in the GUI.
+    dark_mode : bool
+        Whether or not the plots should be displayed in dark mode.
 
     Returns
     -------
     None
     """
 
-    dark_mode = True
-    if dark_mode:
-        plt.style.use('dark_background')
-    else:
-        plt.style.use('default')
     # Set the fontstyle to Times New Roman
     font_mpl = {"family": "serif", "weight": "normal"}
     plt.rc("font", **font_mpl)
@@ -196,6 +216,7 @@ def load_hist_plots(
         lin_corr=lin_corr,
         cmap=cmap,
         use_fig_size=use_fig_size,
+        dark_mode=dark_mode,
     ).hist_plots()
     frame = tk.Frame(root)
     frame.grid(
@@ -203,7 +224,6 @@ def load_hist_plots(
     )
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
-    canvas.get_tk_widget().configure(bg="black")
     canvas.draw()
 
 
@@ -230,6 +250,7 @@ def load_hist_plots_volt(
     v_min=2.2,
     v_max=3.9,
     cmap=None,
+    dark_mode=True,
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -288,6 +309,7 @@ def load_hist_plots_volt(
         v_min=v_min,
         v_max=v_max,
         cmap=cmap,
+        dark_mode=dark_mode,
     ).hist_plots_volt()
     fig_hist.tight_layout()
     # frame = tk.Frame(root, bg="black")
@@ -303,7 +325,6 @@ def load_hist_plots_volt(
 
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.draw()
-    canvas.get_tk_widget().configure(bg="black")
     canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
 
 
@@ -355,6 +376,7 @@ def load_all_hist_plots(
     lin_corr=None,
     cmap=None,
     use_fig_size=False,
+    dark_mode=True,
 ):
     """
     Loads the histogram plots for the selected time range and displays them in the GUI. This is for
@@ -461,6 +483,7 @@ def load_all_hist_plots(
         lin_corr=lin_corr,
         cmap=cmap,
         use_fig_size=use_fig_size,
+        dark_mode=dark_mode,
     )
 
     load_hist_plots_volt(
@@ -485,6 +508,7 @@ def load_all_hist_plots(
         v_min=v_min,
         v_max=v_max,
         cmap=cmap,
+        dark_mode=dark_mode,
     )
 
     load_hist_plots_volt(
@@ -509,4 +533,5 @@ def load_all_hist_plots(
         v_min=v_min,
         v_max=v_max,
         cmap=cmap,
+        dark_mode=dark_mode,
     )

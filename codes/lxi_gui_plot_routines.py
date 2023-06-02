@@ -99,6 +99,8 @@ class plot_data_class:
             The height of the voltage plot. Default is 6.
         volt_fig_width: float
             The width of the voltage plot. Default is 12.
+        dark_mode: bool
+            Whether to plot the plots in dark mode or not. Default is False.
 
     Methods:
         ts_plots:
@@ -192,6 +194,7 @@ class plot_data_class:
         lin_corr=None,
         cmap=None,
         use_fig_size=None,
+        dark_mode=None,
     ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -225,6 +228,7 @@ class plot_data_class:
         self.lin_corr = lin_corr
         self.cmap = cmap
         self.use_fig_size = use_fig_size
+        self.dark_mode = dark_mode
 
     def ts_plots(self):
         """
@@ -284,8 +288,7 @@ class plot_data_class:
 
         alpha = 1
         ms = 2
-        dark_mode = True
-        if dark_mode:
+        if self.dark_mode:
             plt.style.use("dark_background")
             edgecolor = "white"
             facecolor = "black"
@@ -520,8 +523,7 @@ class plot_data_class:
             )
         ]
 
-        dark_mode = True
-        if dark_mode:
+        if self.dark_mode:
             plt.style.use("dark_background")
             edge_color = "white"
             face_color = "black"
@@ -965,13 +967,14 @@ class plot_data_class:
             (self.df_slice_sci.index >= t_start) & (self.df_slice_sci.index <= t_end)
         ]
 
-        dark_mode = True
-        if dark_mode:
+        if self.dark_mode:
             plt.style.use("dark_background")
             edge_color = "white"
             face_color = "black"
         else:
             plt.style.use('default')
+            edge_color = "black"
+            face_color = "white"
 
         # Set the fontstyle to Times New Roman
         font = {'family': 'serif', 'weight': 'normal', 'size': 10}

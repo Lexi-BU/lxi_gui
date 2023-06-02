@@ -409,19 +409,22 @@ def save_csv(root=None, number_of_decimals=3):
     # lin_corr_status_var_value = lin_corr_status_var.get()
     # cmap_option_value = cmap_option.get()
 
-    try:
-        inputs = {
-            "df": global_variables.all_file_details["df_all_sci"],
-            "csv_file": global_variables.all_file_details["file_name_sci"],
-        }
+    if global_variables.all_file_details:
+        try:
+            inputs = {
+                "df": global_variables.all_file_details["df_all_sci"],
+                "csv_file": global_variables.all_file_details["file_name_sci"],
+            }
 
-        lctcsv.lxi_csv_to_csv(**inputs)
-    except Exception as e:
-        print(
-            f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the csv file. Following exception"
-            f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
-            f"Science csv file is loaded. \n"
-        )
+            lctcsv.lxi_csv_to_csv(**inputs)
+        except Exception as e:
+            print(
+                f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the csv file. Following exception"
+                f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+                f"Science csv file is loaded. \n"
+            )
+    else:
+        logger.error("No file loaded/ no Data in the file")
 
 
 def save_cdf():
