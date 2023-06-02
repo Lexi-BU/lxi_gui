@@ -263,10 +263,10 @@ class plot_data_class:
         # Make a dictionary of all the plot options and their units
         unit_dict = {
             "HK_id": "#",
-            "PinPullerTemp": "(K)",
-            "OpticsTemp": "(K)",
+            "PinPullerTemp": "(C)",
+            "OpticsTemp": "(C)",
             "LEXIbaseTemp": "(C)",
-            "HVsupplyTemp": "(K)",
+            "HVsupplyTemp": "(C)",
             "+5.2V_Imon": "(mA)",
             "+10V_Imon": "(mA)",
             "+3.3V_Imon": "(mA)",
@@ -562,6 +562,9 @@ class plot_data_class:
             elif self.unit == "mcp":
                 x_key = "x_mcp"
                 y_key = "y_mcp"
+            elif self.unit == "deg":
+                x_key = "x_mcp"
+                y_key = "y_mcp"
         elif self.lin_corr is True:
             if self.unit == "volt":
                 x_key = "x_val_lin"
@@ -569,6 +572,9 @@ class plot_data_class:
             elif self.unit == "mcp":
                 x_key = "x_mcp_lin"
                 y_key = "y_mcp_lin"
+            elif self.unit == "deg":
+                x_key = "x_deg_lin"
+                y_key = "y_deg_lin"
                 # Add a circle centered at (0,0) with radius 4.5 cm
                 circle = plt.Circle((0, 0), 4.5, color="r", fill=False, linewidth=2)
                 circle1 = plt.Circle((0, 0), 3.75, color="c", fill=False, linewidth=2.2)
@@ -746,6 +752,9 @@ class plot_data_class:
         elif self.unit == "mcp":
             x_label = "X (cm)"
             y_label = "Y (cm)"
+        elif self.unit == "deg":
+            x_label = "X (deg)"
+            y_label = "Y (deg)"
         axs1.set_xlabel(x_label, color="g")
         axs1.set_ylabel(y_label, color="g")
         axs1.set_xlim(x_min, x_max)

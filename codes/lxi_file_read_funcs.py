@@ -323,8 +323,8 @@ def read_binary_data_sci(
     # Check if the word 'mcp' is present in the file name
     if "mcp" in in_file_name:
         while index < len(raw) - 16:
-            if raw[index : index + 4] == sync_lxi:
-                packets.append(sci_packet_gsfc.from_bytes(raw[index : index + 16]))
+            if raw[index:index + 4] == sync_lxi:
+                packets.append(sci_packet_gsfc.from_bytes(raw[index:index + 16]))
                 index += 16
                 continue
 
@@ -333,21 +333,34 @@ def read_binary_data_sci(
     else:
         while index < len(raw) - 28:
             if (
-                raw[index : index + 2] == sync_pit
-                and raw[index + 12 : index + 16] == sync_lxi
+                raw[index:index + 2] == sync_pit
+                and raw[index + 12:index + 16] == sync_lxi
             ):
-                packets.append(sci_packet.from_bytes(raw[index : index + 28]))
+                packets.append(sci_packet.from_bytes(raw[index:index + 28]))
                 index += 28
                 continue
 
             index += 1
 
     # Split the file name in a folder and a file name
-    # output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_sci_output.csv"
-    # output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\sci"
-    output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
-    output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\sci"
-    save_file_name = output_folder_name + "\\" + output_file_name
+    # Format filenames and folder names for the different operating systems
+    if os.name == "posix":
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
+        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
+        save_file_name = output_folder_name + "/" + output_file_name
+        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
+    elif os.name == "nt":
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
+        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\sci"
+        save_file_name = output_folder_name + "\\" + output_file_name
+        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
+    elif os.name == "darwin":
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
+        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
+        save_file_name = output_folder_name + "/" + output_file_name
+        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
+    else:
+        raise OSError("The operating system is not supported.")
 
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
@@ -375,6 +388,8 @@ def read_binary_data_sci(
                 {
                     "Date": default_time
                     + datetime.timedelta(milliseconds=sci_packet.timestamp),
+
+
                     "TimeStamp": sci_packet.timestamp,
                     "IsCommanded": sci_packet.is_commanded,
                     "Channel1": np.round(
@@ -503,8 +518,8 @@ def read_binary_data_hk(
 
     if "mcp" in in_file_name:
         while index < len(raw) - 16:
-            if raw[index : index + 4] == sync_lxi:
-                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index : index + 16]))
+            if raw[index:index + 4] == sync_lxi:
+                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
                 index += 16
                 continue
 
@@ -512,10 +527,10 @@ def read_binary_data_hk(
     else:
         while index < len(raw) - 28:
             if (
-                raw[index : index + 2] == sync_pit
-                and raw[index + 12 : index + 16] == sync_lxi
+                raw[index:index + 2] == sync_pit
+                and raw[index + 12:index + 16] == sync_lxi
             ):
-                packets.append(hk_packet_cls.from_bytes(raw[index : index + 28]))
+                packets.append(hk_packet_cls.from_bytes(raw[index:index + 28]))
                 index += 28
                 continue
 
@@ -681,12 +696,24 @@ def read_binary_data_hk(
     df["Date"] = Date_datetime
 
     # Split the file name in a folder and a file name
-    # output_file_name = in_file_name.split("\\")[-1].split(".")[0] + "_hk_output.csv"
-    # output_folder_name = "\\".join(in_file_name.split("\\")[:-1]) + "\\processed_data\\hk"
-
-    output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
-    output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
-    save_file_name = output_folder_name + "\\" + output_file_name
+    # Format filenames and folder names for the different operating systems
+    if os.name == "posix":
+        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        save_file_name = output_folder_name + "/" + output_file_name
+        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
+    elif os.name == "nt":
+        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        save_file_name = output_folder_name + "\\" + output_file_name
+        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
+    elif os.name == "darwin":
+        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        save_file_name = output_folder_name + "/" + output_file_name
+        print(f"\nSaving the file to {save_file_name} in the folder {output_folder_name} for the operating system {os.name}\n")
+    else:
+        raise OSError("Operating system not supported.")
 
     # Check if the save folder exists, if not then create it
     if not Path(output_folder_name).exists():
@@ -850,6 +877,15 @@ def volt_to_mcp(x, y):
 
     return x_mcp, y_mcp
 
+def volt_to_deg(x, y):
+    """
+    Function to convert voltage coordinates to MCP coordinates
+    """
+    x_deg = (x - 0.544) * 9.1 / 7.5
+    y_deg = (y - 0.564) * 9.1 / 7.5
+
+    return x_deg, y_deg
+
 
 def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
     """
@@ -895,10 +931,11 @@ def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
     # Find the index where the histogram is the maximum
     # NOTE/TODO: I don't quite understand why the offset is computed this way. Need to talk to
     # Dennis about this and get an engineering/physics reason for it.
-    max_index_v1 = np.argmax(hist_v1[0][0 : int(n_bins / 2)])
-    max_index_v2 = np.argmax(hist_v2[0][0 : int(n_bins / 2)])
+    max_index_v1 = np.argmax(hist_v1[0][0:int(n_bins / 2)])
+    max_index_v2 = np.argmax(hist_v2[0][0:int(n_bins / 2)])
 
     z1_min = 1000 * xx[max_index_v1]
+
     z2_min = 1000 * xx[max_index_v2]
 
     n1_z = z1_min / 1000
@@ -1006,11 +1043,19 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     x_mcp_lin_slice, y_mcp_lin_slice = volt_to_mcp(x_lin_slice, y_lin_slice)
     x_mcp_lin, y_mcp_lin = volt_to_mcp(x_lin, y_lin)
 
+    # Get the x,y value in deg units
+    x_deg_slice, y_deg_slice = volt_to_deg(x_mcp_slice, y_mcp_slice)
+    x_deg, y_deg = volt_to_deg(x_mcp, y_mcp)
+    x_deg_lin_slice, y_deg_lin_slice = volt_to_deg(x_mcp_lin_slice, y_mcp_lin_slice)
+    x_deg_lin, y_deg_lin = volt_to_deg(x_mcp_lin, y_mcp_lin)
+
     # Add the x-coordinate to the dataframe
     df_slice_sci["x_val"] = x_slice
     df_slice_sci.loc[:, "x_val_lin"] = x_lin_slice
     df_slice_sci.loc[:, "x_mcp"] = x_mcp_slice
     df_slice_sci.loc[:, "x_mcp_lin"] = x_mcp_lin_slice
+    df_slice_sci.loc[:, "x_deg"] = x_deg_slice
+    df_slice_sci.loc[:, "x_deg_lin"] = x_deg_lin_slice
     df_slice_sci.loc[:, "v1_shift"] = v1_shift_slice
     df_slice_sci.loc[:, "v3_shift"] = v3_shift_slice
 
@@ -1018,6 +1063,8 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df.loc[:, "x_val_lin"] = x_lin
     df.loc[:, "x_mcp"] = x_mcp
     df.loc[:, "x_mcp_lin"] = x_mcp_lin
+    df.loc[:, "x_deg"] = x_deg
+    df.loc[:, "x_deg_lin"] = x_deg_lin
     df.loc[:, "v1_shift"] = v1_shift
     df.loc[:, "v3_shift"] = v3_shift
 
@@ -1026,6 +1073,8 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df_slice_sci.loc[:, "y_val_lin"] = y_lin_slice
     df_slice_sci.loc[:, "y_mcp"] = y_mcp_slice
     df_slice_sci.loc[:, "y_mcp_lin"] = y_mcp_lin_slice
+    df_slice_sci.loc[:, "y_deg"] = y_deg_slice
+    df_slice_sci.loc[:, "y_deg_lin"] = y_deg_lin_slice
     df_slice_sci.loc[:, "v4_shift"] = v4_shift_slice
     df_slice_sci.loc[:, "v2_shift"] = v2_shift_slice
 
@@ -1033,6 +1082,8 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df.loc[:, "y_val_lin"] = y_lin
     df.loc[:, "y_mcp"] = y_mcp
     df.loc[:, "y_mcp_lin"] = y_mcp_lin
+    df.loc[:, "y_deg"] = y_deg
+    df.loc[:, "y_deg_lin"] = y_deg_lin
     df.loc[:, "v4_shift"] = v4_shift
     df.loc[:, "v2_shift"] = v2_shift
 
@@ -1199,8 +1250,9 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 <= t_end_unix
             ]
             print(
-               f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
-               f"\x1b[1;32;255m {t_start.strftime('%Y-%m-%d %H:%M:%S')} \x1b[0m to \x1b[1;32;255m {t_end.strftime('%Y-%m-%d %H:%M:%S')}\x1b[0m"
+                f"Found \x1b[1;32;255m {len(file_list)} \x1b[0m files in the time range "
+                f"\x1b[1;32;255m {t_start.strftime('%Y-%m-%d %H:%M:%S')} \x1b[0m to "
+                f"\x1b[1;32;255m {t_end.strftime('%Y-%m-%d %H:%M:%S')}\x1b[0m"
             )
 
         # Loop through all the files
