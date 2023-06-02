@@ -761,15 +761,15 @@ class plot_data_class:
                 from scipy.optimize import curve_fit
 
                 x_vals = (
-                    xedges[max_index[0] - 10 : max_index[0] + 10]
-                    + xedges[max_index[0] - 9 : max_index[0] + 11]
+                    xedges[max_index[0] - 10:max_index[0] + 10]
+                    + xedges[max_index[0] - 9:max_index[0] + 11]
                 ) / 2
                 y_vals = (
-                    yedges[max_index[1] - 10 : max_index[1] + 10]
-                    + yedges[max_index[1] - 9 : max_index[1] + 11]
+                    yedges[max_index[1] - 10:max_index[1] + 10]
+                    + yedges[max_index[1] - 9:max_index[1] + 11]
                 ) / 2
-                x_vals_counts = yn[max_index[1] - 10 : max_index[1] + 10]
-                y_vals_counts = xn[max_index[0] - 10 : max_index[0] + 10]
+                x_vals_counts = yn[max_index[1] - 10:max_index[1] + 10]
+                y_vals_counts = xn[max_index[0] - 10:max_index[0] + 10]
 
                 # Replace NaNs with zeros
                 x_vals_counts = x_vals_counts.astype(float)
