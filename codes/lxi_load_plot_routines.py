@@ -28,6 +28,7 @@ def load_ts_plots(
     fig_width=None,
     fig_height=None,
     dark_mode=True,
+    time_type="UTC",
 ):
     """
     Loads the time series plots for the selected time range and displays them in the GUI.
@@ -79,6 +80,7 @@ def load_ts_plots(
         ts_fig_height=fig_height,
         ts_fig_width=fig_width,
         dark_mode=dark_mode,
+        time_type=time_type,
     ).ts_plots()
     canvas = FigureCanvasTkAgg(fig_ts, master=frame)
     canvas.get_tk_widget().pack(side="left", fill="both", expand=False)

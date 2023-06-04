@@ -314,6 +314,12 @@ def read_binary_data_sci(
 
     input_file_name = in_file_name
 
+    # Get the creation date of the file in UTC
+    creation_date_utc = datetime.datetime.utcfromtimestamp(
+        os.path.getctime(input_file_name)
+    )
+
+
     with open(input_file_name, "rb") as file:
         raw = file.read()
 
@@ -449,6 +455,15 @@ def read_binary_data_sci(
     # Set index to the date
     df.set_index("Date", inplace=False)
 
+    # For each row, get the time difference between the current row and the last row
+    time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
+    # For each time difference, get the total number of seconds as an array
+    time_diff_seconds = time_diff.dt.total_seconds().values
+    # Add local_time column to the dataframe as NaNs
+    df["local_time"] = np.nan
+    # For each row, set the local_time as sum of created_date_utc and time_diff_seconds
+    df["local_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
+
     # Save the dataframe to a csv file
     df.to_csv(save_file_name, index=False)
 
@@ -507,8 +522,8 @@ def read_binary_data_hk(
 
     input_file_name = in_file_name
 
-    # Get the created date of the file in UTC
-    created_date_utc = datetime.datetime.utcfromtimestamp(
+    # Get the creation date of the file in UTC
+    creation_date_utc = datetime.datetime.utcfromtimestamp(
         os.path.getctime(input_file_name)
     )
 
@@ -546,7 +561,6 @@ def read_binary_data_hk(
 
     Date = np.full(len(hk_idx), np.nan)
     TimeStamp = np.full(len(hk_idx), np.nan)
-    created_date = np.full(len(hk_idx), np.nan)
     HK_id = np.full(len(hk_idx), np.nan)
     PinPullerTemp = np.full(len(hk_idx), np.nan)
     OpticsTemp = np.full(len(hk_idx), np.nan)
@@ -695,9 +709,21 @@ def read_binary_data_hk(
             if np.isnan(df[key][ii]):
                 df[key][ii] = df[key][ii - 1]
 
-    # Set the index to the TimeStamp
+    # Set the date column to the Date_datetime
     df["Date"] = Date_datetime
 
+    # Get the time difference between the first and last timestamp
+    time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
+    # For each time difference, get the total number of seconds as an array
+    time_diff_seconds = np.array([x.total_seconds() for x in time_diff])
+    # Add local_time column to the dataframe as NaNs
+    df["local_time"] = np.nan
+    # For each row, set the local_time as sum of created_date_utc and time_diff_seconds
+    df["local_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
+
+
+    # Set Date as the index without replacing the column
+    df.set_index("Date", inplace=True, drop=False)
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
     if os.name == "posix":
@@ -1122,7 +1148,7 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
     """
 
     global df_slice_hk
-    df = pd.read_csv(file_val)
+    df = pd.read_csv(file_val, index_col=False)
 
     # Check all the keys and find out which one has the word "time" in it
     for key in df.keys():

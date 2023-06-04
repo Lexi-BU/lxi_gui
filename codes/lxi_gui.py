@@ -129,8 +129,8 @@ def ts_plot_inputs(
         "fig_width": screen_width / (2 * dpi),
         "fig_height": screen_height / (3 * dpi),
         "dark_mode": dark_mode_var.get(),
+        "time_type": time_type.get(),
     }
-
     llpr.load_ts_plots(**inputs)
 
 
@@ -966,7 +966,7 @@ start_time_hk.grid(row=12, column=1, columnspan=1, sticky="nsew")
 start_time_label_hk = tk.Label(
     hk_tab, text="Start Time", font=font_style, bg=bg_color, fg=fg_color
 )
-start_time_label_hk.grid(row=12, column=2, columnspan=1, sticky="nsw")
+start_time_label_hk.grid(row=13, column=1, columnspan=1, sticky="nsew")
 
 end_time_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 end_time_hk.insert(0, default_time_dict["end_time"])
@@ -975,15 +975,34 @@ end_time_hk.grid(row=12, column=4, columnspan=1, sticky="nsew")
 end_time_label_hk = tk.Label(
     hk_tab, text="End Time", font=font_style, bg=bg_color, fg=fg_color
 )
-end_time_label_hk.grid(row=12, column=5, columnspan=1, sticky="nsw")
+end_time_label_hk.grid(row=13, column=4, columnspan=1, sticky="nsew")
 
 # If the start time in one tab is changed, update the other tab
-start_time.bind("<FocusOut>", lambda *_: update_time_entry(start_time, start_time_hk))
-start_time_hk.bind("<FocusOut>", lambda *_: update_time_entry(start_time_hk, start_time))
+start_time.bind("<KeyRelease>", lambda *_: update_time_entry(start_time, start_time_hk))
+start_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(start_time_hk, start_time))
 
 # If the end time in one tab is changed, update the other tab
-end_time.bind("<FocusOut>", lambda *_: update_time_entry(end_time, end_time_hk))
-end_time_hk.bind("<FocusOut>", lambda *_: update_time_entry(end_time_hk, end_time))
+end_time.bind("<KeyRelease>", lambda *_: update_time_entry(end_time, end_time_hk))
+end_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(end_time_hk, end_time))
+
+# Add a dropdown menu for the kind of time to be used, options are "Lexi Time" and "UTC Time".
+# Default is "Lexi Time". If the time kind is changed, then run the "refresh_ts_plot" function
+# to update the plot.
+time_type = tk.StringVar()
+time_type.set("UTC")
+time_type_menu = tk.OptionMenu(
+    hk_tab,
+    time_type,
+    "Lexi",
+    "UTC",
+    command=lambda *_: refresh_ts_plot(),
+)
+time_type_menu.config(bg=bg_color, fg=fg_color, borderwidth=2)
+time_type_menu.grid(row=12, column=2, columnspan=1, sticky="nsew")
+time_type_label = tk.Label(
+    hk_tab, text="Time Type", font=font_style, bg=bg_color, fg=fg_color
+)
+time_type_label.grid(row=13, column=2, columnspan=1, sticky="nsew")
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(

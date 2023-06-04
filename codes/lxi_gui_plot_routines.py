@@ -2,6 +2,7 @@ import datetime
 import importlib
 import logging
 import os
+import pandas as pd
 
 import global_variables
 import lxi_misc_codes as lmsc
@@ -195,6 +196,7 @@ class plot_data_class:
         cmap=None,
         use_fig_size=None,
         dark_mode=None,
+        time_type=None,
     ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -229,6 +231,7 @@ class plot_data_class:
         self.cmap = cmap
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
+        self.time_type = time_type
 
     def ts_plots(self):
         """
@@ -327,7 +330,17 @@ class plot_data_class:
         key_50p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 50)
         key_90p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 90)
 
-        x_axs_val = (self.df_slice_hk.index - t_start).total_seconds() / 60
+        # Depending on the time_type, find the x-axis values
+        if self.time_type == "Lexi":
+            #x_axs_val = (self.df_slice_hk.index - t_start).total_seconds() / 60
+            x_axs_val = self.df_slice_hk.index
+        elif self.time_type == "UTC":
+            # Convert self.df_slice_hk.local_time from string to datetime
+            self.df_slice_hk.local_time = pd.to_datetime(
+                self.df_slice_hk.local_time, format="%Y-%m-%d %H:%M:%S", utc=True
+            )
+            #x_axs_val = (self.df_slice_hk.local_time - self.df_slice_hk.local_time.min()).dt.total_seconds() / 60
+            x_axs_val = self.df_slice_hk.local_time
         axs1 = plt.subplot(gs[:])
         axs1.plot(
             x_axs_val,
@@ -356,7 +369,16 @@ class plot_data_class:
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
-        axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
+        if self.time_type == "Lexi":
+            axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
+            # Avoid overlapping of the x-axis labels
+            fig.autofmt_xdate()
+            
+        elif self.time_type == "UTC":
+            axs1.set_xlabel(f"Time since {self.df_slice_hk.local_time.min().strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
+            # Avoid overlapping of the x-axis labels
+            fig.autofmt_xdate()
+
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")
         if self.plot_key == "Cmd_count" or self.plot_key == "HK_id":
