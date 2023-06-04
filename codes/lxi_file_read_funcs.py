@@ -507,6 +507,11 @@ def read_binary_data_hk(
 
     input_file_name = in_file_name
 
+    # Get the created date of the file in UTC
+    created_date_utc = datetime.datetime.utcfromtimestamp(
+        os.path.getctime(input_file_name)
+    )
+
     with open(input_file_name, "rb") as file:
         raw = file.read()
 
@@ -541,6 +546,7 @@ def read_binary_data_hk(
 
     Date = np.full(len(hk_idx), np.nan)
     TimeStamp = np.full(len(hk_idx), np.nan)
+    created_date = np.full(len(hk_idx), np.nan)
     HK_id = np.full(len(hk_idx), np.nan)
     PinPullerTemp = np.full(len(hk_idx), np.nan)
     OpticsTemp = np.full(len(hk_idx), np.nan)
@@ -801,7 +807,7 @@ def open_file_b(t_start=None, t_end=None):
     if t_end.tzinfo is None:
         t_end = t_end.tz_localize("UTC")
 
-    # Cut path to the file off
+    # Read the binary file
     file_name_b = file_val
     (
         df_slice_hk,
