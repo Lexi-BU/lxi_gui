@@ -1295,26 +1295,62 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         df_sci = pd.concat(df_sci_list)
 
         # Set file_names_hk and file_names_sci to dates of first and last files
-        save_dir = os.path.dirname(file_val) + "\\"
+        save_dir = os.path.dirname(file_val)
         # If save_dir does not exist, create it
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        file_name_hk = save_dir + "processed_data\\hk\\" + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
-            file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
-            file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+        # Get the file name based on the os path
+        if os.name == "nt":
+            file_name_hk = save_dir + "\\processed_data\\hk\\" + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
+                file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
+                file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
 
-        file_name_sci = save_dir + "processed_data\\sci\\" + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
-            file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
-            file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
-            file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+            file_name_sci = save_dir + "\\processed_data\\sci\\" + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
+                file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
+                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
+                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+        elif os.name == "posix":
+            file_name_hk = save_dir + "/processed_data/hk/" + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+
+            file_name_sci = save_dir + "/processed_data/sci/" + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+        elif os.name == "darwin":
+            file_name_hk = save_dir + "/processed_data/hk/" + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+
+            file_name_sci = save_dir + "/processed_data/sci/" + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
+                file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+        else:
+            raise OSError("Operating system not supported")
 
         print(
             f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n"

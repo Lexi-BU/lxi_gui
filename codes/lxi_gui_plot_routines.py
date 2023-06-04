@@ -318,6 +318,15 @@ class plot_data_class:
 
         # Set the df_slice_hk to the time range specified by the user in the GUI and plot it
         self.df_slice_hk = self.df_slice_hk.loc[t_start:t_end]
+
+        # For self.plot_key, get the minimum, maximum, 10 percentile, 50 percentile, and 90
+        # percentile values
+        key_min_val = np.nanmin(self.df_slice_hk[self.plot_key])
+        key_max_val = np.nanmax(self.df_slice_hk[self.plot_key])
+        key_10p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 10)
+        key_50p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 50)
+        key_90p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 90)
+
         x_axs_val = (self.df_slice_hk.index - t_start).total_seconds() / 60
         axs1 = plt.subplot(gs[:])
         axs1.plot(
@@ -329,6 +338,21 @@ class plot_data_class:
             ms=ms,
             label=self.plot_key,
         )
+        # On the plot, display the minimum, maximum, 10 percentile, 50 percentile, and 90
+        # percentile values as as mu, where mu is 50 percentile value and subscript is the 10 and
+        # superscript is 90 percentile values
+        axs1.text(
+            0.05,
+            0.95,
+            f"$\mu_{{{10}}}^{{{90}}}={key_50p_val:.2f}_{{{key_10p_val:.2f}}}^{{{key_90p_val:.2f}}}$",
+            horizontalalignment="left",
+            verticalalignment="top",
+            transform=axs1.transAxes,
+            color=edgecolor,
+            fontsize=10,
+            bbox=dict(facecolor=facecolor, edgecolor=edgecolor, alpha=0.5),
+        )
+
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
@@ -338,11 +362,15 @@ class plot_data_class:
         if self.plot_key == "Cmd_count" or self.plot_key == "HK_id":
             # For this case, make sure all the y-axis ticks are integers
             axs1.yaxis.set_major_locator(MaxNLocator(integer=True))
-        axs1.legend(loc="best")
-        legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
-        for item in legend_list.legendHandles:
-            item.set_visible(False)
 
+        # Set the location of the legend and remove the marker from the legend
+        axs1.legend(loc="upper right", markerscale=0, handlelength=0, handletextpad=0, fancybox=True,
+                    framealpha=0.5, edgecolor=edgecolor, facecolor=facecolor, fontsize=10,
+                    bbox_to_anchor=(1.0, 1.0), bbox_transform=axs1.transAxes)
+        # legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
+        # for item in legend_list.legendHandles:
+        #     item.set_visible(False)
+        plt.tight_layout()
         plt.close("all")
         return fig
 

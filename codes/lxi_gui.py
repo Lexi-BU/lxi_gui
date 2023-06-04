@@ -1,5 +1,6 @@
 import importlib
 import logging
+import os
 import platform
 import tkinter as tk
 from tkinter import font, ttk
@@ -864,9 +865,18 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 
 # Set the default folder name in the text box
 # folder_path.insert(1, "For multiple files, enter the folder path here")
-folder_path.insert(
-    1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
-)
+# Insert the default folder path in the text box based on the operating system
+if os.name == "nt":
+    folder_path.insert(
+        1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
+    )
+elif os.name == "posix":
+    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230604_not_sent/")
+elif os.name == "darwin":
+    folder_path.insert(1, "/Users/lexi_user/Desktop/PIT_softwares/PIT_23_05_05/Target/rec_tlm/not_sent/")
+else:
+    raise OSError("Operating system not supported")
+
 folder_path.config(insertbackground=insertbackground_color)
 folder_path.config(state="normal", disabledbackground="black", disabledforeground="gray")
 
