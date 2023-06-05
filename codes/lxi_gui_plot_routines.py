@@ -340,9 +340,9 @@ class plot_data_class:
             )
             x_axs_val = self.df_slice_hk.utc_time
         elif self.time_type == "Local":
-            # Convert self.df_slice_hk.local_time from string to datetime
+            # Convert self.df_slice_hk.local_time and set the time-zone to the local time-zone
             self.df_slice_hk.local_time = pd.to_datetime(
-                self.df_slice_hk.local_time, format="%Y-%m-%d %H:%M:%S", utc=True
+                self.df_slice_hk.local_time, format="%Y-%m-%d %H:%M:%S"
             )
             x_axs_val = self.df_slice_hk.local_time
         axs1 = plt.subplot(gs[:])
