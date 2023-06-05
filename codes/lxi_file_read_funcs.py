@@ -459,7 +459,11 @@ def read_binary_data_sci(
     df.set_index("Date", inplace=False)
 
     # For each row, get the time difference between the current row and the last row
-    time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
+    try:
+        time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
+    except Exception:
+        # Set time difference to 0
+        time_diff = datetime.timedelta(seconds=0)
     # For each time difference, get the total number of seconds as an array
     time_diff_seconds = time_diff.dt.total_seconds().values
     # Add utc_time and local_time column to the dataframe as NaNs
@@ -722,9 +726,13 @@ def read_binary_data_hk(
     df["Date"] = Date_datetime
 
     # Get the time difference between the first and last timestamp
-    time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
+    try:
+        time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
+    except Exception:
+        # Set time difference to 0 seconds
+        time_diff = datetime.timedelta(seconds=0)
     # For each time difference, get the total number of seconds as an array
-    time_diff_seconds = np.array([x.total_seconds() for x in time_diff])
+    time_diff_seconds = time_diff.dt.total_seconds().values
     # Add utc_time and local_time column to the dataframe as NaNs
     df["utc_time"] = np.nan
     df["local_time"] = np.nan

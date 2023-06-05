@@ -486,7 +486,7 @@ font_style = font.Font(family="serif", size=12)
 font_style_box = font.Font(family="serif", size=12, weight="bold")
 font_style_big = font.Font(family="serif", size=25)
 
-dark_mode = False
+dark_mode = True
 if dark_mode:
     bg_color = "black"
     fg_color = "white"
