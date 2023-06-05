@@ -332,14 +332,18 @@ class plot_data_class:
 
         # Depending on the time_type, find the x-axis values
         if self.time_type == "Lexi":
-            #x_axs_val = (self.df_slice_hk.index - t_start).total_seconds() / 60
             x_axs_val = self.df_slice_hk.index
         elif self.time_type == "UTC":
+            # Convert self.df_slice_hk.utc_time from string to datetime
+            self.df_slice_hk.utc_time = pd.to_datetime(
+                self.df_slice_hk.utc_time, format="%Y-%m-%d %H:%M:%S", utc=True
+            )
+            x_axs_val = self.df_slice_hk.utc_time
+        elif self.time_type == "Local":
             # Convert self.df_slice_hk.local_time from string to datetime
             self.df_slice_hk.local_time = pd.to_datetime(
                 self.df_slice_hk.local_time, format="%Y-%m-%d %H:%M:%S", utc=True
             )
-            #x_axs_val = (self.df_slice_hk.local_time - self.df_slice_hk.local_time.min()).dt.total_seconds() / 60
             x_axs_val = self.df_slice_hk.local_time
         axs1 = plt.subplot(gs[:])
         axs1.plot(
@@ -370,14 +374,15 @@ class plot_data_class:
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
         if self.time_type == "Lexi":
-            axs1.set_xlabel(f"Time since {t_start.strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
-            # Avoid overlapping of the x-axis labels
-            fig.autofmt_xdate()
-            
+            axs1.set_xlabel("Time [UTC]")
         elif self.time_type == "UTC":
-            axs1.set_xlabel(f"Time since {self.df_slice_hk.local_time.min().strftime('%Y-%m-%d %H:%M:%S')} [UTC] (minutes)")
-            # Avoid overlapping of the x-axis labels
-            fig.autofmt_xdate()
+            axs1.set_xlabel("Time [UTC]")
+        elif self.time_type == "Local":
+            # Get the local time zone of the system
+            local_timezone = datetime.datetime.now(pytz.timezone('UTC')).astimezone().tzinfo
+            axs1.set_xlabel(f"Time [{local_timezone}]")
+        # Avoid overlapping of the x-axis labels
+        fig.autofmt_xdate()
 
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
         axs1.tick_params(axis="both", which="major")

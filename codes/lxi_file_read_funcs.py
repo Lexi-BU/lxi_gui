@@ -314,8 +314,11 @@ def read_binary_data_sci(
 
     input_file_name = in_file_name
 
-    # Get the creation date of the file in UTC
+    # Get the creation date of the file in UTC and local time
     creation_date_utc = datetime.datetime.utcfromtimestamp(
+        os.path.getctime(input_file_name)
+    )
+    creation_date_local = datetime.datetime.fromtimestamp(
         os.path.getctime(input_file_name)
     )
 
@@ -459,10 +462,12 @@ def read_binary_data_sci(
     time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
     # For each time difference, get the total number of seconds as an array
     time_diff_seconds = time_diff.dt.total_seconds().values
-    # Add local_time column to the dataframe as NaNs
+    # Add utc_time and local_time column to the dataframe as NaNs
+    df["utc_time"] = np.nan
     df["local_time"] = np.nan
-    # For each row, set the local_time as sum of created_date_utc and time_diff_seconds
-    df["local_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
+    # For each row, set the utc_time and local_time as sum of created_date_utc and time_diff_seconds
+    df["utc_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
+    df["local_time"] = creation_date_local + pd.to_timedelta(time_diff_seconds, unit="s")
 
     # Save the dataframe to a csv file
     df.to_csv(save_file_name, index=False)
@@ -522,10 +527,14 @@ def read_binary_data_hk(
 
     input_file_name = in_file_name
 
-    # Get the creation date of the file in UTC
+    # Get the creation date of the file in UTC and local time
     creation_date_utc = datetime.datetime.utcfromtimestamp(
         os.path.getctime(input_file_name)
     )
+    creation_date_local = datetime.datetime.fromtimestamp(
+        os.path.getctime(input_file_name)
+    )
+
 
     with open(input_file_name, "rb") as file:
         raw = file.read()
@@ -716,10 +725,12 @@ def read_binary_data_hk(
     time_diff = df["Date"].iloc[:] - df["Date"].iloc[-1]
     # For each time difference, get the total number of seconds as an array
     time_diff_seconds = np.array([x.total_seconds() for x in time_diff])
-    # Add local_time column to the dataframe as NaNs
+    # Add utc_time and local_time column to the dataframe as NaNs
+    df["utc_time"] = np.nan
     df["local_time"] = np.nan
-    # For each row, set the local_time as sum of created_date_utc and time_diff_seconds
-    df["local_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
+    # For each row, set the utc_time and local_time as sum of created_date_utc and time_diff_seconds
+    df["utc_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
+    df["local_time"] = creation_date_local + pd.to_timedelta(time_diff_seconds, unit="s")
 
 
     # Set Date as the index without replacing the column

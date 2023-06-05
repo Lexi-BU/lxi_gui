@@ -871,7 +871,7 @@ if os.name == "nt":
         1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
     )
 elif os.name == "posix":
-    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230604_not_sent/")
+    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/PIT/20230605_not_sent/")
 elif os.name == "darwin":
     folder_path.insert(1, "/Users/lexi_user/Desktop/PIT_softwares/PIT_23_05_05/Target/rec_tlm/not_sent/")
 else:
@@ -985,7 +985,8 @@ start_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(start_time_hk, s
 end_time.bind("<KeyRelease>", lambda *_: update_time_entry(end_time, end_time_hk))
 end_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(end_time_hk, end_time))
 
-# Add a dropdown menu for the kind of time to be used, options are "Lexi Time" and "UTC Time".
+# Add a dropdown menu for the kind of time to be used, options are "Lexi Time" and "UTC Time" and
+# "Local Time"
 # Default is "Lexi Time". If the time kind is changed, then run the "refresh_ts_plot" function
 # to update the plot.
 time_type = tk.StringVar()
@@ -995,6 +996,7 @@ time_type_menu = tk.OptionMenu(
     time_type,
     "Lexi",
     "UTC",
+    "Local",
     command=lambda *_: refresh_ts_plot(),
 )
 time_type_menu.config(bg=bg_color, fg=fg_color, borderwidth=2)
