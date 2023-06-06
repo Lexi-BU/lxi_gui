@@ -28,7 +28,7 @@ def load_ts_plots(
     fig_width=None,
     fig_height=None,
     dark_mode=True,
-    time_type="UTC",
+    time_type="LEXI",
 ):
     """
     Loads the time series plots for the selected time range and displays them in the GUI.

@@ -331,7 +331,7 @@ class plot_data_class:
         key_90p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 90)
 
         # Depending on the time_type, find the x-axis values
-        if self.time_type == "Lexi":
+        if self.time_type == "LEXI":
             x_axs_val = self.df_slice_hk.index
         elif self.time_type == "UTC":
             # Convert self.df_slice_hk.utc_time from string to datetime
@@ -373,7 +373,7 @@ class plot_data_class:
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         # Rotate the x-axis labels by certain degrees and set their fontsize, if required
         plt.setp(axs1.get_xticklabels(), rotation=0)
-        if self.time_type == "Lexi":
+        if self.time_type == "LEXI":
             axs1.set_xlabel("Time [UTC]")
         elif self.time_type == "UTC":
             axs1.set_xlabel("Time [UTC]")

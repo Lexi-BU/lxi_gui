@@ -990,15 +990,19 @@ end_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(end_time_hk, end_t
 # Default is "Lexi Time". If the time kind is changed, then run the "refresh_ts_plot" function
 # to update the plot.
 time_type = tk.StringVar()
-time_type.set("UTC")
+time_type.set("LEXI")
 time_type_menu = tk.OptionMenu(
     hk_tab,
     time_type,
-    "Lexi",
+    "LEXI",
     "UTC",
     "Local",
     command=lambda *_: refresh_ts_plot(),
 )
+# Deactivate the UTC and Local options for now
+time_type_menu["menu"].entryconfig(1, state="disabled")
+time_type_menu["menu"].entryconfig(2, state="disabled")
+
 time_type_menu.config(bg=bg_color, fg=fg_color, borderwidth=2)
 time_type_menu.grid(row=12, column=2, columnspan=1, sticky="nsew")
 time_type_label = tk.Label(
