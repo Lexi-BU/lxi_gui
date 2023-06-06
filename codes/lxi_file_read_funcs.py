@@ -390,29 +390,33 @@ def read_binary_data_sci(
                 ),
             )
             dict_writer.writeheader()
-            dict_writer.writerows(
-                {
-                    "Date": default_time
-                    + datetime.timedelta(milliseconds=sci_packet.timestamp),
-
-
-                    "TimeStamp": sci_packet.timestamp,
-                    "IsCommanded": sci_packet.is_commanded,
-                    "Channel1": np.round(
-                        sci_packet.channel1, decimals=number_of_decimals
-                    ),
-                    "Channel2": np.round(
-                        sci_packet.channel2, decimals=number_of_decimals
-                    ),
-                    "Channel3": np.round(
-                        sci_packet.channel3, decimals=number_of_decimals
-                    ),
-                    "Channel4": np.round(
-                        sci_packet.channel4, decimals=number_of_decimals
-                    ),
-                }
-                for sci_packet in packets
-            )
+            try:
+                dict_writer.writerows(
+                    {
+                        "Date": default_time + datetime.timedelta(milliseconds=sci_packet.timestamp),
+                        "TimeStamp": sci_packet.timestamp,
+                        "IsCommanded": sci_packet.is_commanded,
+                        "Channel1": np.round(
+                            sci_packet.channel1, decimals=number_of_decimals
+                        ),
+                        "Channel2": np.round(
+                            sci_packet.channel2, decimals=number_of_decimals
+                        ),
+                        "Channel3": np.round(
+                            sci_packet.channel3, decimals=number_of_decimals
+                        ),
+                        "Channel4": np.round(
+                            sci_packet.channel4, decimals=number_of_decimals
+                        ),
+                    }
+                    for sci_packet in packets
+                )
+            except Exception as e:
+                # Print the exception in red color
+                print(f"\n\033[91m{e}\033[00m\n")
+                print(f"Number of science packets found in the file \033[96m {in_file_name}\033[0m "
+                      f"is just \033[91m {len(packets)}\033[0m. \n \033[96m Check the datafile to "
+                      "see if the datafile has proper data.\033[0m \n ")
     else:
         with open(save_file_name, "w", newline="") as file:
             dict_writer = csv.DictWriter(
@@ -428,26 +432,33 @@ def read_binary_data_sci(
                 ),
             )
             dict_writer.writeheader()
-            dict_writer.writerows(
-                {
-                    "Date": datetime.datetime.utcfromtimestamp(sci_packet.Date),
-                    "TimeStamp": sci_packet.timestamp / 1e3,
-                    "IsCommanded": sci_packet.is_commanded,
-                    "Channel1": np.round(
-                        sci_packet.channel1, decimals=number_of_decimals
-                    ),
-                    "Channel2": np.round(
-                        sci_packet.channel2, decimals=number_of_decimals
-                    ),
-                    "Channel3": np.round(
-                        sci_packet.channel3, decimals=number_of_decimals
-                    ),
-                    "Channel4": np.round(
-                        sci_packet.channel4, decimals=number_of_decimals
-                    ),
-                }
-                for sci_packet in packets
-            )
+            try:
+                dict_writer.writerows(
+                    {
+                        "Date": datetime.datetime.utcfromtimestamp(sci_packet.Date),
+                        "TimeStamp": sci_packet.timestamp / 1e3,
+                        "IsCommanded": sci_packet.is_commanded,
+                        "Channel1": np.round(
+                            sci_packet.channel1, decimals=number_of_decimals
+                        ),
+                        "Channel2": np.round(
+                            sci_packet.channel2, decimals=number_of_decimals
+                        ),
+                        "Channel3": np.round(
+                            sci_packet.channel3, decimals=number_of_decimals
+                        ),
+                        "Channel4": np.round(
+                            sci_packet.channel4, decimals=number_of_decimals
+                        ),
+                    }
+                    for sci_packet in packets
+                )
+            except Exception as e:
+                # Print the exception in red color
+                print(f"\n\033[91m{e}\033[00m\n")
+                print(f"Number of science packets found in the file \033[96m {in_file_name}\033[0m "
+                      f"is just \033[91m {len(packets)}\033[0m. \n \033[96m Check the datafile to "
+                      "see if the datafile has proper data.\033[0m \n ")
 
     # Read the saved file data in a dataframe
     df = pd.read_csv(save_file_name)
@@ -464,8 +475,15 @@ def read_binary_data_sci(
     except Exception:
         # Set time difference to 0
         time_diff = datetime.timedelta(seconds=0)
-    # For each time difference, get the total number of seconds as an array
-    time_diff_seconds = time_diff.dt.total_seconds().values
+        logger.warning(f"For the science data, the time difference between the current row and the last row is 0 for {input_file_name}.")
+    try:
+        # For each time difference, get the total number of seconds as an array
+        time_diff_seconds = time_diff.dt.total_seconds().values
+    except Exception:
+        # Set time difference to 0 seconds
+        time_diff_seconds = 0
+        logger.warning(f"For the scicence data, the time difference between the current row and the last row is 0 for {input_file_name}.")
+
     # Add utc_time and local_time column to the dataframe as NaNs
     df["utc_time"] = np.nan
     df["local_time"] = np.nan
@@ -538,7 +556,6 @@ def read_binary_data_hk(
     creation_date_local = datetime.datetime.fromtimestamp(
         os.path.getctime(input_file_name)
     )
-
 
     with open(input_file_name, "rb") as file:
         raw = file.read()
@@ -731,15 +748,21 @@ def read_binary_data_hk(
     except Exception:
         # Set time difference to 0 seconds
         time_diff = datetime.timedelta(seconds=0)
-    # For each time difference, get the total number of seconds as an array
-    time_diff_seconds = time_diff.dt.total_seconds().values
+        logger.warning(f"For the housekeeping data, the time difference between the current row and the last row is 0 for {input_file_name}.")
+
+    try:
+        # For each time difference, get the total number of seconds as an array
+        time_diff_seconds = time_diff.dt.total_seconds().values
+    except Exception:
+        # Set time difference to 0 seconds
+        time_diff_seconds = 0
+        logger.warning(f"For the housekeeping data, the time difference between the current row and the last row is 0 for {input_file_name}.")
     # Add utc_time and local_time column to the dataframe as NaNs
     df["utc_time"] = np.nan
     df["local_time"] = np.nan
     # For each row, set the utc_time and local_time as sum of created_date_utc and time_diff_seconds
     df["utc_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
     df["local_time"] = creation_date_local + pd.to_timedelta(time_diff_seconds, unit="s")
-
 
     # Set Date as the index without replacing the column
     df.set_index("Date", inplace=True, drop=False)
