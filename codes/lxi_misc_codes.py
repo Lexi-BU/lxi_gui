@@ -6,7 +6,7 @@ import subprocess
 import matplotlib.pyplot as plt
 
 import global_variables
-# import lxi_csv_to_cdf as lctc
+import lxi_csv_to_cdf as lctc
 import lxi_csv_to_csv as lctcsv
 import lxi_file_read_funcs as lxrf
 import lxi_gui_entry_box as lgeb
@@ -14,7 +14,7 @@ import numpy as np
 import paramiko
 from tabulate import tabulate
 
-# importlib.reload(lctc)
+importlib.reload(lctc)
 importlib.reload(lgeb)
 importlib.reload(lctcsv)
 importlib.reload(lxrf)
@@ -415,7 +415,6 @@ def save_csv(root=None, number_of_decimals=3):
                 "df": global_variables.all_file_details["df_all_sci"],
                 "csv_file": global_variables.all_file_details["file_name_sci"],
             }
-
             lctcsv.lxi_csv_to_csv(**inputs)
         except Exception as e:
             print(
@@ -433,21 +432,22 @@ def save_cdf():
     in a folder named "cdf". The name of the cdf file is the same as the name of the input file,
     with "cdf" appended to it.
     """
-    try:
-        inputs = {
-            "df": global_variables.all_file_details["df_all_sci"],
-            "csv_file": global_variables.all_file_details["file_name_sci"],
-        }
-
-        lctc.lxi_csv_to_cdf(**inputs)
-    except Exception as e:
-        print(
-            f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
-            f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
-            f"Science csv file is loaded. \n"
-        )
-        pass
-
+    if global_variables.all_file_details:
+        try:
+            inputs = {
+                "df": global_variables.all_file_details["df_all_sci"],
+                "csv_file": global_variables.all_file_details["file_name_sci"],
+            }
+            lctc.lxi_csv_to_cdf(**inputs)
+        except Exception as e:
+            print(
+                f"\n \x1b[1;31;255m Error: \x1b[0m Could not save the cdf file. Following exception"
+                f" was raised: \n \x1b[1;31;255m {e} \x1b[0m is not defined. \n Check if a valid "
+                f"Science csv file is loaded. \n"
+            )
+            pass
+    else:
+        logger.error("No file loaded/ no Data in the file")
 
 def copy_pit_files():
 

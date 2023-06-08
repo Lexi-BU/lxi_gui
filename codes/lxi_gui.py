@@ -792,7 +792,7 @@ cdf_save_button = tk.Button(
 )
 cdf_save_button.grid(row=18, column=11, columnspan=1, sticky="nw")
 # Disable the button until the data is loaded
-cdf_save_button.config(state="disabled")
+cdf_save_button.config(state="normal")
 
 # Add a button to save the data to a csv file
 csv_save_button = tk.Button(
