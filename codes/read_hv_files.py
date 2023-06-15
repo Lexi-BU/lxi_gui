@@ -250,7 +250,7 @@ if __name__ == "__main__":
         "save_fig": True,
         "fig_name": None,
         "start_time": "2023-05-31 07:30:00",
-        "end_time": "2024-06-06 21:30:00",
+        "end_time": "2023-06-06 22:00:00",
         "fig_folder": "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/figures",
         "fig_size": (12, 12),
         "fig_dpi": 300,
