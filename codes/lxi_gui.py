@@ -288,11 +288,11 @@ def load_and_copy_files():
     This function is called when the "Load Files" button is clicked. It copies the LEXI data files
     from PIT to the local computer and loads the data.
     """
-    try:
-        lmsc.copy_pit_files()
-    except Exception as e:
-        logger.exception(f"Exception occurred while copying files from PIT: {e}")
-        pass
+    # try:
+    #     lmsc.copy_pit_files()
+    # except Exception as e:
+    #     logger.exception(f"Exception occurred while copying files from PIT: {e}")
+    #     pass
 
     lmsc.load_folder(
         file_val=folder_path.get(),
@@ -301,19 +301,19 @@ def load_and_copy_files():
         multiple_files=multi_file_status_var.get(),
     )
 
-    try:
-        default_opt_var.set(True)
-        ts_button_val_change(default_opt_var)
-        refresh_ts_plot()
-    except Exception as e:
-        logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
-        pass
+    # try:
+    #     default_opt_var.set(True)
+    #     ts_button_val_change(default_opt_var)
+    #     refresh_ts_plot()
+    # except Exception as e:
+    #     logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
+    #     pass
 
-    try:
-        hist_plot_inputs()
-    except Exception as e:
-        logger.exception(f"Exception occurred while refreshing the histogram plot: {e}")
-        pass
+    # try:
+    #     hist_plot_inputs()
+    # except Exception as e:
+    #     logger.exception(f"Exception occurred while refreshing the histogram plot: {e}")
+    #     pass
 
 
 def update_time_entry(time_entry, time_entry_other):
@@ -871,7 +871,7 @@ if os.name == "nt":
         1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
     )
 elif os.name == "posix":
-    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/PIT/20230605_not_sent/")
+    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230608_not_sent/")
 elif os.name == "darwin":
     folder_path.insert(1, "/Users/lexi_user/Desktop/PIT_softwares/PIT_23_05_05/Target/rec_tlm/not_sent/")
 else:
