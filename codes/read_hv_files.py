@@ -8,7 +8,9 @@ import pandas as pd
 import seaborn as sns
 from spacepy.pycdf import CDF as cdf
 from tabulate import tabulate
+import getpass
 
+user_name = getpass.getuser()
 
 def read_hv_files(hv_file=None, hv_folder=None, file_type=None, start_time=None, end_time=None):
 
@@ -58,7 +60,9 @@ def read_hv_files(hv_file=None, hv_folder=None, file_type=None, start_time=None,
 
 def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=None, key_list=None,
             start_time=None, end_time=None, save_fig=False, fig_name=None, fig_folder=None,
-            fig_size=(6, 6), fig_dpi=100, fig_format="png", unit_dict=None, font_dict=None):
+            fig_size=(6, 6), fig_dpi=100, fig_format="png", unit_dict=None, font_dict=None,
+            dark_mode=False):
+
     # Read the HV file
     df = read_hv_files(hv_file=hv_file, hv_folder=hv_folder, file_type=file_type,
                        start_time=start_time, end_time=end_time)
@@ -71,11 +75,19 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         data = df[key]
         # Print that data is being plotted in cyan color
         print("\n \033[96m" + "Plotting data for " + key + "\033[00m \n")
+
+        if dark_mode:
+            # Use a colorblind friendly palette
+            color = "lime"
+            edge_color = "black"
+        else:
+            color = "steelblue"
+            edge_color = "white"
         # Create a 2x2 plot
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=fig_size, dpi=fig_dpi)
 
         # Plot 1: Time series data
-        axes[0, 0].plot(df.index, df[key], color="aqua", linewidth=0., marker=".", markersize=2.5,)
+        axes[0, 0].plot(df.index, df[key], color=color, linewidth=0., marker=".", markersize=2.5,)
         # Format the x-axis to show the date and time so that they don"t overlap
         axes[0, 0].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H"))
         axes[0, 0].tick_params(axis="x", rotation=45)
@@ -88,7 +100,7 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         axes[0, 0].set_xlim(df.index[0], df.index[-1])
 
         # Plot 2: Histogram
-        axes[0, 1].hist(df[key], bins=20, color="aqua", edgecolor="black", linewidth=1.2)
+        axes[0, 1].hist(df[key], bins=20, color=color, edgecolor=edge_color, linewidth=1.2)
         axes[0, 1].set_xlabel(f"{key} [{unit_dict[key]}]", fontdict=font_dict["axis"])
         axes[0, 1].set_ylabel("Frequency", fontdict=font_dict["axis"])
         axes[0, 1].set_title("Histogram", fontdict=font_dict["title"])
@@ -102,6 +114,11 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         axes[1, 0].set_xlabel("Date", fontdict=font_dict["axis"])
         axes[1, 0].set_ylabel("Hour", fontdict=font_dict["axis"])
         axes[1, 0].set_title("Heatmap", fontdict=font_dict["title"])
+
+        # Set heatmap colorbar label
+        cbar = axes[1, 0].collections[0].colorbar
+        cbar.set_label(f"{key} [{unit_dict[key]}]", fontdict=font_dict["axis"], color=color)
+
         # Set the x-axis limits
         # axes[1, 0].set_xlim(df.index[0], df.index[-1])
 
@@ -132,6 +149,10 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
             # ["Kurtosis", np.round(data.kurtosis(), 2)],
         ]
 
+        if dark_mode:
+            bbox = {"facecolor": "k", "alpha": 0.5, "pad": 1}
+        else:
+            bbox = {"facecolor": "w", "alpha": 0.5, "pad": 1}
         # Add table title outside the table
         axes[1, 1].text(0.5, 1., f"Statistics for {key}", fontdict=font_dict["table_title"],
                         verticalalignment="center", horizontalalignment="center")
@@ -139,7 +160,7 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         axes[1, 1].axis("off")
         axes[1, 1].text(0.5, .95, table_text, fontdict=font_dict["table"],
                         verticalalignment="top", horizontalalignment="center",
-                        bbox={"facecolor": "k", "alpha": 0.5, "pad": 1})
+                        bbox=bbox, transform=axes[1, 1].transAxes)
 
         # Print the statistical values in the fourth subplot as a table
         # axes[1, 1].table(cellText=[[stats_text]], loc="center", colLabels=["Statistics"], cellLoc="center")
@@ -156,18 +177,21 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
                 fig_name = hv_file.split("/")[-1].split(".")[0]
             if fig_folder is None:
                 fig_folder = hv_folder
-            fig.savefig(fig_folder + "/" + fig_name + "_" + key + f".{fig_format}", dpi=300, bbox_inches="tight", pad_inches=0.1, format=fig_format)
+            fig.savefig(f"{fig_folder}/{fig_name}_{key}_{dark_mode}.{fig_format}", dpi=300, bbox_inches="tight", pad_inches=0.1, format=fig_format)
     return df
 
 
 if __name__ == "__main__":
     plt.close("all")
+
+    # Define whether to use dark_mode or not
+    dark_mode = True
     unit_dict = {
         "HK_id": "#",
-        "PinPullerTemp": "$^\\circ$C",
-        "OpticsTemp": "$^\\circ$C",
-        "LEXIbaseTemp": "$^\\circ$C",
-        "HVsupplyTemp": "$^\\circ$C",
+        "PinPullerTemp": r"$^\circ$C",
+        "OpticsTemp": r"$^\circ$C",
+        "LEXIbaseTemp": r"$^\circ$C",
+        "HVsupplyTemp": r"$^\circ$C",
         "+5.2V_Imon": "mA",
         "+10V_Imon": "mA",
         "+3.3V_Imon": "mA",
@@ -178,32 +202,51 @@ if __name__ == "__main__":
         "DeltaEvntCount": "#",
         "DeltaDroppedCount": "#",
     }
+
+    if dark_mode:
+        color_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+                      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+        default_color = "white"
+        plt.style.use("dark_background")
+    else:
+        color_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+                      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+        default_color = "k"
+        plt.style.use("default")
+
+    # Use tex for matplotlib
+    plt.rc("text", usetex=False)
+    plt.rc("font", family="serif")
+
     # Define a font_dict for labels, text, ticklabels, etc.
     # Define a font_dict for title
     font_dict_title = {
         "family": "serif",
-        "color": "white",
+        "color": default_color,
         "weight": "bold",
         "size": 16,
     }
+
     # Define a font_dict for axis labels
     font_dict_axis = {
         "family": "serif",
-        "color": "white",
+        "color": default_color,
         "weight": "normal",
         "size": 16,
     }
+
     # Define a font_dict for tick labels
     font_dict_tick = {
         "family": "serif",
-        "color": "white",
+        "color": default_color,
         "weight": "normal",
         "size": 12,
     }
+
     # Define a font_dict for tick labels
     font_dict_tick = {
         "family": "serif",
-        "color": "white",
+        "color": default_color,
         "weight": "normal",
         "size": 12,
     }
@@ -211,7 +254,7 @@ if __name__ == "__main__":
     # Define a font_dict for table
     font_dict_table = {
         "family": "serif",
-        "color": "white",
+        "color": default_color,
         "weight": "normal",
         "size": 10,
     }
@@ -219,11 +262,11 @@ if __name__ == "__main__":
     # Define a font_dict for table title
     font_dict_table_title = {
         "family": "serif",
-        "color": "white",
+        "color": default_color,
         "weight": "bold",
         "size": 16,
     }
-    
+
     # Define a font_dict for all
     font_dict_all = {
         "title": font_dict_title,
@@ -234,9 +277,10 @@ if __name__ == "__main__":
     }
 
     input = {
-        "hv_file": "payload_lexi_1716500403_21928_1717075719_20852_hk_output.csv",
-        "hv_folder": "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/PIT/20230608_not_sent/processed_data/hk/",
+        "hv_file": "payload_lexi_1716500403_21928_1717071517_5488_hk_output.csv",
+        "hv_folder": f"/home/{user_name}/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230608_not_sent/processed_data/alll_files/hk/",
         "file_type": "csv",
+        # "key_list": ["PinPullerTemp"],
         "key_list": ["PinPullerTemp", "LEXIbaseTemp",
                      "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon",
                      "+28V_Imon", "ADC_Ground",
@@ -251,12 +295,13 @@ if __name__ == "__main__":
         "fig_name": None,
         "start_time": "2023-05-31 07:30:00",
         "end_time": "2023-06-06 22:00:00",
-        "fig_folder": "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/figures",
+        "fig_folder": f"/home/{user_name}/Desktop/git/Lexi-Bu/lxi_gui/figures/hv_testing/",
         "fig_size": (12, 12),
         "fig_dpi": 300,
         "fig_format": "png",
         "unit_dict": unit_dict,
         "font_dict": font_dict_all,
+        "dark_mode": dark_mode,
     }
 
     df = plot_hv(**input)

@@ -301,6 +301,21 @@ def load_and_copy_files():
         multiple_files=multi_file_status_var.get(),
     )
 
+
+    # Try to save the csv file
+    try:
+        lmsc.save_csv()
+    except Exception as e:
+        logger.exception(f"Exception occurred while saving the csv file: {e}")
+        pass
+
+    # Try to save the cdf file
+    try:
+        lmsc.save_cdf()
+    except Exception as e:
+        logger.exception(f"Exception occurred while saving the cdf file: {e}")
+        pass
+
     # try:
     #     default_opt_var.set(True)
     #     ts_button_val_change(default_opt_var)

@@ -375,7 +375,7 @@ def hk_value_comp(ii=None, vpc=None, hk_value=None, hk_id=None, lxi_unit=None):
     return chosen_func(vpc, hk_value, lxi_unit)
 
 
-def save_csv(root=None, number_of_decimals=3):
+def save_csv():
     """
     The function, upon clicking the "Save CSV" button, saves the data in the csv file format in a
     folder names "csv". The name of the csv file is the same as the name of the input file, with
