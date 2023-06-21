@@ -813,7 +813,7 @@ cdf_save_button.config(state="normal")
 csv_save_button = tk.Button(
     sci_tab,
     text="Save CSV",
-    command=lambda: lmsc.save_csv(root=sci_tab),
+    command=lambda: lmsc.save_csv(),
     font=font_style_box,
     justify="center",
     bg=bg_color,
