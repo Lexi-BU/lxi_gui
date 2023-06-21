@@ -346,45 +346,54 @@ def read_binary_data_sci(
                 continue
 
             index += 1
-
     else:
         while index < len(raw) - 28:
-            if (
-                raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi
-            ):
+            if (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi):
                 packets.append(sci_packet.from_bytes(raw[index:index + 28]))
                 index += 28
+                continue
             elif (raw[index:index + 2] == sync_pit) and (raw[index + 12:index + 16] != sync_lxi):
                 # Check if sync_lxi is present in the next 16 bytes
                 if sync_lxi in raw[index + 12:index + 28]:
                     # Find the index of sync_lxi
                     index_sync = index + 12 + raw[index + 12:index + 28].index(sync_lxi)
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index_sync:index + 28] + raw[index + 12 + 28:index_sync + 28]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index_sync:index + 28] +
+                                  raw[index + 12 + 28:index_sync + 28])
                     packets.append(sci_packet.from_bytes(new_packet))
                     index += 28
-                # Check if str(raw[index - 3:index]) + str(raw[index+12:index+13]) == sync_lxi
+                    continue
+                # Check if raw[index - 3:index] + raw[index+12:index+13] == sync_lxi
                 elif raw[index - 3:index] + raw[index + 12:index + 13] == sync_lxi:
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index - 3:index] + raw[index + 12:index + 25]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index - 3:index] +
+                                  raw[index + 12:index + 25])
                     packets.append(sci_packet.from_bytes(new_packet))
                     index += 28
-                # Check if str(raw[index - 2:index]) + str(raw[index+12:index+14]) == sync_lxi
-                elif str(raw[index - 2:index]) + str(raw[index + 12:index + 14]) == sync_lxi:
+                    continue
+                # Check if raw[index - 2:index] + raw[index+12:index+14] == sync_lxi
+                elif raw[index - 2:index] + raw[index + 12:index + 14] == sync_lxi:
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index - 2:index] + raw[index + 13:index + 26]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index - 2:index] +
+                                  raw[index + 13:index + 26])
                     packets.append(sci_packet.from_bytes(new_packet))
                     index += 28
-                # Check if str(raw[index - 1:index]) + str(raw[index+12:index+15]) == sync_lxi
-                elif raw[index - 1:index] == sync_lxi_4 and raw[index + 12:index + 15] == sync_lxi_13:
+                    continue
+                # Check if raw[index - 1:index] + raw[index+12:index+15] == sync_lxi
+                elif raw[index - 1:index] + raw[index + 12:index + 15] == sync_lxi:
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index - 1:index] + raw[index + 14:index + 27]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index - 1:index] +
+                                  raw[index + 14:index + 27])
                     packets.append(sci_packet.from_bytes(new_packet))
                     index += 28
+                    continue
                 index += 28
                 continue
-
-            index += 1
+            index += 28
 
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
@@ -604,46 +613,60 @@ def read_binary_data_hk(
                 packets.append(hk_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
                 index += 16
                 continue
-
             index += 1
     else:
         while index < len(raw) - 28:
-            if (
-                raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi
-            ):
+            if (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi):
+                # print(f"{index} d ==> {raw[index:index + 28].hex()}\n")
                 packets.append(hk_packet_cls.from_bytes(raw[index:index + 28]))
                 index += 28
-            elif (raw[index:index + 2] == sync_pit) and (raw[index + 12:index + 16] != sync_lxi):
+                continue
+            elif (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] != sync_lxi):
                 # Check if sync_lxi is present in the next 16 bytes
                 if sync_lxi in raw[index + 12:index + 28]:
                     # Find the index of sync_lxi
                     index_sync = index + 12 + raw[index + 12:index + 28].index(sync_lxi)
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index_sync:index + 28] + raw[index + 12 + 28:index_sync + 28]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index_sync:index + 28] +
+                                  raw[index + 12 + 28:index_sync + 28])
+                    # print(f"{index} 1 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
-                # Check if str(raw[index - 3:index]) + str(raw[index+12:index+13]) == sync_lxi
+                    continue
+                # Check if raw[index - 3:index] + raw[index+12:index+13] == sync_lxi
                 elif raw[index - 3:index] + raw[index + 12:index + 13] == sync_lxi:
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index - 3:index] + raw[index + 12:index + 25]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index - 3:index] +
+                                  raw[index + 12:index + 25])
+                    # print(f"{index} 2 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
-                # Check if str(raw[index - 2:index]) + str(raw[index+12:index+14]) == sync_lxi
-                elif str(raw[index - 2:index]) + str(raw[index + 12:index + 14]) == sync_lxi:
+                    continue
+                # Check if raw[index - 2:index] + raw[index+12:index+14] == sync_lxi
+                elif raw[index - 2:index] + raw[index + 12:index + 14] == sync_lxi:
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index - 2:index] + raw[index + 13:index + 26]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index - 2:index] +
+                                  raw[index + 13:index + 26])
+                    # print(f"{index} 3 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
-                # Check if str(raw[index - 1:index]) + str(raw[index+12:index+15]) == sync_lxi
-                elif raw[index - 1:index] == sync_lxi_4 and raw[index + 12:index + 15] == sync_lxi_13:
+                    continue
+                # Check if raw[index - 1:index] + raw[index+12:index+15] == sync_lxi
+                elif (raw[index - 1:index] + raw[index + 12:index + 15] == sync_lxi):
                     # Reorder the packet
-                    new_packet = raw[index:index + 12] + raw[index - 1:index] + raw[index + 14:index + 27]
+                    new_packet = (raw[index:index + 12] +
+                                  raw[index - 1:index] +
+                                  raw[index + 14:index + 27])
+                    # print(f"{index} 4 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
+                    continue
                 index += 28
                 continue
-
-            index += 1
+            index += 28
 
     # Get only those packets that have the HK data
     hk_idx = []
