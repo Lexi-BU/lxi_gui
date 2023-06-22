@@ -351,7 +351,7 @@ def read_binary_data_sci(
                     # Find the index of sync_lxi
                     index_sync = index + 12 + raw[index + 12:index + 28].index(sync_lxi)
                     # Reorder the packet
-                    new_packet = (raw[index:index + 12] +
+                    new_packet = (raw[index + 28:index + 12 + 28] +
                                   raw[index_sync:index + 28] +
                                   raw[index + 12 + 28:index_sync + 28])
                     packets.append(sci_packet_cls.from_bytes(new_packet))
