@@ -52,7 +52,7 @@ sync_pit = b"\x54\x53"
 volts_per_count = 4.5126 / 65536  # volts per increment of digitization
 
 
-class sci_packet(NamedTuple):
+class sci_packet_cls(NamedTuple):
     """
     Class for the science packet.
     The code unpacks the science packet into a named tuple. Based on the packet format, each packet
@@ -95,7 +95,7 @@ class sci_packet(NamedTuple):
         )
 
 
-class sci_packet_gsfc(NamedTuple):
+class sci_packet_cls_gsfc(NamedTuple):
     """
     Class for the science packet.
     The code unpacks the science packet into a named tuple. Based on the packet format, each packet
@@ -341,7 +341,7 @@ def read_binary_data_sci(
     if "mcp" in in_file_name:
         while index < len(raw) - 16:
             if raw[index:index + 4] == sync_lxi:
-                packets.append(sci_packet_gsfc.from_bytes(raw[index:index + 16]))
+                packets.append(sci_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
                 index += 16
                 continue
 
@@ -349,7 +349,7 @@ def read_binary_data_sci(
     else:
         while index < len(raw) - 28:
             if (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi):
-                packets.append(sci_packet.from_bytes(raw[index:index + 28]))
+                packets.append(sci_packet_cls.from_bytes(raw[index:index + 28]))
                 index += 28
                 continue
             elif (raw[index:index + 2] == sync_pit) and (raw[index + 12:index + 16] != sync_lxi):
@@ -361,7 +361,7 @@ def read_binary_data_sci(
                     new_packet = (raw[index:index + 12] +
                                   raw[index_sync:index + 28] +
                                   raw[index + 12 + 28:index_sync + 28])
-                    packets.append(sci_packet.from_bytes(new_packet))
+                    packets.append(sci_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
                 # Check if raw[index - 3:index] + raw[index+12:index+13] == sync_lxi
@@ -370,7 +370,7 @@ def read_binary_data_sci(
                     new_packet = (raw[index:index + 12] +
                                   raw[index - 3:index] +
                                   raw[index + 12:index + 25])
-                    packets.append(sci_packet.from_bytes(new_packet))
+                    packets.append(sci_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
                 # Check if raw[index - 2:index] + raw[index+12:index+14] == sync_lxi
@@ -379,7 +379,7 @@ def read_binary_data_sci(
                     new_packet = (raw[index:index + 12] +
                                   raw[index - 2:index] +
                                   raw[index + 13:index + 26])
-                    packets.append(sci_packet.from_bytes(new_packet))
+                    packets.append(sci_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
                 # Check if raw[index - 1:index] + raw[index+12:index+15] == sync_lxi
@@ -388,7 +388,7 @@ def read_binary_data_sci(
                     new_packet = (raw[index:index + 12] +
                                   raw[index - 1:index] +
                                   raw[index + 14:index + 27])
-                    packets.append(sci_packet.from_bytes(new_packet))
+                    packets.append(sci_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
                 index += 28
@@ -437,23 +437,23 @@ def read_binary_data_sci(
             try:
                 dict_writer.writerows(
                     {
-                        "Date": default_time + datetime.timedelta(milliseconds=sci_packet.timestamp),
-                        "TimeStamp": sci_packet.timestamp,
-                        "IsCommanded": sci_packet.is_commanded,
+                        "Date": default_time + datetime.timedelta(milliseconds=sci_packet_cls.timestamp),
+                        "TimeStamp": sci_packet_cls.timestamp,
+                        "IsCommanded": sci_packet_cls.is_commanded,
                         "Channel1": np.round(
-                            sci_packet.channel1, decimals=number_of_decimals
+                            sci_packet_cls.channel1, decimals=number_of_decimals
                         ),
                         "Channel2": np.round(
-                            sci_packet.channel2, decimals=number_of_decimals
+                            sci_packet_cls.channel2, decimals=number_of_decimals
                         ),
                         "Channel3": np.round(
-                            sci_packet.channel3, decimals=number_of_decimals
+                            sci_packet_cls.channel3, decimals=number_of_decimals
                         ),
                         "Channel4": np.round(
-                            sci_packet.channel4, decimals=number_of_decimals
+                            sci_packet_cls.channel4, decimals=number_of_decimals
                         ),
                     }
-                    for sci_packet in packets
+                    for sci_packet_cls in packets
                 )
             except Exception as e:
                 # Print the exception in red color
@@ -479,23 +479,23 @@ def read_binary_data_sci(
             try:
                 dict_writer.writerows(
                     {
-                        "Date": datetime.datetime.utcfromtimestamp(sci_packet.Date),
-                        "TimeStamp": sci_packet.timestamp / 1e3,
-                        "IsCommanded": sci_packet.is_commanded,
+                        "Date": datetime.datetime.utcfromtimestamp(sci_packet_cls.Date),
+                        "TimeStamp": sci_packet_cls.timestamp / 1e3,
+                        "IsCommanded": sci_packet_cls.is_commanded,
                         "Channel1": np.round(
-                            sci_packet.channel1, decimals=number_of_decimals
+                            sci_packet_cls.channel1, decimals=number_of_decimals
                         ),
                         "Channel2": np.round(
-                            sci_packet.channel2, decimals=number_of_decimals
+                            sci_packet_cls.channel2, decimals=number_of_decimals
                         ),
                         "Channel3": np.round(
-                            sci_packet.channel3, decimals=number_of_decimals
+                            sci_packet_cls.channel3, decimals=number_of_decimals
                         ),
                         "Channel4": np.round(
-                            sci_packet.channel4, decimals=number_of_decimals
+                            sci_packet_cls.channel4, decimals=number_of_decimals
                         ),
                     }
-                    for sci_packet in packets
+                    for sci_packet_cls in packets
                 )
             except Exception as e:
                 # Print the exception in red color
