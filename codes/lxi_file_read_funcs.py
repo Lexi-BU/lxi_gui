@@ -39,13 +39,6 @@ packet_format_pit = "<d"
 
 
 sync_lxi = b"\xfe\x6b\x28\x40"
-sync_lxi_4 = b"\x40"
-sync_lxi_34 = b"\x28\x40"
-sync_lxi_24 = b"\x6b\x28\x40"
-
-sync_lxi_13 = b"\xfe\x6b\x28"
-sync_lxi_12 = b"\xfe\x6b"
-sync_lxi_1 = b"\xfe"
 
 sync_pit = b"\x54\x53"
 
