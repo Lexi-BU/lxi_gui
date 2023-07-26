@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+from pathlib import Path
 import socket
 import subprocess
 import matplotlib.pyplot as plt
@@ -23,6 +24,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
+
+# Check if the log folder exists. If not, create it
+Path("../log").mkdir(parents=True, exist_ok=True)
+# if not os.path.exists("../log"):
+#     os.makedirs("../log")
 file_handler = logging.FileHandler("../log/lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
