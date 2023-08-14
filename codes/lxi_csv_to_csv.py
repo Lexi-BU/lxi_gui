@@ -10,7 +10,7 @@ def lxi_csv_to_csv(
     df=None, csv_file=None, csv_folder=None, csvs_file=None, csvs_folder=None
 ):
     """
-    Convert a CSV file to a CDF file.
+    Convert a CSV file to a CSV file.
 
     Parameters
     ----------
