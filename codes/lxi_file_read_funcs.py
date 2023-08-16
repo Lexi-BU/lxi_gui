@@ -346,14 +346,26 @@ def read_binary_data_sci(
                 index += 28
                 continue
             elif (raw[index:index + 2] == sync_pit) and (raw[index + 12:index + 16] != sync_lxi):
+                # Ignore the last packet
+                if index >= len(raw) - 28 - 16:
+                    # NOTE: This is a temporary fix. The last packet is ignored because the last
+                    # packet often isn't complete. Need to find a better solution. Check the function
+                    # read_binary_data_hk for the same.
+                    index += 28
+                    continue
                 # Check if sync_lxi is present in the next 16 bytes
-                if sync_lxi in raw[index + 12:index + 28]:
+                if sync_lxi in raw[index + 12:index + 28] and index + 28 < len(raw):
                     # Find the index of sync_lxi
                     index_sync = index + 12 + raw[index + 12:index + 28].index(sync_lxi)
                     # Reorder the packet
                     new_packet = (raw[index + 28:index + 12 + 28] +
                                   raw[index_sync:index + 28] +
                                   raw[index + 12 + 28:index_sync + 28])
+                    # Check if the packet length is 28
+                    if len(new_packet) != 28:
+                        # If the index + 28 is greater than the length of the raw data, then break
+                        if index + 28 > len(raw):
+                            break
                     packets.append(sci_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
@@ -586,6 +598,8 @@ def read_binary_data_hk(
 
     input_file_name = in_file_name
 
+    print(f"Reading the file \033[96m {in_file_name}\033[0m")
+
     # Get the creation date of the file in UTC and local time
     creation_date_utc = datetime.datetime.utcfromtimestamp(
         os.path.getctime(input_file_name)
@@ -615,14 +629,29 @@ def read_binary_data_hk(
                 index += 28
                 continue
             elif (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] != sync_lxi):
+                # Ignore the last packet
+                if index >= len(raw) - 28 - 16:
+                    # NOTE: This is a temporary fix. The last packet is ignored because the last
+                    # packet often isn't complete. Need to find a better solution. Check the function
+                    # read_binary_data_sci for the same.
+                    index += 28
+                    continue
                 # Check if sync_lxi is present in the next 16 bytes
-                if sync_lxi in raw[index + 12:index + 28]:
+                if sync_lxi in raw[index + 12:index + 28] and index + 28 < len(raw):
                     # Find the index of sync_lxi
                     index_sync = index + 12 + raw[index + 12:index + 28].index(sync_lxi)
                     # Reorder the packet
                     new_packet = (raw[index:index + 12] +
                                   raw[index_sync:index + 28] +
                                   raw[index + 12 + 28:index_sync + 28])
+                    # Check if the packet length is 28
+                    if len(new_packet) != 28:
+                        # Print the packet length
+                        print(f"The packet length is {len(new_packet)}, index = {index} and length of raw is {len(raw)}")
+                        print(f"{index} 1 ==> {new_packet.hex()}\n")
+                        # If the index + 28 is greater than the length of the raw data, then break
+                        if index + 28 > len(raw):
+                            break
                     # print(f"{index} 1 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28

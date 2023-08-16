@@ -301,28 +301,27 @@ def load_and_copy_files():
         multiple_files=multi_file_status_var.get(),
     )
 
-
     # Try to save the csv file
-    try:
-        lmsc.save_csv()
-    except Exception as e:
-        logger.exception(f"Exception occurred while saving the csv file: {e}")
-        pass
-
-    # Try to save the cdf file
-    try:
-        lmsc.save_cdf()
-    except Exception as e:
-        logger.exception(f"Exception occurred while saving the cdf file: {e}")
-        pass
-
     # try:
-    #     default_opt_var.set(True)
-    #     ts_button_val_change(default_opt_var)
-    #     refresh_ts_plot()
+    #     lmsc.save_csv()
     # except Exception as e:
-    #     logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
+    #     logger.exception(f"Exception occurred while saving the csv file: {e}")
     #     pass
+
+    # # Try to save the cdf file
+    # try:
+    #     lmsc.save_cdf()
+    # except Exception as e:
+    #     logger.exception(f"Exception occurred while saving the cdf file: {e}")
+    #     pass
+
+    try:
+        default_opt_var.set(True)
+        ts_button_val_change(default_opt_var)
+        refresh_ts_plot()
+    except Exception as e:
+        logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
+        pass
 
     # try:
     #     hist_plot_inputs()
@@ -886,7 +885,7 @@ if os.name == "nt":
         1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
     )
 elif os.name == "posix":
-    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230608_not_sent/")
+    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/PIT/20230816_not_sent/")
 elif os.name == "darwin":
     folder_path.insert(1, "/Users/lexi_user/Desktop/PIT_softwares/PIT_23_05_05/Target/rec_tlm/not_sent/")
 else:
