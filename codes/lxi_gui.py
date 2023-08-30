@@ -2,6 +2,7 @@ import importlib
 import logging
 import os
 import platform
+from pathlib import Path
 import tkinter as tk
 from tkinter import font, ttk
 
@@ -26,6 +27,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
+
+# Check if the log directory exists, if not then create it.
+Path("../log").mkdir(parents=True, exist_ok=True)
+
 file_handler = logging.FileHandler("../log/lxi_gui.log")
 file_handler.setFormatter(formatter)
 

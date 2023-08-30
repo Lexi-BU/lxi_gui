@@ -2,7 +2,7 @@ import datetime
 import importlib
 import logging
 import os
-import pandas as pd
+from pathlib import Path
 
 import global_variables
 import lxi_misc_codes as lmsc
@@ -10,6 +10,7 @@ import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytz
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -21,6 +22,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
+
+# Check if the log directory exists, if not, create it
+Path("../log").mkdir(parents=True, exist_ok=True)
+
 file_handler = logging.FileHandler("../log/lxi_gui_plot.log")
 file_handler.setFormatter(formatter)
 
@@ -659,10 +664,6 @@ class plot_data_class:
 
         # If all values of counts are NaN, then redo the histogram with different norm and cmin
         if np.isnan(counts).all():
-            print(
-                f"\033[1;31m For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
-                "Redoing the histogram with different norm and cmin\033[0m"
-            )
             logger.warning(
                 f"For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
                 "Redoing the histogram with different norm and cmin"
@@ -738,14 +739,14 @@ class plot_data_class:
             # Make step plot between xedges and xn
             x_hist.step(x_step, xn, color="g", where="post")
             x_hist.plot(
-                xedges[1:], xn, "o", color="c", markerfacecolor="none", markeredgecolor="gray"
+                xedges[1:], xn, "--", color="c", markerfacecolor="none", markeredgecolor="gray"
             )
 
             x_hist.set_xlabel("Vertical Cut")
             # Make step plot between yedges and yn
             y_hist.step(yn, y_step, color="g", where="post")
             y_hist.plot(
-                yn, yedges[:-1], "o", color="c", markerfacecolor="none", markeredgecolor="gray"
+                yn, yedges[:-1], "--", color="c", markerfacecolor="none", markeredgecolor="gray"
             )
             y_hist.invert_xaxis()
             y_hist.set_ylabel("Horizontal Cut")

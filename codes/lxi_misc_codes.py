@@ -27,8 +27,7 @@ formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
 # Check if the log folder exists. If not, create it
 Path("../log").mkdir(parents=True, exist_ok=True)
-# if not os.path.exists("../log"):
-#     os.makedirs("../log")
+
 file_handler = logging.FileHandler("../log/lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
@@ -568,6 +567,7 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
     axs : matplotlib.axes._subplots.AxesSubplot
         The axes object to which the circle is added.
     """
+    """
     if axs is None:
         raise ValueError("The axes object is not defined.")
     else:
@@ -611,5 +611,5 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
         axs.add_artist(circle2)
         circle1.set_zorder(zorder)
         circle2.set_zorder(zorder)
-
+    """
     return axs

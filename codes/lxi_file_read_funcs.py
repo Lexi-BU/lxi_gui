@@ -21,13 +21,15 @@ logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
+# Check if the log folder exists, if not then create it
+Path("../log").mkdir(parents=True, exist_ok=True)
+
 file_handler = logging.FileHandler("../log/lxi_file_read_funcs.log")
 file_handler.setFormatter(formatter)
 
 # stream_handler = logging.StreamHandler()
 
 logger.addHandler(file_handler)
-# logger.addHandler(stream_handler)
 
 # Tha packet format of the science and housekeeping packets
 packet_format_sci = ">II4H"
