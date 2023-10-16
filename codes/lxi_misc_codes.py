@@ -567,7 +567,6 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
     axs : matplotlib.axes._subplots.AxesSubplot
         The axes object to which the circle is added.
     """
-    """
     if axs is None:
         raise ValueError("The axes object is not defined.")
     else:
@@ -611,5 +610,5 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
         axs.add_artist(circle2)
         circle1.set_zorder(zorder)
         circle2.set_zorder(zorder)
-    """
+
     return axs

@@ -325,23 +325,15 @@ def read_binary_data_sci(
         os.path.getctime(input_file_name)
     )
 
-
     with open(input_file_name, "rb") as file:
         raw = file.read()
 
     index = 0
     packets = []
 
-    # Check if the word 'mcp' is present in the file name
-    if "mcp" in in_file_name:
-        while index < len(raw) - 16:
-            if raw[index:index + 4] == sync_lxi:
-                packets.append(sci_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
-                index += 16
-                continue
-
-            index += 1
-    else:
+    # Check if the "file_name" has payload in its name or not. If it has payload in its name, then
+    # use the sci_packet_cls else use sci_packet_cls_gsfc
+    if "payload" in in_file_name:
         while index < len(raw) - 28:
             if (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi):
                 packets.append(sci_packet_cls.from_bytes(raw[index:index + 28]))
@@ -401,6 +393,16 @@ def read_binary_data_sci(
                 index += 28
                 continue
             index += 28
+    else:
+        # Print in green color that the gsfc code is running
+        print("\033[92mRunning the GSFC code for Science.\033[0m")
+        while index < len(raw) - 16:
+            if raw[index:index + 4] == sync_lxi:
+                packets.append(sci_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
+                index += 16
+                continue
+
+            index += 1
 
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
@@ -423,10 +425,7 @@ def read_binary_data_sci(
     if not Path(output_folder_name).exists():
         Path(output_folder_name).mkdir(parents=True, exist_ok=True)
 
-    if "mcp" in in_file_name:
-        default_time = datetime.datetime(
-            2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone("UTC")
-        )
+    if "payload" in in_file_name:
         with open(save_file_name, "w", newline="") as file:
             dict_writer = csv.DictWriter(
                 file,
@@ -444,8 +443,8 @@ def read_binary_data_sci(
             try:
                 dict_writer.writerows(
                     {
-                        "Date": default_time + datetime.timedelta(milliseconds=sci_packet_cls.timestamp),
-                        "TimeStamp": sci_packet_cls.timestamp,
+                        "Date": datetime.datetime.utcfromtimestamp(sci_packet_cls.Date),
+                        "TimeStamp": sci_packet_cls.timestamp / 1e3,
                         "IsCommanded": sci_packet_cls.is_commanded,
                         "Channel1": np.round(
                             sci_packet_cls.channel1, decimals=number_of_decimals
@@ -469,6 +468,9 @@ def read_binary_data_sci(
                       f"is just \033[91m {len(packets)}\033[0m. \n \033[96m Check the datafile to "
                       "see if the datafile has proper data.\033[0m \n ")
     else:
+        default_time = datetime.datetime(
+            2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone("UTC")
+        )
         with open(save_file_name, "w", newline="") as file:
             dict_writer = csv.DictWriter(
                 file,
@@ -486,8 +488,8 @@ def read_binary_data_sci(
             try:
                 dict_writer.writerows(
                     {
-                        "Date": datetime.datetime.utcfromtimestamp(sci_packet_cls.Date),
-                        "TimeStamp": sci_packet_cls.timestamp / 1e3,
+                        "Date": default_time + datetime.timedelta(milliseconds=sci_packet_cls.timestamp),
+                        "TimeStamp": sci_packet_cls.timestamp,
                         "IsCommanded": sci_packet_cls.is_commanded,
                         "Channel1": np.round(
                             sci_packet_cls.channel1, decimals=number_of_decimals
@@ -616,14 +618,7 @@ def read_binary_data_hk(
     index = 0
     packets = []
 
-    if "mcp" in in_file_name:
-        while index < len(raw) - 16:
-            if raw[index:index + 4] == sync_lxi:
-                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
-                index += 16
-                continue
-            index += 1
-    else:
+    if "payload" in in_file_name:
         while index < len(raw) - 28:
             if (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi):
                 # print(f"{index} d ==> {raw[index:index + 28].hex()}\n")
@@ -691,7 +686,15 @@ def read_binary_data_hk(
                 index += 28
                 continue
             index += 28
-
+    else:
+        # Print in green color that the gsfc code is running
+        print("\033[92mRunning the GSFC code for Housekeeping.\033[0m")
+        while index < len(raw) - 16:
+            if raw[index:index + 4] == sync_lxi:
+                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
+                index += 16
+                continue
+            index += 1
     # Get only those packets that have the HK data
     hk_idx = []
     for idx, hk_packet in enumerate(packets):
@@ -781,7 +784,9 @@ def read_binary_data_hk(
     for ii, idx in enumerate(hk_idx):
         hk_packet = packets[idx]
         # Convert to seconds from milliseconds for the timestamp
-        if "mcp" in input_file_name:
+        if "payload" in in_file_name:
+            all_data_dict["Date"][ii] = hk_packet.Date
+        else:
             default_time = datetime.datetime(
                 2024, 1, 1, 0, 0, 0, tzinfo=pytz.timezone("UTC")
             )
@@ -789,8 +794,6 @@ def read_binary_data_hk(
                 milliseconds=hk_packet.timestamp
             )
             all_data_dict["Date"][ii] = new_time.timestamp()
-        else:
-            all_data_dict["Date"][ii] = hk_packet.Date
         all_data_dict["TimeStamp"][ii] = hk_packet.timestamp / 1e3
         all_data_dict["HK_id"][ii] = hk_packet.hk_id
         key = str(hk_packet.hk_id)

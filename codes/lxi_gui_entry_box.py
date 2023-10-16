@@ -248,7 +248,8 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
     norm_type_var = tk.StringVar()
     norm_type_var.set(default_opt_dict["norm_type"])
     norm_type_combobox = ttk.Combobox(
-        root, textvariable=norm_type_var, values=["log", "linear"], state="readonly"
+        root, textvariable=norm_type_var, values=["log", "linear"], state="readonly",
+        background=bg_color, foreground=fg_color
     )
 
     norm_type_combobox.grid(row=8, column=opt_col_num, columnspan=1, sticky="new")
@@ -261,7 +262,8 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
     unit_type_var.set(default_opt_dict["unit_type"])
 
     unit_type_combobox = ttk.Combobox(
-        root, textvariable=unit_type_var, values=["volt", "mcp", "deg"], state="readonly"
+        root, textvariable=unit_type_var, values=["volt", "mcp", "deg"], state="readonly",
+        background=bg_color, foreground=fg_color
     )
     unit_type_combobox.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
 
