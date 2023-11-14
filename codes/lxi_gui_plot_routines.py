@@ -547,9 +547,9 @@ class plot_data_class:
         y_range = [y_min, y_max]
 
         # Remove rows with duplicate indices
-        self.df_slice_sci = self.df_slice_sci[
-            ~self.df_slice_sci.index.duplicated(keep="first")
-        ]
+        # self.df_slice_sci = self.df_slice_sci[
+        #     ~self.df_slice_sci.index.duplicated(keep="first")
+        # ]
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
         # Exclude channel1 to channel4 data based on v_min and v_max
@@ -995,9 +995,9 @@ class plot_data_class:
         else:
             self.cmap = "inferno"
 
-        self.df_slice_sci = self.df_slice_sci[
-            ~self.df_slice_sci.index.duplicated(keep="first")
-        ]
+        # self.df_slice_sci = self.df_slice_sci[
+        #     ~self.df_slice_sci.index.duplicated(keep="first")
+        # ]
 
         # Exclude channel1 to channel4 data based on v_min and v_max
         if v_min is not None and v_max is not None:

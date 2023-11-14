@@ -1073,6 +1073,7 @@ def volt_to_mcp(x, y):
 
     return x_mcp, y_mcp
 
+
 def volt_to_deg(x, y):
     """
     Function to convert voltage coordinates to MCP coordinates
@@ -1577,6 +1578,20 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
     df_slice_sci = df_slice_sci[df_slice_sci["IsCommanded"] == False]
     df_sci = df_sci[df_sci["IsCommanded"] == False]
 
+    # Select only rows where all channels are greater than 0
+    df_slice_sci = df_slice_sci[
+        (df_slice_sci["Channel1"] > 0)
+        & (df_slice_sci["Channel2"] > 0)
+        & (df_slice_sci["Channel3"] > 0)
+        & (df_slice_sci["Channel4"] > 0)
+    ]
+    df_sci = df_sci[
+        (df_sci["Channel1"] > 0)
+        & (df_sci["Channel2"] > 0)
+        & (df_sci["Channel3"] > 0)
+        & (df_sci["Channel4"] > 0)
+    ]
+    
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_hk.loc[t_start:t_end].copy()
     df_slice_sci = df_sci.loc[t_start:t_end].copy()
