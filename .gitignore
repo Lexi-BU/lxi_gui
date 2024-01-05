@@ -143,3 +143,5 @@ luigi.cfg
 
 # Ignore the poetry lock file
 poetry.lock
+
+.flake8
