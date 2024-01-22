@@ -909,7 +909,7 @@ def open_file_sci(start_time=None, end_time=None):
     # define a global variable for the file name
 
     file_val = filedialog.askopenfilename(
-        initialdir="../data/processed_data/sci/",
+        initialdir="../data/data/GSFC/2022_04_29_0900_LEXI_HK_unit1_mcp_unit1_eBox_1800V_hk_/",
         title="Select file",
         filetypes=(("csv files", "*.csv"), ("all files", "*.*")),
     )
@@ -1052,7 +1052,7 @@ def lin_correction(
     x,
     y,
     M_inv=np.array([[0.98678, 0.16204], [0.11385, 0.993497]]),
-    b=np.array([0.00195, 0.56355]),
+    b=np.array([0.00195, 0.0056355]),
 ):
     """
     Function to apply nonlinearity correction to MCP position x/y data
@@ -1141,7 +1141,8 @@ def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
     v1_shift = v1 - n1_z
     v2_shift = v2 - n2_z
 
-    particle_pos = v2_shift / (v2_shift + v1_shift)
+    # particle_pos = v2_shift / (v2_shift + v1_shift)
+    particle_pos = v2 / (v2 + v1)
 
     return particle_pos, v1_shift, v2_shift
 
