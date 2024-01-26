@@ -13,6 +13,7 @@ import lxi_misc_codes as lmsc
 import numpy as np
 import pandas as pd
 import pytz
+import pickle
 
 importlib.reload(lmsc)
 
@@ -1064,6 +1065,50 @@ def lin_correction(
     return x_lin, y_lin
 
 
+def non_lin_correction(
+        x,
+        y,
+):
+    """
+    Function to apply nonlinearity correction to MCP position x/y data. The model to apply the
+    nonlinearity correction is a Gaussian Process model trained on the data from the LEXI massk
+    testing. The kernel used is Matern with length scale = 5 and nu = 2.5.
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        x position data.
+    y : numpy.ndarray
+        y position data.
+
+    Returns
+    -------
+    x_nln : numpy.ndarray
+        x position data after applying nonlinearity correction.
+    y_nln : numpy.ndarray
+        y position data after applying nonlinearity correction.
+    """
+    gp_model_file_name = (
+        "../data/gp_models/gp_data_3.0_10_0.0_0.8_4_Matern(length_scale=5, nu=2.5).pickle"
+    )
+
+    # Get the gp_model from the pickle file
+    with open(gp_model_file_name, "rb") as f:
+        gp_model = pickle.load(f)
+
+    # Close the pickle file
+    f.close()
+
+    xy_coord = np.array([x, y]).T
+    delta_xy, sigma = gp_model.predict(xy_coord, return_std=True)
+
+    corrected_xy = xy_coord - delta_xy
+    x_nln = corrected_xy[:, 0]
+    y_nln = corrected_xy[:, 1]
+
+    return x_nln, y_nln
+
+
 def volt_to_mcp(x, y):
     """
     Function to convert voltage coordinates to MCP coordinates
@@ -1231,7 +1276,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
         v1=df["Channel4"], v2=df["Channel2"], n_bins=401, bin_min=0, bin_max=4
     )
 
-    # Correct for the non-linearity in the positions
+    # Correct for the non-linearity in the positions using lineat correction model
     x_lin_slice, y_lin_slice = lin_correction(x_slice, y_slice)
     x_lin, y_lin = lin_correction(x, y)
 
@@ -1240,6 +1285,12 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     x_mcp, y_mcp = volt_to_mcp(x, y)
     x_mcp_lin_slice, y_mcp_lin_slice = volt_to_mcp(x_lin_slice, y_lin_slice)
     x_mcp_lin, y_mcp_lin = volt_to_mcp(x_lin, y_lin)
+
+    # Correct for the non-linearity in the positions using non-linear correction model
+    # NOTE: The non-linear correction is only applied on the mcp coordinates after linear correction
+    # has been applied.
+    x_mcp_nln_slice, y_mcp_nln_slice = non_lin_correction(x_mcp_slice, y_mcp_slice)
+    x_mcp_nln, y_mcp_nln = non_lin_correction(x_mcp, y_mcp)
 
     # Get the x,y value in deg units
     x_deg_slice, y_deg_slice = volt_to_deg(x_mcp_slice, y_mcp_slice)
@@ -1252,6 +1303,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df_slice_sci.loc[:, "x_val_lin"] = x_lin_slice
     df_slice_sci.loc[:, "x_mcp"] = x_mcp_slice
     df_slice_sci.loc[:, "x_mcp_lin"] = x_mcp_lin_slice
+    df_slice_sci.loc[:, "x_mcp_nln"] = x_mcp_nln_slice
     df_slice_sci.loc[:, "x_deg"] = x_deg_slice
     df_slice_sci.loc[:, "x_deg_lin"] = x_deg_lin_slice
     df_slice_sci.loc[:, "v1_shift"] = v1_shift_slice
@@ -1261,6 +1313,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df.loc[:, "x_val_lin"] = x_lin
     df.loc[:, "x_mcp"] = x_mcp
     df.loc[:, "x_mcp_lin"] = x_mcp_lin
+    df.loc[:, "x_mcp_nln"] = x_mcp_nln
     df.loc[:, "x_deg"] = x_deg
     df.loc[:, "x_deg_lin"] = x_deg_lin
     df.loc[:, "v1_shift"] = v1_shift
@@ -1271,6 +1324,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df_slice_sci.loc[:, "y_val_lin"] = y_lin_slice
     df_slice_sci.loc[:, "y_mcp"] = y_mcp_slice
     df_slice_sci.loc[:, "y_mcp_lin"] = y_mcp_lin_slice
+    df_slice_sci.loc[:, "y_mcp_nln"] = y_mcp_nln_slice
     df_slice_sci.loc[:, "y_deg"] = y_deg_slice
     df_slice_sci.loc[:, "y_deg_lin"] = y_deg_lin_slice
     df_slice_sci.loc[:, "v4_shift"] = v4_shift_slice
@@ -1280,6 +1334,7 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     df.loc[:, "y_val_lin"] = y_lin
     df.loc[:, "y_mcp"] = y_mcp
     df.loc[:, "y_mcp_lin"] = y_mcp_lin
+    df.loc[:, "y_mcp_nln"] = y_mcp_nln
     df.loc[:, "y_deg"] = y_deg
     df.loc[:, "y_deg_lin"] = y_deg_lin
     df.loc[:, "v4_shift"] = v4_shift

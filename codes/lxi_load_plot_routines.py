@@ -115,6 +115,7 @@ def load_hist_plots(
     cut_status_var=False,
     crv_fit=False,
     lin_corr=False,
+    non_lin_corr=False,
     cmap=None,
     use_fig_size=False,
     dark_mode=True,
@@ -176,6 +177,8 @@ def load_hist_plots(
         If cut_status_var is True, whether or not to plot the curve fit for the cut status.
     lin_corr : bool
         Whether to plot the data without or with linear correlation.
+    non_lin_corr : bool
+        Whether to plot the data without or with non-linear correlation.
     cmap : str
         The colormap to be used for the histogram. If None, the default colormap is used.
     use_fig_size : bool
@@ -216,6 +219,7 @@ def load_hist_plots(
         cut_status_var=cut_status_var,
         crv_fit=crv_fit,
         lin_corr=lin_corr,
+        non_lin_corr=non_lin_corr,
         cmap=cmap,
         use_fig_size=use_fig_size,
         dark_mode=dark_mode,
@@ -376,6 +380,7 @@ def load_all_hist_plots(
     cut_status_var=None,
     crv_fit=None,
     lin_corr=None,
+    non_lin_corr=None,
     cmap=None,
     use_fig_size=False,
     dark_mode=True,
@@ -483,6 +488,7 @@ def load_all_hist_plots(
         cut_status_var=cut_status_var,
         crv_fit=crv_fit,
         lin_corr=lin_corr,
+        non_lin_corr=non_lin_corr,
         cmap=cmap,
         use_fig_size=use_fig_size,
         dark_mode=dark_mode,

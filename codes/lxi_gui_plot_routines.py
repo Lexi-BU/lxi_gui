@@ -198,6 +198,7 @@ class plot_data_class:
         cut_status_var=None,
         crv_fit=None,
         lin_corr=None,
+        non_lin_corr=None,
         cmap=None,
         use_fig_size=None,
         dark_mode=None,
@@ -233,6 +234,7 @@ class plot_data_class:
         self.cut_status_var = cut_status_var
         self.crv_fit = crv_fit
         self.lin_corr = lin_corr
+        self.non_lin_corr = non_lin_corr
         self.cmap = cmap
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
@@ -640,8 +642,12 @@ class plot_data_class:
                 x_key = "x_val_lin"
                 y_key = "y_val_lin"
             elif self.unit == "mcp":
-                x_key = "x_mcp_lin"
-                y_key = "y_mcp_lin"
+                if self.non_lin_corr is True:
+                    x_key = "x_mcp_nln"
+                    y_key = "y_mcp_nln"
+                elif self.non_lin_corr is False:
+                    x_key = "x_mcp_lin"
+                    y_key = "y_mcp_lin"
             elif self.unit == "deg":
                 x_key = "x_deg_lin"
                 y_key = "y_deg_lin"
@@ -649,7 +655,7 @@ class plot_data_class:
                                    linewidth=2, zorder=10, fontsize=12)
         print(
             "\033[1;32m Plotting histogram with linearity correction set to "
-            f"{self.lin_corr} and axes units set to {self.unit}\033[0m"
+            f"{self.lin_corr} and non-linear correction set to {self.non_lin_corr} and axes units set to {self.unit}\033[0m"
         )
         counts, xedges, yedges, im = axs1.hist2d(
             self.df_slice_sci[x_key],
@@ -720,10 +726,16 @@ class plot_data_class:
             global_variables.data_org["xedges"] = xedges
             global_variables.data_org["yedges"] = yedges
         elif self.lin_corr is True:
-            # Add histogram data details to the global dictionary
-            global_variables.data_lin["counts"] = counts
-            global_variables.data_lin["xedges"] = xedges
-            global_variables.data_lin["yedges"] = yedges
+            if self.non_lin_corr is False:
+                # Add histogram data details to the global dictionary
+                global_variables.data_lin["counts"] = counts
+                global_variables.data_lin["xedges"] = xedges
+                global_variables.data_lin["yedges"] = yedges
+            elif self.non_lin_corr is True:
+                # Add histogram data details to the global dictionary
+                global_variables.data_nln["counts"] = counts
+                global_variables.data_nln["xedges"] = xedges
+                global_variables.data_nln["yedges"] = yedges
         # Find the index of the maximum value in counts, ignoring NaNs
         max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
@@ -930,13 +942,13 @@ class plot_data_class:
         if not os.path.exists("../figures"):
             os.makedirs("../figures")
         fig_format = "png"
-        fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
+        fig_name = f"../figures/lin_corr_{self.lin_corr}_non_lin_corr_{self.non_lin_corr}_unit_{self.unit}.{fig_format}"
         plt.savefig(
             fig_name, dpi=300, bbox_inches="tight", format=fig_format, transparent=True
         )
 
         fig_format = "pdf"
-        fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
+        fig_name = f"../figures/lin_corr_{self.lin_corr}_non_lin_corr_{self.non_lin_corr}_unit_{self.unit}.{fig_format}"
         plt.savefig(
             fig_name, dpi=300, bbox_inches="tight", format=fig_format, transparent=True
         )

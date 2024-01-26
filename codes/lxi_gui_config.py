@@ -27,6 +27,7 @@ def create_config_file(default_vals=False):
             gui_config.set("sci_plot_options", "cut_status", "0")
             gui_config.set("sci_plot_options", "curve_fit_status", "0")
             gui_config.set("sci_plot_options", "lin_corr_status", "0")
+            gui_config.set("sci_plot_options", "non_lin_corr_status", "0")
             gui_config.set("sci_plot_options", "cmap", "0")
 
             gui_config.add_section("time_options")
@@ -55,6 +56,7 @@ def create_config_file(default_vals=False):
         gui_config.set("sci_plot_options", "cut_status", "0")
         gui_config.set("sci_plot_options", "curve_fit_status", "0")
         gui_config.set("sci_plot_options", "lin_corr_status", "1")
+        gui_config.set("sci_plot_options", "non_lin_corr_status", "1")
         gui_config.set("sci_plot_options", "cmap", "viridis")
 
         gui_config.add_section("time_options")
@@ -100,6 +102,7 @@ def get_config_entry(default_vals=False):
             "cut_status": gui_config.get(entry_sec, "cut_status"),
             "curve_fit_status": gui_config.get(entry_sec, "curve_fit_status"),
             "lin_corr_status": gui_config.get(entry_sec, "lin_corr_status"),
+            "non_lin_corr_status": gui_config.get(entry_sec, "non_lin_corr_status"),
             "cmap": gui_config.get(entry_sec, "cmap"),
         }
     else:
@@ -121,6 +124,7 @@ def get_config_entry(default_vals=False):
             "cut_status": "False",
             "curve_fit_status": "False",
             "lin_corr_status": "False",
+            "non_lin_corr_status": "False",
             "cmap": "viridis",
         }
         # Save the default options to a configuration file
@@ -158,6 +162,9 @@ def get_config_entry(default_vals=False):
         )
         gui_config.set(
             entry_sec, "lin_corr_status", default_opt_dict["lin_corr_status"]
+        )
+        gui_config.set(
+            entry_sec, "non_lin_corr_status", default_opt_dict["non_lin_corr_status"]
         )
         gui_config.set(entry_sec, "cmap", default_opt_dict["cmap"])
         with open("luigi.cfg", "w") as config_file:
@@ -217,11 +224,12 @@ def save_config(entry_list=None, entry_sec=["sci_plot_options"]):
     gui_config.set(entry_sec[0], "cut_status", config_vals[14])
     gui_config.set(entry_sec[0], "curve_fit_status", config_vals[15])
     gui_config.set(entry_sec[0], "lin_corr_status", config_vals[16])
-    gui_config.set(entry_sec[0], "cmap", config_vals[17])
+    gui_config.set(entry_sec[0], "non_lin_corr_status", config_vals[17])
+    gui_config.set(entry_sec[0], "cmap", config_vals[18])
 
     gui_config.add_section(entry_sec[1])
-    gui_config.set(entry_sec[1], "start_time", config_vals[18])
-    gui_config.set(entry_sec[1], "end_time", config_vals[19])
+    gui_config.set(entry_sec[1], "start_time", config_vals[19])
+    gui_config.set(entry_sec[1], "end_time", config_vals[20])
     with open("luigi.cfg", "w") as config_file:
         gui_config.write(config_file)
     print("\033[1;32mConfiguration file 'luigi.cfg' updated.\033[0m")

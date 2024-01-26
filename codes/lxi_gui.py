@@ -98,6 +98,7 @@ def hist_plot_inputs(dpi=100):
             "cut_status_var": cut_status_var.get(),
             "crv_fit": curve_fit_status_var.get(),
             "lin_corr": lin_corr_status_var.get(),
+            "non_lin_corr": non_lin_corr_status_var.get(),
             "cmap": cmap_option.get(),
             "use_fig_size": True,
             "dark_mode": dark_mode_var.get(),
@@ -774,6 +775,7 @@ ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
     cut_status_var,
     curve_fit_status_var,
     lin_corr_status_var,
+    non_lin_corr_status_var,
     cmap_option,
 ) = lgeb.populate_entries(root=sci_tab, dark_mode=dark_mode)
 
@@ -791,6 +793,8 @@ cut_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 curve_fit_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
+
+non_lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 # Add a button to save the data to a cdf file
 cdf_save_button = tk.Button(
@@ -1158,6 +1162,7 @@ entry_list = [
     cut_status_var,
     curve_fit_status_var,
     lin_corr_status_var,
+    non_lin_corr_status_var,
     cmap_option,
     start_time,
     end_time,
