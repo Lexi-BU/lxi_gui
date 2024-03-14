@@ -891,12 +891,12 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Insert the default folder path in the text box based on the operating system
 if os.name == "nt":
     folder_path.insert(
-        1, "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
+        1, "..\\git_data\\"
     )
 elif os.name == "posix":
     folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/PIT/20230816_not_sent/")
 elif os.name == "darwin":
-    folder_path.insert(1, "/Users/lexi_user/Desktop/PIT_softwares/PIT_23_05_05/Target/rec_tlm/not_sent/")
+    folder_path.insert(1, "../git_data/")
 else:
     raise OSError("Operating system not supported")
 

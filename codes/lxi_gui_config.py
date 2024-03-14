@@ -10,18 +10,18 @@ def create_config_file(default_vals=False):
         if not os.path.isfile("luigi.cfg"):
             gui_config = ConfigParser()
             gui_config.add_section("sci_plot_options")
-            gui_config.set("sci_plot_options", "x_min_entry", "0")
-            gui_config.set("sci_plot_options", "x_max_entry", "0")
-            gui_config.set("sci_plot_options", "y_min_entry", "0")
-            gui_config.set("sci_plot_options", "y_max_entry", "0")
-            gui_config.set("sci_plot_options", "hist_bin_entry", "0")
-            gui_config.set("sci_plot_options", "c_min_entry", "0")
-            gui_config.set("sci_plot_options", "c_max_entry", "0")
-            gui_config.set("sci_plot_options", "density_status", "0")
-            gui_config.set("sci_plot_options", "norm_type", "0")
-            gui_config.set("sci_plot_options", "unit_type", "0")
+            gui_config.set("sci_plot_options", "x_min_entry", "-6")
+            gui_config.set("sci_plot_options", "x_max_entry", "6")
+            gui_config.set("sci_plot_options", "y_min_entry", "-6")
+            gui_config.set("sci_plot_options", "y_max_entry", "6")
+            gui_config.set("sci_plot_options", "hist_bin_entry", "200")
+            gui_config.set("sci_plot_options", "c_min_entry", "1")
+            gui_config.set("sci_plot_options", "c_max_entry", "100")
+            gui_config.set("sci_plot_options", "density_status", "False")
+            gui_config.set("sci_plot_options", "norm_type", "log")
+            gui_config.set("sci_plot_options", "unit_type", "mcp")
             gui_config.set("sci_plot_options", "v_min_thresh_entry", "0")
-            gui_config.set("sci_plot_options", "v_max_thresh_entry", "0")
+            gui_config.set("sci_plot_options", "v_max_thresh_entry", "5")
             gui_config.set("sci_plot_options", "v_sum_min_thresh_entry", "0")
             gui_config.set("sci_plot_options", "v_sum_max_thresh_entry", "0")
             gui_config.set("sci_plot_options", "cut_status", "0")
@@ -31,8 +31,8 @@ def create_config_file(default_vals=False):
             gui_config.set("sci_plot_options", "cmap", "0")
 
             gui_config.add_section("time_options")
-            gui_config.set("time_options", "start_time", "YYYY-MM-DD HH:MM:SS")
-            gui_config.set("time_options", "end_time", "YYYY-MM-DD HH:MM:SS")
+            gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
+            gui_config.set("time_options", "end_time", "2024-12-31 00:00:00")
             with open("luigi.cfg", "w") as config_file:
                 gui_config.write(config_file)
             print("\033[1;32mConfiguration file 'luigi.cfg' created.\033[0m")
@@ -60,8 +60,8 @@ def create_config_file(default_vals=False):
         gui_config.set("sci_plot_options", "cmap", "viridis")
 
         gui_config.add_section("time_options")
-        gui_config.set("time_options", "start_time", "YYYY-MM-DD HH:MM:SS")
-        gui_config.set("time_options", "end_time", "YYYY-MM-DD HH:MM:SS")
+        gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
+        gui_config.set("time_options", "end_time", "2024-12-31 00:00:00")
         with open("luigi.cfg", "w") as config_file:
             gui_config.write(config_file)
     return None
@@ -188,8 +188,8 @@ def get_config_time():
         }
     else:
         default_opt_dict = {
-            "start_time": "YYYY-MM-DD HH:MM:SS",
-            "end_time": "YYYY-MM-DD HH:MM:SS",
+            "start_time": "2023-01-01 00:00:00",
+            "end_time": "2024-12-31 00:00:00",
         }
         # Save the default options to a configuration file
         gui_config.add_section(entry_sec)
