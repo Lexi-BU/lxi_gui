@@ -622,7 +622,7 @@ class plot_data_class:
         # Try to select only rows where "IsCommanded" is False
         try:
             self.df_slice_sci = self.df_slice_sci[
-                self.df_slice_sci["IsCommanded"] == False
+                self.df_slice_sci["IsCommanded"] == True
             ]
         except Exception:
             pass
@@ -711,14 +711,10 @@ class plot_data_class:
                 density=density,
             )
             # Print the new cmin and cmax values, greater than 0, to 2 decimal places
-            print(
-                f"\033[1;32m New cmin={np.nanmin(counts[counts > 0]):.2f} and "
-                f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m"
-            )
-            logger.info(
-                f"New cmin={np.nanmin(counts[counts > 0]):.2f} and "
-                f"cmax={np.nanmax(counts[counts > 0]):.2f}"
-            )
+            # print(
+            #     f"\033[1;32m New cmin={np.nanmin(counts[counts > 0]):.2f} and "
+            #     f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m"
+            # )
 
         # Add histogram data detauls to the global dictionary
         if self.lin_corr is False:

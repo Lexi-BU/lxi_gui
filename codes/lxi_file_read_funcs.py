@@ -1071,7 +1071,7 @@ def non_lin_correction(
 ):
     """
     Function to apply nonlinearity correction to MCP position x/y data. The model to apply the
-    nonlinearity correction is a Gaussian Process model trained on the data from the LEXI massk
+    nonlinearity correction is a Gaussian Process model trained on the data from the LEXI mask
     testing. The kernel used is Matern with length scale = 5 and nu = 2.5.
 
     Parameters
@@ -1099,6 +1099,7 @@ def non_lin_correction(
     # Close the pickle file
     f.close()
 
+    print(f"\n\n\nThe value of x and y are {x} and {y}\n\n\n")
     xy_coord = np.array([x, y]).T
     delta_xy, sigma = gp_model.predict(xy_coord, return_std=True)
 
@@ -1289,8 +1290,19 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
     # Correct for the non-linearity in the positions using non-linear correction model
     # NOTE: The non-linear correction is only applied on the mcp coordinates after linear correction
     # has been applied.
-    x_mcp_nln_slice, y_mcp_nln_slice = non_lin_correction(x_mcp_slice, y_mcp_slice)
-    x_mcp_nln, y_mcp_nln = non_lin_correction(x_mcp, y_mcp)
+    try:
+        x_mcp_nln_slice, y_mcp_nln_slice = non_lin_correction(x_mcp_lin_slice, y_mcp_lin_slice)
+    except Exception:
+        # Set theem to NaNs of the same length as x_mcp_slice
+        x_mcp_nln_slice = np.full(len(x_mcp_lin_slice), np.nan)
+        y_mcp_nln_slice = np.full(len(y_mcp_lin_slice), np.nan)
+
+    try:
+        x_mcp_nln, y_mcp_nln = non_lin_correction(x_mcp_lin, y_mcp_lin)
+    except Exception:
+        # Set them to NaNs of the same length as x_mcp
+        x_mcp_nln = np.full(len(x_mcp_lin), np.nan)
+        y_mcp_nln = np.full(len(y_mcp_lin), np.nan)
 
     # Get the x,y value in deg units
     x_deg_slice, y_deg_slice = volt_to_deg(x_mcp_slice, y_mcp_slice)
@@ -1631,8 +1643,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
     )
 
     # Select only those where "IsCommanded" is True
-    df_slice_sci = df_slice_sci[df_slice_sci["IsCommanded"] == False]
-    df_sci = df_sci[df_sci["IsCommanded"] == False]
+    df_slice_sci = df_slice_sci[df_slice_sci["IsCommanded"] == True]
+    df_sci = df_sci[df_sci["IsCommanded"] == True]
 
     # Select only rows where all channels are greater than 0
     df_slice_sci = df_slice_sci[
