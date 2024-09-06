@@ -582,8 +582,10 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
             return axs
 
         # Add a circle centered at (0,0) with radius 4 cm
-        circle1 = plt.Circle((0, 0), radius1, color=color[0], fill=False, linewidth=linewidth, zorder=zorder)
-        circle2 = plt.Circle((0, 0), radius2, color=color[1], fill=False, linewidth=linewidth, zorder=zorder)
+        circle1 = plt.Circle((0, 0), radius1, color=color[0], fill=False, linewidth=linewidth,
+                             zorder=zorder)
+        circle2 = plt.Circle((0, 0), radius2, color=color[1], fill=False, linewidth=linewidth,
+                             zorder=zorder)
         # Make an arrow pointing to the edge of the circle from outside the circle at 45
         # degrees from the horizontal axis and with text "4.5 cm"
         angle_1 = np.pi / 2.7
