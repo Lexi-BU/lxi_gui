@@ -1099,7 +1099,6 @@ def non_lin_correction(
     # Close the pickle file
     f.close()
 
-    print(f"\n\n\nThe value of x and y are {x} and {y}\n\n\n")
     xy_coord = np.array([x, y]).T
     delta_xy, sigma = gp_model.predict(xy_coord, return_std=True)
 

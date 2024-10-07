@@ -151,14 +151,15 @@ def ts_button_val_change(default_opt_var):
         # "OpticsTemp",
         "HVsupplyTemp",
         "LEXIbaseTemp",
+        "PinPullerTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
-        "+10V_Imon",
         "+28V_Imon",
+        "+10V_Imon",
         "AnodeVoltMon",
         "DeltaEvntCount",
         # "DeltaLostEvntCount",
-        "DeltaDroppedCount",
+        # "DeltaDroppedCount",
     ]
     plot_opt_entry_list = [
         plot_opt_entry_1,
@@ -894,7 +895,7 @@ if os.name == "nt":
         1, "..\\git_data\\"
     )
 elif os.name == "posix":
-    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/PIT/20230816_not_sent/")
+    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/20241003_LEXI_Flight_AFT_Lander_20241002_VIBE_Post_X_Axis/")
 elif os.name == "darwin":
     folder_path.insert(1, "../git_data/")
 else:
