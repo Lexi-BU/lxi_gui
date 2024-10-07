@@ -27,8 +27,7 @@ formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
 # Check if the log folder exists. If not, create it
 Path("../log").mkdir(parents=True, exist_ok=True)
-# if not os.path.exists("../log"):
-#     os.makedirs("../log")
+
 file_handler = logging.FileHandler("../log/lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
@@ -292,7 +291,9 @@ def V_Imon_5_2_func(vpc, hk_value, lxi_unit):
 
 
 def V_Imon_10_func(vpc, hk_value, lxi_unit):
-    V_Imon_10 = hk_value * vpc
+
+    # NOTE: The 10 V current monitor value unit is not quite true. The value is in volts but the conversion factor is missing.
+    V_Imon_10 = hk_value * vpc * 1e3
     return V_Imon_10
 
 
@@ -307,7 +308,9 @@ def V_Imon_3_3_func(vpc, hk_value, lxi_unit):
 
 
 def AnodeVoltMon_func(vpc, hk_value, lxi_unit):
-    AnodeVoltMon = hk_value * vpc
+    # NOTE: The anode voltage monitor value unit is not quite true. The value is in volts but the
+    # conversion factor is missing.
+    AnodeVoltMon = hk_value * vpc * 1e3
     return AnodeVoltMon
 
 
@@ -455,6 +458,7 @@ def save_cdf():
     else:
         logger.error("No file loaded/ no Data in the file")
 
+
 def copy_pit_files():
 
     # Path to private key file on local machine
@@ -582,8 +586,10 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
             return axs
 
         # Add a circle centered at (0,0) with radius 4 cm
-        circle1 = plt.Circle((0, 0), radius1, color=color[0], fill=False, linewidth=linewidth, zorder=zorder)
-        circle2 = plt.Circle((0, 0), radius2, color=color[1], fill=False, linewidth=linewidth, zorder=zorder)
+        circle1 = plt.Circle((0, 0), radius1, color=color[0], fill=False, linewidth=linewidth,
+                             zorder=zorder)
+        circle2 = plt.Circle((0, 0), radius2, color=color[1], fill=False, linewidth=linewidth,
+                             zorder=zorder)
         # Make an arrow pointing to the edge of the circle from outside the circle at 45
         # degrees from the horizontal axis and with text "4.5 cm"
         angle_1 = np.pi / 2.7

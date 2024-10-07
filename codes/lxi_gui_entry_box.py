@@ -248,7 +248,8 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
     norm_type_var = tk.StringVar()
     norm_type_var.set(default_opt_dict["norm_type"])
     norm_type_combobox = ttk.Combobox(
-        root, textvariable=norm_type_var, values=["log", "linear"], state="readonly"
+        root, textvariable=norm_type_var, values=["log", "linear"], state="readonly",
+        background=bg_color, foreground=fg_color
     )
 
     norm_type_combobox.grid(row=8, column=opt_col_num, columnspan=1, sticky="new")
@@ -261,7 +262,8 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
     unit_type_var.set(default_opt_dict["unit_type"])
 
     unit_type_combobox = ttk.Combobox(
-        root, textvariable=unit_type_var, values=["volt", "mcp", "deg"], state="readonly"
+        root, textvariable=unit_type_var, values=["volt", "mcp", "deg"], state="readonly",
+        background=bg_color, foreground=fg_color
     )
     unit_type_combobox.grid(row=10, column=opt_col_num, columnspan=1, sticky="new")
 
@@ -358,7 +360,7 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
 
     # Choose whether to implement linear correction or not (is Bool)
     lin_corr_label = tk.Label(
-        root, text="Correction", font=font_style_box, bg=bg_color, fg=fg_color
+        root, text="Lin-Correction", font=font_style_box, bg=bg_color, fg=fg_color
     )
     lin_corr_label.grid(row=18, column=opt_col_num2, columnspan=1, sticky="n")
 
@@ -378,12 +380,34 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
     )
     lin_corr_checkbox.grid(row=18, column=opt_col_num, columnspan=1, sticky="n")
 
+    # Choose whether to implement non-linearity correction or not (is Bool)
+    non_lin_corr_label = tk.Label(
+        root, text="Non-Lin-Correction", font=font_style_box, bg=bg_color, fg=fg_color
+    )
+    non_lin_corr_label.grid(row=19, column=opt_col_num2, columnspan=1, sticky="n")
+
+    # Add a checkbox to choose whether to implement non-linearity correction or not
+    non_lin_corr_status_var = tk.BooleanVar()
+    non_lin_corr_status_var.set(default_opt_dict["non_lin_corr_status"])  # type: ignore
+    non_lin_corr_checkbox = tk.Checkbutton(
+        root,
+        bg=bg_color,
+        fg=fg_color,
+        text="",
+        font=font_style_box,
+        variable=non_lin_corr_status_var,
+        highlightcolor="green",
+        selectcolor="#808080",
+        cursor="hand2",
+    )
+    non_lin_corr_checkbox.grid(row=19, column=opt_col_num, columnspan=1, sticky="n")
+
     # Choose the colorbar
     cmap_option = entry_box(
         root=root,
         bg=bg_color,
         fg=fg_color,
-        row=19,
+        row=20,
         column=opt_col_num,
         entry_label="Cmap",
         entry_val=default_opt_dict["cmap"],
@@ -408,5 +432,6 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
         cut_status_var,
         curve_fit_status_var,
         lin_corr_status_var,
+        non_lin_corr_status_var,
         cmap_option,
     )

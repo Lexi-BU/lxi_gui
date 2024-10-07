@@ -2,7 +2,7 @@ import datetime
 import importlib
 import logging
 import os
-import pandas as pd
+from pathlib import Path
 
 import global_variables
 import lxi_misc_codes as lmsc
@@ -10,6 +10,7 @@ import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytz
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -21,6 +22,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
+
+# Check if the log directory exists, if not, create it
+Path("../log").mkdir(parents=True, exist_ok=True)
+
 file_handler = logging.FileHandler("../log/lxi_gui_plot.log")
 file_handler.setFormatter(formatter)
 
@@ -193,6 +198,7 @@ class plot_data_class:
         cut_status_var=None,
         crv_fit=None,
         lin_corr=None,
+        non_lin_corr=None,
         cmap=None,
         use_fig_size=None,
         dark_mode=None,
@@ -228,6 +234,7 @@ class plot_data_class:
         self.cut_status_var = cut_status_var
         self.crv_fit = crv_fit
         self.lin_corr = lin_corr
+        self.non_lin_corr = non_lin_corr
         self.cmap = cmap
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
@@ -275,9 +282,9 @@ class plot_data_class:
             "LEXIbaseTemp": "(C)",
             "HVsupplyTemp": "(C)",
             "+5.2V_Imon": "(mA)",
-            "+10V_Imon": "(mA)",
+            "+10V_Imon": "(mA*)",
             "+3.3V_Imon": "(mA)",
-            "AnodeVoltMon": "(V)",
+            "AnodeVoltMon": "(V*)",
             "+28V_Imon": "(mA)",
             "ADC_Ground": "(V)",
             "Cmd_count": "#",
@@ -542,9 +549,9 @@ class plot_data_class:
         y_range = [y_min, y_max]
 
         # Remove rows with duplicate indices
-        self.df_slice_sci = self.df_slice_sci[
-            ~self.df_slice_sci.index.duplicated(keep="first")
-        ]
+        # self.df_slice_sci = self.df_slice_sci[
+        #     ~self.df_slice_sci.index.duplicated(keep="first")
+        # ]
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
         # Exclude channel1 to channel4 data based on v_min and v_max
@@ -635,8 +642,12 @@ class plot_data_class:
                 x_key = "x_val_lin"
                 y_key = "y_val_lin"
             elif self.unit == "mcp":
-                x_key = "x_mcp_lin"
-                y_key = "y_mcp_lin"
+                if self.non_lin_corr is True:
+                    x_key = "x_mcp_nln"
+                    y_key = "y_mcp_nln"
+                elif self.non_lin_corr is False:
+                    x_key = "x_mcp_lin"
+                    y_key = "y_mcp_lin"
             elif self.unit == "deg":
                 x_key = "x_deg_lin"
                 y_key = "y_deg_lin"
@@ -644,7 +655,7 @@ class plot_data_class:
                                    linewidth=2, zorder=10, fontsize=12)
         print(
             "\033[1;32m Plotting histogram with linearity correction set to "
-            f"{self.lin_corr} and axes units set to {self.unit}\033[0m"
+            f"{self.lin_corr} and non-linear correction set to {self.non_lin_corr} and axes units set to {self.unit}\033[0m"
         )
         counts, xedges, yedges, im = axs1.hist2d(
             self.df_slice_sci[x_key],
@@ -657,12 +668,34 @@ class plot_data_class:
             density=density,
         )
 
+        # Location of the 54 holes in the mask
+        xy = np.array([[3.06650655, 1.01332765, 1.65660378, 2.29987991, 2.94315604,
+                        3.58643217, -0.39657511, 0.24670102, 0.88997715, 1.53325327,
+                        2.1765294, 2.81980553, 3.46308166, -1.16320175, -0.51992562,
+                        0.12335051, 0.76662664, 1.40990277, 2.05317889, 2.69645502,
+                        -2.57310451, -1.92982838, -1.28655226, -0.64327613, 0.,
+                        0.64327613, 1.28655226, 1.92982838, 2.57310451, -2.69645502,
+                        -2.05317889, -1.40990277, -0.76662664, -0.12335051, 0.51992562,
+                        1.16320175, -3.46308166, -2.81980553, -2.1765294, -1.53325327,
+                        -0.88997715, -0.24670102, 0.39657511, -3.58643217, -2.94315604,
+                        -2.29987991, -1.65660378, -1.01332765, -3.06650655, -1.47157802,
+                        -0.06167525, 1.98987096, 2.35960941],
+                       [2.57310451, 3.46308166, 2.69645502, 1.92982838, 1.16320175,
+                        0.39657511, 3.58643217, 2.81980553, 2.05317889, 1.28655226,
+                        0.51992562, -0.24670102, -1.01332765, 2.94315604, 2.1765294,
+                        1.40990277, 0.64327613, -0.12335051, -0.88997715, -1.65660378,
+                        3.06650655, 2.29987991, 1.53325327, 0.76662664, 0.,
+                        -0.76662664, -1.53325327, -2.29987991, -3.06650655, 1.65660378,
+                        0.88997715, 0.12335051, -0.64327613, -1.40990277, -2.1765294,
+                        -2.94315604, 1.01332765, 0.24670102, -0.51992562, -1.28655226,
+                        -2.05317889, -2.81980553, -3.58643217, -0.39657511, -1.16320175,
+                        -1.92982838, -2.69645502, -3.46308166, -2.57310451, -0.58160087,
+                        -0.70495138, -1.59298278, 2.63314709]])
+
+        # Scatter plot the xy values
+        axs1.scatter(xy[0], xy[1], marker=".", color="r", s=25, zorder=10)
         # If all values of counts are NaN, then redo the histogram with different norm and cmin
         if np.isnan(counts).all():
-            print(
-                f"\033[1;31m For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
-                "Redoing the histogram with different norm and cmin\033[0m"
-            )
             logger.warning(
                 f"For cmin={cmin}, and cmax={cmax}, all values of counts are NaN. "
                 "Redoing the histogram with different norm and cmin"
@@ -678,14 +711,10 @@ class plot_data_class:
                 density=density,
             )
             # Print the new cmin and cmax values, greater than 0, to 2 decimal places
-            print(
-                f"\033[1;32m New cmin={np.nanmin(counts[counts > 0]):.2f} and "
-                f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m"
-            )
-            logger.info(
-                f"New cmin={np.nanmin(counts[counts > 0]):.2f} and "
-                f"cmax={np.nanmax(counts[counts > 0]):.2f}"
-            )
+            # print(
+            #     f"\033[1;32m New cmin={np.nanmin(counts[counts > 0]):.2f} and "
+            #     f"cmax={np.nanmax(counts[counts > 0]):.2f}\033[0m"
+            # )
 
         # Add histogram data detauls to the global dictionary
         if self.lin_corr is False:
@@ -693,10 +722,16 @@ class plot_data_class:
             global_variables.data_org["xedges"] = xedges
             global_variables.data_org["yedges"] = yedges
         elif self.lin_corr is True:
-            # Add histogram data details to the global dictionary
-            global_variables.data_lin["counts"] = counts
-            global_variables.data_lin["xedges"] = xedges
-            global_variables.data_lin["yedges"] = yedges
+            if self.non_lin_corr is False:
+                # Add histogram data details to the global dictionary
+                global_variables.data_lin["counts"] = counts
+                global_variables.data_lin["xedges"] = xedges
+                global_variables.data_lin["yedges"] = yedges
+            elif self.non_lin_corr is True:
+                # Add histogram data details to the global dictionary
+                global_variables.data_nln["counts"] = counts
+                global_variables.data_nln["xedges"] = xedges
+                global_variables.data_nln["yedges"] = yedges
         # Find the index of the maximum value in counts, ignoring NaNs
         max_index = np.unravel_index(np.nanargmax(counts, axis=None), counts.shape)
 
@@ -738,14 +773,14 @@ class plot_data_class:
             # Make step plot between xedges and xn
             x_hist.step(x_step, xn, color="g", where="post")
             x_hist.plot(
-                xedges[1:], xn, "o", color="c", markerfacecolor="none", markeredgecolor="gray"
+                xedges[1:], xn, "--", color="c", markerfacecolor="none", markeredgecolor="gray"
             )
 
             x_hist.set_xlabel("Vertical Cut")
             # Make step plot between yedges and yn
             y_hist.step(yn, y_step, color="g", where="post")
             y_hist.plot(
-                yn, yedges[:-1], "o", color="c", markerfacecolor="none", markeredgecolor="gray"
+                yn, yedges[:-1], "--", color="c", markerfacecolor="none", markeredgecolor="gray"
             )
             y_hist.invert_xaxis()
             y_hist.set_ylabel("Horizontal Cut")
@@ -903,13 +938,13 @@ class plot_data_class:
         if not os.path.exists("../figures"):
             os.makedirs("../figures")
         fig_format = "png"
-        fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
+        fig_name = f"../figures/lin_corr_{self.lin_corr}_non_lin_corr_{self.non_lin_corr}_unit_{self.unit}.{fig_format}"
         plt.savefig(
             fig_name, dpi=300, bbox_inches="tight", format=fig_format, transparent=True
         )
 
         fig_format = "pdf"
-        fig_name = f"../figures/lin_corr_{self.lin_corr}_unit_{self.unit}.{fig_format}"
+        fig_name = f"../figures/lin_corr_{self.lin_corr}_non_lin_corr_{self.non_lin_corr}_unit_{self.unit}.{fig_format}"
         plt.savefig(
             fig_name, dpi=300, bbox_inches="tight", format=fig_format, transparent=True
         )
@@ -994,9 +1029,9 @@ class plot_data_class:
         else:
             self.cmap = "inferno"
 
-        self.df_slice_sci = self.df_slice_sci[
-            ~self.df_slice_sci.index.duplicated(keep="first")
-        ]
+        # self.df_slice_sci = self.df_slice_sci[
+        #     ~self.df_slice_sci.index.duplicated(keep="first")
+        # ]
 
         # Exclude channel1 to channel4 data based on v_min and v_max
         if v_min is not None and v_max is not None:
