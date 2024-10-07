@@ -622,7 +622,7 @@ class plot_data_class:
         # Try to select only rows where "IsCommanded" is False
         try:
             self.df_slice_sci = self.df_slice_sci[
-                self.df_slice_sci["IsCommanded"] == True
+                self.df_slice_sci["IsCommanded"] == False
             ]
         except Exception:
             pass

@@ -1642,8 +1642,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
     )
 
     # Select only those where "IsCommanded" is True
-    df_slice_sci = df_slice_sci[df_slice_sci["IsCommanded"] == True]
-    df_sci = df_sci[df_sci["IsCommanded"] == True]
+    df_slice_sci = df_slice_sci[df_slice_sci["IsCommanded"] == False]
+    df_sci = df_sci[df_sci["IsCommanded"] == False]
 
     # Select only rows where all channels are greater than 0
     df_slice_sci = df_slice_sci[
