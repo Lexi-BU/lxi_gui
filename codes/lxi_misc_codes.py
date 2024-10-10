@@ -2,8 +2,8 @@ import importlib
 import logging
 import os
 from pathlib import Path
+from datetime import datetime, timedelta
 import socket
-import subprocess
 import matplotlib.pyplot as plt
 
 import global_variables
@@ -459,88 +459,85 @@ def save_cdf():
         logger.error("No file loaded/ no Data in the file")
 
 
-def copy_pit_files():
+# Function to recursively download files modified in the last 'time_delta_minutes' minutes
+def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
+    # Change to the remote directory
+    sftp.chdir(remote_dir)
 
-    # Path to private key file on local machine
-    # private_key_path = "C:\\Users\\Lexi-User\\.ssh\\id_rsa"
-    private_key_path = "C:\\Users\\Lexi-User/.ssh/id_rsa"
+    # Get list of files and directories in the remote directory
+    for file_attr in sftp.listdir_attr():
+        file_name = file_attr.filename
+        file_modified_time = datetime.fromtimestamp(file_attr.st_mtime)
+        remote_file_path = Path(remote_dir) / file_name
+        local_file_path = Path(local_dir) / file_name
 
-    # Source and destination paths for the copy operation
-    source_path = "/home/pi/MAX/Target/rec_tlm/not_sent/"
-    dest_path = "C:\\Users\\Lexi-User\\Desktop\\PIT_softwares\\PIT_23_05_05\\Target\\rec_tlm\\not_sent\\"
+        # If it is a directory, recurse into it
+        if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
+            print(f"Entering directory: {remote_file_path}")
+            local_file_path.mkdir(parents=True, exist_ok=True)
+            get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
+
+        # If it is a file, check if it was modified in the last 'time_delta_minutes'
+        elif file_modified_time >= time_threshold:
+            # Ensure the local directory exists
+            local_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Check if the file already exists locally
+            if local_file_path.exists():
+                local_file_size = local_file_path.stat().st_size
+                remote_file_size = file_attr.st_size
+
+                # If the file exists and sizes match, skip downloading
+                if local_file_size == remote_file_size:
+                    print(f"Skipping download: {file_name} (already exists with matching size)")
+                    continue
+
+            # Download the file
+            print(f"Downloading: {file_name} (modified: {file_modified_time})")
+            sftp.get(str(remote_file_path), str(local_file_path))
+
+
+def download_latest_files():
+
+    # Configuration parameters
+    hostname = "sftp.fireflyspace.com"
+    port = 22  # or the port number your server uses
+    username = "LEXI"
+    private_key_path = "/home/cephadrius/.ssh/firefly_ssh_key"  # Use None if not using a private key
+    # password = "your_password"  # Only needed if not using an SSH key
+    remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
+    local_directory = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/"
+    time_delta_minutes = None  # Time range in minutes
+
+    # Time calculation: files modified in the last "time_delta_minutes" minutes
+    # If time_delta_minutes is None, then download all files
+    if time_delta_minutes is not None:
+        time_threshold = datetime.now() - timedelta(minutes=time_delta_minutes)
+    else:
+        time_threshold = datetime.min
 
     # Create SSH client
-    ssh_client = paramiko.SSHClient()
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    # Automatically add the remote server's host key to the known_hosts file
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # Authenticate using either password or SSH key
+    if private_key_path:
+        private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
+        ssh.connect(hostname, port, username=username, pkey=private_key)
+    else:
+        ssh.connect(hostname, port, username=username)
 
-    try:
-        # Connect to the SSH server
-        ssh_client.connect(
-            hostname="10.10.1.1",
-            port=22,
-            username="pi",
-            password="your_password",
-            key_filename=private_key_path,
-            timeout=2,
-        )
+    # Open the SFTP session
+    sftp = ssh.open_sftp()
 
-        # Create SFTP client from the SSH client
-        sftp_client = ssh_client.open_sftp()
+    # Download files modified in the last 37 minutes
+    get_lexi_files_from_ff(sftp, remote_directory, local_directory, time_threshold)
 
-        # Recursively copy files and folders
-        copy_recursively(sftp_client, source_path, dest_path)
+    # Close the SFTP session
+    sftp.close()
+    ssh.close()
 
-        # Close the SFTP client
-        sftp_client.close()
-    except paramiko.AuthenticationException:
-        logger.error("Authentication failed, please verify your credentials")
-    except paramiko.SSHException as e:
-        logger.error("An error occurred while connecting to the server: %s", str(e))
-    except socket.timeout:
-        logger.error("Connection timed out after 2 seconds")
-    except Exception as e:
-        logger.error(str(e))
-    finally:
-        # Close the SSH client
-        ssh_client.close()
-
-
-def copy_recursively(sftp, remote_path, local_path):
-    """
-    Helper function to recursively copy files and folders from a remote path to a local path.
-    """
-    print(f"Copying files from \x1b[1;31;255m{remote_path}\x1b[0m to \x1b[1;36;255m{local_path}\x1b[0m \n")
-    try:
-        # Create local directories if they don't exist
-        os.makedirs(local_path, exist_ok=True)
-
-        # List files and folders in the remote path
-        files = sftp.listdir_attr(remote_path)
-        file_num = 0
-        for file in files:
-            remote_file = remote_path + "/" + file.filename
-            local_file = os.path.join(local_path, file.filename)
-
-            if file.st_mode & 0o040000:  # Directory
-                if not file.filename.startswith("."):  # Exclude hidden directories
-                    copy_recursively(sftp, remote_file, local_file)
-            else:  # File
-                if not file.filename.startswith("."):  # Exclude hidden files
-                    if not os.path.exists(
-                        local_file
-                    ):  # Check if file already exists locally
-                        print(f"Copying file: \x1b[1;36;255m{file.filename}\x1b[0m from \x1b[1;31;255m PIT \x1b[0m\n")
-                        sftp.get(remote_file, local_file)
-                        file_num += 1
-        # Print the number of files copied
-        if file_num == 0:
-            print("\x1b[1;33;255m No new files to copy \x1b[0m\n")
-        else:
-            print(f"A total of \x1b[1;31;255m {file_num} \x1b[0m files copied from \x1b[1;31;255m PIT \x1b[0m\n")
-    except Exception as e:
-        print("An error occurred during file transfer:", str(e))
+    print("Download complete.")
 
 
 def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, linewidth=2, zorder=10,

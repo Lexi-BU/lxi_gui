@@ -296,7 +296,7 @@ def load_and_copy_files():
     from PIT to the local computer and loads the data.
     """
     # try:
-    #     lmsc.copy_pit_files()
+    #     lmsc.download_latest_files()
     # except Exception as e:
     #     logger.exception(f"Exception occurred while copying files from PIT: {e}")
     #     pass
@@ -1265,10 +1265,10 @@ copy_button = tk.Button(
     sci_tab,
     bg=bg_color,
     fg=fg_color,
-    text="Copy PIT Files",
+    text="Get Latest Files",
     font=font_style_box,
     justify="center",
-    command=lambda: lmsc.copy_pit_files(),
+    command=lambda: lmsc.download_latest_files(),
 )
 copy_button.grid(
     row=18, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
