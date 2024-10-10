@@ -296,7 +296,7 @@ def load_and_copy_files():
     from PIT to the local computer and loads the data.
     """
     # try:
-    #     lmsc.copy_pit_files()
+    #     lmsc.download_latest_files()
     # except Exception as e:
     #     logger.exception(f"Exception occurred while copying files from PIT: {e}")
     #     pass
@@ -895,7 +895,7 @@ if os.name == "nt":
         1, "..\\git_data\\"
     )
 elif os.name == "posix":
-    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/20241003_LEXI_Flight_AFT_Lander_20241002_VIBE_Post_X_Axis/")
+    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/")
 elif os.name == "darwin":
     folder_path.insert(1, "../git_data/")
 else:
@@ -1265,10 +1265,10 @@ copy_button = tk.Button(
     sci_tab,
     bg=bg_color,
     fg=fg_color,
-    text="Copy PIT Files",
+    text="Get Latest Files",
     font=font_style_box,
     justify="center",
-    command=lambda: lmsc.copy_pit_files(),
+    command=lambda: lmsc.download_latest_files(),
 )
 copy_button.grid(
     row=18, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
