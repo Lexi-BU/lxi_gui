@@ -1,9 +1,10 @@
 import importlib
 import logging
-import os
+import time
+import threading
+import sys
 from pathlib import Path
 from datetime import datetime, timedelta
-import socket
 import matplotlib.pyplot as plt
 
 import global_variables
@@ -32,6 +33,9 @@ file_handler = logging.FileHandler("../log/lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
+
+# Global flag to control the blinking thread
+thread_running = True
 
 
 def print_time_details(file_type=None, start_time=None, end_time=None):
@@ -459,8 +463,26 @@ def save_cdf():
         logger.error("No file loaded/ no Data in the file")
 
 
-# Function to recursively download files modified in the last 'time_delta_minutes' minutes
 def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
+    """
+    Recursively download files from the Firefly server that were modified after the given time
+    threshold.
+
+    Parameters
+    ----------
+    sftp : paramiko.SFTPClient
+        The SFTP client object
+    remote_dir : str
+        The remote directory to download files from
+    local_dir : str
+        The local directory to save the files
+    time_threshold : datetime
+        The time threshold to check if the files were modified after this time
+
+    Returns
+    -------
+        None
+    """
     # Change to the remote directory
     sftp.chdir(remote_dir)
 
@@ -473,7 +495,6 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
 
         # If it is a directory, recurse into it
         if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
-            print(f"Entering directory: {remote_file_path}")
             local_file_path.mkdir(parents=True, exist_ok=True)
             get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
 
@@ -489,15 +510,49 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
 
                 # If the file exists and sizes match, skip downloading
                 if local_file_size == remote_file_size:
-                    print(f"Skipping download: {file_name} (already exists with matching size)")
                     continue
 
             # Download the file
-            print(f"Downloading: {file_name} (modified: {file_modified_time})")
             sftp.get(str(remote_file_path), str(local_file_path))
 
 
+def show_blinking_message():
+    """
+    Display a blinking message "Downloading data, please wait" while the data is being downloaded
+    """
+
+    global thread_running
+
+    while thread_running:
+        sys.stdout.write("\rDownloading data, please wait" + "." * (int(time.time()) % 4))
+        sys.stdout.flush()
+        time.sleep(0.25)
+
+    # Clear the blinking message after download is complete
+    sys.stdout.write("\r" + " " * 30 + "\r")  # Clear the line
+
+
 def download_latest_files():
+    """
+    Download the latest files from the Firefly server that were modified in the last given time. By
+    default, all files from last 1 hour are downloaded. You can change the time range by changing
+    the "time_delta_minutes" parameter in the function.
+
+    The default configuration parameters are:
+    hostname = "sftp.fireflyspace.com"
+    port = 22  # or the port number your server uses
+    username = "LEXI"
+    private_key_path = "/home/cephadrius/.ssh/firefly_ssh_key"
+    remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
+    local_directory = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/"
+    time_delta_minutes = None  # Time range in minutes. If None, download all files
+
+    Returns
+    -------
+        None
+    """
+
+    global thread_running
 
     # Configuration parameters
     hostname = "sftp.fireflyspace.com"
@@ -507,7 +562,7 @@ def download_latest_files():
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
     local_directory = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/"
-    time_delta_minutes = None  # Time range in minutes
+    time_delta_minutes = 60  # Time range in minutes
 
     # Time calculation: files modified in the last "time_delta_minutes" minutes
     # If time_delta_minutes is None, then download all files
@@ -516,28 +571,37 @@ def download_latest_files():
     else:
         time_threshold = datetime.min
 
-    # Create SSH client
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # Start the blinking message in a separate thread
+    blinking_thread = threading.Thread(target=show_blinking_message)
+    blinking_thread.daemon = True  # This ensures the thread will exit when the main program does
+    blinking_thread.start()
 
-    # Authenticate using either password or SSH key
-    if private_key_path:
-        private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
-        ssh.connect(hostname, port, username=username, pkey=private_key)
-    else:
-        ssh.connect(hostname, port, username=username)
+    try:
+        # Create SSH client
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    # Open the SFTP session
-    sftp = ssh.open_sftp()
+        # Authenticate using either password or SSH key
+        if private_key_path:
+            private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
+            ssh.connect(hostname, port, username=username, pkey=private_key)
+        else:
+            ssh.connect(hostname, port, username=username)
 
-    # Download files modified in the last 37 minutes
-    get_lexi_files_from_ff(sftp, remote_directory, local_directory, time_threshold)
+        # Open the SFTP session
+        sftp = ssh.open_sftp()
 
-    # Close the SFTP session
-    sftp.close()
-    ssh.close()
+        # Download files modified in the last 37 minutes
+        get_lexi_files_from_ff(sftp, remote_directory, local_directory, time_threshold)
 
-    print("Download complete.")
+        # Close the SFTP session
+        sftp.close()
+        ssh.close()
+
+        print("\nDownload complete.")
+
+    finally:
+        thread_running = False
 
 
 def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, linewidth=2, zorder=10,

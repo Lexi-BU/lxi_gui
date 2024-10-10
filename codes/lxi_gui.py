@@ -895,7 +895,7 @@ if os.name == "nt":
         1, "..\\git_data\\"
     )
 elif os.name == "posix":
-    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/20241003_LEXI_Flight_AFT_Lander_20241002_VIBE_Post_X_Axis/")
+    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/")
 elif os.name == "darwin":
     folder_path.insert(1, "../git_data/")
 else:
