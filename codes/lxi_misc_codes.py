@@ -485,7 +485,6 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
     """
     # Change to the remote directory
     sftp.chdir(remote_dir)
-    print(f"The threshold time is: {time_threshold}")
     # Get list of files and directories in the remote directory
     for file_attr in sftp.listdir_attr():
         file_name = file_attr.filename
@@ -497,7 +496,7 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
         # if file_modified_time < time_threshold:
         # Check if the file was modified before the threshold time and that it is not a directory
         if file_modified_time < time_threshold and not file_attr.st_mode & 0o040000:
-            print(f"Skipping {file_name} as it was modified before the threshold time")
+            print(f"Skipping {file_name} as it was modified before the threshold time\n")
             # print(f"File modified time: {file_modified_time}, Threshold time: {time_threshold}")
             continue
         elif file_modified_time < time_threshold and file_attr.st_mode & 0o040000:
@@ -520,13 +519,13 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
                 remote_file_size = file_attr.st_size
                 # If the file exists and sizes match, skip downloading
                 if local_file_size == remote_file_size:
-                    print(f"Skipping {file_name} as it already exists locally")
+                    print(f"Skipping {file_name} as it already exists locally\n")
                     continue
 
             # Download the file
             try:
                 sftp.get(str(remote_file_path), str(local_file_path))
-                print(f"Downloaded {file_name} from {remote_dir} to {local_dir}")
+                print(f"Downloaded {file_name} from {remote_dir} to {local_dir}\n")
             except Exception:
                 logger.exception(f"Error downloading {file_name} from {remote_dir} to {local_dir}")
                 continue
@@ -578,14 +577,14 @@ def download_latest_files(time_threshold=1):
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "~/Desktop/git/Lexi-Bu/lxi_gui/data/test2/"
+    local_directory = "~/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/from_sim/"
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes
     except Exception:
         time_delta_minutes = None
 
-    print(f"Downloading files modified in the last {time_delta_minutes} minutes")
+    print(f"Downloading files modified in the last {time_delta_minutes} minutes\n")
     # Time calculation: files modified in the last "time_delta_minutes" minutes
     # If time_delta_minutes is None, then download all files
     if time_delta_minutes is not None:
