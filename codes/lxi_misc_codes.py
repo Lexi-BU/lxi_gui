@@ -485,6 +485,7 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
     """
     # Change to the remote directory
     sftp.chdir(remote_dir)
+    print(f"The threshold time is: {time_threshold}")
     # Get list of files and directories in the remote directory
     for file_attr in sftp.listdir_attr():
         file_name = file_attr.filename
@@ -504,26 +505,31 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
             if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
                 local_file_path.mkdir(parents=True, exist_ok=True)
                 get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
-
+        elif file_modified_time > time_threshold and file_attr.st_mode & 0o040000:
+            # If it is a directory, recurse into it
+            if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
+                local_file_path.mkdir(parents=True, exist_ok=True)
+                get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
         # If it is a file, check if it was modified in the last 'time_delta_minutes'
         elif file_modified_time > time_threshold:
-
             # Ensure the local directory exists
             local_file_path.parent.mkdir(parents=True, exist_ok=True)
-
             # Check if the file already exists locally
             if local_file_path.exists():
                 local_file_size = local_file_path.stat().st_size
                 remote_file_size = file_attr.st_size
-
                 # If the file exists and sizes match, skip downloading
                 if local_file_size == remote_file_size:
                     print(f"Skipping {file_name} as it already exists locally")
                     continue
 
             # Download the file
-            sftp.get(str(remote_file_path), str(local_file_path))
-            print(f"Downloaded {file_name} from {remote_dir} to {local_dir}")
+            try:
+                sftp.get(str(remote_file_path), str(local_file_path))
+                print(f"Downloaded {file_name} from {remote_dir} to {local_dir}")
+            except Exception:
+                logger.exception(f"Error downloading {file_name} from {remote_dir} to {local_dir}")
+                continue
 
 
 def show_blinking_message():
@@ -574,7 +580,10 @@ def download_latest_files(time_threshold=1):
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
     local_directory = "~/Desktop/git/Lexi-Bu/lxi_gui/data/test2/"
     local_directory = Path(local_directory).expanduser()
-    time_delta_minutes = float(time_threshold)  # Time range in minutes
+    try:
+        time_delta_minutes = float(time_threshold)  # Time range in minutes
+    except Exception:
+        time_delta_minutes = None
 
     print(f"Downloading files modified in the last {time_delta_minutes} minutes")
     # Time calculation: files modified in the last "time_delta_minutes" minutes
@@ -584,6 +593,8 @@ def download_latest_files(time_threshold=1):
         time_threshold = datetime.now(timezone.utc) - timedelta(minutes=time_delta_minutes)
     else:
         time_threshold = datetime.min
+        # Set the timezone to UTC
+        time_threshold = time_threshold.replace(tzinfo=timezone.utc)
 
     # Start the blinking message in a separate thread
     blinking_thread = threading.Thread(target=show_blinking_message)
