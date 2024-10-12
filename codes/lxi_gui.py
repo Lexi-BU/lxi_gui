@@ -57,6 +57,7 @@ def hist_plot_inputs(dpi=100):
             "df_slice_sci": global_variables.all_file_details["df_slice_sci"],
             "start_time": start_time.get(),
             "end_time": end_time.get(),
+            "time_threshold": time_threshold.get(),
             "bins": hist_bins_entry.get(),
             "cmin": c_min_entry.get(),
             "cmax": c_max_entry.get(),
@@ -456,8 +457,8 @@ else:
         0.9 * root.winfo_screenheight(),
     )
 
-screen_width = 1200
-screen_height = 800
+# screen_width = 1200
+# screen_height = 800
 # print(
 #     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
 # )
@@ -534,7 +535,7 @@ dark_mode_button = tk.Checkbutton(
     selectcolor="#808080",
     cursor="hand2",
 )
-dark_mode_button.grid(row=19, column=0, sticky="nsew", padx=5, pady=5)
+dark_mode_button.grid(row=21, column=0, sticky="nsew", padx=5, pady=5)
 # add this button on the housekeeping tab as well
 dark_mode_button = tk.Checkbutton(
     hk_tab,
@@ -964,6 +965,7 @@ start_time_label.grid(row=8, column=0, columnspan=2, sticky="nsew")
 
 # Add an input box with a label for start time
 default_time_dict = lgcf.get_config_time()
+
 start_time = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 start_time.insert(0, default_time_dict["start_time"])
 start_time.config(insertbackground=insertbackground_color)
@@ -1261,6 +1263,18 @@ time_button.grid(
     row=17, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
 )
 
+# Add a box to enter the threshold time for copy button
+time_threshold_label = tk.Label(
+    sci_tab, text="Time Threshold (Minutes)", font=font_style, bg=bg_color, fg=fg_color
+)
+time_threshold_label.grid(row=18, column=0, columnspan=2)
+
+time_threshold = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+time_threshold.insert(0, default_time_dict["time_threshold"])
+time_threshold.config(insertbackground=insertbackground_color)
+time_threshold.grid(row=19, column=0, columnspan=2, sticky="nsew")
+
+# Add a clickable button to download the latest files from the server
 copy_button = tk.Button(
     sci_tab,
     bg=bg_color,
@@ -1268,10 +1282,10 @@ copy_button = tk.Button(
     text="Get Latest Files",
     font=font_style_box,
     justify="center",
-    command=lambda: lmsc.download_latest_files(),
+    command=lambda: lmsc.download_latest_files(time_threshold=time_threshold.get()),
 )
 copy_button.grid(
-    row=18, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
+    row=20, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
 )
 
 # Add a refresh button to reload all the time series plots
