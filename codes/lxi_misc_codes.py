@@ -489,6 +489,7 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
     for file_attr in sftp.listdir_attr():
         file_name = file_attr.filename
         remote_file_path = Path(remote_dir) / file_name
+        remote_file_path = remote_file_path.as_posix()
         local_file_path = Path(local_dir) / file_name
 
         # Get the modified time of the file in UTC
@@ -573,7 +574,7 @@ def download_latest_files(time_threshold=1):
     hostname = "sftp.fireflyspace.com"
     port = 22  # or the port number your server uses
     username = "LEXI"
-    private_key_path = "~/.ssh/firefly_ssh_key"
+    private_key_path = "firefly_ssh_key_ssh"
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
