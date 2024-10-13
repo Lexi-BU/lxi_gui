@@ -33,6 +33,7 @@ def create_config_file(default_vals=False):
             gui_config.add_section("time_options")
             gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
             gui_config.set("time_options", "end_time", "2024-12-31 00:00:00")
+            gui_config.set("time_options", "time_threshold", "60")
             with open("luigi.cfg", "w") as config_file:
                 gui_config.write(config_file)
             print("\033[1;32mConfiguration file 'luigi.cfg' created.\033[0m")
@@ -62,6 +63,7 @@ def create_config_file(default_vals=False):
         gui_config.add_section("time_options")
         gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
         gui_config.set("time_options", "end_time", "2024-12-31 00:00:00")
+        gui_config.set("time_options", "time_threshold", "60")
         with open("luigi.cfg", "w") as config_file:
             gui_config.write(config_file)
     return None
@@ -185,16 +187,19 @@ def get_config_time():
         default_opt_dict = {
             "start_time": gui_config.get(entry_sec, "start_time"),
             "end_time": gui_config.get(entry_sec, "end_time"),
+            "time_threshold": gui_config.get(entry_sec, "time_threshold"),
         }
     else:
         default_opt_dict = {
             "start_time": "2023-01-01 00:00:00",
             "end_time": "2024-12-31 00:00:00",
+            "time_threshold": "60",
         }
         # Save the default options to a configuration file
         gui_config.add_section(entry_sec)
         gui_config.set(entry_sec, "start_time", default_opt_dict["start_time"])
         gui_config.set(entry_sec, "end_time", default_opt_dict["end_time"])
+        gui_config.set(entry_sec, "time_threshold", default_opt_dict["time_threshold"])
         with open("luigi.cfg", "w") as config_file:
             gui_config.write(config_file)
         print("\033[1;32mConfiguration file 'luigi.cfg' created.\033[0m")
@@ -230,6 +235,7 @@ def save_config(entry_list=None, entry_sec=["sci_plot_options"]):
     gui_config.add_section(entry_sec[1])
     gui_config.set(entry_sec[1], "start_time", config_vals[19])
     gui_config.set(entry_sec[1], "end_time", config_vals[20])
+    gui_config.set(entry_sec[1], "time_threshold", config_vals[21])
     with open("luigi.cfg", "w") as config_file:
         gui_config.write(config_file)
     print("\033[1;32mConfiguration file 'luigi.cfg' updated.\033[0m")

@@ -4,7 +4,7 @@ import time
 import threading
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import matplotlib.pyplot as plt
 
 import global_variables
@@ -485,35 +485,50 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
     """
     # Change to the remote directory
     sftp.chdir(remote_dir)
-
     # Get list of files and directories in the remote directory
     for file_attr in sftp.listdir_attr():
         file_name = file_attr.filename
-        file_modified_time = datetime.fromtimestamp(file_attr.st_mtime)
         remote_file_path = Path(remote_dir) / file_name
         local_file_path = Path(local_dir) / file_name
 
-        # If it is a directory, recurse into it
-        if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
-            local_file_path.mkdir(parents=True, exist_ok=True)
-            get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
-
+        # Get the modified time of the file in UTC
+        file_modified_time = datetime.fromtimestamp(file_attr.st_mtime, timezone.utc)
+        # if file_modified_time < time_threshold:
+        # Check if the file was modified before the threshold time and that it is not a directory
+        if file_modified_time < time_threshold and not file_attr.st_mode & 0o040000:
+            print(f"Skipping {file_name} as it was modified before the threshold time\n")
+            # print(f"File modified time: {file_modified_time}, Threshold time: {time_threshold}")
+            continue
+        elif file_modified_time < time_threshold and file_attr.st_mode & 0o040000:
+            # If it is a directory, recurse into it
+            if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
+                local_file_path.mkdir(parents=True, exist_ok=True)
+                get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
+        elif file_modified_time > time_threshold and file_attr.st_mode & 0o040000:
+            # If it is a directory, recurse into it
+            if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
+                local_file_path.mkdir(parents=True, exist_ok=True)
+                get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
         # If it is a file, check if it was modified in the last 'time_delta_minutes'
-        elif file_modified_time >= time_threshold:
+        elif file_modified_time > time_threshold:
             # Ensure the local directory exists
             local_file_path.parent.mkdir(parents=True, exist_ok=True)
-
             # Check if the file already exists locally
             if local_file_path.exists():
                 local_file_size = local_file_path.stat().st_size
                 remote_file_size = file_attr.st_size
-
                 # If the file exists and sizes match, skip downloading
                 if local_file_size == remote_file_size:
+                    print(f"Skipping {file_name} as it already exists locally\n")
                     continue
 
             # Download the file
-            sftp.get(str(remote_file_path), str(local_file_path))
+            try:
+                sftp.get(str(remote_file_path), str(local_file_path))
+                print(f"Downloaded {file_name} from {remote_dir} to {local_dir}\n")
+            except Exception:
+                logger.exception(f"Error downloading {file_name} from {remote_dir} to {local_dir}")
+                continue
 
 
 def show_blinking_message():
@@ -532,7 +547,7 @@ def show_blinking_message():
     sys.stdout.write("\r" + " " * 30 + "\r")  # Clear the line
 
 
-def download_latest_files():
+def download_latest_files(time_threshold=1):
     """
     Download the latest files from the Firefly server that were modified in the last given time. By
     default, all files from last 1 hour are downloaded. You can change the time range by changing
@@ -558,18 +573,27 @@ def download_latest_files():
     hostname = "sftp.fireflyspace.com"
     port = 22  # or the port number your server uses
     username = "LEXI"
-    private_key_path = "/home/cephadrius/.ssh/firefly_ssh_key"  # Use None if not using a private key
+    private_key_path = "~/.ssh/firefly_ssh_key"
+    private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/"
-    time_delta_minutes = 60  # Time range in minutes
+    local_directory = "~/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/from_sim/"
+    local_directory = Path(local_directory).expanduser()
+    try:
+        time_delta_minutes = float(time_threshold)  # Time range in minutes
+    except Exception:
+        time_delta_minutes = None
 
+    print(f"Downloading files modified in the last {time_delta_minutes} minutes\n")
     # Time calculation: files modified in the last "time_delta_minutes" minutes
     # If time_delta_minutes is None, then download all files
     if time_delta_minutes is not None:
-        time_threshold = datetime.now() - timedelta(minutes=time_delta_minutes)
+        # Get the time in UTC
+        time_threshold = datetime.now(timezone.utc) - timedelta(minutes=time_delta_minutes)
     else:
         time_threshold = datetime.min
+        # Set the timezone to UTC
+        time_threshold = time_threshold.replace(tzinfo=timezone.utc)
 
     # Start the blinking message in a separate thread
     blinking_thread = threading.Thread(target=show_blinking_message)
