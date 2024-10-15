@@ -208,7 +208,8 @@ def get_config_time():
 
 def save_config(entry_list=None, entry_sec=["sci_plot_options"]):
     """Save the current options to a configuration file."""
-
+    for entry in entry_list:
+        print(entry.get())
     config_vals = [str(entry.get()) for entry in entry_list]
     gui_config = ConfigParser()
     gui_config.add_section(entry_sec[0])

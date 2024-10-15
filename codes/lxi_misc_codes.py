@@ -547,7 +547,7 @@ def show_blinking_message():
     sys.stdout.write("\r" + " " * 30 + "\r")  # Clear the line
 
 
-def download_latest_files(time_threshold=1):
+def download_latest_files(time_threshold=1.0):
     """
     Download the latest files from the Firefly server that were modified in the last given time. By
     default, all files from last 1 hour are downloaded. You can change the time range by changing
@@ -577,7 +577,7 @@ def download_latest_files(time_threshold=1):
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "~/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/from_sim/"
+    local_directory = "~/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/"
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes
