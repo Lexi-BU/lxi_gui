@@ -893,7 +893,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Insert the default folder path in the text box based on the operating system
 if os.name == "nt":
     folder_path.insert(
-        1, "..\\git_data\\"
+        1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
     )
 elif os.name == "posix":
     folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/")

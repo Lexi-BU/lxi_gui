@@ -489,6 +489,7 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
     for file_attr in sftp.listdir_attr():
         file_name = file_attr.filename
         remote_file_path = Path(remote_dir) / file_name
+        remote_file_path = remote_file_path.as_posix()
         local_file_path = Path(local_dir) / file_name
 
         # Get the modified time of the file in UTC
@@ -573,18 +574,20 @@ def download_latest_files(time_threshold=1.0):
     hostname = "sftp.fireflyspace.com"
     port = 22  # or the port number your server uses
     username = "LEXI"
-    private_key_path = "~/.ssh/firefly_ssh_key"
+    private_key_path = "~/firefly_ssh_key_ssh"
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "~/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/"
+    local_directory = "C:\\Users\\Lexi-Admin\\Documents\\GitHub\\Lexi-BU\\lxi_gui\\data\\from_ff"
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes
+        print(f"Downloading files modified in the last {time_delta_minutes} minutes\n")
+
     except Exception:
         time_delta_minutes = None
+        print("Downloading all files\n")
 
-    print(f"Downloading files modified in the last {time_delta_minutes} minutes\n")
     # Time calculation: files modified in the last "time_delta_minutes" minutes
     # If time_delta_minutes is None, then download all files
     if time_delta_minutes is not None:
