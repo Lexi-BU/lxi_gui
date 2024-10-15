@@ -548,7 +548,7 @@ def show_blinking_message():
     sys.stdout.write("\r" + " " * 30 + "\r")  # Clear the line
 
 
-def download_latest_files(time_threshold=1):
+def download_latest_files(time_threshold=1.0):
     """
     Download the latest files from the Firefly server that were modified in the last given time. By
     default, all files from last 1 hour are downloaded. You can change the time range by changing

@@ -1011,6 +1011,16 @@ start_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(start_time_hk, s
 end_time.bind("<KeyRelease>", lambda *_: update_time_entry(end_time, end_time_hk))
 end_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(end_time_hk, end_time))
 
+# Add a box to enter the threshold time for copy button
+time_threshold = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+time_threshold.insert(0, default_time_dict["time_threshold"])
+time_threshold.config(insertbackground=insertbackground_color)
+time_threshold.grid(row=19, column=0, columnspan=2, sticky="nsew")
+time_threshold_label = tk.Label(
+    sci_tab, text="Time Threshold (Minutes)", font=font_style, bg=bg_color, fg=fg_color
+)
+time_threshold_label.grid(row=18, column=0, columnspan=2)
+
 # Add a dropdown menu for the kind of time to be used, options are "Lexi Time" and "UTC Time" and
 # "Local Time"
 # Default is "Lexi Time". If the time kind is changed, then run the "refresh_ts_plot" function
@@ -1169,6 +1179,7 @@ entry_list = [
     cmap_option,
     start_time,
     end_time,
+    time_threshold,
 ]
 
 save_config_button = tk.Button(
@@ -1202,8 +1213,35 @@ default_config_button.grid(
 )
 
 
-# Dsiable the default config button
-default_config_button.config(state="disabled", disabledforeground="grey", relief="sunken")
+# If the default config button is pressed, then update the values in the entry boxes using the
+# populte_entries function
+def apply_default_config(event):
+    lgeb.populate_entries(root=sci_tab, dark_mode=dark_mode)
+
+    # Clear and reset the time_threshold entry
+    time_threshold.delete(0, tk.END)
+    time_threshold.insert(0, default_time_dict["time_threshold"])
+
+    # Clear and reset the start_time entry
+    start_time.delete(0, tk.END)
+    start_time.insert(0, default_time_dict["start_time"])
+
+    # Clear and reset the end_time entry
+    end_time.delete(0, tk.END)
+    end_time.insert(0, default_time_dict["end_time"])
+
+    # Save the default values to the configuration file
+    lgcf.get_config_entry(default_vals=True)
+    lgcf.create_config_file(default_vals=True)
+    lgeb.populate_entries(root=sci_tab, dark_mode=dark_mode)
+
+    # Update the folder path to the default value
+    folder_path.delete(0, tk.END)
+    folder_path.insert(0, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/")
+
+
+# Bind the function to the default_config_button
+default_config_button.bind("<Button-1>", apply_default_config)
 
 # Add a quit button
 quit_button_sci = tk.Button(
@@ -1263,17 +1301,6 @@ time_button.grid(
     row=17, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
 )
 
-# Add a box to enter the threshold time for copy button
-time_threshold_label = tk.Label(
-    sci_tab, text="Time Threshold (Minutes)", font=font_style, bg=bg_color, fg=fg_color
-)
-time_threshold_label.grid(row=18, column=0, columnspan=2)
-
-time_threshold = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
-time_threshold.insert(0, default_time_dict["time_threshold"])
-time_threshold.config(insertbackground=insertbackground_color)
-time_threshold.grid(row=19, column=0, columnspan=2, sticky="nsew")
-
 # Add a clickable button to download the latest files from the server
 copy_button = tk.Button(
     sci_tab,
@@ -1282,7 +1309,7 @@ copy_button = tk.Button(
     text="Get Latest Files",
     font=font_style_box,
     justify="center",
-    command=lambda: lmsc.download_latest_files(time_threshold=time_threshold.get()),
+    command=lambda: lmsc.download_latest_files(time_threshold=float(time_threshold.get())),
 )
 copy_button.grid(
     row=20, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5
