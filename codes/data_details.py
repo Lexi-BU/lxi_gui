@@ -3,7 +3,11 @@ import pandas as pd
 import csv
 from pathlib import Path
 from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
+
+
+plt.close("all")
 
 
 def list_folders_in_directory(directory_path):
@@ -68,9 +72,10 @@ def read_data_from_folder(folder_path="", save_file_name=""):
         # return data_dict
 
 
-
+"""
 if __name__ == "__main__":
-    directory_path = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/hk_testings/"
+    directory_path = "~/Desktop/git/Lexi-BU/lxi_gui/data/hk_testings/"
+    directory_path = os.path.expanduser(directory_path)
     folder_list = list_folders_in_directory(directory_path)
 
     count = 0
@@ -105,57 +110,199 @@ for folder_name in folder_names:
 
 # Save the filtered data to a new csv file
 df_filtered.to_csv(f"../data/hk_testings/filtered_data_{random_seed}_random_seed.csv", index=False)
-
+"""
 
 file_name_hv = "../data/hk_testings/filtered_data_42_random_seed-hv.csv"
-df = pd.read_csv(file_name_hv)
+df_hv = pd.read_csv(file_name_hv)
 
 # Convert the date column from YYYYMMDD format to datetime format
-df["datetime"] = pd.to_datetime(df["date"], format="%Y%m%d")
+df_hv["datetime"] = pd.to_datetime(df_hv["date"], format="%Y%m%d")
 
 # If the consecutive datetimes are same, then add 4 hours to the next datetime
-for i in range(1, len(df)):
-    if df["datetime"][i] == df["datetime"][i - 1]:
-        df["datetime"][i] = df["datetime"][i] + pd.Timedelta(hours=4)
+for i in range(1, len(df_hv)):
+    if df_hv["datetime"][i] == df_hv["datetime"][i - 1]:
+        df_hv["datetime"][i] = df_hv["datetime"][i] + pd.Timedelta(hours=4)
 
 # Set the datetime column as the index
-df = df.set_index("datetime")
+df_hv = df_hv.set_index("datetime")
 
-ploit_key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"] 
-
-# Plot the data
-fig, ax = plt.subplots(5, 1, figsize=(20, 15))
-for i, key in enumerate(ploit_key_list):
-    ax[i].plot(df.index, df[key], label=key, marker="o", linestyle=None, lw=0, markersize=5)
-    ax[i].set_title(key)
-    ax[i].legend()
-    ax[i].grid()
-# plt.show()
-plt.savefig("../data/hk_testings/filtered_data_42_random_seed-hv.png")
+plot_key_list_hv = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
 
 
+def make_plots(df, plot_key_list, save_file_name, format="pdf"):
+
+    label_fontsize = 18
+    # legend_fontsize = 22
+    marker_size = 12
+    marker_style = "h"
+    alpha = 0.5
+
+    unique_folders = df['folder_name'].unique()
+    print(f"{unique_folders}\n")
+    folder_color_map = {folder: plt.cm.get_cmap('tab20')(i) for i, folder in enumerate(unique_folders)}
+    # Plot the data
+    fig = plt.figure(
+        num=None, figsize=(14, 18), dpi=200, facecolor="w", edgecolor="gray"
+    )
+    fig.subplots_adjust(
+        left=0.01, right=0.95, top=0.95, bottom=0.01, wspace=0.02, hspace=0.1
+    )
+
+    gs = fig.add_gridspec(5, 1)
+    axs1 = fig.add_subplot(gs[0, 0])
+    # Plot with different colors for different folder names
+    for folder in unique_folders:
+        folder_df = df[df['folder_name'] == folder]
+        axs1.plot(
+            folder_df.index, folder_df["+5.2V_Imon"], label=f"{folder} - +5.2V_Imon", marker=marker_style, linestyle='None',
+            lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+        )
+
+    # axs1.plot(
+    #     df.index, df["+5.2V_Imon"], label="+5.2V_Imon", marker=marker_style, linestyle=None, lw=0, markersize=marker_size
+    # )
+    # # axs1.set_title("+5.2V_Imon")
+    #  axs1.legend(fontsize=legend_fontsize, loc="best")
+    # axs1.grid()
+    # Hide the x-axis labels
+    plt.setp(axs1.get_xticklabels(), visible=False)
+    # Set the y-axis limits to 1.1 times the maximum annd 0.9 times the minimum value
+    axs1.set_ylim(
+        0.9 * df["+5.2V_Imon"].min(), 1.1 * df["+5.2V_Imon"].max()
+    )
+    axs1.set_ylabel("+5.2V_Imon (mA)", fontsize=label_fontsize)
+
+    axs2 = fig.add_subplot(gs[1, 0])
+    for folder in unique_folders:
+        folder_df = df[df['folder_name'] == folder]
+        axs2.plot(
+            folder_df.index, folder_df["+10V_Imon"] / 1e3, label=f"{folder} - +10V_Imon", marker=marker_style, linestyle='None',
+            lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+        )
+
+    # axs2.set_title("+10V_Imon")
+    # axs2.legend(fontsize=legend_fontsize, loc="best")
+    # axs2.grid()
+    # Hide the x-axis labels
+    plt.setp(axs2.get_xticklabels(), visible=False)
+    # Set the y-axis limits to 1.1 times the maximum annd 0.9 times the minimum value
+    axs2.set_ylim(
+        0.9 * df["+10V_Imon"].min() / 1e3, 1.1 * df["+10V_Imon"].max() / 1e3
+    )
+    axs2.set_ylabel("+10V_Imon (mA)", fontsize=label_fontsize)
+
+    axs3 = fig.add_subplot(gs[2, 0])
+    for folder in unique_folders:
+        folder_df = df[df['folder_name'] == folder]
+        axs3.plot(
+            folder_df.index, folder_df["+3.3V_Imon"], label=f"{folder} - +3.3V_Imon", marker=marker_style, linestyle='None',
+            lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+        )
+    # axs3.set_title("+3.3V_Imon")
+    # axs3.legend(fontsize=legend_fontsize, loc="lower right")
+    # axs3.grid()
+
+    # Hide the x-axis labels
+    plt.setp(axs3.get_xticklabels(), visible=False)
+    # Set the y-axis limits to 1.1 times the maximum annd 0.9 times the minimum value
+    axs3.set_ylim(
+        0.9 * df["+3.3V_Imon"].min(), 1.1 * df["+3.3V_Imon"].max()
+    )
+    axs3.set_ylabel("+3.3V_Imon (mA)", fontsize=label_fontsize)
+
+    axs4 = fig.add_subplot(gs[3, 0])
+    for folder in unique_folders:
+        folder_df = df[df['folder_name'] == folder]
+        axs4.plot(
+            folder_df.index, folder_df["AnodeVoltMon"] / 1e3 , label=f"{folder} - AnodeVoltMon", marker=marker_style, linestyle='None',
+            lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+        )
+
+    # axs4.set_title("AnodeVoltMon")
+    # axs4.legend(fontsize=legend_fontsize, loc="best")
+    # axs4.grid()
+    # Hide the x-axis labels
+    plt.setp(axs4.get_xticklabels(), visible=False)
+    # Set the y-axis limits to 1.1 times the maximum annd 0.9 times the minimum value
+    axs4.set_ylim(
+        0.9 * df["AnodeVoltMon"].min() / 1e3, 1.1 * df["AnodeVoltMon"].max() / 1e3
+    )
+    axs4.set_ylabel("AnodeVoltMon (V)", fontsize=label_fontsize)
+
+    axs5 = fig.add_subplot(gs[4, 0])
+    for folder in unique_folders:
+        folder_df = df[df['folder_name'] == folder]
+        axs5.plot(
+            folder_df.index, folder_df["+28V_Imon"], label=f"{folder} - +28V_Imon", marker=marker_style, linestyle='None',
+            lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+        )
+
+    # axs5.set_title("+28V_Imon")
+    # axs5.legend(fontsize=0.25 * legend_fontsize, loc="best")
+    # axs5.grid()
+    # Hide the x-axis labels
+    plt.setp(axs5.get_xticklabels(), rotation=45, ha="right")
+    # Set the y-axis limits to 1.1 times the maximum annd 0.9 times the minimum value
+    axs5.set_ylim(
+        0.9 * df["+28V_Imon"].min(), 1.1 * df["+28V_Imon"].max()
+    )
+    axs5.set_ylabel("+28V_Imon (mA)", fontsize=label_fontsize)
+
+    # For each y-axis, set the label and tick label font size
+    for ax in fig.get_axes():
+        # ax.set_ylabel("Current (mA)", fontsize=label_fontsize)
+        ax.tick_params(axis="both", which="major", labelsize=label_fontsize)
+
+    # Add another axis for the legend in two columns
+    # axs6 = fig.add_subplot(gs[5, 0])
+    # axs6.axis("off")
+    # handles, labels = axs1.get_legend_handles_labels()
+    # axs6.legend(handles, labels, fontsize=0.5 * legend_fontsize, loc="center", ncol=2)
+
+    # Save the figure
+    save_file_name = save_file_name + f".{format}"
+    plt.savefig(save_file_name, dpi=200, bbox_inches="tight", pad_inches=0.1, format=format)
+
+
+# The HV file
+file_name_hv = "../data/hk_testings/filtered_data_42_random_seed-hv.csv"
+df_hv = pd.read_csv(file_name_hv)
+
+# Convert the date column from YYYYMMDD format to datetime format
+df_hv["datetime"] = pd.to_datetime(df_hv["date"], format="%Y%m%d")
+
+# If the consecutive datetimes are same, then add 4 hours to the next datetime
+for i in range(1, len(df_hv)):
+    if df_hv["datetime"][i] == df_hv["datetime"][i - 1]:
+        df_hv["datetime"][i] = df_hv["datetime"][i] + pd.Timedelta(hours=4)
+
+# Set the datetime column as the index
+df_hv = df_hv.set_index("datetime")
+
+# Sort the dataframe by the datetime index
+df_hv = df_hv.sort_index()
+
+plot_key_list_hv = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
+
+# The non-HV file
 file_name_no_hv = "../data/hk_testings/filtered_data_42_random_seed-no_hv.csv"
-df = pd.read_csv(file_name_no_hv)
+df_no_hv = pd.read_csv(file_name_no_hv)
 
 # Convert the date column from YYYYMMDD format to datetime format
-df["datetime"] = pd.to_datetime(df["date"], format="%Y%m%d")
+df_no_hv["datetime"] = pd.to_datetime(df_no_hv["date"], format="%Y%m%d")
 
 # If the consecutive datetimes are same, then add 4 hours to the next datetime
-for i in range(1, len(df)):
-    if df["datetime"][i] == df["datetime"][i - 1]:
-        df["datetime"][i] = df["datetime"][i] + pd.Timedelta(hours=4)
+for i in range(1, len(df_no_hv)):
+    if df_no_hv["datetime"][i] == df_no_hv["datetime"][i - 1]:
+        df_no_hv["datetime"][i] = df_no_hv["datetime"][i] + pd.Timedelta(hours=4)
 
 # Set the datetime column as the index
-df = df.set_index("datetime")
+df_no_hv = df_no_hv.set_index("datetime")
 
-ploit_key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
+# Sort the dataframe by the datetime index
+df_no_hv = df_no_hv.sort_index()
 
-# Plot the data
-fig, ax = plt.subplots(5, 1, figsize=(20, 15))
-for i, key in enumerate(ploit_key_list):
-    ax[i].plot(df.index, df[key], label=key, marker="o", linestyle=None, lw=0, markersize=5)
-    ax[i].set_title(key)
-    ax[i].legend()
-    ax[i].grid()
-# plt.show()
-plt.savefig("../data/hk_testings/filtered_data_42_random_seed-no_hv.png")
+plot_key_list_no_hv = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
+
+make_plots(df_hv, plot_key_list_hv, "../data/hk_testings/hv_plots", format="png")
+make_plots(df_no_hv, plot_key_list_no_hv, "../data/hk_testings/no_hv_plots", format="png")
