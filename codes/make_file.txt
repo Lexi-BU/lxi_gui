@@ -1,3 +1,5 @@
 "C:\Users\Lexi-Admin\AppData\Roaming\Python\Python310\Scripts\pyinstaller.exe" --onefile "codes; C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\codes" --icon=lxi_icon.ico lxi_gui.py
 
 "C:\Users\Lexi-Admin\AppData\Roaming\Python\Python310\Scripts\pyinstaller.exe" --onefile --add-data "C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\codes\firefly_ssh_key_ssh:." --icon="lxi_icon.ico" lxi_gui.py
+
+pyinstaller --onefile --icon=lxi_icon.ico lxi_gui.py

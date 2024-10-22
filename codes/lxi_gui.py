@@ -57,7 +57,6 @@ def hist_plot_inputs(dpi=100):
             "df_slice_sci": global_variables.all_file_details["df_slice_sci"],
             "start_time": start_time.get(),
             "end_time": end_time.get(),
-            "time_threshold": time_threshold.get(),
             "bins": hist_bins_entry.get(),
             "cmin": c_min_entry.get(),
             "cmax": c_max_entry.get(),
@@ -155,8 +154,8 @@ def ts_button_val_change(default_opt_var):
         "PinPullerTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
-        "+28V_Imon",
         "+10V_Imon",
+        "+28V_Imon",
         "AnodeVoltMon",
         "DeltaEvntCount",
         # "DeltaLostEvntCount",
@@ -453,12 +452,12 @@ if platform.system() == "Linux":
     )
 else:
     screen_width, screen_height = (
-        0.9 * root.winfo_screenwidth(),
-        0.9 * root.winfo_screenheight(),
+        0.8 * root.winfo_screenwidth(),
+        0.8 * root.winfo_screenheight(),
     )
 
-# screen_width = 1200
-# screen_height = 800
+# screen_width = 1800
+# screen_height = 1000
 # print(
 #     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
 # )
@@ -551,7 +550,7 @@ dark_mode_button = tk.Checkbutton(
     selectcolor="#808080",
     cursor="hand2",
 )
-dark_mode_button.grid(row=12, column=6, columnspan=1, sticky="nsew", padx=5, pady=5)
+dark_mode_button.grid(row=12, column=5, columnspan=1, sticky="nsew", padx=5, pady=5)
 
 
 sci_tab.configure(
@@ -954,7 +953,7 @@ folder_load_button_hk = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-folder_load_button_hk.grid(row=12, column=7, columnspan=1, sticky="nsew")
+folder_load_button_hk.grid(row=12, column=6, columnspan=1, sticky="nsew")
 folder_load_button_hk.config(state="normal")
 
 # Label for plot times
@@ -1332,7 +1331,7 @@ refresh_ts_hk_button = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-refresh_ts_hk_button.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
+refresh_ts_hk_button.grid(row=12, column=7, columnspan=1, rowspan=1, sticky="new")
 
 quit_button_hk = tk.Button(
     hk_tab,
@@ -1350,6 +1349,6 @@ quit_button_hk = tk.Button(
     highlightbackground="red",
     highlightcolor="red",
 )
-quit_button_hk.grid(row=12, column=9, columnspan=1, rowspan=1, sticky="new")
+quit_button_hk.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
 
 root.mainloop()
