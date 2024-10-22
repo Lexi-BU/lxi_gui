@@ -29,8 +29,10 @@ def read_data_from_folder(folder_path="", save_file_name=""):
     #             "Pinpuller_Armed", "HVmcpAuto", "HVmcpMan", "DeltaEvntCount",
     #             "DeltaDroppedCount", "DeltaLostEvntCount"]
 
-    key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon",
-                "AnodeVoltMon", "+28V_Imon", "HVmcpMan", "DeltaEvntCount"]
+    # key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon",
+    #             "AnodeVoltMon", "+28V_Imon", "HVmcpMan", "DeltaEvntCount"]
+    key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon", "HVmcpMan",
+            "DeltaEvntCount", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp", "HVsupplyTemp"]
     # Check if the data folder exists
     if not os.path.exists(data_folder):
         print(f"Data folder does not exist for {folder_path}.\n")
@@ -39,11 +41,13 @@ def read_data_from_folder(folder_path="", save_file_name=""):
         # print(f"Data folder exists for {folder_path}.\n")
         # Get the list of files in the data folder
         file_list_all = os.listdir(data_folder)
-        print(len(file_list_all))
+        # print(len(file_list_all))
         print(f"Reading data from {data_folder}.\n")
         for file_list in file_list_all:
             # Read the data from the file
             data = pd.read_csv(data_folder + file_list)
+            # Print the name of the file that was read
+            print(f"Reading data from {file_list}.\n")
             # For each key in the key list, find the 50th percentile, rounded to 3 decimal places
             data_dict = {}
             for key in key_list:
@@ -62,15 +66,20 @@ def read_data_from_folder(folder_path="", save_file_name=""):
                     writer = csv.writer(file)
                     writer.writerow(["folder_name", "file_name"] + key_list)
             # Append the data to the save file
-            print(f"Writing data for {folder_name} to {save_file_name}.")
+            # print(f"Writing data for {folder_name} to {save_file_name}.")
             with open(save_file_name, "a") as file:
                 writer = csv.writer(file)
                 writer.writerow([folder_name] + [file_list] + [data_dict[key] for key in key_list])
         # return data_dict
 
-
 """
 if __name__ == "__main__":
+
+    # Delete all the files in all the folders that start with ".~lock."
+    for root, dirs, files in os.walk("/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/hk_testings/"):
+        for file in files:
+            if file.startswith(".~lock."):
+                os.remove(os.path.join(root, file))
     directory_path = "~/Desktop/git/Lexi-BU/lxi_gui/data/hk_testings/"
     directory_path = os.path.expanduser(directory_path)
     folder_list = list_folders_in_directory(directory_path)
@@ -78,16 +87,15 @@ if __name__ == "__main__":
     count = 0
     for folder_path in folder_list[:]:
         count += 1
-        data = read_data_from_folder(folder_path=folder_path + "/", save_file_name="../data/hk_testings/median_data.csv")
+        data = read_data_from_folder(folder_path=folder_path + "/", save_file_name="../data/hk_testings/median_data_temp.csv")
         print(f"Processed {count} folders out of {len(folder_list)}.")
         continue
-"""
 
 # Read the data from the median_data.csv file
-df = pd.read_csv("../data/hk_testings/median_data.csv")
+df = pd.read_csv("../data/hk_testings/median_data_temp.csv")
 
 key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon", "HVmcpMan",
-            "DeltaEvntCount"]
+            "DeltaEvntCount", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp", "HVsupplyTemp"]
 # If the value of all the keys in the key_list is nan, then remove the row
 df = df.dropna(subset=key_list, how="all")
 
@@ -97,7 +105,7 @@ folder_names = df["folder_name"].unique()
 # For each folder name, select a random row corresponding to the folder name and add it to a new
 # dataframe
 df_filtered = pd.DataFrame()
-random_seed = 11
+random_seed = 42
 for folder_name in folder_names:
     df_temp = df[df["folder_name"] == folder_name]
     try:
@@ -108,9 +116,9 @@ for folder_name in folder_names:
 
 # Save the filtered data to a new csv file
 df_filtered.to_csv(f"../data/hk_testings/filtered_data_{random_seed}_random_seed.csv", index=False)
-
-
 """
+
+
 def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, random_seed=None):
 
     label_fontsize = 18
@@ -120,7 +128,7 @@ def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, ra
     alpha = 0.5
 
     unique_folders = df['folder_name'].unique()
-    print(f"{unique_folders}\n")
+    # print(f"{unique_folders}\n")
     folder_color_map = {folder: plt.cm.get_cmap('tab20')(i) for i, folder in enumerate(unique_folders)}
     # Plot the data
     fig = plt.figure(
@@ -152,7 +160,7 @@ def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, ra
     axs1.set_ylim(
         0.9 * df["+5.2V_Imon"].min(), 1.1 * df["+5.2V_Imon"].max()
     )
-    axs1.set_ylabel("+5.2V_Imon (mA)", fontsize=label_fontsize)
+    axs1.set_ylabel("+5.2V_Imon [mA]", fontsize=label_fontsize)
 
     axs2 = fig.add_subplot(gs[1, 0])
     for folder in unique_folders:
@@ -171,7 +179,7 @@ def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, ra
     axs2.set_ylim(
         0.9 * df["+10V_Imon"].min() / 1e3, 1.1 * df["+10V_Imon"].max() / 1e3
     )
-    axs2.set_ylabel("+10V_Imon (mA)", fontsize=label_fontsize)
+    axs2.set_ylabel("+10V_Imon [mA]", fontsize=label_fontsize)
 
     axs3 = fig.add_subplot(gs[2, 0])
     for folder in unique_folders:
@@ -190,7 +198,7 @@ def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, ra
     axs3.set_ylim(
         0.9 * df["+3.3V_Imon"].min(), 1.1 * df["+3.3V_Imon"].max()
     )
-    axs3.set_ylabel("+3.3V_Imon (mA)", fontsize=label_fontsize)
+    axs3.set_ylabel("+3.3V_Imon [mA]", fontsize=label_fontsize)
 
     axs4 = fig.add_subplot(gs[3, 0])
     for folder in unique_folders:
@@ -228,11 +236,11 @@ def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, ra
     axs5.set_ylim(
         0.9 * df["+28V_Imon"].min(), 1.1 * df["+28V_Imon"].max()
     )
-    axs5.set_ylabel("+28V_Imon (mA)", fontsize=label_fontsize)
+    axs5.set_ylabel("+28V_Imon [mA]", fontsize=label_fontsize)
 
     # For each y-axis, set the label and tick label font size
     for ax in fig.get_axes():
-        # ax.set_ylabel("Current (mA)", fontsize=label_fontsize)
+        # ax.set_ylabel("Current [mA]", fontsize=label_fontsize)
         ax.tick_params(axis="both", which="major", labelsize=label_fontsize)
 
     # Set the x-axis limits
@@ -247,7 +255,7 @@ def make_plots(df, plot_key_list, save_file_name, format="pdf", x_limit=None, ra
     # axs6.legend(handles, labels, fontsize=0.5 * legend_fontsize, loc="center", ncol=2)
 
     # Save the figure
-    save_file_name = save_file_name + f"{random_seed}.{format}"
+    save_file_name = save_file_name + f"_{random_seed}.{format}"
     plt.savefig(save_file_name, dpi=200, bbox_inches="tight", pad_inches=0.1, format=format)
 
 
@@ -274,8 +282,13 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
             left=0.01, right=0.95, top=0.95, bottom=0.01, wspace=0.02, hspace=0.05
         )
 
+        # Find the correlation coefficient between the the plot key and the LexiBaseTemp
+        corr_no_hv = df_no_hv[plot_key].corr(df_no_hv["LEXIbaseTemp"])
+        corr_hv = df_hv[plot_key].corr(df_hv["LEXIbaseTemp"])
+        print(f"Correlation coefficient between {plot_key} and LexiBaseTemp for HV OFF: {corr_no_hv}.")
         gs = fig.add_gridspec(2, 1)
         axs1 = fig.add_subplot(gs[0, 0])
+        axs1b = axs1.twinx()
         # Plot with different colors for different folder names
         for folder in unique_folders_no_hv:
             folder_df_no_hv = df_no_hv[df_no_hv['folder_name'] == folder]
@@ -283,8 +296,28 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
                 folder_df_no_hv[plot_key] = folder_df_no_hv[plot_key] / 1e3
             axs1.plot(
                 folder_df_no_hv.index, folder_df_no_hv[plot_key], label=f"{folder} - plot_key", marker=marker_style, linestyle='None',
-                lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+                lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=1
             )
+            # Add the temperature data to the right y-axis
+            # axs1b.plot(
+            #     folder_df_no_hv.index, folder_df_no_hv["LEXIbaseTemp"], label=f"{folder} - LEXIbaseTemp", marker="d", linestyle='None',
+            #     lw=0, markersize=marker_size, color=folder_color_map[folder], alpha=alpha
+            # )
+
+        # Add LexiBaseTemp to the right y-axis
+        axs1b.plot(df_no_hv.index, df_no_hv["LEXIbaseTemp"], label="LexiBaseTemp",
+                   marker=".", linestyle='--', lw=1, markersize=marker_size,
+                   color="black", alpha=alpha)
+        axs1b.set_ylabel("LexiBaseTemp [C]", fontsize=label_fontsize)
+
+        # At the top left corner, in a box, write that diamond is temperature and hexagons are
+        # current
+        axs1.text(0.05, 1.05, "\u25CF--: Temperature \u2B22: Current", fontsize=1 * label_fontsize,
+                  color="black", backgroundcolor="white", transform=axs1.transAxes, ha="left",
+                  va="bottom")
+        axs1.text(0.95, 1.05, f"\u03B1: {np.round(corr_no_hv, 3)}", fontsize=label_fontsize,
+                  color="black", backgroundcolor="white", transform=axs1.transAxes, ha="right",
+                  va="top")
 
         # Hide the x-axis labels
         plt.setp(axs1.get_xticklabels(), visible=False)
@@ -297,10 +330,10 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
             axs1.set_ylim(
                 0.9 * df_no_hv[plot_key].min(), 1.1 * df_no_hv[plot_key].max()
             )
-        axs1.set_ylabel(f"{plot_key} (mA)", fontsize=label_fontsize)
+        axs1.set_ylabel(f"{plot_key} [mA]", fontsize=label_fontsize)
         # For each y-axis, set the label and tick label font size
         for ax in fig.get_axes():
-            # ax.set_ylabel("Current (mA)", fontsize=label_fontsize)
+            # ax.set_ylabel("Current [mA]", fontsize=label_fontsize)
             ax.tick_params(axis="both", which="major", labelsize=label_fontsize)
 
         # On the top right, add a box that says "No HV" in white color with green background
@@ -308,6 +341,7 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
                   backgroundcolor="green", transform=axs1.transAxes, ha="right", va="top")
 
         axs2 = fig.add_subplot(gs[1, 0], sharex=axs1)
+        axs2b = axs2.twinx()
         # Plot with different colors for different folder names
         for folder in unique_folders_hv:
             folder_df_hv = df_hv[df_hv['folder_name'] == folder]
@@ -317,6 +351,18 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
                 folder_df_hv.index, folder_df_hv[plot_key], label=f"{folder} - plot_key", marker=marker_style, linestyle='None',
                 lw=0, markersize=marker_size, color=folder_color_map_hv[folder], alpha=alpha
             )
+            # Add the temperature data to the right y-axis
+            # axs2b.plot(
+            #     folder_df_hv.index, folder_df_hv["LEXIbaseTemp"], label=f"{folder} - LEXIbaseTemp",
+            #     marker="d", linestyle='None',
+            #     lw=0, markersize=marker_size, color=folder_color_map_hv[folder], alpha=alpha
+            # )
+
+        # Add LexiBaseTemp to the right y-axis
+        axs2b.plot(df_hv.index, df_hv["LEXIbaseTemp"], label="LexiBaseTemp",
+                   marker=".", linestyle='--', lw=1, markersize=marker_size,
+                   color="black", alpha=alpha)
+        axs2b.set_ylabel("LexiBaseTemp [C]", fontsize=label_fontsize)
 
         # Set the y-axis limits to 1.1 times the maximum annd 0.9 times the minimum value
         if plot_key == "+10V_Imon" or plot_key == "AnodeVoltMon":
@@ -327,12 +373,12 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
             axs2.set_ylim(
                 0.9 * df_hv[plot_key].min(), 1.1 * df_hv[plot_key].max()
             )
-        axs2.set_ylabel(f"{plot_key} (mA)", fontsize=label_fontsize)
+        axs2.set_ylabel(f"{plot_key} [mA]", fontsize=label_fontsize)
         # Set the x-axis label
         axs2.set_xlabel("Time", fontsize=label_fontsize)
         # For each y-axis, set the label and tick label font size
         for ax in fig.get_axes():
-            # ax.set_ylabel("Current (mA)", fontsize=label_fontsize)
+            # ax.set_ylabel("Current [mA]", fontsize=label_fontsize)
             ax.tick_params(axis="both", which="major", labelsize=label_fontsize,)
             # Rotate the tick labels by 45 degrees
             plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
@@ -340,6 +386,9 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
         # On the top right, add a box that says "HV" in white color with red background
         axs2.text(0.95, 0.95, "HV ON", fontsize=2 * label_fontsize, color="white",
                   backgroundcolor="red", transform=axs2.transAxes, ha="right", va="top")
+        axs2.text(0.95, 1.05, f"\u03B1: {np.round(corr_hv, 3)}", fontsize=label_fontsize,
+                  color="black", backgroundcolor="white", transform=axs2.transAxes, ha="right",
+                  va="top")
         # Set the x-axis limits
         if x_limit is not None:
             for ax in fig.get_axes():
@@ -352,8 +401,9 @@ def make_plots_indiv(df_no_hv, df_hv, plot_key_list, save_file_name, format="pdf
         print(f"Saved {save_file_name_new}.")
 
 
+random_seed = 42
 # The HV file
-file_name_hv = f"../data/hk_testings/filtered_data_{random_seed}_random_seed-hv.csv"
+file_name_hv = f"../data/hk_testings/filtered_data_{random_seed}_random_seed_temp-hv.csv"
 df_hv = pd.read_csv(file_name_hv)
 
 # Convert the date column from YYYYMMDD format to datetime format
@@ -370,7 +420,7 @@ df_hv = df_hv.set_index("datetime")
 plot_key_list_hv = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
 
 # The non-HV file
-file_name_no_hv = f"../data/hk_testings/filtered_data_{random_seed}_random_seed-no_hv.csv"
+file_name_no_hv = f"../data/hk_testings/filtered_data_{random_seed}_random_seed_temp-no_hv.csv"
 df_no_hv = pd.read_csv(file_name_no_hv)
 
 # Convert the date column from YYYYMMDD format to datetime format
@@ -401,7 +451,6 @@ x_limit = (x_limit[0] - pd.Timedelta(weeks=2), x_limit[1] + pd.Timedelta(weeks=5
 
 # Make the plots
 make_plots(df_hv, plot_key_list_hv, "../data/hk_testings/hv_plots", format="png", x_limit=x_limit)
-make_plots(df_no_hv, plot_key_list_no_hv, "../data/hk_testings/no_hv_plots", format="png", x_limit=x_limit)
+make_plots(df_no_hv, plot_key_list_no_hv, "../data/hk_testings/no_hv_plots", format="png", x_limit=x_limit, random_seed=random_seed)
 
-# make_plots_indiv(df_no_hv, df_hv, plot_key_list_no_hv, "../data/hk_testings/figures/", format="png", x_limit=x_limit)
-"""
+make_plots_indiv(df_no_hv, df_hv, plot_key_list_no_hv, "../data/hk_testings/figures/", format="png", x_limit=x_limit, random_seed=random_seed)
