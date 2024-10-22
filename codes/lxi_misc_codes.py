@@ -297,7 +297,7 @@ def V_Imon_5_2_func(vpc, hk_value, lxi_unit):
 def V_Imon_10_func(vpc, hk_value, lxi_unit):
 
     # NOTE: The 10 V current monitor value unit is not quite true. The value is in volts but the conversion factor is missing.
-    V_Imon_10 = hk_value * vpc * 1e3
+    V_Imon_10 = hk_value * vpc
     return V_Imon_10
 
 
@@ -314,7 +314,7 @@ def V_Imon_3_3_func(vpc, hk_value, lxi_unit):
 def AnodeVoltMon_func(vpc, hk_value, lxi_unit):
     # NOTE: The anode voltage monitor value unit is not quite true. The value is in volts but the
     # conversion factor is missing.
-    AnodeVoltMon = hk_value * vpc * 1e3
+    AnodeVoltMon = hk_value * vpc
     return AnodeVoltMon
 
 
