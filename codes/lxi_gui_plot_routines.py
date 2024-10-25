@@ -613,12 +613,12 @@ class plot_data_class:
             fig = plt.figure(num=None, facecolor=face_color, edgecolor=edge_color)
 
         # fig.subplots_adjust(wspace=0., hspace=0.1)
-        gs = plt.GridSpec(21, 21)
+        gs = plt.GridSpec(15, 15)
 
         axs1 = fig.add_subplot(gs[:-3, 3:], aspect=1)
 
         # Drop all nans in the data
-        self.df_slice_sci = self.df_slice_sci.dropna()
+        # self.df_slice_sci = self.df_slice_sci.dropna()
         # Try to select only rows where "IsCommanded" is False
         try:
             self.df_slice_sci = self.df_slice_sci[
@@ -693,7 +693,7 @@ class plot_data_class:
                         -0.70495138, -1.59298278, 2.63314709]])
 
         # Scatter plot the xy values
-        axs1.scatter(xy[0], xy[1], marker=".", color="r", s=25, zorder=10)
+        # axs1.scatter(xy[0], xy[1], marker=".", color="r", s=25, zorder=10)
         # If all values of counts are NaN, then redo the histogram with different norm and cmin
         if np.isnan(counts).all():
             logger.warning(
