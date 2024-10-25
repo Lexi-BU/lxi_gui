@@ -345,6 +345,14 @@ def update_time_entry(time_entry, time_entry_other):
     time_entry_other.insert(0, time_entry.get())
 
 
+def update_file_entry(file_entry, file_entry_other):
+    """
+    This function will take one file entry and update the other
+    """
+    file_entry_other.delete(0, tk.END)
+    file_entry_other.insert(0, file_entry.get())
+
+
 def dark_mode_change():
     """
     This function is called when the "Dark Mode" checkbox is clicked. It changes the background and
@@ -352,6 +360,7 @@ def dark_mode_change():
     """
     global dark_mode
     dark_mode = dark_mode_var.get()
+
     if dark_mode:
         bg_color = "black"
         fg_color = "white"
@@ -418,6 +427,9 @@ def dark_mode_change():
             except Exception:
                 pass
 
+    # Run the populating entries function to change the color of the entry boxes
+    # lgeb.populate_entries(root=root, dark_mode=dark_mode)
+
     # Check if global_variables.all_file_details is empty. If not, then refresh the plots
     if global_variables.all_file_details:
         try:
@@ -429,6 +441,7 @@ def dark_mode_change():
             hist_plot_inputs()
         except Exception:
             pass
+
 
 # Create the main window.
 root = tk.Tk()
@@ -904,6 +917,18 @@ else:
 folder_path.config(insertbackground=insertbackground_color)
 folder_path.config(state="normal", disabledbackground="black", disabledforeground="gray")
 
+# Add a textbox to enter the folder path in HK tab as well
+folder_path_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+folder_path_hk.grid(row=12, column=6, columnspan=1, sticky="nsew")
+
+# Set the default folder name in the text box same as the one in the science tab
+folder_path_hk.insert(1, folder_path.get())
+
+# If the folder path in one tab is changed, update the other tab
+folder_path.bind("<KeyRelease>", lambda *_: update_file_entry(folder_path, folder_path_hk))
+folder_path_hk.bind("<KeyRelease>", lambda *_: update_file_entry(folder_path_hk, folder_path))
+
+
 # Add a button to load all the files in the folder_path
 folder_load_button = tk.Button(
     sci_tab,
@@ -953,7 +978,7 @@ folder_load_button_hk = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-folder_load_button_hk.grid(row=12, column=6, columnspan=1, sticky="nsew")
+folder_load_button_hk.grid(row=12, column=7, columnspan=1, sticky="nsew")
 folder_load_button_hk.config(state="normal")
 
 # Label for plot times
@@ -1331,7 +1356,7 @@ refresh_ts_hk_button = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-refresh_ts_hk_button.grid(row=12, column=7, columnspan=1, rowspan=1, sticky="new")
+refresh_ts_hk_button.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
 
 quit_button_hk = tk.Button(
     hk_tab,
@@ -1349,6 +1374,6 @@ quit_button_hk = tk.Button(
     highlightbackground="red",
     highlightcolor="red",
 )
-quit_button_hk.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
+quit_button_hk.grid(row=12, column=9, columnspan=1, rowspan=1, sticky="new")
 
 root.mainloop()
