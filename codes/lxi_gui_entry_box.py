@@ -121,10 +121,10 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
 
     if dark_mode:
         bg_color = "black"
-        fg_color = "white"
+        fg_color = "red"
     else:
         bg_color = "white"
-        fg_color = "black"
+        fg_color = "red"
     # Get the default values from the config file
     default_opt_dict = lgcf.get_config_entry(default_vals=default_vals)
 
