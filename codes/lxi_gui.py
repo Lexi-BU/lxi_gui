@@ -469,8 +469,8 @@ else:
         0.8 * root.winfo_screenheight(),
     )
 
-# screen_width = 1800
-# screen_height = 1000
+screen_width = 900
+screen_height = 600
 # print(
 #     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
 # )
@@ -523,12 +523,12 @@ font_style_big = font.Font(family="serif", size=25)
 dark_mode = True
 if dark_mode:
     bg_color = "black"
-    fg_color = "white"
-    insertbackground_color = "cyan"
+    fg_color = "red"
+    insertbackground_color = "red"
 else:
     bg_color = "white"
-    fg_color = "black"
-    insertbackground_color = "black"
+    fg_color = "red"
+    insertbackground_color = "red"
 
 # Add a checkbutton to enable/disable dark mode
 dark_mode_var = tk.BooleanVar()
