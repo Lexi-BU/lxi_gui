@@ -138,3 +138,10 @@ documents/
 data/*
 figures/*
 
+# Ignore the config file
+luigi.cfg
+
+# Ignore the poetry lock file
+poetry.lock
+
+.flake8

@@ -17,7 +17,6 @@
 2. Create a virtual environment using the command `$python3 -m venv
    lexi_gui_env` (or any other name you want to give to the environment)
     (for Ubuntu)
-
     a. Might need to install the python3 venv package using the command
        `$sudo apt-get install python3-venv` (for Ubuntu)
 3. Activate the virtual environment using the command `$source
@@ -62,8 +61,8 @@
 
 Please let me know if you have any trouble in using the program.
 
-![Science Front](https://drive.google.com/uc?export=view&id=1VFafFmAaAu8Mw0J6nU7ESeE7bcFPSg1u)
+![Science Front](git_figures/science.png)
 ### <center>The Science histograms</center>
 
-![Housekeeping Front](https://drive.google.com/uc?export=view&id=1mz2tq4QXq6cpneEWdwmCd_uoXQ4k9xOH)
+![Housekeeping Front](git_figures/housekeeping.png)
 ### <center>The Housekeeping Time series</center>
