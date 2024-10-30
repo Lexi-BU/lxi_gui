@@ -343,13 +343,13 @@ class plot_data_class:
         elif self.time_type == "UTC":
             # Convert self.df_slice_hk.utc_time from string to datetime
             self.df_slice_hk.utc_time = pd.to_datetime(
-                self.df_slice_hk.utc_time, format="%Y-%m-%d %H:%M:%S", utc=True
+                self.df_slice_hk.utc_time, utc=True, format="mixed",
             )
             x_axs_val = self.df_slice_hk.utc_time
         elif self.time_type == "Local":
             # Convert self.df_slice_hk.local_time and set the time-zone to the local time-zone
             self.df_slice_hk.local_time = pd.to_datetime(
-                self.df_slice_hk.local_time, format="%Y-%m-%d %H:%M:%S"
+                self.df_slice_hk.local_time, format="mixed"
             )
             x_axs_val = self.df_slice_hk.local_time
         axs1 = plt.subplot(gs[:])
@@ -404,7 +404,7 @@ class plot_data_class:
         # legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
         # for item in legend_list.legendHandles:
         #     item.set_visible(False)
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.close("all")
         return fig
 

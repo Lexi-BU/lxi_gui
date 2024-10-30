@@ -2,6 +2,7 @@ import csv
 import datetime
 import importlib
 import os
+import platform
 import logging
 import struct
 from pathlib import Path
@@ -407,15 +408,15 @@ def read_binary_data_sci(
 
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
-    if os.name == "posix":
+    if platform.system() == "Linux":
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
         save_file_name = output_folder_name + "/" + output_file_name
-    elif os.name == "nt":
+    elif platform.system() == "Windows":
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\sci"
         save_file_name = output_folder_name + "\\" + output_file_name
-    elif os.name == "darwin":
+    elif platform.system() == "Darwin":
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
         save_file_name = output_folder_name + "/" + output_file_name
@@ -518,7 +519,7 @@ def read_binary_data_sci(
     df = pd.read_csv(save_file_name)
 
     # Convert the date column to datetime
-    df["Date"] = pd.to_datetime(df["Date"])
+    df["Date"] = pd.to_datetime(df["Date"], format="mixed")
 
     # Set index to the date
     df.set_index("Date", inplace=False)
@@ -850,7 +851,8 @@ def read_binary_data_hk(
     for key in df.keys():
         for ii in range(1, len(df[key])):
             if np.isnan(df[key][ii]):
-                df[key][ii] = df[key][ii - 1]
+                # df[key][ii] = df[key][ii - 1]
+                df.loc[ii, key] = df.loc[ii - 1, key]
 
     # Set the date column to the Date_datetime
     df["Date"] = Date_datetime
@@ -881,15 +883,15 @@ def read_binary_data_hk(
     df.set_index("Date", inplace=True, drop=False)
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
-    if os.name == "posix":
+    if platform.system() == "Linux":
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
         save_file_name = output_folder_name + "/" + output_file_name
-    elif os.name == "nt":
+    elif platform.system() == "Windows":
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
         save_file_name = output_folder_name + "\\" + output_file_name
-    elif os.name == "darwin":
+    elif platform.system() == "Darwin":
         output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
         output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
         save_file_name = output_folder_name + "/" + output_file_name
@@ -916,11 +918,11 @@ def open_file_sci(start_time=None, end_time=None):
     )
 
     # Get the file name from the file path for different operating systems
-    if os.name == "posix":
+    if platform.system() == "Linux":
         file_name_sci = file_val.split("/")[-1]
-    elif os.name == "nt":
+    elif platform.system() == "Windows":
         file_name_sci = file_val.split("\\")[-1]
-    elif os.name == "darwin":
+    elif platform.system() == "Darwin":
         file_name_sci = file_val.split("/")[-1]
     else:
         raise OSError("Operating system not supported.")
@@ -945,11 +947,11 @@ def open_file_hk(start_time=None, end_time=None):
     )
     
     # Get the file name from the file path for different operating systems
-    if os.name == "posix":
+    if platform.system() == "Linux":
         file_name_hk = file_val.split("/")[-1]
-    elif os.name == "nt":
+    elif platform.system() == "Windows":
         file_name_hk = file_val.split("\\")[-1]
-    elif os.name == "darwin":
+    elif platform.system() == "Darwin":
         file_name_hk = file_val.split("/")[-1]
     else:
         raise OSError("Operating system not supported.")
@@ -1219,10 +1221,10 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
 
     # Convert the Date column from string to datetime in utc
     try:
-        df["Date"] = pd.to_datetime(df["Date"], utc=True)
+        df["Date"] = pd.to_datetime(df["Date"], utc=True, format="mixed")
     except Exception:
         # Convert timestamp to datetime and set it to Date
-        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True)
+        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True, format="mixed")
 
     # Set the index to the time column
     df.set_index("Date", inplace=True)
@@ -1382,10 +1384,10 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
     # Convert the Date column from string to datetime in utc
     try:
-        df["Date"] = pd.to_datetime(df["Date"], utc=True)
+        df["Date"] = pd.to_datetime(df["Date"], utc=True, format="mixed")
     except Exception:
         # Convert timestamp to datetime and set it to Date
-        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True)
+        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True, format="mixed")
 
     # Set the index to the time column
     df.set_index("Date", inplace=True)
@@ -1465,8 +1467,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         if t_start is not None and t_end is not None:
             # Convert t_start and t_end from string to datetime in UTC timezone
-            t_start = pd.to_datetime(t_start, utc=True)
-            t_end = pd.to_datetime(t_end, utc=True)
+            t_start = pd.to_datetime(t_start, utc=True, format="mixed")
+            t_end = pd.to_datetime(t_end, utc=True, format="mixed")
 
             try:
                 # Convert t_start and t_end from string to unix time in seconds in UTC timezone
@@ -1555,7 +1557,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             os.makedirs(save_dir)
 
         # Get the file name based on the os path
-        if os.name == "nt":
+        if platform.system() == "Windows":
             file_name_hk = save_dir + "\\processed_data\\hk\\" + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
@@ -1571,7 +1573,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
                 file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
-        elif os.name == "posix":
+        elif platform.system() == "Linux":
             file_name_hk = save_dir + "/processed_data/hk/" + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
@@ -1587,7 +1589,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
                 file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
-        elif os.name == "darwin":
+        elif platform.system() == "Darwin":
             file_name_hk = save_dir + "/processed_data/hk/" + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
