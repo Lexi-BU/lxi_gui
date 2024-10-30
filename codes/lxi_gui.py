@@ -102,7 +102,6 @@ def hist_plot_inputs(dpi=100):
             "use_fig_size": True,
             "dark_mode": dark_mode_var.get(),
         }
-
         llpr.load_all_hist_plots(**inputs)
     else:
         logger.info("No data to plot")
@@ -116,6 +115,7 @@ def ts_plot_inputs(
     columnspan=3,
     rowspan=2,
     plot_key=None,
+    display_time_label=False,
 ):
     """
     The function creates and updates the list of widget inputs as might be available from the GUI
@@ -131,10 +131,11 @@ def ts_plot_inputs(
         "column": column,
         "columnspan": columnspan,
         "rowspan": rowspan,
-        "fig_width": screen_width / (3.5 * dpi),
+        "fig_width": screen_width / (3 * dpi),
         "fig_height": screen_height / (4 * dpi),
         "dark_mode": dark_mode_var.get(),
         "time_type": time_type.get(),
+        "display_time_label": display_time_label,
     }
     llpr.load_ts_plots(**inputs)
 
@@ -255,7 +256,7 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3, display_time_label=True
             )
         except Exception:
             logger.exception(
@@ -266,7 +267,7 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3, display_time_label=True
             )
         except Exception:
             logger.exception(
@@ -277,7 +278,7 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3, display_time_label=True
             )
         except Exception:
             logger.exception(
@@ -448,7 +449,7 @@ root = tk.Tk()
 # Get the DPI of the screen. This is used to scale the figure size.
 dpi = root.winfo_fpixels("1i")
 # dpi = 100
-print(f"The DPI of the screen is: {dpi}")
+# print(f"The DPI of the screen is: {dpi}")
 # NOTE: This hack is necessary since I am using multiple monitors. This can be edited as we work on
 # a different machine.
 # Check whether the operating system is windows or linux, and assign the correct screen width and
@@ -468,15 +469,16 @@ if platform.system() == "Darwin":
         0.9 * root.winfo_screenwidth(),
         0.9 * root.winfo_screenheight(),
     )
-    print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
 else:
     screen_width, screen_height = (
         0.8 * root.winfo_screenwidth(),
         0.8 * root.winfo_screenheight(),
     )
 
-# screen_width = 1000
-# screen_height = 800
+
+print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
+screen_width = 3600
+screen_height = 1000
 print(
     "If the GUI size is messed up, uncomment the line 474 and 475 of lxi_gui.py code and set the "
     "screen_width and screen_height to your liking."
@@ -1123,21 +1125,21 @@ plot_opt_entry_6.trace(
 plot_opt_entry_7.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3
+        plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3, display_time_label=True
     ),
 )
 
 plot_opt_entry_8.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3
+        plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3, display_time_label=True
     ),
 )
 
 plot_opt_entry_9.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3
+        plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3, display_time_label=True
     ),
 )
 

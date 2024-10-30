@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytz
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, FormatStrFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 importlib.reload(global_variables)
@@ -203,6 +203,7 @@ class plot_data_class:
         use_fig_size=None,
         dark_mode=None,
         time_type=None,
+        display_time_label=None,
     ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -239,6 +240,7 @@ class plot_data_class:
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
         self.time_type = time_type
+        self.display_time_label = display_time_label
 
     def ts_plots(self):
         """
@@ -378,21 +380,44 @@ class plot_data_class:
         )
 
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
-        # Rotate the x-axis labels by certain degrees and set their fontsize, if required
-        plt.setp(axs1.get_xticklabels(), rotation=0)
-        if self.time_type == "LEXI":
-            axs1.set_xlabel("Time [UTC]")
-        elif self.time_type == "UTC":
-            axs1.set_xlabel("Time [UTC]")
-        elif self.time_type == "Local":
-            # Get the local time zone of the system
-            local_timezone = datetime.datetime.now(pytz.timezone('UTC')).astimezone().tzinfo
-            axs1.set_xlabel(f"Time [{local_timezone}]")
-        # Avoid overlapping of the x-axis labels
-        fig.autofmt_xdate()
+        min_x_val_time = np.nanmin(x_axs_val)
+        max_x_val_time = np.nanmax(x_axs_val)
+        axs1.tick_params(axis="x", which="major", direction="in", length=2, width=1)
+        # Hide or display the x-axis label based on the display_time_label variable
+        if self.display_time_label:
+            # Rotate the x-axis labels by certain degrees and set their fontsize, if required
+            plt.setp(axs1.get_xticklabels(), rotation=0)
+            if self.time_type == "LEXI":
+                axs1.set_xlabel("Time [UTC]")
+            elif self.time_type == "UTC":
+                axs1.set_xlabel("Time [UTC]")
+            elif self.time_type == "Local":
+                # Get the local time zone of the system
+                local_timezone = datetime.datetime.now(pytz.timezone('UTC')).astimezone().tzinfo
+                axs1.set_xlabel(f"Time [{local_timezone}]")
+            # Avoid overlapping of the x-axis labels
+            fig.autofmt_xdate()
+            # At the bottom right, display the start and end time of the plot
+            axs1.text(
+                0.99,
+                0.02,
+                f"Start:{min_x_val_time.strftime('%Y-%m-%d %H:%M:%S')}\n End:{max_x_val_time.strftime('%Y-%m-%d %H:%M:%S')}",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+                transform=axs1.transAxes,
+                color=edgecolor,
+                fontsize=8,
+                bbox=dict(facecolor=facecolor, edgecolor=edgecolor, alpha=0.5),
+            )
+        else:
+            axs1.set_xlabel("")
+            axs1.tick_params(axis="x", which="major", direction="in", length=2, width=1)
+            # Hide the x-tick labels
+            axs1.set_xticklabels([])
 
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
-        axs1.tick_params(axis="both", which="major")
+        # Set the y-tick labels to 2 decimal places
+        axs1.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
         if self.plot_key == "Cmd_count" or self.plot_key == "HK_id":
             # For this case, make sure all the y-axis ticks are integers
             axs1.yaxis.set_major_locator(MaxNLocator(integer=True))
