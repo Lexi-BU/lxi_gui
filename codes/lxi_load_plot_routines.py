@@ -29,6 +29,7 @@ def load_ts_plots(
     fig_height=None,
     dark_mode=True,
     time_type="LEXI",
+    display_time_label=True,
 ):
     """
     Loads the time series plots for the selected time range and displays them in the GUI.
@@ -81,6 +82,7 @@ def load_ts_plots(
         ts_fig_width=fig_width,
         dark_mode=dark_mode,
         time_type=time_type,
+        display_time_label=display_time_label,
     ).ts_plots()
     canvas = FigureCanvasTkAgg(fig_ts, master=frame)
     canvas.get_tk_widget().pack(side="left", fill="both", expand=False)
@@ -231,6 +233,16 @@ def load_hist_plots(
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
     canvas.draw()
+
+    # Create a new tkinter frame to display histograms
+    # new_root = tk.Tk(baseName=None, className="Histograms")
+    # new_root.title("Histograms")
+    # new_root.geometry("800x800")
+    # frame = tk.Frame(new_root)
+    # frame.pack(fill="both", expand=True)
+    # canvas = FigureCanvasTkAgg(fig_hist, master=frame)
+    # canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+    # canvas.draw()
 
 
 def load_hist_plots_volt(

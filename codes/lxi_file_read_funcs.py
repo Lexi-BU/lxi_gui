@@ -519,7 +519,7 @@ def read_binary_data_sci(
     df = pd.read_csv(save_file_name)
 
     # Convert the date column to datetime
-    df["Date"] = pd.to_datetime(df["Date"], format="mixed")
+    df["Date"] = pd.to_datetime(df["Date"])
 
     # Set index to the date
     df.set_index("Date", inplace=False)
@@ -1221,10 +1221,10 @@ def read_csv_sci(file_val=None, t_start=None, t_end=None):
 
     # Convert the Date column from string to datetime in utc
     try:
-        df["Date"] = pd.to_datetime(df["Date"], utc=True, format="mixed")
+        df["Date"] = pd.to_datetime(df["Date"], utc=True)
     except Exception:
         # Convert timestamp to datetime and set it to Date
-        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True, format="mixed")
+        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True)
 
     # Set the index to the time column
     df.set_index("Date", inplace=True)
@@ -1384,10 +1384,10 @@ def read_csv_hk(file_val=None, t_start=None, t_end=None):
 
     # Convert the Date column from string to datetime in utc
     try:
-        df["Date"] = pd.to_datetime(df["Date"], utc=True, format="mixed")
+        df["Date"] = pd.to_datetime(df["Date"], utc=True)
     except Exception:
         # Convert timestamp to datetime and set it to Date
-        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True, format="mixed")
+        df["Date"] = pd.to_datetime(df["TimeStamp"], unit="s", utc=True)
 
     # Set the index to the time column
     df.set_index("Date", inplace=True)
@@ -1467,9 +1467,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         if t_start is not None and t_end is not None:
             # Convert t_start and t_end from string to datetime in UTC timezone
-            t_start = pd.to_datetime(t_start, utc=True, format="mixed")
-            t_end = pd.to_datetime(t_end, utc=True, format="mixed")
-
+            t_start = pd.to_datetime(t_start, utc=True)
+            t_end = pd.to_datetime(t_end, utc=True)
             try:
                 # Convert t_start and t_end from string to unix time in seconds in UTC timezone
                 t_start_unix = t_start.timestamp()
@@ -1487,6 +1486,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         # Make sure that file_val is a directory
         if not os.path.isdir(file_val):
+            print(f"\n \x1b[1;31;255m WARNING: {file_val} is not a directory. \x1b[0m")
             raise ValueError("file_val should be a directory.")
 
         # Get the names of all the files in the directory with*.dat or *.txt extension
