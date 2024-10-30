@@ -469,8 +469,8 @@ else:
         0.8 * root.winfo_screenheight(),
     )
 
-screen_width = 900
-screen_height = 600
+screen_width = 1250
+screen_height = 800
 # print(
 #     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
 # )
