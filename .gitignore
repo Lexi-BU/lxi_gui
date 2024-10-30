@@ -145,3 +145,6 @@ luigi.cfg
 poetry.lock
 
 .flake8
+
+# Ignore the .ds store file
+.DS_Store
