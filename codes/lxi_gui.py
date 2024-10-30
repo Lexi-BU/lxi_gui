@@ -1,6 +1,5 @@
 import importlib
 import logging
-import os
 import platform
 from pathlib import Path
 import tkinter as tk
@@ -83,14 +82,14 @@ def hist_plot_inputs(dpi=100):
             "sticky_channel24": "nesw",
             "row_span_channel24": 6,
             "column_span_channel24": 3,
-            "hist_fig_height": screen_height / (2.2 * dpi),
-            "hist_fig_width": screen_width / (2.2 * dpi),
+            "hist_fig_height": screen_height / (4 * dpi),
+            "hist_fig_width": screen_width / (4 * dpi),
             "hist_colspan": 7,
             "hist_rowspan": 20,
-            "channel13_fig_height": screen_height / (3 * dpi),
-            "channel13_fig_width": screen_width / (3 * dpi),
-            "channel24_fig_height": screen_height / (3 * dpi),
-            "channel24_fig_width": screen_width / (3 * dpi),
+            "channel13_fig_height": screen_height / (6 * dpi),
+            "channel13_fig_width": screen_width / (6 * dpi),
+            "channel24_fig_height": screen_height / (6 * dpi),
+            "channel24_fig_width": screen_width / (6 * dpi),
             "v_min": v_min_thresh_entry.get(),
             "v_max": v_max_thresh_entry.get(),
             "v_sum_min": v_sum_min_thresh_entry.get(),
@@ -103,7 +102,6 @@ def hist_plot_inputs(dpi=100):
             "use_fig_size": True,
             "dark_mode": dark_mode_var.get(),
         }
-
         llpr.load_all_hist_plots(**inputs)
     else:
         logger.info("No data to plot")
@@ -117,6 +115,7 @@ def ts_plot_inputs(
     columnspan=3,
     rowspan=2,
     plot_key=None,
+    display_time_label=False,
 ):
     """
     The function creates and updates the list of widget inputs as might be available from the GUI
@@ -132,10 +131,11 @@ def ts_plot_inputs(
         "column": column,
         "columnspan": columnspan,
         "rowspan": rowspan,
-        "fig_width": screen_width / (2 * dpi),
-        "fig_height": screen_height / (3 * dpi),
+        "fig_width": screen_width / (3 * dpi),
+        "fig_height": screen_height / (4 * dpi),
         "dark_mode": dark_mode_var.get(),
         "time_type": time_type.get(),
+        "display_time_label": display_time_label,
     }
     llpr.load_ts_plots(**inputs)
 
@@ -256,7 +256,7 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3, display_time_label=True
             )
         except Exception:
             logger.exception(
@@ -267,7 +267,7 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3, display_time_label=True
             )
         except Exception:
             logger.exception(
@@ -278,7 +278,7 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3, display_time_label=True
             )
         except Exception:
             logger.exception(
@@ -448,7 +448,8 @@ root = tk.Tk()
 
 # Get the DPI of the screen. This is used to scale the figure size.
 dpi = root.winfo_fpixels("1i")
-
+# dpi = 100
+# print(f"The DPI of the screen is: {dpi}")
 # NOTE: This hack is necessary since I am using multiple monitors. This can be edited as we work on
 # a different machine.
 # Check whether the operating system is windows or linux, and assign the correct screen width and
@@ -463,17 +464,25 @@ if platform.system() == "Linux":
         0.45 * root.winfo_screenwidth(),
         0.8 * root.winfo_screenheight(),
     )
+if platform.system() == "Darwin":
+    screen_width, screen_height = (
+        0.9 * root.winfo_screenwidth(),
+        0.9 * root.winfo_screenheight(),
+    )
 else:
     screen_width, screen_height = (
         0.8 * root.winfo_screenwidth(),
         0.8 * root.winfo_screenheight(),
     )
 
-screen_width = 1250
-screen_height = 800
-# print(
-#     "If the GUI size is messed up, check comment on line #215 of the code 'lxi_gui.py'."
-# )
+
+print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
+# screen_width = 3600
+# screen_height = 1000
+print(
+    "If the GUI size is messed up, uncomment the line 480 and 481 of lxi_gui.py code and set the "
+    "screen_width and screen_height to your liking."
+)
 
 # Set the title of the main window.
 root.title("LEXI GUI")
@@ -903,14 +912,14 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Set the default folder name in the text box
 # folder_path.insert(1, "For multiple files, enter the folder path here")
 # Insert the default folder path in the text box based on the operating system
-if os.name == "nt":
+if platform.system() == "Windows":
     folder_path.insert(
         1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
     )
-elif os.name == "posix":
+elif platform.system() == "Linux":
     folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/")
-elif os.name == "darwin":
-    folder_path.insert(1, "../git_data/")
+elif platform.system() == "Darwin":
+    folder_path.insert(1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/")
 else:
     raise OSError("Operating system not supported")
 
@@ -1116,21 +1125,21 @@ plot_opt_entry_6.trace(
 plot_opt_entry_7.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3
+        plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3, display_time_label=True
     ),
 )
 
 plot_opt_entry_8.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3
+        plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3, display_time_label=True
     ),
 )
 
 plot_opt_entry_9.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3
+        plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3, display_time_label=True
     ),
 )
 
