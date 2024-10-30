@@ -366,11 +366,11 @@ class plot_data_class:
         # percentile values as as mu, where mu is 50 percentile value and subscript is the 10 and
         # superscript is 90 percentile values
         axs1.text(
+            0.02,
             0.05,
-            0.95,
             f"$\mu_{{{10}}}^{{{90}}}={key_50p_val:.2f}_{{{key_10p_val:.2f}}}^{{{key_90p_val:.2f}}}$",
             horizontalalignment="left",
-            verticalalignment="top",
+            verticalalignment="bottom",
             transform=axs1.transAxes,
             color=edgecolor,
             fontsize=10,
@@ -398,9 +398,9 @@ class plot_data_class:
             axs1.yaxis.set_major_locator(MaxNLocator(integer=True))
 
         # Set the location of the legend and remove the marker from the legend
-        axs1.legend(loc="upper right", markerscale=0, handlelength=0, handletextpad=0, fancybox=True,
-                    framealpha=0.5, edgecolor=edgecolor, facecolor=facecolor, fontsize=10,
-                    bbox_to_anchor=(1.0, 1.0), bbox_transform=axs1.transAxes)
+        # axs1.legend(loc="upper right", markerscale=0, handlelength=0, handletextpad=0, fancybox=True,
+        #             framealpha=0.5, edgecolor=edgecolor, facecolor=facecolor, fontsize=10,
+        #             bbox_to_anchor=(1.0, 1.0), bbox_transform=axs1.transAxes)
         # legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
         # for item in legend_list.legendHandles:
         #     item.set_visible(False)
