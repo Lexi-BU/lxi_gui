@@ -3,7 +3,7 @@ from pathlib import Path
 
 import lxi_file_read_funcs as lxrf
 import pandas as pd
-# from spacepy.pycdf import CDF as cdf
+from spacepy.pycdf import CDF as cdf
 
 importlib.reload(lxrf)
 
