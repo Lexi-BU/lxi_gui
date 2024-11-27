@@ -1453,7 +1453,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         ):
             raise ValueError(
                 "when multiple_files is True, both t_start and t_end must either be"
-                f"None or a valid time value. The vlaues provided are t_start ="
+                f"None or a valid time value. The values provided are t_start ="
                 f"{t_start} and t_end = {t_end}."
             )
         # If both t_start and t_end are None, raise a warning stating that the times are set to none
