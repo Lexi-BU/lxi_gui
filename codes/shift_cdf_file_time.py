@@ -14,11 +14,11 @@ dat = cdf(fn)
 print(dat)
 
 # Convert the dat to a pandas dataframe
-df = pd.DataFrame(index=dat['Epoch'][:])
+df = pd.DataFrame(index=dat["Epoch"][:])
 
 # Add the data to the dataframe
 for key in dat.keys():
-    if key != 'Epoch':
+    if key != "Epoch":
         df[key] = dat[key][:]
 """
 # Find the time difference between the first index and the datetime 2025-03-02 08:00:00
