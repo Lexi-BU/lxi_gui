@@ -13,7 +13,9 @@ import getpass
 user_name = getpass.getuser()
 
 
-def read_hv_files(hv_file=None, hv_folder=None, file_type=None, start_time=None, end_time=None):
+def read_hv_files(
+    hv_file=None, hv_folder=None, file_type=None, start_time=None, end_time=None
+):
 
     df_list = []
     if file_type == "csv":
@@ -29,7 +31,9 @@ def read_hv_files(hv_file=None, hv_folder=None, file_type=None, start_time=None,
         df.index = pd.to_datetime(df.index)
         df = df.sort_index()
         # Offset the index, so that 2024-05-23 21:40:00 becomes 2023-05-31 06:30:00
-        df.index = df.index - pd.DateOffset(years=0, months=11, days=23, hours=15, minutes=10)
+        df.index = df.index - pd.DateOffset(
+            years=0, months=11, days=23, hours=15, minutes=10
+        )
 
         # print(df.head())
         # If start and end time are given, filter the data
@@ -59,14 +63,34 @@ def read_hv_files(hv_file=None, hv_folder=None, file_type=None, start_time=None,
     return df
 
 
-def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=None, key_list=None,
-            start_time=None, end_time=None, save_fig=False, fig_name=None, fig_folder=None,
-            fig_size=(6, 6), fig_dpi=100, fig_format="png", unit_dict=None, font_dict=None,
-            dark_mode=False):
+def plot_hv(
+    df=None,
+    hv_file=None,
+    hv_folder=None,
+    file_type=None,
+    plot_type=None,
+    key_list=None,
+    start_time=None,
+    end_time=None,
+    save_fig=False,
+    fig_name=None,
+    fig_folder=None,
+    fig_size=(6, 6),
+    fig_dpi=100,
+    fig_format="png",
+    unit_dict=None,
+    font_dict=None,
+    dark_mode=False,
+):
 
     # Read the HV file
-    df = read_hv_files(hv_file=hv_file, hv_folder=hv_folder, file_type=file_type,
-                       start_time=start_time, end_time=end_time)
+    df = read_hv_files(
+        hv_file=hv_file,
+        hv_folder=hv_folder,
+        file_type=file_type,
+        start_time=start_time,
+        end_time=end_time,
+    )
     # For each key, make a 2x2 plot, where the first subplot is the time series data, the second
     # subplot is the histogram, the third subplot is the heatmap and the fourth subplot is following
     # statistical values: Minimum and maximum time, maximum and minimum values, 10, 25, 50, 75 and 90
@@ -88,7 +112,14 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=fig_size, dpi=fig_dpi)
 
         # Plot 1: Time series data
-        axes[0, 0].plot(df.index, df[key], color=color, linewidth=0., marker=".", markersize=2.5,)
+        axes[0, 0].plot(
+            df.index,
+            df[key],
+            color=color,
+            linewidth=0.0,
+            marker=".",
+            markersize=2.5,
+        )
         # Format the x-axis to show the date and time so that they don"t overlap
         axes[0, 0].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H"))
         axes[0, 0].tick_params(axis="x", rotation=45)
@@ -101,13 +132,17 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         axes[0, 0].set_xlim(df.index[0], df.index[-1])
 
         # Plot 2: Histogram
-        axes[0, 1].hist(df[key], bins=20, color=color, edgecolor=edge_color, linewidth=1.2)
+        axes[0, 1].hist(
+            df[key], bins=20, color=color, edgecolor=edge_color, linewidth=1.2
+        )
         axes[0, 1].set_xlabel(f"{key} [{unit_dict[key]}]", fontdict=font_dict["axis"])
         axes[0, 1].set_ylabel("Frequency", fontdict=font_dict["axis"])
         axes[0, 1].set_title("Histogram", fontdict=font_dict["title"])
         axes[0, 1].set_xlim(df[key].min(), df[key].max())
         # Plot 3: Heatmap
-        heatmap_data = df.pivot_table(index=df.index.hour, columns=df.index.date, values=key)
+        heatmap_data = df.pivot_table(
+            index=df.index.hour, columns=df.index.date, values=key
+        )
         sns.heatmap(heatmap_data, cmap="RdBu_r", ax=axes[1, 0])
         # Format the x-axis to show the date and time so that they don"t overlap
         # axes[1, 0].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
@@ -118,7 +153,9 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
 
         # Set heatmap colorbar label
         cbar = axes[1, 0].collections[0].colorbar
-        cbar.set_label(f"{key} [{unit_dict[key]}]", fontdict=font_dict["axis"], color=color)
+        cbar.set_label(
+            f"{key} [{unit_dict[key]}]", fontdict=font_dict["axis"], color=color
+        )
 
         # Set the x-axis limits
         # axes[1, 0].set_xlim(df.index[0], df.index[-1])
@@ -155,13 +192,30 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
         else:
             bbox = {"facecolor": "w", "alpha": 0.5, "pad": 1}
         # Add table title outside the table
-        axes[1, 1].text(0.5, 1., f"Statistics for {key}", fontdict=font_dict["table_title"],
-                        verticalalignment="center", horizontalalignment="center")
-        table_text = tabulate(table_data, tablefmt="fancy_grid", floatfmt=".2f", )
+        axes[1, 1].text(
+            0.5,
+            1.0,
+            f"Statistics for {key}",
+            fontdict=font_dict["table_title"],
+            verticalalignment="center",
+            horizontalalignment="center",
+        )
+        table_text = tabulate(
+            table_data,
+            tablefmt="fancy_grid",
+            floatfmt=".2f",
+        )
         axes[1, 1].axis("off")
-        axes[1, 1].text(0.5, .95, table_text, fontdict=font_dict["table"],
-                        verticalalignment="top", horizontalalignment="center",
-                        bbox=bbox, transform=axes[1, 1].transAxes)
+        axes[1, 1].text(
+            0.5,
+            0.95,
+            table_text,
+            fontdict=font_dict["table"],
+            verticalalignment="top",
+            horizontalalignment="center",
+            bbox=bbox,
+            transform=axes[1, 1].transAxes,
+        )
 
         # Print the statistical values in the fourth subplot as a table
         # axes[1, 1].table(cellText=[[stats_text]], loc="center", colLabels=["Statistics"], cellLoc="center")
@@ -178,7 +232,13 @@ def plot_hv(df=None, hv_file=None, hv_folder=None, file_type=None, plot_type=Non
                 fig_name = hv_file.split("/")[-1].split(".")[0]
             if fig_folder is None:
                 fig_folder = hv_folder
-            fig.savefig(f"{fig_folder}/{fig_name}_{key}_{dark_mode}.{fig_format}", dpi=300, bbox_inches="tight", pad_inches=0.1, format=fig_format)
+            fig.savefig(
+                f"{fig_folder}/{fig_name}_{key}_{dark_mode}.{fig_format}",
+                dpi=300,
+                bbox_inches="tight",
+                pad_inches=0.1,
+                format=fig_format,
+            )
     return df
 
 
@@ -205,13 +265,33 @@ if __name__ == "__main__":
     }
 
     if dark_mode:
-        color_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-                      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+        color_list = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
         default_color = "white"
         plt.style.use("dark_background")
     else:
-        color_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-                      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+        color_list = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
         default_color = "k"
         plt.style.use("default")
 
@@ -282,10 +362,19 @@ if __name__ == "__main__":
         "hv_folder": f"/home/{user_name}/Desktop/git/Lexi-Bu/lxi_gui/data/PIT/20230608_not_sent/processed_data/alll_files/hk/",
         "file_type": "csv",
         # "key_list": ["PinPullerTemp"],
-        "key_list": ["PinPullerTemp", "LEXIbaseTemp",
-                     "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon",
-                     "+28V_Imon", "ADC_Ground",
-                     "DeltaEvntCount", "DeltaDroppedCount"],
+        "key_list": [
+            "PinPullerTemp",
+            "LEXIbaseTemp",
+            "HVsupplyTemp",
+            "+5.2V_Imon",
+            "+10V_Imon",
+            "+3.3V_Imon",
+            "AnodeVoltMon",
+            "+28V_Imon",
+            "ADC_Ground",
+            "DeltaEvntCount",
+            "DeltaDroppedCount",
+        ],
         # "key_list": ["HK_id", "PinPullerTemp", "OpticsTemp", "LEXIbaseTemp",
         #              "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon",
         #              "+28V_Imon", "ADC_Ground", "Cmd_count",

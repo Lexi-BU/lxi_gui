@@ -222,8 +222,12 @@ def read_binary_data_hk(
     print(f"Reading the file \033[96m {in_file_name}\033[0m")
 
     # Get the creation date of the file in UTC and local time
-    creation_date_utc = datetime.datetime.fromtimestamp(os.path.getctime(input_file_name), tz=datetime.timezone.utc)
-    creation_date_local = datetime.datetime.fromtimestamp(os.path.getctime(input_file_name))
+    creation_date_utc = datetime.datetime.fromtimestamp(
+        os.path.getctime(input_file_name), tz=datetime.timezone.utc
+    )
+    creation_date_local = datetime.datetime.fromtimestamp(
+        os.path.getctime(input_file_name)
+    )
 
     with open(input_file_name, "rb") as file:
         raw = file.read()
@@ -233,12 +237,18 @@ def read_binary_data_hk(
 
     if "payload" in in_file_name:
         while index < len(raw) - 28:
-            if (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] == sync_lxi):
+            if (
+                raw[index : index + 2] == sync_pit
+                and raw[index + 12 : index + 16] == sync_lxi
+            ):
                 # print(f"{index} d ==> {raw[index:index + 28].hex()}\n")
-                packets.append(hk_packet_cls.from_bytes(raw[index:index + 28]))
+                packets.append(hk_packet_cls.from_bytes(raw[index : index + 28]))
                 index += 28
                 continue
-            elif (raw[index:index + 2] == sync_pit and raw[index + 12:index + 16] != sync_lxi):
+            elif (
+                raw[index : index + 2] == sync_pit
+                and raw[index + 12 : index + 16] != sync_lxi
+            ):
                 # Ignore the last packet
                 if index >= len(raw) - 28 - 16:
                     # NOTE: This is a temporary fix. The last packet is ignored because the last
@@ -247,17 +257,23 @@ def read_binary_data_hk(
                     index += 28
                     continue
                 # Check if sync_lxi is present in the next 16 bytes
-                if sync_lxi in raw[index + 12:index + 28] and index + 28 < len(raw):
+                if sync_lxi in raw[index + 12 : index + 28] and index + 28 < len(raw):
                     # Find the index of sync_lxi
-                    index_sync = index + 12 + raw[index + 12:index + 28].index(sync_lxi)
+                    index_sync = (
+                        index + 12 + raw[index + 12 : index + 28].index(sync_lxi)
+                    )
                     # Reorder the packet
-                    new_packet = (raw[index:index + 12] +
-                                  raw[index_sync:index + 28] +
-                                  raw[index + 12 + 28:index_sync + 28])
+                    new_packet = (
+                        raw[index : index + 12]
+                        + raw[index_sync : index + 28]
+                        + raw[index + 12 + 28 : index_sync + 28]
+                    )
                     # Check if the packet length is 28
                     if len(new_packet) != 28:
                         # Print the packet length
-                        print(f"The packet length is {len(new_packet)}, index = {index} and length of raw is {len(raw)}")
+                        print(
+                            f"The packet length is {len(new_packet)}, index = {index} and length of raw is {len(raw)}"
+                        )
                         print(f"{index} 1 ==> {new_packet.hex()}\n")
                         # If the index + 28 is greater than the length of the raw data, then break
                         if index + 28 > len(raw):
@@ -267,31 +283,37 @@ def read_binary_data_hk(
                     index += 28
                     continue
                 # Check if raw[index - 3:index] + raw[index+12:index+13] == sync_lxi
-                elif raw[index - 3:index] + raw[index + 12:index + 13] == sync_lxi:
+                elif raw[index - 3 : index] + raw[index + 12 : index + 13] == sync_lxi:
                     # Reorder the packet
-                    new_packet = (raw[index:index + 12] +
-                                  raw[index - 3:index] +
-                                  raw[index + 12:index + 25])
+                    new_packet = (
+                        raw[index : index + 12]
+                        + raw[index - 3 : index]
+                        + raw[index + 12 : index + 25]
+                    )
                     # print(f"{index} 2 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
                 # Check if raw[index - 2:index] + raw[index+12:index+14] == sync_lxi
-                elif raw[index - 2:index] + raw[index + 12:index + 14] == sync_lxi:
+                elif raw[index - 2 : index] + raw[index + 12 : index + 14] == sync_lxi:
                     # Reorder the packet
-                    new_packet = (raw[index:index + 12] +
-                                  raw[index - 2:index] +
-                                  raw[index + 13:index + 26])
+                    new_packet = (
+                        raw[index : index + 12]
+                        + raw[index - 2 : index]
+                        + raw[index + 13 : index + 26]
+                    )
                     # print(f"{index} 3 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
                     continue
                 # Check if raw[index - 1:index] + raw[index+12:index+15] == sync_lxi
-                elif (raw[index - 1:index] + raw[index + 12:index + 15] == sync_lxi):
+                elif raw[index - 1 : index] + raw[index + 12 : index + 15] == sync_lxi:
                     # Reorder the packet
-                    new_packet = (raw[index:index + 12] +
-                                  raw[index - 1:index] +
-                                  raw[index + 14:index + 27])
+                    new_packet = (
+                        raw[index : index + 12]
+                        + raw[index - 1 : index]
+                        + raw[index + 14 : index + 27]
+                    )
                     # print(f"{index} 4 ==> {new_packet.hex()}\n")
                     packets.append(hk_packet_cls.from_bytes(new_packet))
                     index += 28
@@ -303,8 +325,8 @@ def read_binary_data_hk(
         # Print in green color that the gsfc code is running
         print("\033[92mRunning the GSFC code for Housekeeping.\033[0m")
         while index < len(raw) - 16:
-            if raw[index:index + 4] == sync_lxi:
-                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index:index + 16]))
+            if raw[index : index + 4] == sync_lxi:
+                packets.append(hk_packet_cls_gsfc.from_bytes(raw[index : index + 16]))
                 index += 16
                 continue
             index += 1
@@ -480,23 +502,40 @@ def read_binary_data_hk(
     df["local_time"] = np.nan
     # For each row, set the utc_time and local_time as sum of created_date_utc and time_diff_seconds
     df["utc_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
-    df["local_time"] = creation_date_local + pd.to_timedelta(time_diff_seconds, unit="s")
+    df["local_time"] = creation_date_local + pd.to_timedelta(
+        time_diff_seconds, unit="s"
+    )
 
     # Set Date as the index without replacing the column
     df.set_index("Date", inplace=True, drop=False)
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
     if os.name == "posix":
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        output_folder_name = (
+            os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
+        )
+        output_file_name = (
+            os.path.basename(os.path.normpath(in_file_name)).split(".")[0]
+            + "_hk_output.csv"
+        )
         save_file_name = output_folder_name + "/" + output_file_name
     elif os.name == "nt":
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        output_folder_name = (
+            os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
+        )
+        output_file_name = (
+            os.path.basename(os.path.normpath(in_file_name)).split(".")[0]
+            + "_hk_output.csv"
+        )
         save_file_name = output_folder_name + "\\" + output_file_name
     elif os.name == "darwin":
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        output_folder_name = (
+            os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
+        )
+        output_file_name = (
+            os.path.basename(os.path.normpath(in_file_name)).split(".")[0]
+            + "_hk_output.csv"
+        )
         save_file_name = output_folder_name + "/" + output_file_name
     else:
         raise OSError("Operating system not supported.")
@@ -689,17 +728,24 @@ def read_binary_file(file_val=None, t_start=None, t_end=None):
         os.makedirs(save_dir)
 
     # Get the file name based on the os path
-    file_name_hk = save_dir + "/processed_data/hk/" + \
-        file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
-        file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
-        file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
-        file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
-        file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
-        file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
-
-    print(
-        f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n"
+    file_name_hk = (
+        save_dir
+        + "/processed_data/hk/"
+        + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[0]
+        + "_"
+        + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[1]
+        + "_"
+        + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[2]
+        + "_"
+        + file_name_hk_list[0].split("/")[-1].split(".")[0].split("_")[3]
+        + "_"
+        + file_name_hk_list[-1].split("/")[-1].split(".")[0].split("_")[-4]
+        + "_"
+        + file_name_hk_list[-1].split("/")[-1].split(".")[0].split("_")[-3]
+        + "_hk_output.csv"
     )
+
+    print(f"The Housekeeping File name =\x1b[1;32;255m {file_name_hk} \x1b[0m, \n")
     # Save the dataframe to a csv file
     df_hk.to_csv(file_name_hk, index=False)
 
@@ -745,7 +791,9 @@ if __name__ == "__main__":
     folder_list = list_folders_in_directory(directory_path)
 
     for folder in folder_list[4:]:
-        print(f"\n \x1b[1;31;255m Reading the binary file from the folder {folder} \x1b[0m \n")
+        print(
+            f"\n \x1b[1;31;255m Reading the binary file from the folder {folder} \x1b[0m \n"
+        )
         # If the folder anme has "processed_data" in it, then skip it
         if "processed" in folder:
             print(f"Skipping the folder {folder}")

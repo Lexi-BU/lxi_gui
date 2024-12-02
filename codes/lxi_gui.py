@@ -190,7 +190,11 @@ def refresh_ts_plot():
     if global_variables.all_file_details:
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_1, row=1, column=0, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_1,
+                row=1,
+                column=0,
+                rowspan=1,
+                columnspan=3,
             )
         except Exception:
             logger.exception(
@@ -201,7 +205,11 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_2, row=1, column=3, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_2,
+                row=1,
+                column=3,
+                rowspan=1,
+                columnspan=3,
             )
         except Exception:
             logger.exception(
@@ -212,7 +220,11 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_3, row=1, column=6, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_3,
+                row=1,
+                column=6,
+                rowspan=1,
+                columnspan=3,
             )
         except Exception:
             logger.exception(
@@ -223,7 +235,11 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_4, row=3, column=0, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_4,
+                row=3,
+                column=0,
+                rowspan=1,
+                columnspan=3,
             )
         except Exception:
             logger.exception(
@@ -234,7 +250,11 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_5, row=3, column=3, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_5,
+                row=3,
+                column=3,
+                rowspan=1,
+                columnspan=3,
             )
         except Exception:
             logger.exception(
@@ -245,7 +265,11 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_6, row=3, column=6, rowspan=1, columnspan=3
+                plot_opt_entry=plot_opt_entry_6,
+                row=3,
+                column=6,
+                rowspan=1,
+                columnspan=3,
             )
         except Exception:
             logger.exception(
@@ -256,7 +280,12 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3, display_time_label=True
+                plot_opt_entry=plot_opt_entry_7,
+                row=5,
+                column=0,
+                rowspan=1,
+                columnspan=3,
+                display_time_label=True,
             )
         except Exception:
             logger.exception(
@@ -267,7 +296,12 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3, display_time_label=True
+                plot_opt_entry=plot_opt_entry_8,
+                row=5,
+                column=3,
+                rowspan=1,
+                columnspan=3,
+                display_time_label=True,
             )
         except Exception:
             logger.exception(
@@ -278,7 +312,12 @@ def refresh_ts_plot():
 
         try:
             ts_plot_inputs(
-                plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3, display_time_label=True
+                plot_opt_entry=plot_opt_entry_9,
+                row=5,
+                column=6,
+                rowspan=1,
+                columnspan=3,
+                display_time_label=True,
             )
         except Exception:
             logger.exception(
@@ -327,7 +366,9 @@ def load_and_copy_files():
         ts_button_val_change(default_opt_var)
         refresh_ts_plot()
     except Exception as e:
-        logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
+        logger.exception(
+            f"Exception occurred while refreshing the time series plot: {e}"
+        )
         pass
 
     # try:
@@ -396,7 +437,9 @@ def dark_mode_change():
         # try to change the color of the text boxes
         for textbox in root_item.winfo_children():
             try:
-                textbox.configure(bg=bg_color, fg=fg_color, insertbackground=insertbackground_color)
+                textbox.configure(
+                    bg=bg_color, fg=fg_color, insertbackground=insertbackground_color
+                )
             except Exception:
                 pass
 
@@ -421,8 +464,14 @@ def dark_mode_change():
                 pass
         for button in root_item.winfo_children():
             try:
-                if button["text"] in ["Dark Mode", "Default Options", "Load Files", "Refresh",
-                                      "Save CDF", "Save CSV"]:
+                if button["text"] in [
+                    "Dark Mode",
+                    "Default Options",
+                    "Load Files",
+                    "Refresh",
+                    "Save CDF",
+                    "Save CSV",
+                ]:
                     button.configure(fg="green")
             except Exception:
                 pass
@@ -476,7 +525,9 @@ else:
     )
 
 
-print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
+print(
+    f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}"
+)
 # screen_width = 3600
 # screen_height = 1000
 print(
@@ -578,7 +629,9 @@ dark_mode_button.grid(row=12, column=5, columnspan=1, sticky="nsew", padx=5, pad
 sci_tab.configure(
     bg=bg_color, padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
 )
-hk_tab.configure(bg=bg_color, padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5)
+hk_tab.configure(
+    bg=bg_color, padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
+)
 
 # Configure the housekeeping tab rows and columns.
 for i in range(0, 10):
@@ -588,8 +641,12 @@ for i in range(0, 10):
 # Insert a file load button
 # For science file
 sci_file_load_button = tk.Button(
-    sci_tab, text="Load Science File", command=lxrf.open_file_sci, font=font_style, bg=bg_color,
-    fg=fg_color
+    sci_tab,
+    text="Load Science File",
+    command=lxrf.open_file_sci,
+    font=font_style,
+    bg=bg_color,
+    fg=fg_color,
 )
 sci_file_load_button.grid(row=0, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -606,7 +663,9 @@ sci_file_load_entry = tk.Entry(
     borderwidth=2,
 )
 sci_file_load_entry.grid(row=1, column=0, columnspan=2, pady=0, sticky="ew")
-sci_file_load_entry.config(state="disabled", disabledbackground="black", disabledforeground="gray")
+sci_file_load_entry.config(
+    state="disabled", disabledbackground="black", disabledforeground="gray"
+)
 
 # insert the file_load_entry value into the entry box only if the sci_file_load_button is clicked
 sci_file_load_button.config(
@@ -616,7 +675,12 @@ sci_file_load_button.config(state="disabled")
 
 # For housekeeping file
 hk_file_load_button = tk.Button(
-    sci_tab, text="Load HK File", command=lxrf.open_file_hk, font=font_style, bg=bg_color, fg=fg_color
+    sci_tab,
+    text="Load HK File",
+    command=lxrf.open_file_hk,
+    font=font_style,
+    bg=bg_color,
+    fg=fg_color,
 )
 hk_file_load_button.grid(row=2, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -633,7 +697,9 @@ hk_file_load_entry = tk.Entry(
     borderwidth=2,
 )
 hk_file_load_entry.grid(row=3, column=0, columnspan=2, pady=0, sticky="ew")
-hk_file_load_entry.config(state="disabled", disabledbackground="black", disabledforeground="gray")
+hk_file_load_entry.config(
+    state="disabled", disabledbackground="black", disabledforeground="gray"
+)
 
 # insert the file_load_entry value into the entry box only if the hk_file_load_button is clicked
 hk_file_load_button.config(
@@ -643,7 +709,12 @@ hk_file_load_button.config(state="disabled")
 
 # For binary file
 b_file_load_button = tk.Button(
-    sci_tab, text="Load binary File", command=lxrf.open_file_b, font=font_style, bg=bg_color, fg=fg_color
+    sci_tab,
+    text="Load binary File",
+    command=lxrf.open_file_b,
+    font=font_style,
+    bg=bg_color,
+    fg=fg_color,
 )
 b_file_load_button.grid(row=4, column=0, columnspan=1, pady=0, sticky="ew")
 
@@ -660,7 +731,9 @@ b_file_load_entry = tk.Entry(
     borderwidth=2,
 )
 b_file_load_entry.grid(row=5, column=0, columnspan=2, pady=0, sticky="ew")
-b_file_load_entry.config(state="disabled", disabledbackground="black", disabledforeground="gray")
+b_file_load_entry.config(
+    state="disabled", disabledbackground="black", disabledforeground="gray"
+)
 
 # insert the file_load_entry value into the entry box only if the b_file_load_button is clicked
 b_file_load_button.config(
@@ -906,7 +979,9 @@ multi_file_status_var.trace(
 multi_file_status_var.trace("w", lambda *_: lmsc.change_state(button=folder_path))
 
 # Add a text box to enter the folder path
-folder_path = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+folder_path = tk.Entry(
+    sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2
+)
 folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 
 # Set the default folder name in the text box
@@ -917,25 +992,38 @@ if platform.system() == "Windows":
         1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
     )
 elif platform.system() == "Linux":
-    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/")
+    folder_path.insert(
+        1,
+        "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/",
+    )
 elif platform.system() == "Darwin":
-    folder_path.insert(1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/")
+    folder_path.insert(
+        1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/"
+    )
 else:
     raise OSError("Operating system not supported")
 
 folder_path.config(insertbackground=insertbackground_color)
-folder_path.config(state="normal", disabledbackground="black", disabledforeground="gray")
+folder_path.config(
+    state="normal", disabledbackground="black", disabledforeground="gray"
+)
 
 # Add a textbox to enter the folder path in HK tab as well
-folder_path_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+folder_path_hk = tk.Entry(
+    hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2
+)
 folder_path_hk.grid(row=12, column=6, columnspan=1, sticky="nsew")
 
 # Set the default folder name in the text box same as the one in the science tab
 folder_path_hk.insert(1, folder_path.get())
 
 # If the folder path in one tab is changed, update the other tab
-folder_path.bind("<KeyRelease>", lambda *_: update_file_entry(folder_path, folder_path_hk))
-folder_path_hk.bind("<KeyRelease>", lambda *_: update_file_entry(folder_path_hk, folder_path))
+folder_path.bind(
+    "<KeyRelease>", lambda *_: update_file_entry(folder_path, folder_path_hk)
+)
+folder_path_hk.bind(
+    "<KeyRelease>", lambda *_: update_file_entry(folder_path_hk, folder_path)
+)
 
 
 # Add a button to load all the files in the folder_path
@@ -1018,7 +1106,9 @@ end_time_label = tk.Label(
 end_time_label.grid(row=12, column=0, columnspan=2)
 
 # Add the start and end time to hk tab as well
-start_time_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+start_time_hk = tk.Entry(
+    hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2
+)
 start_time_hk.insert(0, default_time_dict["start_time"])
 start_time_hk.config(insertbackground=insertbackground_color)
 start_time_hk.grid(row=12, column=1, columnspan=1, sticky="nsew")
@@ -1038,14 +1128,18 @@ end_time_label_hk.grid(row=13, column=4, columnspan=1, sticky="nsew")
 
 # If the start time in one tab is changed, update the other tab
 start_time.bind("<KeyRelease>", lambda *_: update_time_entry(start_time, start_time_hk))
-start_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(start_time_hk, start_time))
+start_time_hk.bind(
+    "<KeyRelease>", lambda *_: update_time_entry(start_time_hk, start_time)
+)
 
 # If the end time in one tab is changed, update the other tab
 end_time.bind("<KeyRelease>", lambda *_: update_time_entry(end_time, end_time_hk))
 end_time_hk.bind("<KeyRelease>", lambda *_: update_time_entry(end_time_hk, end_time))
 
 # Add a box to enter the threshold time for copy button
-time_threshold = tk.Entry(sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
+time_threshold = tk.Entry(
+    sci_tab, justify="center", bg=bg_color, fg="green", borderwidth=2
+)
 time_threshold.insert(0, default_time_dict["time_threshold"])
 time_threshold.config(insertbackground=insertbackground_color)
 time_threshold.grid(row=19, column=0, columnspan=2, sticky="nsew")
@@ -1125,21 +1219,36 @@ plot_opt_entry_6.trace(
 plot_opt_entry_7.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_7, row=5, column=0, rowspan=1, columnspan=3, display_time_label=True
+        plot_opt_entry=plot_opt_entry_7,
+        row=5,
+        column=0,
+        rowspan=1,
+        columnspan=3,
+        display_time_label=True,
     ),
 )
 
 plot_opt_entry_8.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_8, row=5, column=3, rowspan=1, columnspan=3, display_time_label=True
+        plot_opt_entry=plot_opt_entry_8,
+        row=5,
+        column=3,
+        rowspan=1,
+        columnspan=3,
+        display_time_label=True,
     ),
 )
 
 plot_opt_entry_9.trace(
     "w",
     lambda *_: ts_plot_inputs(
-        plot_opt_entry=plot_opt_entry_9, row=5, column=6, rowspan=1, columnspan=3, display_time_label=True
+        plot_opt_entry=plot_opt_entry_9,
+        row=5,
+        column=6,
+        rowspan=1,
+        columnspan=3,
+        display_time_label=True,
     ),
 )
 
@@ -1270,7 +1379,9 @@ def apply_default_config(event):
 
     # Update the folder path to the default value
     folder_path.delete(0, tk.END)
-    folder_path.insert(0, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/")
+    folder_path.insert(
+        0, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/"
+    )
 
 
 # Bind the function to the default_config_button
@@ -1342,7 +1453,9 @@ copy_button = tk.Button(
     text="Get Latest Files",
     font=font_style_box,
     justify="center",
-    command=lambda: lmsc.download_latest_files(time_threshold=float(time_threshold.get())),
+    command=lambda: lmsc.download_latest_files(
+        time_threshold=float(time_threshold.get())
+    ),
 )
 copy_button.grid(
     row=20, column=0, columnspan=1, rowspan=1, sticky="nsew", pady=5, padx=5

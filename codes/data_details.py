@@ -28,8 +28,15 @@ def read_data_from_folder(folder_path="", save_file_name=""):
     #             "Pinpuller_Armed", "HVmcpAuto", "HVmcpMan", "DeltaEvntCount",
     #             "DeltaDroppedCount", "DeltaLostEvntCount"]
 
-    key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon",
-                "AnodeVoltMon", "+28V_Imon", "HVmcpMan", "DeltaEvntCount"]
+    key_list = [
+        "+5.2V_Imon",
+        "+10V_Imon",
+        "+3.3V_Imon",
+        "AnodeVoltMon",
+        "+28V_Imon",
+        "HVmcpMan",
+        "DeltaEvntCount",
+    ]
     # Check if the data folder exists
     if not os.path.exists(data_folder):
         print(f"Data folder does not exist for {folder_path}.\n")
@@ -64,9 +71,10 @@ def read_data_from_folder(folder_path="", save_file_name=""):
             print(f"Writing data for {folder_name} to {save_file_name}.")
             with open(save_file_name, "a") as file:
                 writer = csv.writer(file)
-                writer.writerow([folder_name] + [file_list] + [data_dict[key] for key in key_list])
+                writer.writerow(
+                    [folder_name] + [file_list] + [data_dict[key] for key in key_list]
+                )
         # return data_dict
-
 
 
 if __name__ == "__main__":
@@ -76,15 +84,25 @@ if __name__ == "__main__":
     count = 0
     for folder_path in folder_list[:]:
         count += 1
-        data = read_data_from_folder(folder_path=folder_path + "/", save_file_name="../data/hk_testings/median_data.csv")
+        data = read_data_from_folder(
+            folder_path=folder_path + "/",
+            save_file_name="../data/hk_testings/median_data.csv",
+        )
         print(f"Processed {count} folders out of {len(folder_list)}.")
         continue
 
 # Read the data from the median_data.csv file
 df = pd.read_csv("../data/hk_testings/median_data.csv")
 
-key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon", "HVmcpMan",
-            "DeltaEvntCount"]
+key_list = [
+    "+5.2V_Imon",
+    "+10V_Imon",
+    "+3.3V_Imon",
+    "AnodeVoltMon",
+    "+28V_Imon",
+    "HVmcpMan",
+    "DeltaEvntCount",
+]
 # If the value of all the keys in the key_list is nan, then remove the row
 df = df.dropna(subset=key_list, how="all")
 
@@ -104,7 +122,9 @@ for folder_name in folder_names:
     df_filtered = pd.concat([df_filtered, df_temp])
 
 # Save the filtered data to a new csv file
-df_filtered.to_csv(f"../data/hk_testings/filtered_data_{random_seed}_random_seed.csv", index=False)
+df_filtered.to_csv(
+    f"../data/hk_testings/filtered_data_{random_seed}_random_seed.csv", index=False
+)
 
 
 file_name_hv = "../data/hk_testings/filtered_data_42_random_seed-hv.csv"
@@ -121,12 +141,14 @@ for i in range(1, len(df)):
 # Set the datetime column as the index
 df = df.set_index("datetime")
 
-ploit_key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"] 
+ploit_key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
 
 # Plot the data
 fig, ax = plt.subplots(5, 1, figsize=(20, 15))
 for i, key in enumerate(ploit_key_list):
-    ax[i].plot(df.index, df[key], label=key, marker="o", linestyle=None, lw=0, markersize=5)
+    ax[i].plot(
+        df.index, df[key], label=key, marker="o", linestyle=None, lw=0, markersize=5
+    )
     ax[i].set_title(key)
     ax[i].legend()
     ax[i].grid()
@@ -153,7 +175,9 @@ ploit_key_list = ["+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V
 # Plot the data
 fig, ax = plt.subplots(5, 1, figsize=(20, 15))
 for i, key in enumerate(ploit_key_list):
-    ax[i].plot(df.index, df[key], label=key, marker="o", linestyle=None, lw=0, markersize=5)
+    ax[i].plot(
+        df.index, df[key], label=key, marker="o", linestyle=None, lw=0, markersize=5
+    )
     ax[i].set_title(key)
     ax[i].legend()
     ax[i].grid()

@@ -339,7 +339,9 @@ def load_hist_plots_volt(
     # canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
 
     frame = tk.Frame(root)
-    frame.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky)
+    frame.grid(
+        row=row, column=column, columnspan=columnspan, rowspan=rowspan, sticky=sticky
+    )
 
     canvas = FigureCanvasTkAgg(fig_hist, master=frame)
     canvas.draw()

@@ -497,19 +497,25 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
         # if file_modified_time < time_threshold:
         # Check if the file was modified before the threshold time and that it is not a directory
         if file_modified_time < time_threshold and not file_attr.st_mode & 0o040000:
-            print(f"Skipping {file_name} as it was modified before the threshold time\n")
+            print(
+                f"Skipping {file_name} as it was modified before the threshold time\n"
+            )
             # print(f"File modified time: {file_modified_time}, Threshold time: {time_threshold}")
             continue
         elif file_modified_time < time_threshold and file_attr.st_mode & 0o040000:
             # If it is a directory, recurse into it
             if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
                 local_file_path.mkdir(parents=True, exist_ok=True)
-                get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
+                get_lexi_files_from_ff(
+                    sftp, str(remote_file_path), str(local_file_path), time_threshold
+                )
         elif file_modified_time > time_threshold and file_attr.st_mode & 0o040000:
             # If it is a directory, recurse into it
             if file_attr.st_mode & 0o040000:  # This checks if the path is a directory
                 local_file_path.mkdir(parents=True, exist_ok=True)
-                get_lexi_files_from_ff(sftp, str(remote_file_path), str(local_file_path), time_threshold)
+                get_lexi_files_from_ff(
+                    sftp, str(remote_file_path), str(local_file_path), time_threshold
+                )
         # If it is a file, check if it was modified in the last 'time_delta_minutes'
         elif file_modified_time > time_threshold:
             # Ensure the local directory exists
@@ -528,7 +534,9 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
                 sftp.get(str(remote_file_path), str(local_file_path))
                 print(f"Downloaded {file_name} from {remote_dir} to {local_dir}\n")
             except Exception:
-                logger.exception(f"Error downloading {file_name} from {remote_dir} to {local_dir}")
+                logger.exception(
+                    f"Error downloading {file_name} from {remote_dir} to {local_dir}"
+                )
                 continue
 
 
@@ -540,7 +548,9 @@ def show_blinking_message():
     global thread_running
 
     while thread_running:
-        sys.stdout.write("\rDownloading data, please wait" + "." * (int(time.time()) % 4))
+        sys.stdout.write(
+            "\rDownloading data, please wait" + "." * (int(time.time()) % 4)
+        )
         sys.stdout.flush()
         time.sleep(0.25)
 
@@ -578,7 +588,9 @@ def download_latest_files(time_threshold=1.0):
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "C:\\Users\\Lexi-Admin\\Documents\\GitHub\\Lexi-BU\\lxi_gui\\data\\from_ff"
+    local_directory = (
+        "C:\\Users\\Lexi-Admin\\Documents\\GitHub\\Lexi-BU\\lxi_gui\\data\\from_ff"
+    )
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes
@@ -592,7 +604,9 @@ def download_latest_files(time_threshold=1.0):
     # If time_delta_minutes is None, then download all files
     if time_delta_minutes is not None:
         # Get the time in UTC
-        time_threshold = datetime.now(timezone.utc) - timedelta(minutes=time_delta_minutes)
+        time_threshold = datetime.now(timezone.utc) - timedelta(
+            minutes=time_delta_minutes
+        )
     else:
         time_threshold = datetime.min
         # Set the timezone to UTC
@@ -600,7 +614,9 @@ def download_latest_files(time_threshold=1.0):
 
     # Start the blinking message in a separate thread
     blinking_thread = threading.Thread(target=show_blinking_message)
-    blinking_thread.daemon = True  # This ensures the thread will exit when the main program does
+    blinking_thread.daemon = (
+        True  # This ensures the thread will exit when the main program does
+    )
     blinking_thread.start()
 
     try:
@@ -631,8 +647,16 @@ def download_latest_files(time_threshold=1.0):
         thread_running = False
 
 
-def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, linewidth=2, zorder=10,
-               fontsize=12):
+def add_circle(
+    axs=None,
+    radius=4,
+    units="mcp",
+    color=["r", "c"],
+    fill=False,
+    linewidth=2,
+    zorder=10,
+    fontsize=12,
+):
     """
     The function adds a circle to the histogram plot.
 
@@ -674,10 +698,22 @@ def add_circle(axs=None, radius=4, units="mcp", color=["r", "c"], fill=False, li
             return axs
 
         # Add a circle centered at (0,0) with radius 4 cm
-        circle1 = plt.Circle((0, 0), radius1, color=color[0], fill=False, linewidth=linewidth,
-                             zorder=zorder)
-        circle2 = plt.Circle((0, 0), radius2, color=color[1], fill=False, linewidth=linewidth,
-                             zorder=zorder)
+        circle1 = plt.Circle(
+            (0, 0),
+            radius1,
+            color=color[0],
+            fill=False,
+            linewidth=linewidth,
+            zorder=zorder,
+        )
+        circle2 = plt.Circle(
+            (0, 0),
+            radius2,
+            color=color[1],
+            fill=False,
+            linewidth=linewidth,
+            zorder=zorder,
+        )
         # Make an arrow pointing to the edge of the circle from outside the circle at 45
         # degrees from the horizontal axis and with text "4.5 cm"
         angle_1 = np.pi / 2.7
