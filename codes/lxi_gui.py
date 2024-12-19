@@ -528,8 +528,8 @@ else:
 print(
     f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}"
 )
-# screen_width = 3600
-# screen_height = 1000
+screen_width = 3600
+screen_height = 1000
 print(
     "If the GUI size is messed up, uncomment the line 480 and 481 of lxi_gui.py code and set the "
     "screen_width and screen_height to your liking."
