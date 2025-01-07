@@ -145,3 +145,5 @@ luigi.cfg
 poetry.lock
 
 .flake8
+
+documents_from_ff
