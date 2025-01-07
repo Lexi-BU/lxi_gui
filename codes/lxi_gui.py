@@ -4,6 +4,7 @@ import platform
 from pathlib import Path
 import tkinter as tk
 from tkinter import font, ttk
+import tkinter.font as tkFont
 
 import global_variables
 import lxi_file_read_funcs as lxrf
@@ -134,7 +135,7 @@ def ts_plot_inputs(
         "fig_width": screen_width / (3 * dpi),
         "fig_height": screen_height / (4 * dpi),
         "dark_mode": dark_mode_var.get(),
-        "time_type": time_type.get(),
+        "hv_status": hv_status.get(),
         "display_time_label": display_time_label,
     }
     llpr.load_ts_plots(**inputs)
@@ -290,6 +291,17 @@ def refresh_ts_plot():
         logger.info("No time series data to plot")
 
 
+def toggle_hv_status():
+    # Toggle between "HV-Off" and "HV-On"
+    if hv_status.get() == "HV-Off":
+        hv_status.set("HV-On")
+        hv_status_button.config(text="HV-On", bg="red", fg="white", font=("Helvetica", 12, "bold"))
+    else:
+        hv_status.set("HV-Off")
+        hv_status_button.config(text="HV-Off", bg="green", fg="black", font=("Helvetica", 12, "bold"))
+    refresh_ts_plot()  # Call the plot refresh function
+
+
 def load_and_copy_files():
     """
     This function is called when the "Load Files" button is clicked. It copies the LEXI data files
@@ -427,6 +439,21 @@ def dark_mode_change():
             except Exception:
                 pass
 
+        # Try to change the colors of the toggle buttons
+        for button in root_item.winfo_children():
+            try:
+                if button["text"] == "HV-Off":
+                    button.configure(bg="green", fg="black")
+            except Exception:
+                pass
+        for button in root_item.winfo_children():
+            try:
+                if button["text"] == "HV-On":
+                    button.configure(bg="red", fg="white")
+            except Exception:
+                pass
+
+
     # Run the populating entries function to change the color of the entry boxes
     # lgeb.populate_entries(root=root, dark_mode=dark_mode)
 
@@ -477,8 +504,8 @@ else:
 
 
 print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
-# screen_width = 3600
-# screen_height = 1000
+screen_width = 3600
+screen_height = 1000
 print(
     "If the GUI size is messed up, uncomment the line 480 and 481 of lxi_gui.py code and set the "
     "screen_width and screen_height to your liking."
@@ -557,23 +584,6 @@ dark_mode_button = tk.Checkbutton(
     cursor="hand2",
 )
 dark_mode_button.grid(row=21, column=0, sticky="nsew", padx=5, pady=5)
-# add this button on the housekeeping tab as well
-dark_mode_button = tk.Checkbutton(
-    hk_tab,
-    text="Dark Mode",
-    variable=dark_mode_var,
-    command=dark_mode_change,
-    bg=bg_color,
-    fg=fg_color,
-    font=font_style,
-    relief="raised",
-    highlightthickness=5,
-    highlightcolor=bg_color,
-    selectcolor="#808080",
-    cursor="hand2",
-)
-dark_mode_button.grid(row=12, column=5, columnspan=1, sticky="nsew", padx=5, pady=5)
-
 
 sci_tab.configure(
     bg=bg_color, padx=5, pady=5, relief="raised", borderwidth=5, highlightthickness=5
@@ -917,7 +927,7 @@ if platform.system() == "Windows":
         1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
     )
 elif platform.system() == "Linux":
-    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/test/20241010/recovery_files/")
+    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/20240925/recovery_files/")
 elif platform.system() == "Darwin":
     folder_path.insert(1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/")
 else:
@@ -928,7 +938,7 @@ folder_path.config(state="normal", disabledbackground="black", disabledforegroun
 
 # Add a textbox to enter the folder path in HK tab as well
 folder_path_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
-folder_path_hk.grid(row=12, column=6, columnspan=1, sticky="nsew")
+folder_path_hk.grid(row=12, column=5, columnspan=1, sticky="nsew")
 
 # Set the default folder name in the text box same as the one in the science tab
 folder_path_hk.insert(1, folder_path.get())
@@ -987,7 +997,7 @@ folder_load_button_hk = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-folder_load_button_hk.grid(row=12, column=7, columnspan=1, sticky="nsew")
+folder_load_button_hk.grid(row=12, column=6, columnspan=1, sticky="nsew")
 folder_load_button_hk.config(state="normal")
 
 # Label for plot times
@@ -1021,11 +1031,11 @@ end_time_label.grid(row=12, column=0, columnspan=2)
 start_time_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 start_time_hk.insert(0, default_time_dict["start_time"])
 start_time_hk.config(insertbackground=insertbackground_color)
-start_time_hk.grid(row=12, column=1, columnspan=1, sticky="nsew")
+start_time_hk.grid(row=12, column=2, columnspan=1, sticky="nsew")
 start_time_label_hk = tk.Label(
     hk_tab, text="Start Time", font=font_style, bg=bg_color, fg=fg_color
 )
-start_time_label_hk.grid(row=13, column=1, columnspan=1, sticky="nsew")
+start_time_label_hk.grid(row=13, column=2, columnspan=1, sticky="nsew")
 
 end_time_hk = tk.Entry(hk_tab, justify="center", bg=bg_color, fg="green", borderwidth=2)
 end_time_hk.insert(0, default_time_dict["end_time"])
@@ -1054,30 +1064,26 @@ time_threshold_label = tk.Label(
 )
 time_threshold_label.grid(row=18, column=0, columnspan=2)
 
-# Add a dropdown menu for the kind of time to be used, options are "Lexi Time" and "UTC Time" and
-# "Local Time"
-# Default is "Lexi Time". If the time kind is changed, then run the "refresh_ts_plot" function
-# to update the plot.
-time_type = tk.StringVar()
-time_type.set("LEXI")
-time_type_menu = tk.OptionMenu(
-    hk_tab,
-    time_type,
-    "LEXI",
-    "UTC",
-    "Local",
-    command=lambda *_: refresh_ts_plot(),
-)
-# Deactivate the UTC and Local options for now
-time_type_menu["menu"].entryconfig(1, state="disabled")
-time_type_menu["menu"].entryconfig(2, state="disabled")
+# Add a toggle button to turn on/off the HV
+hv_status = tk.StringVar()
+hv_status.set("HV-Off")
 
-time_type_menu.config(bg=bg_color, fg=fg_color, borderwidth=2)
-time_type_menu.grid(row=12, column=2, columnspan=1, sticky="nsew")
-time_type_label = tk.Label(
-    hk_tab, text="Time Type", font=font_style, bg=bg_color, fg=fg_color
+hv_status_button = tk.Button(
+    hk_tab,
+    text="HV-Off",
+    bg="green",
+    fg="black",
+    font=("Helvetica", 12, "bold"),
+    borderwidth=2,
+    command=toggle_hv_status
 )
-time_type_label.grid(row=13, column=2, columnspan=1, sticky="nsew")
+
+hv_status_button.grid(row=12, column=1, columnspan=1, sticky="nsew")
+
+hv_status_label = tk.Label(
+    hk_tab, text="HV Status", font=font_style, bg=bg_color, fg=fg_color
+)
+hv_status_label.grid(row=13, column=1, columnspan=1, sticky="nsew")
 
 # if any of the ts_options are changed, update the plot
 plot_opt_entry_1.trace(
@@ -1365,7 +1371,7 @@ refresh_ts_hk_button = tk.Button(
     highlightbackground="green",
     highlightcolor="green",
 )
-refresh_ts_hk_button.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
+refresh_ts_hk_button.grid(row=12, column=7, columnspan=1, rowspan=1, sticky="new")
 
 quit_button_hk = tk.Button(
     hk_tab,
@@ -1383,6 +1389,6 @@ quit_button_hk = tk.Button(
     highlightbackground="red",
     highlightcolor="red",
 )
-quit_button_hk.grid(row=12, column=9, columnspan=1, rowspan=1, sticky="new")
+quit_button_hk.grid(row=12, column=8, columnspan=1, rowspan=1, sticky="new")
 
 root.mainloop()
