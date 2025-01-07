@@ -28,7 +28,7 @@ def load_ts_plots(
     fig_width=None,
     fig_height=None,
     dark_mode=True,
-    time_type="LEXI",
+    hv_status="HV-Off",
     display_time_label=True,
 ):
     """
@@ -81,7 +81,7 @@ def load_ts_plots(
         ts_fig_height=fig_height,
         ts_fig_width=fig_width,
         dark_mode=dark_mode,
-        time_type=time_type,
+        hv_status=hv_status,
         display_time_label=display_time_label,
     ).ts_plots()
     canvas = FigureCanvasTkAgg(fig_ts, master=frame)

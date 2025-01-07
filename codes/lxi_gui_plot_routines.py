@@ -202,7 +202,7 @@ class plot_data_class:
         cmap=None,
         use_fig_size=None,
         dark_mode=None,
-        time_type=None,
+        hv_status=None,
         display_time_label=None,
     ):
         self.df_slice_hk = df_slice_hk
@@ -239,7 +239,7 @@ class plot_data_class:
         self.cmap = cmap
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
-        self.time_type = time_type
+        self.hv_status = hv_status
         self.display_time_label = display_time_label
 
     def ts_plots(self):
@@ -297,6 +297,32 @@ class plot_data_class:
             "DeltaDroppedCount": "#",
             "DeltaLostevntCount": "#",
         }
+        nominal_values_dict_hv_on = {
+            "PinPullerTemp": "-10 to 50",
+            "OpticsTemp": "-10 to 50",
+            "LEXIbaseTemp": "-10 to 50",
+            "HVsupplyTemp": "-10 to 50",
+            "+5.2V_Imon": "$68 \pm 0.5$",
+            "+10V_Imon": "$2.5 \pm 0.4$",
+            "+3.3V_Imon": "$42.5 \pm 0.5$",
+            "AnodeVoltMon": "$3.4 \pm 0.6$",
+            "+28V_Imon": "$57.6 \pm 2.2$",
+            "DeltaDroppedCount": 0,
+            "DeltaLostevntCount": 0,
+        }
+        nominal_values_dict_hv_off = {
+            "PinPullerTemp": "-10 to 50",
+            "OpticsTemp": "-10 to 50",
+            "LEXIbaseTemp": "-10 to 50",
+            "HVsupplyTemp": "-10 to 50",
+            "+5.2V_Imon": "$61.5 \pm 0.5$",
+            "+10V_Imon": "$0.0033 \pm 0.0$",
+            "+3.3V_Imon": "$47.7 \pm 0.1$",
+            "AnodeVoltMon": "$0.0044 \pm 0.0$",
+            "+28V_Imon": "$44.1 \pm 0.4$",
+            "DeltaDroppedCount": 0,
+            "DeltaLostevntCount": 0,
+        }
 
         alpha = 1
         ms = 2
@@ -339,21 +365,8 @@ class plot_data_class:
         key_50p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 50)
         key_90p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 90)
 
-        # Depending on the time_type, find the x-axis values
-        if self.time_type == "LEXI":
-            x_axs_val = self.df_slice_hk.index
-        elif self.time_type == "UTC":
-            # Convert self.df_slice_hk.utc_time from string to datetime
-            self.df_slice_hk.utc_time = pd.to_datetime(
-                self.df_slice_hk.utc_time, utc=True, format="mixed",
-            )
-            x_axs_val = self.df_slice_hk.utc_time
-        elif self.time_type == "Local":
-            # Convert self.df_slice_hk.local_time and set the time-zone to the local time-zone
-            self.df_slice_hk.local_time = pd.to_datetime(
-                self.df_slice_hk.local_time, format="mixed"
-            )
-            x_axs_val = self.df_slice_hk.local_time
+        x_axs_val = self.df_slice_hk.index
+
         axs1 = plt.subplot(gs[:])
         axs1.plot(
             x_axs_val,
@@ -379,6 +392,35 @@ class plot_data_class:
             bbox=dict(facecolor=facecolor, edgecolor=edgecolor, alpha=0.5),
         )
 
+        # On the plot, display the nominal value of the parameter being plotted at the top left
+        try:
+            if self.hv_status == "HV-On":
+                axs1.text(
+                    0.02,
+                    0.95,
+                    f"Nominal Value={nominal_values_dict_hv_on[self.plot_key]}",
+                    horizontalalignment="left",
+                    verticalalignment="top",
+                    transform=axs1.transAxes,
+                    color=edgecolor,
+                    fontsize=10,
+                    bbox=dict(facecolor=facecolor, edgecolor=edgecolor, alpha=0.5),
+                )
+            elif self.hv_status == "HV-Off":
+                axs1.text(
+                    0.02,
+                    0.95,
+                    f"Nominal Value={nominal_values_dict_hv_off[self.plot_key]}",
+                    horizontalalignment="left",
+                    verticalalignment="top",
+                    transform=axs1.transAxes,
+                    color=edgecolor,
+                    fontsize=10,
+                    bbox=dict(facecolor=facecolor, edgecolor=edgecolor, alpha=0.5),
+                )
+        except Exception:
+            pass
+
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
         min_x_val_time = np.nanmin(x_axs_val)
         max_x_val_time = np.nanmax(x_axs_val)
@@ -387,14 +429,7 @@ class plot_data_class:
         if self.display_time_label:
             # Rotate the x-axis labels by certain degrees and set their fontsize, if required
             plt.setp(axs1.get_xticklabels(), rotation=0)
-            if self.time_type == "LEXI":
-                axs1.set_xlabel("Time [UTC]")
-            elif self.time_type == "UTC":
-                axs1.set_xlabel("Time [UTC]")
-            elif self.time_type == "Local":
-                # Get the local time zone of the system
-                local_timezone = datetime.datetime.now(pytz.timezone('UTC')).astimezone().tzinfo
-                axs1.set_xlabel(f"Time [{local_timezone}]")
+            axs1.set_xlabel("Time [UTC]")
             # Avoid overlapping of the x-axis labels
             fig.autofmt_xdate()
             # At the bottom right, display the start and end time of the plot
