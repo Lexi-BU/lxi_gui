@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytz
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, FormatStrFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 importlib.reload(global_variables)
@@ -203,6 +203,7 @@ class plot_data_class:
         use_fig_size=None,
         dark_mode=None,
         time_type=None,
+        display_time_label=None,
     ):
         self.df_slice_hk = df_slice_hk
         self.df_slice_sci = df_slice_sci
@@ -239,6 +240,7 @@ class plot_data_class:
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
         self.time_type = time_type
+        self.display_time_label = display_time_label
 
     def ts_plots(self):
         """
@@ -343,13 +345,13 @@ class plot_data_class:
         elif self.time_type == "UTC":
             # Convert self.df_slice_hk.utc_time from string to datetime
             self.df_slice_hk.utc_time = pd.to_datetime(
-                self.df_slice_hk.utc_time, format="%Y-%m-%d %H:%M:%S", utc=True
+                self.df_slice_hk.utc_time, utc=True, format="mixed",
             )
             x_axs_val = self.df_slice_hk.utc_time
         elif self.time_type == "Local":
             # Convert self.df_slice_hk.local_time and set the time-zone to the local time-zone
             self.df_slice_hk.local_time = pd.to_datetime(
-                self.df_slice_hk.local_time, format="%Y-%m-%d %H:%M:%S"
+                self.df_slice_hk.local_time, format="mixed"
             )
             x_axs_val = self.df_slice_hk.local_time
         axs1 = plt.subplot(gs[:])
@@ -366,11 +368,11 @@ class plot_data_class:
         # percentile values as as mu, where mu is 50 percentile value and subscript is the 10 and
         # superscript is 90 percentile values
         axs1.text(
+            0.02,
             0.05,
-            0.95,
             f"$\mu_{{{10}}}^{{{90}}}={key_50p_val:.2f}_{{{key_10p_val:.2f}}}^{{{key_90p_val:.2f}}}$",
             horizontalalignment="left",
-            verticalalignment="top",
+            verticalalignment="bottom",
             transform=axs1.transAxes,
             color=edgecolor,
             fontsize=10,
@@ -378,33 +380,56 @@ class plot_data_class:
         )
 
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
-        # Rotate the x-axis labels by certain degrees and set their fontsize, if required
-        plt.setp(axs1.get_xticklabels(), rotation=0)
-        if self.time_type == "LEXI":
-            axs1.set_xlabel("Time [UTC]")
-        elif self.time_type == "UTC":
-            axs1.set_xlabel("Time [UTC]")
-        elif self.time_type == "Local":
-            # Get the local time zone of the system
-            local_timezone = datetime.datetime.now(pytz.timezone('UTC')).astimezone().tzinfo
-            axs1.set_xlabel(f"Time [{local_timezone}]")
-        # Avoid overlapping of the x-axis labels
-        fig.autofmt_xdate()
+        min_x_val_time = np.nanmin(x_axs_val)
+        max_x_val_time = np.nanmax(x_axs_val)
+        axs1.tick_params(axis="x", which="major", direction="in", length=2, width=1)
+        # Hide or display the x-axis label based on the display_time_label variable
+        if self.display_time_label:
+            # Rotate the x-axis labels by certain degrees and set their fontsize, if required
+            plt.setp(axs1.get_xticklabels(), rotation=0)
+            if self.time_type == "LEXI":
+                axs1.set_xlabel("Time [UTC]")
+            elif self.time_type == "UTC":
+                axs1.set_xlabel("Time [UTC]")
+            elif self.time_type == "Local":
+                # Get the local time zone of the system
+                local_timezone = datetime.datetime.now(pytz.timezone('UTC')).astimezone().tzinfo
+                axs1.set_xlabel(f"Time [{local_timezone}]")
+            # Avoid overlapping of the x-axis labels
+            fig.autofmt_xdate()
+            # At the bottom right, display the start and end time of the plot
+            axs1.text(
+                0.99,
+                0.02,
+                f"Start:{min_x_val_time.strftime('%Y-%m-%d %H:%M:%S')}\n End:{max_x_val_time.strftime('%Y-%m-%d %H:%M:%S')}",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+                transform=axs1.transAxes,
+                color=edgecolor,
+                fontsize=8,
+                bbox=dict(facecolor=facecolor, edgecolor=edgecolor, alpha=0.5),
+            )
+        else:
+            axs1.set_xlabel("")
+            axs1.tick_params(axis="x", which="major", direction="in", length=2, width=1)
+            # Hide the x-tick labels
+            axs1.set_xticklabels([])
 
         axs1.set_ylabel(f"{unit_dict[self.plot_key]}")
-        axs1.tick_params(axis="both", which="major")
+        # Set the y-tick labels to 2 decimal places
+        axs1.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
         if self.plot_key == "Cmd_count" or self.plot_key == "HK_id":
             # For this case, make sure all the y-axis ticks are integers
             axs1.yaxis.set_major_locator(MaxNLocator(integer=True))
 
         # Set the location of the legend and remove the marker from the legend
-        axs1.legend(loc="upper right", markerscale=0, handlelength=0, handletextpad=0, fancybox=True,
-                    framealpha=0.5, edgecolor=edgecolor, facecolor=facecolor, fontsize=10,
-                    bbox_to_anchor=(1.0, 1.0), bbox_transform=axs1.transAxes)
+        # axs1.legend(loc="upper right", markerscale=0, handlelength=0, handletextpad=0, fancybox=True,
+        #             framealpha=0.5, edgecolor=edgecolor, facecolor=facecolor, fontsize=10,
+        #             bbox_to_anchor=(1.0, 1.0), bbox_transform=axs1.transAxes)
         # legend_list = axs1.legend(handlelength=0, handletextpad=0, fancybox=False)
         # for item in legend_list.legendHandles:
         #     item.set_visible(False)
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.close("all")
         return fig
 
@@ -613,12 +638,12 @@ class plot_data_class:
             fig = plt.figure(num=None, facecolor=face_color, edgecolor=edge_color)
 
         # fig.subplots_adjust(wspace=0., hspace=0.1)
-        gs = plt.GridSpec(21, 21)
+        gs = plt.GridSpec(15, 15)
 
         axs1 = fig.add_subplot(gs[:-3, 3:], aspect=1)
 
         # Drop all nans in the data
-        self.df_slice_sci = self.df_slice_sci.dropna()
+        # self.df_slice_sci = self.df_slice_sci.dropna()
         # Try to select only rows where "IsCommanded" is False
         try:
             self.df_slice_sci = self.df_slice_sci[
@@ -693,7 +718,7 @@ class plot_data_class:
                         -0.70495138, -1.59298278, 2.63314709]])
 
         # Scatter plot the xy values
-        axs1.scatter(xy[0], xy[1], marker=".", color="r", s=25, zorder=10)
+        # axs1.scatter(xy[0], xy[1], marker=".", color="r", s=25, zorder=10)
         # If all values of counts are NaN, then redo the histogram with different norm and cmin
         if np.isnan(counts).all():
             logger.warning(
