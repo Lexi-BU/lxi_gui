@@ -13,6 +13,7 @@ import lxi_gui_entry_box as lgeb
 import lxi_gui_plot_routines as lgpr
 import lxi_load_plot_routines as llpr
 import lxi_misc_codes as lmsc
+import lxi_save_figures as lsf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -21,6 +22,7 @@ importlib.reload(llpr)
 importlib.reload(lgeb)
 importlib.reload(lmsc)
 importlib.reload(lgcf)
+importlib.reload(lsf)
 
 
 logger = logging.getLogger(__name__)
@@ -296,9 +298,13 @@ def toggle_hv_status():
     if hv_status.get() == "HV-Off":
         hv_status.set("HV-On")
         hv_status_button.config(text="HV-On", bg="red", fg="white", font=("Helvetica", 12, "bold"))
+        # Modify the value of the global variable
+        global_variables.hv_status = True
     else:
         hv_status.set("HV-Off")
         hv_status_button.config(text="HV-Off", bg="green", fg="black", font=("Helvetica", 12, "bold"))
+        # Modify the value of the global variable
+        global_variables.hv_status = False
     refresh_ts_plot()  # Call the plot refresh function
 
 
@@ -504,8 +510,8 @@ else:
 
 
 print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
-# screen_width = 3600
-# screen_height = 1000
+screen_width = 2000
+screen_height = 1000
 print(
     "If the GUI size is messed up, uncomment the line 507 and 508 of lxi_gui.py code and set the "
     "screen_width and screen_height to your liking."
@@ -723,11 +729,18 @@ else:
         "DeltaLostEvntCount",
     ]
 
-# Plot options for the first plot
+# Add a text to display "Plot options"
 plot_opt_label_1 = tk.Label(hk_tab, text="Plot options:", font=font_style_box)
 plot_opt_label_1.grid(row=0, column=0, columnspan=1, pady=0, sticky="w")
 plot_opt_label_1.config(fg=fg_color, bg=bg_color)
 
+# Add a button to save the figures when it is clicked
+save_fig_button = tk.Button(
+    hk_tab, text="Save Figures", command=lambda: lsf.save_figures(df=None, start_time=start_time.get(), end_time=end_time.get()), font=font_style, bg=bg_color, fg=fg_color
+)
+save_fig_button.grid(row=0, column=1, columnspan=1, pady=0, sticky="w")
+
+# Plot options for the first plot
 plot_opt_entry_1 = tk.StringVar(hk_tab)
 plot_opt_entry_1.set("Select a column")
 ts_menu_1 = tk.OptionMenu(hk_tab, plot_opt_entry_1, *ts_options)
@@ -927,7 +940,7 @@ if platform.system() == "Windows":
         1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
     )
 elif platform.system() == "Linux":
-    folder_path.insert(1, "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_ff/from_sim/20240925/recovery_files/")
+    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/from_sim/20241010/recovery_files/")
 elif platform.system() == "Darwin":
     folder_path.insert(1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/")
 else:
