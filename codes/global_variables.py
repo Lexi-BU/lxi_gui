@@ -7,3 +7,5 @@ def init():
     data_lin = {}
     global data_nln
     data_nln = {}
+    global hv_status
+    hv_status = False
