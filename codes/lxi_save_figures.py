@@ -3,6 +3,7 @@ import numpy as np
 import global_variables
 import matplotlib.dates as mdates
 from pathlib import Path
+from matplotlib.ticker import FuncFormatter
 
 
 def save_figures(df=None, start_time=None, end_time=None):
@@ -169,14 +170,21 @@ def save_figures(df=None, start_time=None, end_time=None):
             pass
 
         # Put the tickmarks inside the plot
-        axs[row, col].tick_params(axis="both", direction="in", length=5)
+        axs[row, col].tick_params(axis="both", direction="in", length=8)
+        # Put the tickmarks inside the plot for minor ticks
+        axs[row, col].tick_params(axis="both", which="minor", direction="in", length=5)
         # Set the xlabel only if it is the last row
         if row == 2:
             # Format the x-axis to show the time
+            axs[row, col].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+    
+            # Set a 5-minute interval for minor tick marks
+            axs[row, col].xaxis.set_minor_locator(mdates.MinuteLocator(interval=5))
+            
+            # Format the x-axis to display labels only for major tick marks
             axs[row, col].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
-            axs[row, col].xaxis.set_major_locator(mdates.MinuteLocator(interval=5))
             # Ensure that the x-axis is readable
-            plt.setp(axs[row, col].xaxis.get_majorticklabels(), rotation=45)
+            plt.setp(axs[row, col].xaxis.get_majorticklabels(), rotation=45, ha="right", rotation_mode="anchor")
             axs[row, col].set_xlabel("Time [UTC]", fontsize=fontsize)
 
         # Set the ylabel

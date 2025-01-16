@@ -940,7 +940,7 @@ if platform.system() == "Windows":
         1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
     )
 elif platform.system() == "Linux":
-    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_ff/from_sim/20241010/recovery_files/")
+    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/orbit/20250116/")
 elif platform.system() == "Darwin":
     folder_path.insert(1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/")
 else:

@@ -150,3 +150,6 @@ poetry.lock
 .DS_Store
 
 documents_from_ff
+
+
+lxi_housekeeping_data/
