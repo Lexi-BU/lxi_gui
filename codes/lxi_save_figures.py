@@ -204,8 +204,20 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Expand the path to full path
     default_folder = Path(default_folder).expanduser()
     if global_variables.hv_status:
+        # In the start and end time, replace the : with _ to avoid confusion with the file name
+        start_time = start_time.replace(":", "_")
+        end_time = end_time.replace(":", "_")
+        # Replace space with _
+        start_time = start_time.replace(" ", "_")
+        end_time = end_time.replace(" ", "_")
         fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_status_ON.png"
     else:
+        # In the start and end time, replace the : with _ to avoid confusion with the file name
+        start_time = start_time.replace(":", "_")
+        end_time = end_time.replace(":", "_")
+        # Replace space with _
+        start_time = start_time.replace(" ", "_")
+        end_time = end_time.replace(" ", "_")
         fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_status_OFF.png"
 
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
