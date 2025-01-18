@@ -141,6 +141,10 @@ def save_figures(df=None, start_time=None, end_time=None):
             bbox=dict(facecolor="black", alpha=0.5),
         )
 
+        # Add a grid to the plot for better readability, separate the major and minor ticks
+        axs[row, col].grid(which="major", axis="both", color="white", linestyle="--", linewidth=0.3, alpha=0.5)
+        axs[row, col].grid(which="minor", axis="both", color="c", linestyle="--", linewidth=0.1, alpha=0.5)
+
         try:
             if global_variables.hv_status:
                 axs[row, col].text(

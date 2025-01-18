@@ -1,3 +1,4 @@
+import datetime
 import importlib
 import logging
 import platform
@@ -936,13 +937,19 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # folder_path.insert(1, "For multiple files, enter the folder path here")
 # Insert the default folder path in the text box based on the operating system
 if platform.system() == "Windows":
-    folder_path.insert(
-        1, r"C:\Users\Lexi-Admin\Documents\GitHub\Lexi-BU\lxi_gui\data\from_ff"
-    )
-elif platform.system() == "Linux":
-    folder_path.insert(1, "/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/orbit/20250116/")
-elif platform.system() == "Darwin":
-    folder_path.insert(1, "/Users/mac/Documents/GitHub/Lexi-BU/lxi_gui/git_data/sample_datasets/")
+    todays_date = datetime.datetime.now().strftime("%Y%m%d")
+    folder_location = f"..\\data\\from_LEXI\orbit\\{todays_date}\\"
+    # Get the full path
+    folder_location = Path(folder_location).resolve()
+    folder_path.insert(1, folder_location)
+elif platform.system() == "Linux" or platform.system() == "Darwin":
+    todays_date = datetime.datetime.now().strftime("%Y%m%d")
+    folder_location = f"../data/from_LEXI/orbit/{todays_date}/"
+    # Get the full path
+    folder_location = Path(folder_location).resolve()
+    # Add "/" to the end of the folder path
+    folder_location = f"{folder_location}/"
+    folder_path.insert(1, folder_location)
 else:
     raise OSError("Operating system not supported")
 
