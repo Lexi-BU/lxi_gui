@@ -511,10 +511,15 @@ else:
 
 
 print(f"The screen width and height are: {screen_width}, {screen_height} for platform: {platform.system()}")
-screen_width = 2000
-screen_height = 1000
+if platform.system() == "Windows":
+    screen_width = 3000
+    screen_height = 1000
+elif platform.system() == "Linux" or platform.system() == "Darwin":
+    screen_width = 2000
+    screen_height = 1000
+
 print(
-    "If the GUI size is messed up, uncomment the line 507 and 508 of lxi_gui.py code and set the "
+    "If the GUI size is messed up, uncomment the line 515 and 516 of lxi_gui.py code and set the "
     "screen_width and screen_height to your liking."
 )
 
@@ -938,9 +943,11 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Insert the default folder path in the text box based on the operating system
 if platform.system() == "Windows":
     todays_date = datetime.datetime.now().strftime("%Y%m%d")
-    folder_location = f"..\\data\\from_LEXI\orbit\\{todays_date}\\"
+    folder_location = f"..\\data\\from_LEXI\\orbit\\{todays_date}\\"
     # Get the full path
     folder_location = Path(folder_location).resolve()
+    # Add "/" to the end of the folder path
+    folder_location = f"{folder_location}\\"
     folder_path.insert(1, folder_location)
 elif platform.system() == "Linux" or platform.system() == "Darwin":
     todays_date = datetime.datetime.now().strftime("%Y%m%d")

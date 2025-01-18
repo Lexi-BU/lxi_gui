@@ -111,13 +111,7 @@ def lxi_csv_to_cdf(
         df.index = pd.to_datetime(df.index, utc=True, unit="s")
         cdf_data["Epoch"] = df.index
         for col in df.columns:
-            # If the column is either "utc_time" or "local_time", convert it to a datetime object and
-            # then to a CDF variable
-            if col == "utc_time" or col == "local_time":
-                df[col] = pd.to_datetime(df[col], utc=True)
-                cdf_data[col] = df[col]
-            else:
-                cdf_data[col] = df[col]
+            cdf_data[col] = df[col]
         cdf_data.close()
         print(f"\n  CDF file created: \x1b[1;32;255m {cdf_file} \x1b[0m")
 

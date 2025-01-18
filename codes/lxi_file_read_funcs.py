@@ -539,13 +539,6 @@ def read_binary_data_sci(
         time_diff_seconds = 0
         logger.warning(f"For the scicence data, the time difference between the current row and the last row is 0 for {input_file_name}.")
 
-    # Add utc_time and local_time column to the dataframe as NaNs
-    df["utc_time"] = np.nan
-    df["local_time"] = np.nan
-    # For each row, set the utc_time and local_time as sum of created_date_utc and time_diff_seconds
-    df["utc_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
-    df["local_time"] = creation_date_local + pd.to_timedelta(time_diff_seconds, unit="s")
-
     # Save the dataframe to a csv file
     df.to_csv(save_file_name, index=False)
 
@@ -872,12 +865,6 @@ def read_binary_data_hk(
         # Set time difference to 0 seconds
         time_diff_seconds = 0
         logger.warning(f"For the housekeeping data, the time difference between the current row and the last row is 0 for {input_file_name}.")
-    # Add utc_time and local_time column to the dataframe as NaNs
-    df["utc_time"] = np.nan
-    df["local_time"] = np.nan
-    # For each row, set the utc_time and local_time as sum of created_date_utc and time_diff_seconds
-    df["utc_time"] = creation_date_utc + pd.to_timedelta(time_diff_seconds, unit="s")
-    df["local_time"] = creation_date_local + pd.to_timedelta(time_diff_seconds, unit="s")
 
     # Set Date as the index without replacing the column
     df.set_index("Date", inplace=True, drop=False)
