@@ -497,7 +497,7 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
         # if file_modified_time < time_threshold:
         # Check if the file was modified before the threshold time and that it is not a directory
         if file_modified_time < time_threshold and not file_attr.st_mode & 0o040000:
-            print(f"Skipping {file_name} as it was modified before the threshold time\n")
+            # print(f"Skipping {file_name} as it was modified before the threshold time\n")
             # print(f"File modified time: {file_modified_time}, Threshold time: {time_threshold}")
             continue
         elif file_modified_time < time_threshold and file_attr.st_mode & 0o040000:
@@ -520,7 +520,7 @@ def get_lexi_files_from_ff(sftp, remote_dir, local_dir, time_threshold):
                 remote_file_size = file_attr.st_size
                 # If the file exists and sizes match, skip downloading
                 if local_file_size == remote_file_size:
-                    print(f"Skipping {file_name} as it already exists locally\n")
+                    # print(f"Skipping {file_name} as it already exists locally\n")
                     continue
 
             # Download the file
@@ -578,7 +578,7 @@ def download_latest_files(time_threshold=1.0):
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "C:\\Users\\Lexi-Admin\\Documents\\GitHub\\Lexi-BU\\lxi_gui\\data\\from_ff"
+    local_directory = "C:\\Users\\Lexi-Admin\\Documents\\GitHub\\Lexi-BU\\lxi_gui\\data\\from_LEXI\\orbit\\"
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes

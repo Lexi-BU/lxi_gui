@@ -76,7 +76,7 @@ def save_figures(df=None, start_time=None, end_time=None):
         "LEXIbaseTemp": "-10 to 50",
         "HVsupplyTemp": "-10 to 50",
         "+5.2V_Imon": "$61.5 \pm 0.5$",
-        "+10V_Imon": "$0.0033 \pm 0.0$",
+        "+10V_Imon": "$0.15 \pm 0.0$",
         "+3.3V_Imon": "$47.7 \pm 0.1$",
         "AnodeVoltMon": "$0.0044 \pm 0.0$",
         "+28V_Imon": "$44.1 \pm 0.4$",
