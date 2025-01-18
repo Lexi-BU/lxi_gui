@@ -255,8 +255,16 @@ def save_figures(df=None, start_time=None, end_time=None):
         "Channel4",
     ]
 
+
+    fontsize = 15
+
+    # Set the font size for the plots
+    font = {"family": "serif", "weight": "normal", "size": fontsize}
+    plt.rc("font", **font)
+    # Use dark background
+    plt.style.use("dark_background")
     # Plot the data in a 2 by 2 grid
-    fig, axs = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
+    fig, axs = plt.subplots(2, 2, figsize=(18, 10), sharex=True, sharey=True)
     fig.subplots_adjust(hspace=0.05, wspace=0.05, top=0.92)
 
     fig.suptitle(f"Science Data from {start_time} to {end_time}", fontsize=1.2 * fontsize,)
@@ -285,7 +293,7 @@ def save_figures(df=None, start_time=None, end_time=None):
             verticalalignment="bottom",
             transform=axs[row, col].transAxes,
             color="white",
-            fontsize=0.75 * fontsize,
+            fontsize=fontsize,
             bbox=dict(facecolor="black", alpha=0.5),
         )
 
@@ -300,7 +308,7 @@ def save_figures(df=None, start_time=None, end_time=None):
             verticalalignment="bottom",
             transform=axs[row, col].transAxes,
             color="white",
-            fontsize=0.75 * fontsize,
+            fontsize=1 * fontsize,
             bbox=dict(facecolor="black", alpha=0.5),
         )
 
