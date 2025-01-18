@@ -1,5 +1,6 @@
 import importlib
 import logging
+import platform
 import time
 import threading
 import sys
@@ -574,11 +575,17 @@ def download_latest_files(time_threshold=1.0):
     hostname = "sftp.fireflyspace.com"
     port = 22  # or the port number your server uses
     username = "LEXI"
-    private_key_path = "~/firefly_ssh_key_ssh"
+    if platform.system() == "Windows":
+        private_key_path = "~/firefly_ssh_key_ssh"
+    else:
+        private_key_path = "~/.ssh/firefly_ssh_key"
     private_key_path = Path(private_key_path).expanduser()
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
-    local_directory = "C:\\Users\\Lexi-Admin\\Documents\\GitHub\\Lexi-BU\\lxi_gui\\data\\from_LEXI\\orbit\\"
+    if platform.system() == "Windows":
+        local_directory = "..\\data\\from_LEXI\\orbit\\"
+    else:
+        local_directory = "../data/from_LEXI/orbit/"
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes
