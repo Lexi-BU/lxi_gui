@@ -320,10 +320,13 @@ def load_and_copy_files():
     #     logger.exception(f"Exception occurred while copying files from PIT: {e}")
     #     pass
 
+    # Add a 5-minute pad to the start and end times
+    start_time_new = datetime.datetime.strptime(start_time.get(), "%Y-%m-%d %H:%M:%S") - datetime.timedelta(minutes=5)
+    end_time_new = datetime.datetime.strptime(end_time.get(), "%Y-%m-%d %H:%M:%S") + datetime.timedelta(minutes=5)
     lmsc.load_folder(
         file_val=folder_path.get(),
-        t_start=start_time.get(),
-        t_end=end_time.get(),
+        t_start=start_time_new,
+        t_end=end_time_new,
         multiple_files=multi_file_status_var.get(),
     )
 
