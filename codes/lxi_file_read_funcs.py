@@ -409,16 +409,19 @@ def read_binary_data_sci(
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
     if platform.system() == "Linux":
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output_L1a.csv"
+        output_folder_name_list = os.path.dirname(os.path.normpath(in_file_name)).split("/")
+        output_folder_name = "/".join(output_folder_name_list[:-2]) + "/L1a/sci/" + output_folder_name_list[-1]
         save_file_name = output_folder_name + "/" + output_file_name
     elif platform.system() == "Windows":
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\sci"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output_L1a.csv"
+        output_folder_name_list = os.path.dirname(os.path.normpath(in_file_name)).split("\\")
+        output_folder_name = "\\".join(output_folder_name_list[:-2]) + "\\L1a\\sci\\" + output_folder_name_list[-1]
         save_file_name = output_folder_name + "\\" + output_file_name
     elif platform.system() == "Darwin":
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output.csv"
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/sci"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_sci_output_L1a.csv"
+        output_folder_name_list = os.path.dirname(os.path.normpath(in_file_name)).split("/")
+        output_folder_name = "/".join(output_folder_name_list[:-2]) + "/L1a/sci/" + output_folder_name_list[-1]
         save_file_name = output_folder_name + "/" + output_file_name
     else:
         raise OSError("The operating system is not supported.")
@@ -871,16 +874,19 @@ def read_binary_data_hk(
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
     if platform.system() == "Linux":
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output_L1a.csv"
+        output_folder_name_list = os.path.dirname(os.path.normpath(in_file_name)).split("/")
+        output_folder_name = "/".join(output_folder_name_list[:-2]) + "/L1a/hk/" + output_folder_name_list[-1]
         save_file_name = output_folder_name + "/" + output_file_name
     elif platform.system() == "Windows":
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "\\processed_data\\hk"
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output_L1a.csv"
+        output_folder_name_list = os.path.dirname(os.path.normpath(in_file_name)).split("\\")
+        output_folder_name = "\\".join(output_folder_name_list[:-2]) + "\\L1a\\hk\\" + output_folder_name_list[-1]
         save_file_name = output_folder_name + "\\" + output_file_name
     elif platform.system() == "Darwin":
-        output_folder_name = os.path.dirname(os.path.normpath(in_file_name)) + "/processed_data/hk"
-        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output.csv"
+        output_file_name = os.path.basename(os.path.normpath(in_file_name)).split(".")[0] + "_hk_output_L1a.csv"
+        output_folder_name_list = os.path.dirname(os.path.normpath(in_file_name)).split("/")
+        output_folder_name = "/".join(output_folder_name_list[:-2]) + "/L1a/hk/" + output_folder_name_list[-1]
         save_file_name = output_folder_name + "/" + output_file_name
     else:
         raise OSError("Operating system not supported.")
@@ -1539,59 +1545,69 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         # Set file_names_hk and file_names_sci to dates of first and last files
         save_dir = os.path.dirname(file_val)
+        print(f"\n \x1b[1;32;255m Saving the processed data to {save_dir} \x1b[0m")
         # If save_dir does not exist, create it
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
         # Get the file name based on the os path
         if platform.system() == "Windows":
-            file_name_hk = save_dir + "\\processed_data\\hk\\" + \
+            save_dir_list = save_dir.split("\\")
+            save_dir_new_hk = "\\".join(save_dir_list[:-2]) + "\\L1a\\hk\\" + save_dir_list[-1] + "\\"
+            file_name_hk = save_dir_new_hk + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+                file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_hk_output_L1a.csv'
 
-            file_name_sci = save_dir + "\\processed_data\\sci\\" + \
+            save_dir_new_sci = "\\".join(save_dir_list[:-2]) + "\\L1a\\sci\\" + save_dir_list[-1] + "\\"
+            file_name_sci = save_dir_new_sci + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output_L1a.csv'
         elif platform.system() == "Linux":
-            file_name_hk = save_dir + "/processed_data/hk/" + \
+            save_dir_list = save_dir.split("/")
+            save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1a/hk/" + save_dir_list[-1] + "/"
+            file_name_hk = save_dir_new_hk + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output_L1a.csv'
 
-            file_name_sci = save_dir + "/processed_data/sci/" + \
+            save_dir_new_sci = "/".join(save_dir_list[:-2]) + "/L1a/sci/" + save_dir_list[-1] + "/"
+            file_name_sci = save_dir_new_sci + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output_L1a.csv'
         elif platform.system() == "Darwin":
-            file_name_hk = save_dir + "/processed_data/hk/" + \
+            save_dir_list = save_dir.split("/")
+            save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1a/hk/" + save_dir_list[-1] + "/"
+            file_name_hk = save_dir_new_hk + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output.csv'
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_hk_output_L1a.csv'
 
-            file_name_sci = save_dir + "/processed_data/sci/" + \
+            save_dir_new_sci = "/".join(save_dir_list[:-2]) + "/L1a/sci/" + save_dir_list[-1] + "/"
+            file_name_sci = save_dir_new_sci + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output.csv'
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-3] + '_sci_output_L1a.csv'
         else:
             raise OSError("Operating system not supported")
 

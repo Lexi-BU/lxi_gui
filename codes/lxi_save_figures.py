@@ -374,7 +374,7 @@ def check_folder_structure():
         check_path = current_path.parents[i] if i < len(current_path.parents) else current_path
 
         # Define the target folder structure
-        target_folder = check_path / 'data' / 'from_LEXI' / 'orbit'
+        target_folder = check_path / 'data' / 'from_LEXI' / 'L1a' / 'hk'
 
         if target_folder.is_dir():
             print(f"Found folder structure at: {target_folder}")
@@ -389,12 +389,13 @@ def check_folder_structure():
 def read_and_plot_all_files():
 
     parent_folder = check_folder_structure()
+    print(f"Reading files from: {parent_folder}")
 
-    file_name_format = "payload_lexi_*_*_hk_output.csv"
+    file_name_format = "payload_lexi_*_*_hk_output_L1a.csv"
     csv_files = glob.glob(
         str(parent_folder / "**" / file_name_format), recursive=True
     )
-    exclude_pattern = re.compile(r"payload_lexi_\d+_\d+_\d+_\d+_hk_output.csv")
+    exclude_pattern = re.compile(r"payload_lexi_\d+_\d+_\d+_\d+_hk_output_L1a.csv")
     csv_files = [file for file in csv_files if not exclude_pattern.search(file)]
     # Sort the files by name
     csv_files.sort()
