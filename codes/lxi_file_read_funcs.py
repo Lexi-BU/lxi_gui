@@ -1647,7 +1647,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         & (df_sci["Channel3"] > 0)
         & (df_sci["Channel4"] > 0)
     ]
-    
+
     # Select dataframe from timestamp t_start to t_end
     df_slice_hk = df_slice_hk.loc[t_start:t_end].copy()
     df_slice_sci = df_slice_sci.loc[t_start:t_end].copy()
