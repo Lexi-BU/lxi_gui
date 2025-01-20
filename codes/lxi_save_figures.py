@@ -448,10 +448,11 @@ def long_time_series_plot():
         lambda x: pd.to_datetime(str(x) + " " + str(time_stats_seconds["median"][x]))
     )
 
+    numeric_df = df_all.select_dtypes(include=['number'])
     # For each day, calculate the median, 10th percentile, and 90th percentile for each key
-    daily_median = df_all.groupby(df_all.index.date).quantile(0.5)
-    daily_10p = df_all.groupby(df_all.index.date).quantile(0.1)
-    daily_90p = df_all.groupby(df_all.index.date).quantile(0.9)
+    daily_median = numeric_df.groupby(df_all.index.date).quantile(0.5)
+    daily_10p = numeric_df.groupby(df_all.index.date).quantile(0.1)
+    daily_90p = numeric_df.groupby(df_all.index.date).quantile(0.9)
 
     default_key_list = [
         "HVsupplyTemp",
