@@ -251,7 +251,6 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Close the figure
     plt.close(fig)
     print(f"Figure saved as {default_folder / fig_name}")
-
     """
     default_key_list = [
         "Channel1",
@@ -365,7 +364,9 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print("Long term time series plot saved.")
     """
-    fontsize = 15
+    fontsize = 18
+    label_factor = 1.3
+    linewidth = 4.5
 
     # Compute the pulse height by adding all 4 channels together
     df_sci["PulseHeight"] = df_sci["Channel1"] + df_sci["Channel2"] + df_sci["Channel3"] + df_sci["Channel4"]
@@ -376,62 +377,234 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Use dark background
     plt.style.use("dark_background")
     # Plot the data in a 2 by 3 grid
-    fig, axs = plt.subplots(4, 2, figsize=(18, 22), sharex=False, sharey=False)
-    fig.subplots_adjust(hspace=0.15, wspace=0.35, top=0.92)
+    fig, axs = plt.subplots(3, 3, figsize=(24, 15), sharex=False, sharey=False)
+    fig.subplots_adjust(hspace=0.15, wspace=0.35, top=0.95)
 
     fig.suptitle(f"Science Data from {start_time} to {end_time}", fontsize=1.2 * fontsize,)
-    # Plot the time series of Channel 1 and Channel 3 (with Channel 3 on the right y-axis)
-    axs[0, 0].plot(df_sci.index, df_sci["Channel1"], ".", label="Channel1", color="#42f5bc", markersize=5, alpha=0.1,)
-    axs[0, 0].set_ylabel("Channel 1 [V]")
-    # axs[0, 0].set_xlabel("Time [UTC]")
-    # Format the x-axis correctly to show the time without overlapping
-    axs[0, 0].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+    # Plot the distribution of Channel 1
+    axs[0, 0].hist(df_sci["Channel1"], bins=50, color="#42f5bc", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[0, 0].set_ylabel("Frequency", fontsize=fontsize)
+    axs[0, 0].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
+    # axs[0, 0].set_xlabel("Channel 1 [V]", fontsize=fontsize)
+    axs[0, 0].set_yscale("log")
+    axs[0, 0].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
+    # Add a text at the top right corner of the plot that says Channel 1
+    axs[0, 0].text(
+        0.98,
+        0.98,
+        "Channel 1",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[0, 0].transAxes,
+        color="#42f5bc",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.5),
+    )
 
-    axs[1, 0].plot(df_sci.index, df_sci["Channel3"], ".", label="Channel3", color="#42cef5", markersize=5, alpha=0.1,)
-    axs[1, 0].set_ylabel("Channel 3 [V]")
-    axs[1, 0].set_xlabel("Time [UTC]")
+    # Plot the distribution of Channel 2
+    axs[1, 0].hist(df_sci["Channel2"], bins=50, color="#42cef5", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[1, 0].set_ylabel("Frequency", fontsize=fontsize)
+    # Add x-label (inside the plot)
+    axs[1, 0].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
+    # axs[0, 1].set_xlabel("Channel 2 [V]", fontsize=fontsize)
+    axs[1, 0].set_yscale("log")
+    axs[1, 0].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
+    # Add a text at the top right corner of the plot that says Channel 2
+    axs[1, 0].text(
+        0.98,
+        0.98,
+        "Channel 2",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[1, 0].transAxes,
+        color="#42cef5",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.5),
+    )
 
-    # Plot the time series of Channel 2 and Channel 4 (with Channel 4 on the right y-axis)
-    axs[0, 1].plot(df_sci.index, df_sci["Channel2"], ".", label="Channel2", color="#f542ef", markersize=5, alpha=0.1,)
-    axs[0, 1].set_ylabel("Channel 2 [V]")
-    # axs[0, 1].set_xlabel("Time [UTC]")
-    axs[0, 1].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+    # Plot the distribution of Channel 3
+    axs[0, 1].hist(df_sci["Channel3"], bins=50, color="#f542ef", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[0, 1].set_ylabel("Frequency", fontsize=fontsize)
+    axs[0, 1].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
+    # axs[1, 0].set_xlabel("Channel 3 [V]", fontsize=fontsize)
+    axs[0, 1].set_yscale("log")
+    axs[0, 1].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
+    # Add a text at the top right corner of the plot that says Channel 3
+    axs[0, 1].text(
+        0.98,
+        0.98,
+        "Channel 3",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[0, 1].transAxes,
+        color="#f542ef",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.5),
+    )
 
-    axs[1, 1].plot(df_sci.index, df_sci["Channel4"], ".", label="Channel4", color="#e8484b", markersize=5, alpha=0.1,)
-    axs[1, 1].set_ylabel("Channel 4 [V]")
-    axs[1, 1].set_xlabel("Time [UTC]")
-    axs[1, 1].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+    # Plot the distribution of Channel 4
+    axs[1, 1].hist(df_sci["Channel4"], bins=50, color="#f5a742", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[1, 1].set_ylabel("Frequency", fontsize=fontsize)
+    axs[1, 1].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
+    # axs[1, 1].set_xlabel("Channel 4 [V]", fontsize=fontsize)
+    axs[1, 1].set_yscale("log")
+    axs[1, 1].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
+    # Add a text at the top right corner of the plot that says Channel 4
+    axs[1, 1].text(
+        0.98,
+        0.98,
+        "Channel 4",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[1, 1].transAxes,
+        color="#f5a742",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.5),
+    )
 
     # Plot the hexbin plot of Channel 1 and Channel 3
-    axs[2, 0].hexbin(df_sci["Channel1"], df_sci["Channel3"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
+    axs[0, 2].hexbin(df_sci["Channel1"], df_sci["Channel3"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
     # Set equal aspect ratio
-    axs[2, 0].set_aspect('equal', adjustable='box')
-    axs[2, 0].set_xlabel("Channel 1 [V]")
-    axs[2, 0].set_ylabel("Channel 3 [V]")
+    axs[0, 2].set_aspect('equal', adjustable='box')
+    axs[0, 2].set_xlabel("Channel 1 [V]", fontsize=fontsize)
+    axs[0, 2].set_ylabel("Channel 3 [V]", fontsize=fontsize)
     # Display the colorbar
-    cb = plt.colorbar(axs[2, 0].collections[0], ax=axs[2, 0], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
+    cb = plt.colorbar(axs[0, 2].collections[0], ax=axs[0, 2], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
     cb.ax.xaxis.set_label_position("top")
+    axs[0, 2].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
 
     # Plot the hexbin plot of Channel 2 and Channel 4
-    axs[2, 1].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
-    axs[2, 1].set_xlabel("Channel 2 [V]")
-    axs[2, 1].set_ylabel("Channel 4 [V]")
+    axs[1, 2].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
+    axs[1, 2].set_xlabel("Channel 2 [V]", fontsize=fontsize)
+    axs[1, 2].set_ylabel("Channel 4 [V]", fontsize=fontsize)
     # Set equal aspect ratio
-    axs[2, 1].set_aspect('equal', adjustable='box')
+    axs[1, 2].set_aspect('equal', adjustable='box')
     # Display the colorbar
-    cb = plt.colorbar(axs[2, 1].collections[0], ax=axs[2, 1], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
+    cb = plt.colorbar(axs[1, 2].collections[0], ax=axs[1, 2], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
     cb.ax.xaxis.set_label_position("top")
-    # Plot the time series of Pulse Height
-    axs[3, 0].plot(df_sci.index, df_sci["PulseHeight"], ".", label="PulseHeight", color="#8e31f7", markersize=5, alpha=0.1)
-    axs[3, 0].set_ylabel("Voltage [V]")
-    axs[3, 0].set_xlabel("Time [UTC]")
+    axs[1, 2].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
 
     # Plot the distribution of Pulse Height
-    axs[3, 1].hist(df_sci["PulseHeight"], bins=50, color="#8e31f7", alpha=0.5, log=True, histtype="step", linewidth=2.5)
-    axs[3, 1].set_ylabel("Frequency")
-    axs[3, 1].set_xlabel("Pulse Height [V]")
-    axs[3, 1].set_yscale("log")
+    axs[2, 0].hist(df_sci["PulseHeight"], bins=50, color="w", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[2, 0].set_ylabel("Frequency", fontsize=fontsize)
+    axs[2, 0].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
+    # axs[2, 0].set_xlabel("Pulse Height [V]", fontsize=fontsize)
+    axs[2, 0].set_yscale("log")
+    # Turn on the grid
+    axs[2, 0].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
+    # Add a text at the top right corner of the plot that says Pulse Height
+    axs[2, 0].text(
+        0.98,
+        0.98,
+        "Pulse Height",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[2, 0].transAxes,
+        color="w",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.5),
+    )
 
+    # Select only the data where x_mcp_lin and y_mcp_lin are withing +/- 6
+    df_sci = df_sci[(df_sci["x_mcp_lin"] < 6) & (df_sci["x_mcp_lin"] > -6) & (df_sci["y_mcp_lin"] < 6) & (df_sci["y_mcp_lin"] > -6)]
+    # Plot the hexbin historagram of between "x_mcp_lin" and "y_mcp_lin". Ignore any bins where the
+    # number of points is less than 10
+    mincnt = 40
+    axs[2, 2].hexbin(df_sci["x_mcp_lin"], df_sci["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    axs[2, 2].set_xlabel("X [cm]", fontsize=fontsize)
+    axs[2, 2].set_ylabel("Y [cm]", fontsize=fontsize)
+    # Set equal aspect ratio
+    axs[2, 2].set_aspect('equal', adjustable='box')
+    # Display the colorbar
+    cb = plt.colorbar(axs[2, 2].collections[0], ax=axs[2, 2], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right",)
+    cb.ax.xaxis.set_label_position("top")
+    axs[2, 2].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
+
+    # Set the x and y axes limits to -6 to 6
+    axs[2, 2].set_xlim(-6, 6)
+    axs[2, 2].set_ylim(-6, 6)
+
+    # Plot a circle with radius 4 and 0.9375 * 4
+    radius1 = 4
+    radius2 = 0.9375 * radius1
+
+    circle1 = axs[2, 2].add_patch(plt.Circle((0, 0), radius1, color="red", fill=False, linewidth=linewidth))
+    circle2 = axs[2, 2].add_patch(plt.Circle((0, 0), radius2, color="blue", fill=False, linewidth=linewidth))
+
+    angle_1 = np.pi / 2.7
+    angle_2 = np.pi / 1.3
+    # Annotate the twwo circles
+    axs[2, 2].annotate("Detector Size", xy=(radius1 * np.cos(angle_1), radius1 * np.sin(angle_1)), xytext=((radius1 - 2.2) * np.cos(angle_1), (radius1 + 1.55) * np.sin(angle_1)), arrowprops=dict(arrowstyle="->", color="r", linewidth=linewidth), color="red", fontsize=0.9 * fontsize,)
+    axs[2, 2].annotate("Effective Area", xy=(radius2 * np.cos(angle_2), radius2 * np.sin(angle_2)), xytext=((radius2 + 4.2) * np.cos(angle_2), (radius2 + 4.5) * np.sin(angle_2)), arrowprops=dict(arrowstyle="->", color="b", linewidth=linewidth), color="blue", fontsize=0.9 * fontsize, ha="left", va="center",)
+
+
+    # Get the 10, 50 and 90 percentile values of the data (Channel 1, Channel 2, Channel 3, Channel
+    # 4, Pulse Height)
+    percentile_values = df_sci[["Channel1", "Channel2", "Channel3", "Channel4", "PulseHeight"]].quantile([0.1, 0.5, 0.9])
+
+    # On the plot 2, 1 display the 10, 50 and 90 percentile values of the data with the mean value of
+    # the data in the middle and the 10th and 90th percentile values as the subscript and superscript
+    # of the mean value respectively
+    x_0 = 0.04
+    y_0 = 0.65
+    axs[2, 1].text(
+        x_0,
+        y_0,
+        f"$\mu_{{10}}^{{90}}={percentile_values['Channel1'][0.5]:.2f}_{{{percentile_values['Channel1'][0.1]:.2f}}}^{{{percentile_values['Channel1'][0.9]:.2f}}}$",
+        horizontalalignment="left",
+        verticalalignment="top",
+        transform=axs[2, 1].transAxes,
+        color="#42f5bc",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.0),
+    )
+    axs[2, 1].text(
+        x_0,
+        y_0 - 0.2,
+        f"$\mu_{{10}}^{{90}}={percentile_values['Channel2'][0.5]:.2f}_{{{percentile_values['Channel2'][0.1]:.2f}}}^{{{percentile_values['Channel2'][0.9]:.2f}}}$",
+        horizontalalignment="left",
+        verticalalignment="top",
+        transform=axs[2, 1].transAxes,
+        color="#42cef5",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.0),
+    )
+    axs[2, 1].text(
+        x_0 + 0.96,
+        y_0,
+        f"$\mu_{{10}}^{{90}}={percentile_values['Channel3'][0.5]:.2f}_{{{percentile_values['Channel3'][0.1]:.2f}}}^{{{percentile_values['Channel3'][0.9]:.2f}}}$",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[2, 1].transAxes,
+        color="#f542ef",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.0),
+    )
+    axs[2, 1].text(
+        x_0 + 0.96,
+        y_0 - 0.2,
+        f"$V4_{{10}}^{{90}}={percentile_values['Channel4'][0.5]:.2f}_{{{percentile_values['Channel4'][0.1]:.2f}}}^{{{percentile_values['Channel4'][0.9]:.2f}}}$",
+        horizontalalignment="right",
+        verticalalignment="top",
+        transform=axs[2, 1].transAxes,
+        color="#f5a742",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.0),
+    )
+    axs[2, 1].text(
+        0.5,
+        y_0 - 0.4,
+        f"$\mu_{{10}}^{{90}}={percentile_values['PulseHeight'][0.5]:.2f}_{{{percentile_values['PulseHeight'][0.1]:.2f}}}^{{{percentile_values['PulseHeight'][0.9]:.2f}}}$",
+        horizontalalignment="center",
+        verticalalignment="top",
+        transform=axs[2, 1].transAxes,
+        color="white",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.0),
+    )
+
+    # Turn off the axis for the last plot
+    axs[2, 1].axis("off")
     # Save the figure as png file to the path
     default_folder = "../lxi_science_data/"
     Path(default_folder).mkdir(parents=True, exist_ok=True)
@@ -780,3 +953,7 @@ def long_time_series_plot():
     print(f"Figure saved as {default_folder / fig_name}")
 
     return daily_median, daily_10p, daily_90p
+
+
+# if __name__ == "__main__":
+#     save_figures()
