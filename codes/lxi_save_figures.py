@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 import global_variables
 import matplotlib.dates as mdates
@@ -251,6 +252,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     plt.close(fig)
     print(f"Figure saved as {default_folder / fig_name}")
 
+    """
     default_key_list = [
         "Channel1",
         "Channel2",
@@ -362,6 +364,92 @@ def save_figures(df=None, start_time=None, end_time=None):
     long_time_series_plot()
 
     print("Long term time series plot saved.")
+    """
+    fontsize = 15
+
+    # Compute the pulse height by adding all 4 channels together
+    df_sci["PulseHeight"] = df_sci["Channel1"] + df_sci["Channel2"] + df_sci["Channel3"] + df_sci["Channel4"]
+
+    # Set the font size for the plots
+    font = {"family": "serif", "weight": "normal", "size": fontsize}
+    plt.rc("font", **font)
+    # Use dark background
+    plt.style.use("dark_background")
+    # Plot the data in a 2 by 3 grid
+    fig, axs = plt.subplots(4, 2, figsize=(18, 22), sharex=False, sharey=False)
+    fig.subplots_adjust(hspace=0.15, wspace=0.35, top=0.92)
+
+    fig.suptitle(f"Science Data from {start_time} to {end_time}", fontsize=1.2 * fontsize,)
+    # Plot the time series of Channel 1 and Channel 3 (with Channel 3 on the right y-axis)
+    axs[0, 0].plot(df_sci.index, df_sci["Channel1"], ".", label="Channel1", color="#42f5bc", markersize=5, alpha=0.1,)
+    axs[0, 0].set_ylabel("Channel 1 [V]")
+    # axs[0, 0].set_xlabel("Time [UTC]")
+    # Format the x-axis correctly to show the time without overlapping
+    axs[0, 0].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+
+    axs[1, 0].plot(df_sci.index, df_sci["Channel3"], ".", label="Channel3", color="#42cef5", markersize=5, alpha=0.1,)
+    axs[1, 0].set_ylabel("Channel 3 [V]")
+    axs[1, 0].set_xlabel("Time [UTC]")
+
+    # Plot the time series of Channel 2 and Channel 4 (with Channel 4 on the right y-axis)
+    axs[0, 1].plot(df_sci.index, df_sci["Channel2"], ".", label="Channel2", color="#f542ef", markersize=5, alpha=0.1,)
+    axs[0, 1].set_ylabel("Channel 2 [V]")
+    # axs[0, 1].set_xlabel("Time [UTC]")
+    axs[0, 1].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+
+    axs[1, 1].plot(df_sci.index, df_sci["Channel4"], ".", label="Channel4", color="#e8484b", markersize=5, alpha=0.1,)
+    axs[1, 1].set_ylabel("Channel 4 [V]")
+    axs[1, 1].set_xlabel("Time [UTC]")
+    axs[1, 1].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+
+    # Plot the hexbin plot of Channel 1 and Channel 3
+    axs[2, 0].hexbin(df_sci["Channel1"], df_sci["Channel3"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
+    # Set equal aspect ratio
+    axs[2, 0].set_aspect('equal', adjustable='box')
+    axs[2, 0].set_xlabel("Channel 1 [V]")
+    axs[2, 0].set_ylabel("Channel 3 [V]")
+    # Display the colorbar
+    cb = plt.colorbar(axs[2, 0].collections[0], ax=axs[2, 0], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
+    cb.ax.xaxis.set_label_position("top")
+
+    # Plot the hexbin plot of Channel 2 and Channel 4
+    axs[2, 1].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
+    axs[2, 1].set_xlabel("Channel 2 [V]")
+    axs[2, 1].set_ylabel("Channel 4 [V]")
+    # Set equal aspect ratio
+    axs[2, 1].set_aspect('equal', adjustable='box')
+    # Display the colorbar
+    cb = plt.colorbar(axs[2, 1].collections[0], ax=axs[2, 1], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
+    cb.ax.xaxis.set_label_position("top")
+    # Plot the time series of Pulse Height
+    axs[3, 0].plot(df_sci.index, df_sci["PulseHeight"], ".", label="PulseHeight", color="#8e31f7", markersize=5, alpha=0.1)
+    axs[3, 0].set_ylabel("Voltage [V]")
+    axs[3, 0].set_xlabel("Time [UTC]")
+
+    # Plot the distribution of Pulse Height
+    axs[3, 1].hist(df_sci["PulseHeight"], bins=50, color="#8e31f7", alpha=0.5, log=True, histtype="step", linewidth=2.5)
+    axs[3, 1].set_ylabel("Frequency")
+    axs[3, 1].set_xlabel("Pulse Height [V]")
+    axs[3, 1].set_yscale("log")
+
+    # Save the figure as png file to the path
+    default_folder = "../lxi_science_data/"
+    Path(default_folder).mkdir(parents=True, exist_ok=True)
+    # Expand the path to full path
+    default_folder = Path(default_folder).expanduser()
+
+    # In the start and end time, replace the : with _ to avoid confusion with the file name
+    start_time = start_time.replace(":", "_")
+    end_time = end_time.replace(":", "_")
+    # Replace space with _
+    start_time = start_time.replace(" ", "_")
+    end_time = end_time.replace(" ", "_")
+    fig_name = f"detailed_lxi_science_{start_time}_{end_time}.png"
+
+    fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
+
+    print(f"Figure saved as {default_folder / fig_name}")
+
     return None
 
 

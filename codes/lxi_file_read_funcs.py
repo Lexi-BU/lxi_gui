@@ -4,6 +4,7 @@ import importlib
 import os
 import platform
 import logging
+import shutil
 import struct
 from pathlib import Path
 from tkinter import filedialog
@@ -1015,6 +1016,7 @@ def open_file_b(t_start=None, t_end=None):
 def open_file_b_multiple(file_val=None, t_start=None, t_end=None, multiple_files=True):
     # Cut path to the file off
     file_name_b = file_val
+    # Read the binary file
     (
         df_slice_hk,
         file_name_hk,
@@ -1516,8 +1518,35 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
 
         # Loop through all the files
         for file_name in file_list:
+            # Copy this file to another location called L0
+            if platform.system() == "Linux":
+                folder_name_list = file_name.split("/")[:-1]
+                folder_name = "/".join(folder_name_list[:-2]) + "/L0/" + folder_name_list[-1] + "/"
+                if not os.path.exists(folder_name):
+                    os.makedirs(folder_name)
+
+                # Copy the file to the L0 folder
+                shutil.copy2(file_name, folder_name)
+            elif platform.system() == "Windows":
+                folder_name_list = file_name.split("\\")[:-1]
+                folder_name = "\\".join(folder_name_list[:-2]) + "\\L0\\" + folder_name_list[-1] + "\\"
+                if not os.path.exists(folder_name):
+                    os.makedirs(folder_name)
+
+                # Copy the file to the L0 folder
+                shutil.copy2(file_name, folder_name)
+            elif platform.system() == "Darwin":
+                folder_name_list = file_name.split("/")[:-1]
+                folder_name = "/".join(folder_name_list[:-2]) + "/L0/" + folder_name_list[-1] + "/"
+                if not os.path.exists(folder_name):
+                    os.makedirs(folder_name)
+
+                # Copy the file to the L0 folder
+                shutil.copy2(file_name, folder_name)
+            else:
+                raise OSError("Operating system not supported.")
+
             # Print in cyan color that file number is being read from the directory conatining total
-            # number of files
             print(
                 f"\n Reading file \x1b[1;36;255m {file_list.index(file_name) + 1} \x1b[0m of "
                 f"total \x1b[1;36;255m {len(file_list)} \x1b[0m files."
