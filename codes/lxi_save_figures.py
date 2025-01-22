@@ -551,7 +551,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     axs[2, 1].text(
         0.5,
         0.85,
-        f"T: {total_observation_time:.2f} seconds \n N: {total__number_of_events} events\n <N/s>: {average_number_of_events_per_second:.2f} Hz",
+        f"Observation Length: {total_observation_time:.2f} seconds \n Total Number of Events: {total__number_of_events}\n Average Number of Events: {average_number_of_events_per_second:.2f} Hz",
         horizontalalignment="center",
         verticalalignment="top",
         transform=axs[2, 1].transAxes,
