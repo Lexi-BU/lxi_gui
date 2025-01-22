@@ -542,11 +542,28 @@ def save_figures(df=None, start_time=None, end_time=None):
     # 4, Pulse Height)
     percentile_values = df_sci[["Channel1", "Channel2", "Channel3", "Channel4", "PulseHeight"]].quantile([0.1, 0.5, 0.9])
 
+    # Get the averagee number of events per second
+
+    total__number_of_events = df_sci.shape[0]
+    total_observation_time = (df_sci.index[-1] - df_sci.index[0]).total_seconds()
+    average_number_of_events_per_second = total__number_of_events / total_observation_time
+    # Add the text to the plot
+    axs[2, 1].text(
+        0.5,
+        0.85,
+        f"T: {total_observation_time:.2f} seconds \n N: {total__number_of_events} events\n <N/s>: {average_number_of_events_per_second:.2f} Hz",
+        horizontalalignment="center",
+        verticalalignment="top",
+        transform=axs[2, 1].transAxes,
+        color="white",
+        fontsize=label_factor * fontsize,
+        bbox=dict(facecolor="black", alpha=0.5),
+    )
     # On the plot 2, 1 display the 10, 50 and 90 percentile values of the data with the mean value of
     # the data in the middle and the 10th and 90th percentile values as the subscript and superscript
     # of the mean value respectively
     x_0 = 0.04
-    y_0 = 0.65
+    y_0 = 0.45
     axs[2, 1].text(
         x_0,
         y_0,
@@ -623,6 +640,11 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print(f"Figure saved as {default_folder / fig_name}")
 
+
+    long_time_series_plot()
+
+    print("Long term time series plot saved.")
+
     return None
 
 
@@ -656,10 +678,13 @@ def read_and_plot_all_files():
     csv_files = glob.glob(
         str(parent_folder / "**" / file_name_format), recursive=True
     )
-    exclude_pattern = re.compile(r"payload_lexi_\d+_\d+_\d+_\d+_hk_output_L1a.csv")
+    print(f"Found {len(csv_files)} CSV files in the orbit folder.")
+    # Remove files that has "_hk_hk_" in the name
+    exclude_pattern = re.compile(r"_hk_hk_")
     csv_files = [file for file in csv_files if not exclude_pattern.search(file)]
     # Sort the files by name
     csv_files.sort()
+    print(f"Found {len(csv_files)} CSV files in the orbit folder after excluding some files.")
     df_list = []
     if not csv_files:
         print("No CSV files found in the orbit folder.")
@@ -824,7 +849,7 @@ def long_time_series_plot():
         # Write the name of the key in the bottom right corner of the plot
         axs[row, col].text(
             0.98,
-            0.02,
+            0.05,
             key,
             horizontalalignment="right",
             verticalalignment="bottom",
@@ -956,4 +981,5 @@ def long_time_series_plot():
 
 
 # if __name__ == "__main__":
+#     save_figures()
 #     save_figures()
