@@ -367,6 +367,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     fontsize = 18
     label_factor = 1.3
     linewidth = 4.5
+    mincnt = 1
 
     # Compute the pulse height by adding all 4 channels together
     df_sci["PulseHeight"] = df_sci["Channel1"] + df_sci["Channel2"] + df_sci["Channel3"] + df_sci["Channel4"]
@@ -463,7 +464,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     )
 
     # Plot the hexbin plot of Channel 1 and Channel 3
-    axs[0, 2].hexbin(df_sci["Channel1"], df_sci["Channel3"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
+    axs[0, 2].hexbin(df_sci["Channel1"], df_sci["Channel3"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
     # Set equal aspect ratio
     axs[0, 2].set_aspect('equal', adjustable='box')
     axs[0, 2].set_xlabel("Channel 1 [V]", fontsize=fontsize)
@@ -474,7 +475,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     axs[0, 2].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
 
     # Plot the hexbin plot of Channel 2 and Channel 4
-    axs[1, 2].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=10),)
+    axs[1, 2].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
     axs[1, 2].set_xlabel("Channel 2 [V]", fontsize=fontsize)
     axs[1, 2].set_ylabel("Channel 4 [V]", fontsize=fontsize)
     # Set equal aspect ratio
@@ -509,7 +510,6 @@ def save_figures(df=None, start_time=None, end_time=None):
     df_sci = df_sci[(df_sci["x_mcp_lin"] < 6) & (df_sci["x_mcp_lin"] > -6) & (df_sci["y_mcp_lin"] < 6) & (df_sci["y_mcp_lin"] > -6)]
     # Plot the hexbin historagram of between "x_mcp_lin" and "y_mcp_lin". Ignore any bins where the
     # number of points is less than 10
-    mincnt = 40
     axs[2, 2].hexbin(df_sci["x_mcp_lin"], df_sci["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
     axs[2, 2].set_xlabel("X [cm]", fontsize=fontsize)
     axs[2, 2].set_ylabel("Y [cm]", fontsize=fontsize)
