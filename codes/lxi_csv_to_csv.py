@@ -1,6 +1,6 @@
 import importlib
 from pathlib import Path
-
+import platform
 import lxi_file_read_funcs as lxrf
 
 importlib.reload(lxrf)
@@ -66,31 +66,76 @@ def lxi_csv_to_csv(
     if csvs_folder is not None:
         if not Path(csvs_folder).exists():
             Path(csvs_folder).mkdir(parents=True, exist_ok=True)
-            print(f"\n \033[1;32mCreated folder {csvs_folder}\033[0m \n")
+            print(f"\n \033[1;32m Created folder {csvs_folder}\033[0m \n")
     else:
-        csvs_folder = "/".join(csv_file.split("/")[0:-2]) + "/csv"
-        if not Path(csvs_folder).exists():
-            Path(csvs_folder).mkdir(parents=True, exist_ok=True)
-            print(f"\n \033[1;32mCreated folder {csvs_folder}\033[0m \n")
+        if platform.system() == "Linux":
+            csv_file_name_list = csv_file.split("/")
+            # If "L1a" is in the csv_file_name_list, then replace it with "L1b"
+            if "L1a" in csv_file_name_list:
+                csv_file_name_list[csv_file_name_list.index("L1a")] = "L1b"
+            # Get the csvs folder name from the new csv_file_name_list
+            csvs_folder = "/".join(csv_file_name_list[0:-1])
+            print(csvs_folder)
+            if not Path(csvs_folder).exists():
+                Path(csvs_folder).mkdir(parents=True, exist_ok=True)
+                print(f"\n \033[1;32mCreated folder {csvs_folder}\033[0m \n")
 
-        # If the csvs_file does not exist, create it
-        if csvs_file is None:
-            csvs_file = (
-                csvs_folder + "/" + csv_file.split("/")[-1].split(".")[0] + ".csv"
-            )
-        else:
-            csvs_file = csvs_folder + "/" + csvs_file
-            print("Creating csv file: " + csvs_file)
+            # If the csvs_file does not exist, create it
+            if csvs_file is None:
+                new_csv_file_name = csv_file_name_list[-1].split(".")[0]
+                # Replace the "L1a" with "L1b" in the new_csv_file_name
+                new_csv_file_name = new_csv_file_name.replace("L1a", "L1b")
+                print(f"new_csv_file_name: {new_csv_file_name}")
+                csvs_file = (
+                    csvs_folder + "/" + new_csv_file_name + ".csv"
+                )
+            else:
+                csvs_file = csvs_folder + "/" + csvs_file
+                print("Creating csv file: " + csvs_file)
 
-        # If the csv file already exists, overwrite it
-        if Path(csvs_file).exists():
-            # Raise a warning saying the file already exists and ask the user if they want to
-            # overwrite it
-            print(
-                f"\n \x1b[1;31;255m WARNING: The csv file already exists and will be overwritten:"
-                f" {csvs_file} \x1b[0m"
-            )
-            Path(csvs_file).unlink()
+            # If the csv file already exists, overwrite it
+            if Path(csvs_file).exists():
+                # Raise a warning saying the file already exists and ask the user if they want to
+                # overwrite it
+                print(
+                    f"\n \x1b[1;31;255m WARNING: The csv file already exists and will be overwritten:"
+                    f" {csvs_file} \x1b[0m"
+                )
+                Path(csvs_file).unlink()
+        elif platform.system() == "Windows":
+            csv_file_name_list = csv_file.split("\\")
+            # If "L1a" is in the csv_file_name_list, then replace it with "L1b"
+            if "L1a" in csv_file_name_list:
+                csv_file_name_list[csv_file_name_list.index("L1a")] = "L1b"
+            # Get the csvs folder name from the new csv_file_name_list
+            csvs_folder = "\\".join(csv_file_name_list[0:-1])
+            print(csvs_folder)
+            if not Path(csvs_folder).exists():
+                Path(csvs_folder).mkdir(parents=True, exist_ok=True)
+                print(f"\n \033[1;32mCreated folder {csvs_folder}\033[0m \n")
+
+            # If the csvs_file does not exist, create it
+            if csvs_file is None:
+                new_csv_file_name = csv_file_name_list[-1].split(".")[0]
+                # Replace the "L1a" with "L1b" in the new_csv_file_name
+                new_csv_file_name = new_csv_file_name.replace("L1a", "L1b")
+                print(f"new_csv_file_name: {new_csv_file_name}")
+                csvs_file = (
+                    csvs_folder + "\\" + new_csv_file_name + ".csv"
+                )
+            else:
+                csvs_file = csvs_folder + "\\" + csvs_file
+                print("Creating csv file: " + csvs_file)
+
+            # If the csv file already exists, overwrite it
+            if Path(csvs_file).exists():
+                # Raise a warning saying the file already exists and ask the user if they want to
+                # overwrite it
+                print(
+                    f"\n \x1b[1;31;255m WARNING: The csv file already exists and will be overwritten:"
+                    f" {csvs_file} \x1b[0m"
+                )
+                Path(csvs_file).unlink()
 
         print(f"Creating csv file: {csvs_file}")
 
