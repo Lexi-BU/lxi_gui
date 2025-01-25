@@ -1597,8 +1597,8 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
-                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_' + \
-                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-3] + '_sci_output_L1a.csv'
+                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-5] + '_' + \
+                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1a.csv'
         elif platform.system() == "Linux":
             save_dir_list = save_dir.split("/")
             save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1a/hk/" + save_dir_list[-1] + "/"
