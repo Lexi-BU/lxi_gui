@@ -250,7 +250,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
     # Close the figure
     plt.close(fig)
-    print(f"Figure saved as {default_folder / fig_name}")
+    print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
     """
     default_key_list = [
         "Channel1",
@@ -638,12 +638,11 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
 
-    print(f"Figure saved as {default_folder / fig_name}")
-
+    print(f"Figure saved as \033[1;32m{default_folder / fig_name}\033[0m\n")
 
     long_time_series_plot()
 
-    print("Long term time series plot saved.")
+    print("\033[1;31m Long term time series plot saved.\033[0m\n")
 
     return None
 
@@ -660,10 +659,10 @@ def check_folder_structure():
         target_folder = check_path / 'data' / 'from_LEXI' / 'L1a' / 'hk'
 
         if target_folder.is_dir():
-            print(f"Found folder structure at: {target_folder}")
+            print(f"Found folder structure at: \033[1;32m {target_folder}\033[0m\n")
             return target_folder
 
-    print("Folder structure not found.")
+    print("\033[1;91m Folder structure not found.\033[0m\n")
     # Cd into the target folder
 
     return target_folder
@@ -672,22 +671,22 @@ def check_folder_structure():
 def read_and_plot_all_files():
 
     parent_folder = check_folder_structure()
-    print(f"Reading files from: {parent_folder}")
+    print(f"Reading files from: \033[1;32m{parent_folder}\033[0m\n")
 
     file_name_format = "payload_lexi_*_*_hk_output_L1a.csv"
     csv_files = glob.glob(
         str(parent_folder / "**" / file_name_format), recursive=True
     )
-    print(f"Found {len(csv_files)} CSV files in the orbit folder.")
+    print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder.\n")
     # Remove files that has "_hk_hk_" in the name
     exclude_pattern = re.compile(r"_hk_hk_")
     csv_files = [file for file in csv_files if not exclude_pattern.search(file)]
     # Sort the files by name
     csv_files.sort()
-    print(f"Found {len(csv_files)} CSV files in the orbit folder after excluding some files.")
+    print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder after excluding some files.")
     df_list = []
     if not csv_files:
-        print("No CSV files found in the orbit folder.")
+        print("\033[1;91m No CSV files found in the orbit folder.\033[0m\n")
         return pd.DataFrame()
     for i, file in enumerate(csv_files):
         # print(f"Reading file {i + 1} of {len(csv_files)}: {file}")
@@ -975,7 +974,7 @@ def long_time_series_plot():
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
     # Close the figure
     # plt.close(fig)
-    print(f"Figure saved as {default_folder / fig_name}")
+    print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
 
     return daily_median, daily_10p, daily_90p
 
