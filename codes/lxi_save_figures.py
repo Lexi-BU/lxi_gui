@@ -28,7 +28,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
     end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
-    """
+
     # In global_variables, if hv_status is not defined, set it to False
     if "hv_status" not in global_variables.__dict__:
         global_variables.hv_status = False
@@ -283,7 +283,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     plt.close(fig)
     print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
     """
-    """
+
     default_key_list = [
         "Channel1",
         "Channel2",
@@ -590,7 +590,6 @@ def save_figures(df=None, start_time=None, end_time=None):
     axs[2, 2].annotate("Detector Size", xy=(radius1 * np.cos(angle_1), radius1 * np.sin(angle_1)), xytext=((radius1 - 2.2) * np.cos(angle_1), (radius1 + 1.55) * np.sin(angle_1)), arrowprops=dict(arrowstyle="->", color="r", linewidth=linewidth), color="red", fontsize=0.9 * fontsize,)
     axs[2, 2].annotate("Effective Area", xy=(radius2 * np.cos(angle_2), radius2 * np.sin(angle_2)), xytext=((radius2 + 4.2) * np.cos(angle_2), (radius2 + 4.5) * np.sin(angle_2)), arrowprops=dict(arrowstyle="->", color="b", linewidth=linewidth), color="blue", fontsize=0.9 * fontsize, ha="left", va="center",)
 
-
     # Get the 10, 50 and 90 percentile values of the data (Channel 1, Channel 2, Channel 3, Channel
     # 4, Pulse Height)
     percentile_values = df_sci[["Channel1", "Channel2", "Channel3", "Channel4", "PulseHeight"]].quantile([0.1, 0.5, 0.9])
@@ -693,7 +692,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print(f"Figure saved as \033[1;32m{default_folder / fig_name}\033[0m\n")
 
-    # long_time_series_plot()
+    long_time_series_plot()
 
     print("\033[1;31m Long term time series plot saved.\033[0m\n")
 
