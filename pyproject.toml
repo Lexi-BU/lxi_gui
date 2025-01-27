@@ -16,6 +16,7 @@ spacepy = "^0.4.1"
 bokeh = "^3.1.0"
 matplotlib = "3.5.2"
 paramiko = "^3.1.0"
+plotly = "^5.24.1"
 
 [tool.poetry.dev-dependencies]
 

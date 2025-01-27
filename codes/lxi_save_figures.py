@@ -7,6 +7,7 @@ from pathlib import Path
 import glob
 import re
 import pandas as pd
+from matplotlib.ticker import FormatStrFormatter
 
 
 def save_figures(df=None, start_time=None, end_time=None):
@@ -746,18 +747,24 @@ def read_and_plot_all_files():
         # Ignore first 30 rows
         df = df.iloc[:]
         # Remove the outliers for each column exc
-        # for col in df.columns:
-        #     if pd.api.types.is_numeric_dtype(df[col]):
-        #         outlier_mask = np.abs(stats.zscore(df[col])) < 3
-        #         df[col] = df[col][outlier_mask]
+        for col in df.columns:
+            try:
+                df[col] = df[col][np.abs(df[col] - df[col].mean()) <= (3 * df[col].std())]
+            except Exception:
+                pass
+        # print(df.head())
 
         df_list.append(df)
 
     df_all = pd.concat(df_list)
     df_all["Date"] = pd.to_datetime(df_all["Date"])
     df_all.set_index("Date", inplace=True)
+    # Ignore any values that are less than 0
+    df_all = df_all[df_all > 0]
     # Sort the data by date
     df_all.sort_index(inplace=True)
+    # Remove any duplicate rows
+    df_all = df_all[~df_all.index.duplicated(keep="first")]
 
     return df_all
 
@@ -884,9 +891,10 @@ def long_time_series_plot():
 
     # Create a figure with 3 by 3 subplots
     fig, axs = plt.subplots(3, 3, figsize=(15, 6), sharex=True)
-    fig.subplots_adjust(hspace=0.15, wspace=0.35, top=0.92)
+    fig.subplots_adjust(hspace=0.15, wspace=0.20, top=0.92)
 
-    fig.suptitle(f"Long Term Housekeeping Data from {start_time} to {end_time}", fontsize=1.2 * fontsize,)
+    fig.suptitle(f"Long Term Housekeeping Data from {start_time} to {end_time}",
+                 fontsize=1.2 * fontsize, y=0.95, x=0.5, ha="center", va="bottom")
 
     color_list = ["red", "red", "red", "green", "green", "green", "green", "green", "white"]
     # Plot the data
@@ -900,8 +908,11 @@ def long_time_series_plot():
 
         row = i // 3
         col = i % 3
+        key_x_lim = [df_all[key].min(), df_all[key].max()]
+        key_y_lim = [df_all[key].min(), df_all[key].max()]
 
-        axs[row, col].plot(df_all.index, df_all[key], ".", label=key, color=color_list[i], markersize=1, alpha=0.05,)
+        axs[row, col].plot(df_all.index, df_all[key], ".", label=key, color=color_list[i],
+                           markersize=1, alpha=0.05,)
         # axs[row, col].scatter(
         #     df_all.index,
         #     df_all[key],
@@ -913,10 +924,16 @@ def long_time_series_plot():
         # )
         axs[row, col].set_ylabel(f"{unit_dict[key]}")
 
+        # Set the y-axis limits
+        if key_y_lim[1] - key_y_lim[0] > 2:
+            axs[row, col].set_ylim(0.9 * key_y_lim[0], 1.1 * key_y_lim[1])
+        else:
+            axs[row, col].set_ylim(key_y_lim[0] - 1, key_y_lim[1] + 1)
+
         # Write the name of the key in the bottom right corner of the plot
         axs[row, col].text(
-            0.98,
-            0.05,
+            0.982,
+            1.02,
             key,
             horizontalalignment="right",
             verticalalignment="bottom",
@@ -934,10 +951,10 @@ def long_time_series_plot():
             if global_variables.hv_status:
                 axs[row, col].text(
                     0.02,
-                    0.95,
+                    1.02,
                     f"Nom Val: {nominal_values_dict_hv_on[key]}",
                     horizontalalignment="left",
-                    verticalalignment="top",
+                    verticalalignment="bottom",
                     transform=axs[row, col].transAxes,
                     color="white",
                     fontsize=0.75 * fontsize,
@@ -946,10 +963,10 @@ def long_time_series_plot():
             elif global_variables.hv_status is False:
                 axs[row, col].text(
                     0.02,
-                    0.95,
+                    1.02,
                     f"Nom Val: {nominal_values_dict_hv_off[key]}",
                     horizontalalignment="left",
-                    verticalalignment="top",
+                    verticalalignment="bottom",
                     transform=axs[row, col].transAxes,
                     color="white",
                     fontsize=0.75 * fontsize,
@@ -962,6 +979,9 @@ def long_time_series_plot():
         axs[row, col].tick_params(axis="both", direction="in", length=8)
         # Put the tickmarks inside the plot for minor ticks
         axs[row, col].tick_params(axis="both", which="minor", direction="in", length=5)
+
+        # For each y-tick, set the format to 2 decimal places
+        axs[row, col].yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
         # Set the xlabel only if it is the last row
         if row == 2:
             # Format the x-axis to show the time
@@ -1008,7 +1028,7 @@ def long_time_series_plot():
     # Add HV status in the top right corner of the 0, 2 subplot
     axs[0, 2].text(
         0.97,
-        1.05,
+        1.18,
         "HV ON" if global_variables.hv_status else "HV OFF",
         transform=axs[0, 2].transAxes,
         horizontalalignment="right",
@@ -1047,6 +1067,7 @@ def long_time_series_plot():
     return daily_median, daily_10p, daily_90p
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 #     save_figures()
-#     long_time_series_plot()
+    # long_time_series_plot()
+    df = read_and_plot_all_files()
