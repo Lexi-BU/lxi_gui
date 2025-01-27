@@ -28,7 +28,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
     end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
-
+    """
     # In global_variables, if hv_status is not defined, set it to False
     if "hv_status" not in global_variables.__dict__:
         global_variables.hv_status = False
@@ -121,16 +121,26 @@ def save_figures(df=None, start_time=None, end_time=None):
         key_10p_val = np.percentile(df[key], 10)
         key_50p_val = np.percentile(df[key], 50)
         key_90p_val = np.percentile(df[key], 90)
-        key_std = np.std(df[key])
+        key_std = np.nanstd(df[key])
 
-        key_x_lim = df.index
+        # Set the x and y limits
+        key_x_lim = [df.index[0], df.index[-1]]
         key_y_lim = [0.9 * key_10p_val, 1.05 * key_90p_val]
         # key_y_lim = [key_50p_val - 3 * key_std, key_50p_val + 3 * key_std]
+
+        # For any data that is more than 5 standard deviations away from the median, modify it
+        outliers = df[np.abs(df[key] - key_50p_val) > 4 * key_std]
+        df_outliers_replaced = df.copy()
+        df_outliers_replaced.loc[outliers.index, key] = key_y_lim[0]
+
+        # Set the values at the outliers to NaN in the original dataframe
+        df.loc[outliers.index, key] = np.nan
 
         row = i // 3
         col = i % 3
 
         axs[row, col].plot(df.index, df[key], ".", label=key, color="green", markersize=5, alpha=0.5,)
+        axs[row, col].plot(outliers.index, df_outliers_replaced.loc[outliers.index, key], marker="d", color="red", ls=None, lw=0, ms=5, zorder=10)
         axs[row, col].set_ylabel(f"{unit_dict[key]}")
 
         # Write the name of the key in the bottom right corner of the plot
@@ -149,7 +159,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
         # Set the x and y limits
         axs[row, col].set_xlim(key_x_lim[0], key_x_lim[-1])
-        axs[row, col].set_ylim(key_y_lim[0], key_y_lim[1])
+        axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
         # On the plot, display the 10, 50 and 90 percentile values of the data where mu is the mean
         # and the subscript is the 10th percentile value and the superscript is the 90th percentile
         # value
@@ -268,11 +278,11 @@ def save_figures(df=None, start_time=None, end_time=None):
         end_time = end_time.replace(" ", "_")
         fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_status_OFF.png"
 
-
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
     # Close the figure
     plt.close(fig)
     print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
+    """
     """
     default_key_list = [
         "Channel1",
@@ -401,7 +411,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     plt.style.use("dark_background")
     # Plot the data in a 2 by 3 grid
     fig, axs = plt.subplots(3, 3, figsize=(24, 15), sharex=False, sharey=False)
-    fig.subplots_adjust(hspace=0.15, wspace=0.35, top=0.95)
+    fig.subplots_adjust(hspace=0.15, wspace=0.40, top=0.95)
 
     fig.suptitle(f"Science Data from {start_time} to {end_time}", fontsize=1.2 * fontsize,)
     # Plot the distribution of Channel 1
@@ -491,6 +501,16 @@ def save_figures(df=None, start_time=None, end_time=None):
     axs[0, 2].set_aspect('equal', adjustable='box')
     axs[0, 2].set_xlabel("Channel 1 [V]", fontsize=fontsize)
     axs[0, 2].set_ylabel("Channel 3 [V]", fontsize=fontsize)
+    # Change the color of x-axis and ticks and its labels to #42f5bc
+    axs[0, 2].tick_params(axis="x", colors="#42f5bc")
+    axs[0, 2].xaxis.label.set_color("#42f5bc")
+    axs[0, 2].spines["bottom"].set_color("#42f5bc")
+
+    # Change the color of y-axis and ticks and its labels to #f542ef
+    axs[0, 2].tick_params(axis="y", colors="#f542ef")
+    axs[0, 2].yaxis.label.set_color("#f542ef")
+    axs[0, 2].spines["left"].set_color("#f542ef")
+
     # Display the colorbar
     cb = plt.colorbar(axs[0, 2].collections[0], ax=axs[0, 2], orientation="vertical", pad=0.01, aspect=40, shrink=0.85, fraction=0.25, label="Frequency", extend="max", extendfrac=0.1, extendrect=True, location="right")
     cb.ax.xaxis.set_label_position("top")
@@ -500,6 +520,17 @@ def save_figures(df=None, start_time=None, end_time=None):
     axs[1, 2].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
     axs[1, 2].set_xlabel("Channel 2 [V]", fontsize=fontsize)
     axs[1, 2].set_ylabel("Channel 4 [V]", fontsize=fontsize)
+
+    # Change the color of x-axis and ticks and its labels to #42cef5
+    axs[1, 2].tick_params(axis="x", colors="#42cef5")
+    axs[1, 2].xaxis.label.set_color("#42cef5")
+    axs[1, 2].spines["bottom"].set_color("#42cef5")
+
+    # Change the color of y-axis and ticks and its labels to #f5a742
+    axs[1, 2].tick_params(axis="y", colors="#f5a742")
+    axs[1, 2].yaxis.label.set_color("#f5a742")
+    axs[1, 2].spines["left"].set_color("#f5a742")
+
     # Set equal aspect ratio
     axs[1, 2].set_aspect('equal', adjustable='box')
     # Display the colorbar
@@ -662,7 +693,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print(f"Figure saved as \033[1;32m{default_folder / fig_name}\033[0m\n")
 
-    long_time_series_plot()
+    # long_time_series_plot()
 
     print("\033[1;31m Long term time series plot saved.\033[0m\n")
 
@@ -714,7 +745,13 @@ def read_and_plot_all_files():
         # print(f"Reading file {i + 1} of {len(csv_files)}: {file}")
         df = pd.read_csv(file)
         # Ignore first 30 rows
-        df = df.iloc[30:]
+        df = df.iloc[:]
+        # Remove the outliers for each column exc
+        # for col in df.columns:
+        #     if pd.api.types.is_numeric_dtype(df[col]):
+        #         outlier_mask = np.abs(stats.zscore(df[col])) < 3
+        #         df[col] = df[col][outlier_mask]
+
         df_list.append(df)
 
     df_all = pd.concat(df_list)
@@ -722,6 +759,7 @@ def read_and_plot_all_files():
     df_all.set_index("Date", inplace=True)
     # Sort the data by date
     df_all.sort_index(inplace=True)
+
     return df_all
 
 
@@ -856,6 +894,10 @@ def long_time_series_plot():
     for i, key in enumerate(default_key_list):
         # Get rid of NaN values
         df_all = df_all.dropna(subset=[key])
+
+        # Get rid of the outliers
+        # outlier_mask = np.abs(stats.zscore(df_all[key])) < 3
+        # df_all = df_all[outlier_mask]
 
         row = i // 3
         col = i % 3
@@ -1008,4 +1050,4 @@ def long_time_series_plot():
 
 # if __name__ == "__main__":
 #     save_figures()
-#     save_figures()
+#     long_time_series_plot()

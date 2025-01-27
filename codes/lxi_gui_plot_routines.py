@@ -364,18 +364,50 @@ class plot_data_class:
         key_10p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 10)
         key_50p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 50)
         key_90p_val = np.nanpercentile(self.df_slice_hk[self.plot_key], 90)
+        key_std = np.nanstd(self.df_slice_hk[self.plot_key])
 
         x_axs_val = self.df_slice_hk.index
+        y_axs_lim = [0.9 * key_10p_val, 1.1 * key_90p_val]
 
+        # For any data that is more than 5 standard deviations away from the mean, select it
+        outlier = self.df_slice_hk[
+            np.abs(self.df_slice_hk[self.plot_key] - key_50p_val) > 4 * key_std
+        ]
+        df_outliers_replaced = self.df_slice_hk.copy()
+        df_outliers_replaced.loc[outlier.index, self.plot_key] = y_axs_lim[0]
+
+        # Plot the data
         axs1 = plt.subplot(gs[:])
+        # Exclude the outliers from the plot
         axs1.plot(
             x_axs_val,
-            self.df_slice_hk[self.plot_key],
+            df_outliers_replaced[self.plot_key],
             ".",
             color="green",
             alpha=alpha,
             ms=ms,
             label=self.plot_key,
+        )
+
+        # axs1.plot(
+        #     x_axs_val,
+        #     self.df_slice_hk[self.plot_key],
+        #     ".",
+        #     color="green",
+        #     alpha=alpha,
+        #     ms=ms,
+        #     label=self.plot_key,
+        # )
+        # Plot the outliers in red
+        axs1.plot(
+            outlier.index,
+            df_outliers_replaced.loc[outlier.index, self.plot_key],
+            "d",
+            color="red",
+            alpha=alpha,
+            ms=ms,
+            label="Outliers",
+            zorder=20,
         )
         # On the plot, display the minimum, maximum, 10 percentile, 50 percentile, and 90
         # percentile values as as mu, where mu is 50 percentile value and subscript is the 10 and
@@ -422,6 +454,7 @@ class plot_data_class:
             pass
 
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
+        axs1.set_ylim(y_axs_lim[0], y_axs_lim[1])
         min_x_val_time = np.nanmin(x_axs_val)
         max_x_val_time = np.nanmax(x_axs_val)
         axs1.tick_params(axis="x", which="major", direction="in", length=2, width=1)
