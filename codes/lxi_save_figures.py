@@ -109,9 +109,9 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     # Create a figure with 3 by 3 subplots
     fig, axs = plt.subplots(3, 3, figsize=(15, 6), sharex=True)
-    fig.subplots_adjust(hspace=0.15, wspace=0.35, top=0.92)
+    fig.subplots_adjust(hspace=0.165, wspace=0.25, top=0.92)
 
-    fig.suptitle(f"Housekeeping Data from {start_time} to {end_time}", fontsize=1.2 * fontsize,)
+    fig.suptitle(f"Housekeeping Data from {start_time} to {end_time}", fontsize=1.2 * fontsize, x=0.5, y=1.005)
 
     # Plot the data
     for i, key in enumerate(default_key_list):
@@ -121,6 +121,11 @@ def save_figures(df=None, start_time=None, end_time=None):
         key_10p_val = np.percentile(df[key], 10)
         key_50p_val = np.percentile(df[key], 50)
         key_90p_val = np.percentile(df[key], 90)
+        key_std = np.std(df[key])
+
+        key_x_lim = df.index
+        key_y_lim = [0.9 * key_10p_val, 1.05 * key_90p_val]
+        # key_y_lim = [key_50p_val - 3 * key_std, key_50p_val + 3 * key_std]
 
         row = i // 3
         col = i % 3
@@ -130,25 +135,29 @@ def save_figures(df=None, start_time=None, end_time=None):
 
         # Write the name of the key in the bottom right corner of the plot
         axs[row, col].text(
-            0.98,
-            0.02,
+            1.035,
+            0.5,
             key,
-            horizontalalignment="right",
-            verticalalignment="bottom",
+            horizontalalignment="center",
+            verticalalignment="center",
+            rotation=270,
             transform=axs[row, col].transAxes,
             color="white",
             fontsize=0.75 * fontsize,
             bbox=dict(facecolor="black", alpha=0.5),
         )
 
+        # Set the x and y limits
+        axs[row, col].set_xlim(key_x_lim[0], key_x_lim[-1])
+        axs[row, col].set_ylim(key_y_lim[0], key_y_lim[1])
         # On the plot, display the 10, 50 and 90 percentile values of the data where mu is the mean
         # and the subscript is the 10th percentile value and the superscript is the 90th percentile
         # value
         axs[row, col].text(
-            0.02,
-            0.05,
+            0.982,
+            1.035,
             f"$\mu_{{{10}}}^{{{90}}}={key_50p_val:.2f}_{{{key_10p_val:.2f}}}^{{{key_90p_val:.2f}}}$",
-            horizontalalignment="left",
+            horizontalalignment="right",
             verticalalignment="bottom",
             transform=axs[row, col].transAxes,
             color="white",
@@ -163,11 +172,11 @@ def save_figures(df=None, start_time=None, end_time=None):
         try:
             if global_variables.hv_status:
                 axs[row, col].text(
-                    0.02,
-                    0.95,
+                    0.018,
+                    1.035,
                     f"Nominal Value: {nominal_values_dict_hv_on[key]}",
                     horizontalalignment="left",
-                    verticalalignment="top",
+                    verticalalignment="bottom",
                     transform=axs[row, col].transAxes,
                     color="white",
                     fontsize=0.75 * fontsize,
@@ -175,11 +184,11 @@ def save_figures(df=None, start_time=None, end_time=None):
                 )
             elif global_variables.hv_status is False:
                 axs[row, col].text(
-                    0.02,
-                    0.95,
+                    0.018,
+                    1.035,
                     f"Nominal Value: {nominal_values_dict_hv_off[key]}",
                     horizontalalignment="left",
-                    verticalalignment="top",
+                    verticalalignment="bottom",
                     transform=axs[row, col].transAxes,
                     color="white",
                     fontsize=0.75 * fontsize,
@@ -192,6 +201,18 @@ def save_figures(df=None, start_time=None, end_time=None):
         axs[row, col].tick_params(axis="both", direction="in", length=8)
         # Put the tickmarks inside the plot for minor ticks
         axs[row, col].tick_params(axis="both", which="minor", direction="in", length=5)
+
+        # For each y-tick, set the number of significant figures to 2, and remove the leading zeros
+        y_ticks = axs[row, col].get_yticks()
+        y_ticks_new = []
+        for y_tick in y_ticks:
+            if y_tick == 0:
+                y_ticks_new.append(0)
+            else:
+                y_ticks_new.append(round(y_tick, 2))
+        axs[row, col].set_yticks(y_ticks_new)
+        axs[row, col].set_yticklabels(y_ticks_new)
+
         # Set the xlabel only if it is the last row
         if row == 2:
             # Format the x-axis to show the time
@@ -210,8 +231,8 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     # Add HV status in the top right corner of the 0, 2 subplot
     axs[0, 2].text(
-        0.97,
-        1.05,
+        0.982,
+        1.202,
         "HV ON" if global_variables.hv_status else "HV OFF",
         transform=axs[0, 2].transAxes,
         horizontalalignment="right",
@@ -246,6 +267,7 @@ def save_figures(df=None, start_time=None, end_time=None):
         start_time = start_time.replace(" ", "_")
         end_time = end_time.replace(" ", "_")
         fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_status_OFF.png"
+
 
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
     # Close the figure
@@ -706,6 +728,11 @@ def read_and_plot_all_files():
 def long_time_series_plot():
     df_all = read_and_plot_all_files()
 
+    # For all the data, if its not datetime, and if its value is less than 0, then replace it with
+    # NaN
+    for col in df_all.columns:
+        if not pd.api.types.is_datetime64_any_dtype(df_all[col]):
+            df_all[col] = df_all[col].apply(lambda x: np.nan if x < 0 else x)
     # Extract the time portion from the index
     df_all["Time"] = df_all.index.time
 
