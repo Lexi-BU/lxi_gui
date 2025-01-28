@@ -733,7 +733,11 @@ def read_and_plot_all_files():
     print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder.\n")
     # Remove files that has "_hk_hk_" in the name
     exclude_pattern = re.compile(r"_hk_hk_")
+    # Also exlude files that have names like these:
+    # payload_lexi_1737059168_6115_1737066668_7976_hk_output_L1a.csv
+    exclude_pattern_2 = re.compile(r"payload_lexi_\d+_\d+_\d+_\d+_hk_output_L1a.csv")
     csv_files = [file for file in csv_files if not exclude_pattern.search(file)]
+    csv_files = [file for file in csv_files if not exclude_pattern_2.search(file)]
     # Sort the files by name
     csv_files.sort()
     print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder after excluding some files.")
