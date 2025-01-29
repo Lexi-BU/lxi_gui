@@ -12,7 +12,10 @@ importlib.reload(lsf)
 read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
-    selected_columns = ["PinPullerTemp"]
+    # selected_columns = ["PinPullerTemp"]
+    selected_columns = ["+10V_Imon"]
+    input_key = selected_columns[0]
+    input_key_unit = "mA"
     df = df[selected_columns]
     df["operation_number"] = 1
     df["number_of_data_points"] = 1
@@ -35,7 +38,8 @@ if read_data:
     df["operation_number"] = df["operation_number"].astype(int)
     df["number_of_data_points"] = df["number_of_data_points"] / 60
     df["Date"] = df.index
-
+    # Smooth out the input key
+    df[f"{input_key}_smooth"] = df[input_key].rolling(window=60, center=True).median()
     # Unique operation numbers
     unique_operations = df["operation_number"].unique()
 
@@ -59,7 +63,7 @@ app = dash.Dash(__name__)
 app.layout = html.Div(
     style={"height": "100vh", "width": "100vw", "backgroundColor": "#121212", "color": "white", "padding": "10px"},
     children=[
-        html.H1("PinPullerTemp vs Time since start for each operation",
+        html.H1(f"{input_key} vs Time since start for each operation",
                 style={"textAlign": "center", "color": "white"}),
         html.Div([
             html.Label("Select Operations:", style={"color": "white"}),
@@ -88,20 +92,20 @@ def update_plot(selected_operations):
     fig = px.line(
         filtered_df,
         x="number_of_data_points",
-        y="PinPullerTemp",
+        y=f"{input_key}_smooth",
         color="operation_number",
-        title="PinPullerTemp vs Time since start for each operation",
+        # title="PinPullerTemp vs Time since start for each operation",
         labels={
             "number_of_data_points": "Time since start [Minutes]",
-            "PinPullerTemp": "PinPullerTemp [°C]",
+            f"{input_key}_smooth": f"{input_key} {input_key_unit}",
             "operation_number": "Operation Number"
         },
         color_discrete_map=color_map,  # Fixed color mapping
         template="plotly_dark",
-        hover_data={"Date": True, "PinPullerTemp": True, "number_of_data_points": True}
+        hover_data={"Date": True, input_key: True, "number_of_data_points": True}
     )
     fig.update_xaxes(range=[0, 130])
-    fig.update_yaxes(range=[60, 70])
+    # fig.update_yaxes(range=[60, 70])
     # Display the x and y-axes lines in the plot
     fig.update_xaxes(showline=True, linewidth=2, linecolor="white", mirror=True)
     fig.update_yaxes(showline=True, linewidth=2, linecolor="white", mirror=True)
