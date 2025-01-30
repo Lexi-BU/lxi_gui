@@ -379,36 +379,47 @@ class plot_data_class:
         # Plot the data
         axs1 = plt.subplot(gs[:])
         # Exclude the outliers from the plot
-        axs1.plot(
-            x_axs_val,
-            df_outliers_replaced[self.plot_key],
-            ".",
-            color="green",
-            alpha=alpha,
-            ms=ms,
-            label=self.plot_key,
-        )
+        if self.plot_key == "DeltaEvntCount":
+            axs1.plot(
+                x_axs_val,
+                self.df_slice_hk[self.plot_key],
+                ".",
+                color="green",
+                alpha=alpha,
+                ms=ms,
+                label=self.plot_key,
+            )
+        else:
+            axs1.plot(
+                x_axs_val,
+                df_outliers_replaced[self.plot_key],
+                ".",
+                color="green",
+                alpha=alpha,
+                ms=ms,
+                label=self.plot_key,
+            )
 
-        # axs1.plot(
-        #     x_axs_val,
-        #     self.df_slice_hk[self.plot_key],
-        #     ".",
-        #     color="green",
-        #     alpha=alpha,
-        #     ms=ms,
-        #     label=self.plot_key,
-        # )
-        # Plot the outliers in red
-        axs1.plot(
-            outlier.index,
-            df_outliers_replaced.loc[outlier.index, self.plot_key],
-            "d",
-            color="red",
-            alpha=alpha,
-            ms=ms,
-            label="Outliers",
-            zorder=20,
-        )
+            # axs1.plot(
+            #     x_axs_val,
+            #     self.df_slice_hk[self.plot_key],
+            #     ".",
+            #     color="green",
+            #     alpha=alpha,
+            #     ms=ms,
+            #     label=self.plot_key,
+            # )
+            # Plot the outliers in red
+            axs1.plot(
+                outlier.index,
+                df_outliers_replaced.loc[outlier.index, self.plot_key],
+                "d",
+                color="red",
+                alpha=alpha,
+                ms=ms,
+                label="Outliers",
+                zorder=20,
+            )
         # On the plot, display the minimum, maximum, 10 percentile, 50 percentile, and 90
         # percentile values as as mu, where mu is 50 percentile value and subscript is the 10 and
         # superscript is 90 percentile values
@@ -454,7 +465,10 @@ class plot_data_class:
             pass
 
         axs1.set_xlim(np.nanmin(x_axs_val), np.nanmax(x_axs_val))
-        axs1.set_ylim(y_axs_lim[0], y_axs_lim[1])
+        if self.plot_key == "DeltaEvntCount":
+            axs1.set_ylim(0, 1.05 * self.df_slice_hk[self.plot_key].max())
+        else:
+            axs1.set_ylim(y_axs_lim[0], y_axs_lim[1])
         min_x_val_time = np.nanmin(x_axs_val)
         max_x_val_time = np.nanmax(x_axs_val)
         axs1.tick_params(axis="x", which="major", direction="in", length=2, width=1)

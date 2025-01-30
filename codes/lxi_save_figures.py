@@ -134,14 +134,19 @@ def save_figures(df=None, start_time=None, end_time=None):
         df_outliers_replaced = df.copy()
         df_outliers_replaced.loc[outliers.index, key] = key_y_lim[0]
 
-        # Set the values at the outliers to NaN in the original dataframe
-        df.loc[outliers.index, key] = np.nan
+        # If the key is "DeltaEvntCount", then ignore the outliers
+        if key == "DeltaEvntCount":
+            pass
+        else:
+            # Set the values at the outliers to NaN in the original dataframe
+            df.loc[outliers.index, key] = np.nan
 
         row = i // 3
         col = i % 3
 
         axs[row, col].plot(df.index, df[key], ".", label=key, color="green", markersize=5, alpha=0.5,)
-        axs[row, col].plot(outliers.index, df_outliers_replaced.loc[outliers.index, key], marker="d", color="red", ls=None, lw=0, ms=5, zorder=10)
+        if key != "DeltaEvntCount":
+            axs[row, col].plot(outliers.index, df_outliers_replaced.loc[outliers.index, key], marker="d", color="red", ls=None, lw=0, ms=5, zorder=10)
         axs[row, col].set_ylabel(f"{unit_dict[key]}")
 
         # Write the name of the key in the bottom right corner of the plot
@@ -158,9 +163,13 @@ def save_figures(df=None, start_time=None, end_time=None):
             bbox=dict(facecolor="black", alpha=0.5),
         )
 
+        if key == "DeltaEvntCount":
+            axs[row, col].set_ylim(0, 1.05 * df[key].max())
+        else:
+            axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
+
         # Set the x and y limits
         axs[row, col].set_xlim(key_x_lim[0], key_x_lim[-1])
-        axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
         # On the plot, display the 10, 50 and 90 percentile values of the data where mu is the mean
         # and the subscript is the 10th percentile value and the superscript is the 90th percentile
         # value
@@ -562,9 +571,11 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     # Select only the data where x_mcp_lin and y_mcp_lin are withing +/- 6
     df_sci = df_sci[(df_sci["x_mcp_lin"] < 6) & (df_sci["x_mcp_lin"] > -6) & (df_sci["y_mcp_lin"] < 6) & (df_sci["y_mcp_lin"] > -6)]
+    # Only select the data where IsCommanded is False
+    df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
     # Plot the hexbin historagram of between "x_mcp_lin" and "y_mcp_lin". Ignore any bins where the
     # number of points is less than 10
-    axs[2, 2].hexbin(df_sci["x_mcp_lin"], df_sci["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    axs[2, 2].hexbin(df_sci_cmd_false["x_mcp_lin"], df_sci_cmd_false["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
     axs[2, 2].set_xlabel("X [cm]", fontsize=fontsize)
     axs[2, 2].set_ylabel("Y [cm]", fontsize=fontsize)
     # Set equal aspect ratio

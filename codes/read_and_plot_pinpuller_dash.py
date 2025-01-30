@@ -12,10 +12,10 @@ importlib.reload(lsf)
 read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
-    # selected_columns = ["PinPullerTemp"]
-    selected_columns = ["+10V_Imon"]
+    selected_columns = ["PinPullerTemp"]
+    # selected_columns = ["+10V_Imon"]
     input_key = selected_columns[0]
-    input_key_unit = "mA"
+    input_key_unit = "C"
     df = df[selected_columns]
     df["operation_number"] = 1
     df["number_of_data_points"] = 1
@@ -121,5 +121,9 @@ def update_plot(selected_operations):
     return fig
 
 
-if __name__ == "__main__":
-    app.run_server(debug=True)
+
+if __name__ == "__main__":# Define the host and port
+    host = "127.0.0.1"
+    port = 8050
+    app.run_server(debug=False, host=host, port=port)
+    print(f"Dash app running on http://{host}:{port}/")
