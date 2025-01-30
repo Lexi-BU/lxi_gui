@@ -7,7 +7,7 @@ from pathlib import Path
 import glob
 import re
 import pandas as pd
-from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import FormatStrFormatter, MaxNLocator
 
 
 def save_figures(df=None, start_time=None, end_time=None):
@@ -1000,15 +1000,20 @@ def long_time_series_plot():
         # Set the xlabel only if it is the last row
         if row == 2:
             # Format the x-axis to show the time
-            axs[row, col].xaxis.set_major_locator(mdates.HourLocator(interval=24))
+            axs[row, col].xaxis.set_major_locator(mdates.HourLocator(interval=24*7))
 
             # Set a 5-minute interval for minor tick marks
-            axs[row, col].xaxis.set_minor_locator(mdates.HourLocator(interval=6))
+            axs[row, col].xaxis.set_minor_locator(mdates.HourLocator(interval=12))
 
             # Format the x-axis to display labels only for major tick marks
             # axs[row, col].xaxis.set_major_formatter(mdates.DateFormatter("%M/%D %H:%M"))
             # Ensure that the x-axis is readable
-            plt.setp(axs[row, col].xaxis.get_majorticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+            plt.setp(axs[row, col].xaxis.get_majorticklabels(), rotation=45, ha="center", va="top", rotation_mode="anchor")
+            # Set the maximum number of ticks labels to 10
+            axs[row, col].xaxis.set_major_locator(plt.MaxNLocator(10))
+            # Shift the location of each ticklabel by 12 hours
+            axs[row, col].xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
+
             axs[row, col].set_xlabel("Time [UTC]", fontsize=fontsize)
 
         #  Plot the daily stats, with median in red diamond and 10th-90th percentile as error bars in
@@ -1053,6 +1058,11 @@ def long_time_series_plot():
         bbox=dict(facecolor="black", alpha=0.5),
     )
 
+    # Set the maximum number of ticks labels to 10
+    # for ax in axs.flat:
+    #     ax.xaxis.set_major_locator(plt.MaxNLocator(10))
+    #     # Format the ticks so that only day and month is displayed
+    #     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
     default_folder = "../lxi_housekeeping_data/long_term_trends/"
     Path(default_folder).mkdir(parents=True, exist_ok=True)
     # Expand the path to full path
@@ -1084,5 +1094,5 @@ def long_time_series_plot():
 
 # if __name__ == "__main__":
 # #     save_figures()
-#     # long_time_series_plot()
+#     long_time_series_plot()
 #     df = read_and_plot_all_files()

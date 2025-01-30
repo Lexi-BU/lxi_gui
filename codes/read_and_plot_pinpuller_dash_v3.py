@@ -9,7 +9,7 @@ import colorsys
 
 importlib.reload(lsf)
 
-read_data = False
+read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
     available_columns = list(df.columns)
@@ -31,7 +31,7 @@ if read_data:
         if i % 1000 == 0:
             print(f"Progress: {i}/{len(df)}")
 
-    df = df.dropna()
+    # df = df.dropna()
     df["operation_number"] = df["operation_number"].astype(int)
     df["number_of_data_points"] = df["number_of_data_points"] / 60
     df["Date"] = df.index

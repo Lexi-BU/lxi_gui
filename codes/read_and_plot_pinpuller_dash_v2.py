@@ -7,7 +7,7 @@ import lxi_save_figures as lsf
 import importlib
 importlib.reload(lsf)
 
-read_data = False
+read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
     available_columns = list(df.columns)
