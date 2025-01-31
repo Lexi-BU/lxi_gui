@@ -295,7 +295,7 @@ class plot_data_class:
             "HVmcpMan": "",
             "DeltaEvntCount": "#",
             "DeltaDroppedCount": "#",
-            "DeltaLostevntCount": "#",
+            "DeltaLostEvntCount": "#",
         }
         nominal_values_dict_hv_on = {
             "PinPullerTemp": "-10 to 50",
@@ -308,7 +308,7 @@ class plot_data_class:
             "AnodeVoltMon": "$3.4 \pm 0.6$",
             "+28V_Imon": "$57.6 \pm 2.2$",
             "DeltaDroppedCount": 0,
-            "DeltaLostevntCount": 0,
+            "DeltaLostEvntCount": 0,
         }
         nominal_values_dict_hv_off = {
             "PinPullerTemp": "-10 to 50",
@@ -321,7 +321,7 @@ class plot_data_class:
             "AnodeVoltMon": "$0.0044 \pm 0.0$",
             "+28V_Imon": "$44.1 \pm 0.4$",
             "DeltaDroppedCount": 0,
-            "DeltaLostevntCount": 0,
+            "DeltaLostEvntCount": 0,
         }
 
         alpha = 1

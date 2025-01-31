@@ -71,7 +71,7 @@ def save_figures(df=None, start_time=None, end_time=None):
         "HVmcpMan": "",
         "DeltaEvntCount": "#",
         "DeltaDroppedCount": "#",
-        "DeltaLostevntCount": "#",
+        "DeltaLostEvntCount": "#",
     }
     nominal_values_dict_hv_on = {
         "PinPullerTemp": "-10 to 50",
@@ -84,7 +84,7 @@ def save_figures(df=None, start_time=None, end_time=None):
         "AnodeVoltMon": "$3.4 \pm 0.6$",
         "+28V_Imon": "$57.6 \pm 2.2$",
         "DeltaDroppedCount": 0,
-        "DeltaLostevntCount": 0,
+        "DeltaLostEvntCount": 0,
     }
     nominal_values_dict_hv_off = {
         "PinPullerTemp": "-10 to 50",
@@ -97,7 +97,7 @@ def save_figures(df=None, start_time=None, end_time=None):
         "AnodeVoltMon": "$0.0044 \pm 0.0$",
         "+28V_Imon": "$44.1 \pm 0.4$",
         "DeltaDroppedCount": 0,
-        "DeltaLostevntCount": 0,
+        "DeltaLostEvntCount": 0,
     }
 
     fontsize = 10
@@ -857,7 +857,7 @@ def long_time_series_plot():
         "HVmcpMan": "",
         "DeltaEvntCount": "#",
         "DeltaDroppedCount": "#",
-        "DeltaLostevntCount": "#",
+        "DeltaLostEvntCount": "#",
     }
     nominal_values_dict_hv_on = {
         "PinPullerTemp": "-10 to 50",
@@ -870,7 +870,7 @@ def long_time_series_plot():
         "AnodeVoltMon": "$3.4 \pm 0.6$",
         "+28V_Imon": "$57.6 \pm 2.2$",
         "DeltaDroppedCount": 0,
-        "DeltaLostevntCount": 0,
+        "DeltaLostEvntCount": 0,
     }
     nominal_values_dict_hv_off = {
         "PinPullerTemp": "-10 to 50",
@@ -883,7 +883,7 @@ def long_time_series_plot():
         "AnodeVoltMon": "$0.0044 \pm 0.0$",
         "+28V_Imon": "$44.1 \pm 0.4$",
         "DeltaDroppedCount": 0,
-        "DeltaLostevntCount": 0,
+        "DeltaLostEvntCount": 0,
     }
 
     start_time = df_all.index[0]

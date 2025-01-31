@@ -104,7 +104,7 @@ def update_plot(selected_operations):
         template="plotly_dark",
         hover_data={"Date": True, input_key: True, "number_of_data_points": True}
     )
-    fig.update_xaxes(range=[0, 130])
+    # fig.update_xaxes(range=[0, 130])
     # fig.update_yaxes(range=[60, 70])
     # Display the x and y-axes lines in the plot
     fig.update_xaxes(showline=True, linewidth=2, linecolor="white", mirror=True)
