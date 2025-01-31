@@ -599,8 +599,8 @@ def save_figures(df=None, start_time=None, end_time=None):
     angle_1 = np.pi / 2.7
     angle_2 = np.pi / 1.3
     # Annotate the twwo circles
-    axs[2, 2].annotate("Detector Size", xy=(radius1 * np.cos(angle_1), radius1 * np.sin(angle_1)), xytext=((radius1 - 2.2) * np.cos(angle_1), (radius1 + 1.55) * np.sin(angle_1)), arrowprops=dict(arrowstyle="->", color="r", linewidth=linewidth), color="red", fontsize=0.9 * fontsize,)
-    axs[2, 2].annotate("Effective Area", xy=(radius2 * np.cos(angle_2), radius2 * np.sin(angle_2)), xytext=((radius2 + 4.2) * np.cos(angle_2), (radius2 + 4.5) * np.sin(angle_2)), arrowprops=dict(arrowstyle="->", color="b", linewidth=linewidth), color="blue", fontsize=0.9 * fontsize, ha="left", va="center",)
+    axs[2, 2].annotate("Detector Size", xy=(radius1 * np.cos(angle_1), radius1 * np.sin(angle_1)), xytext=((radius1 - 2.2) * np.cos(angle_1), (radius1 + 1.55) * np.sin(angle_1)), arrowprops=dict(arrowstyle="->", color="w", linewidth=linewidth), color="w", fontsize=0.9 * fontsize,)
+    axs[2, 2].annotate("Effective Area", xy=(radius2 * np.cos(angle_2), radius2 * np.sin(angle_2)), xytext=((radius2 + 4.2) * np.cos(angle_2), (radius2 + 4.5) * np.sin(angle_2)), arrowprops=dict(arrowstyle="->", color="w", linewidth=linewidth), color="w", fontsize=0.9 * fontsize, ha="left", va="center",)
 
     # Get the 10, 50 and 90 percentile values of the data (Channel 1, Channel 2, Channel 3, Channel
     # 4, Pulse Height)
