@@ -287,35 +287,47 @@ def HVsupplyTemp_func(vpc, hk_value, lxi_unit):
 
 def V_Imon_5_2_func(vpc, hk_value, lxi_unit):
     if lxi_unit == 1:
-        V_Imon_5_2 = (hk_value * vpc) * 1e3 / 18
+        # V_Imon_5_2 = (hk_value * vpc) * 1e3 / 18
+        # NOTE: The new formula is based on the document sent by Norm on 2025-01-30
+        V_Imon_5_2 = (hk_value * vpc * 110) * 1e3 / (20000 * 0.05)
     elif lxi_unit == 2:
         V_Imon_5_2 = (hk_value * vpc - 1.129) * 1e3 / 21.456
     else:
-        V_Imon_5_2 = (hk_value * vpc) * 1e3 / 18
+        # V_Imon_5_2 = (hk_value * vpc) * 1e3 / 18
+        # NOTE: The new formula is based on the document sent by Norm on 2025-01-30
+        V_Imon_5_2 = (hk_value * vpc * 110) * 1e3 / (20000 * 0.05)
     return V_Imon_5_2
 
 
 def V_Imon_10_func(vpc, hk_value, lxi_unit):
 
     # NOTE: The 10 V current monitor value unit is not quite true. The value is in volts but the conversion factor is missing.
-    V_Imon_10 = hk_value * vpc
+    # V_Imon_10 = hk_value * vpc
+    # NOTE: The new formula is based on the document sent by Norm on 2025-01-30
+    V_Imon_10 = (hk_value * vpc * 110) * 1e3 / (47000 * 0.2)
     return V_Imon_10
 
 
 def V_Imon_3_3_func(vpc, hk_value, lxi_unit):
     if lxi_unit == 1:
-        V_Imon_3_3 = (hk_value * vpc + 0.0178) * 1e3 / 9.131
+        # V_Imon_3_3 = (hk_value * vpc + 0.0178) * 1e3 / 9.131
+        # NOTE: The new formula is based on the document sent by Norm on 2025-01-30
+        V_Imon_3_3 = (hk_value * vpc * 110) * 1e3 / (20000 * 0.05)
     elif lxi_unit == 2:
         V_Imon_3_3 = (hk_value * vpc - 0.029) * 1e3 / 18
     else:
-        V_Imon_3_3 = (hk_value * vpc + 0.0178) * 1e3 / 9.131
+        # V_Imon_3_3 = (hk_value * vpc + 0.0178) * 1e3 / 9.131
+        # NOTE: The new formula is based on the document sent by Norm on 2025-01-30
+        V_Imon_3_3 = (hk_value * vpc * 110) * 1e3 / (20000 * 0.05)
     return V_Imon_3_3
 
 
 def AnodeVoltMon_func(vpc, hk_value, lxi_unit):
     # NOTE: The anode voltage monitor value unit is not quite true. The value is in volts but the
     # conversion factor is missing.
-    AnodeVoltMon = hk_value * vpc
+    # AnodeVoltMon = hk_value * vpc
+    # NOTE: The new formula is based on the document sent by Norm on 2025-01-30
+    AnodeVoltMon = hk_value * vpc * 601
     return AnodeVoltMon
 
 
