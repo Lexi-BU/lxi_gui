@@ -1092,7 +1092,7 @@ def long_time_series_plot():
     return daily_median, daily_10p, daily_90p
 
 
-# if __name__ == "__main__":
-# #     save_figures()
+if __name__ == "__main__":
+    save_figures()
 #     long_time_series_plot()
 #     df = read_and_plot_all_files()

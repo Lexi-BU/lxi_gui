@@ -523,7 +523,10 @@ def read_binary_data_sci(
     df = pd.read_csv(save_file_name)
 
     # Convert the date column to datetime
-    df["Date"] = pd.to_datetime(df["Date"], format="mixed")
+    if platform.system() == "Windows":
+        df["Date"] = pd.to_datetime(df["Date"], format="mixed")
+    else:
+        df["Date"] = pd.to_datetime(df["Date"])
 
     # Set index to the date
     df.set_index("Date", inplace=False)

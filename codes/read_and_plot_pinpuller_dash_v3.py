@@ -118,7 +118,7 @@ def update_plot(selected_operations, selected_columns):
                 trace["line"]["color"] = color_shade  # Assign adjusted color
                 fig.add_trace(trace)
 
-    fig.update_xaxes(range=[0, 130], showline=True, linewidth=2, linecolor="white", mirror=True)
+    # fig.update_xaxes(range=[0, 130], showline=True, linewidth=2, linecolor="white", mirror=True)
     fig.update_yaxes(showline=True, linewidth=2, linecolor="white", mirror=True)
     fig.update_xaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
     fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
@@ -126,4 +126,7 @@ def update_plot(selected_operations, selected_columns):
     return fig
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    host = "127.0.0.3"
+    port = "8050"
+    app.run_server(debug=True, host=host, port=port)
+    print(f"Dash server running on http://{host}:{port}/")
