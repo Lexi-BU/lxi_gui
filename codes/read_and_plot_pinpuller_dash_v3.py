@@ -128,5 +128,5 @@ def update_plot(selected_operations, selected_columns):
 if __name__ == "__main__":
     host = "127.0.0.3"
     port = "8050"
-    app.run_server(debug=True, host=host, port=port)
+    app.run_server(debug=False, host=host, port=port)
     print(f"Dash server running on http://{host}:{port}/")

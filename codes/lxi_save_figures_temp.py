@@ -7,9 +7,10 @@ from pathlib import Path
 import pandas as pd
 from matplotlib.ticker import FormatStrFormatter, MaxNLocator
 from functools import reduce
+import os
 
 
-def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_voltage=None, end_voltage=None):
+def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_voltage=None, end_voltage=None, default_folder=None):
 
     # Get the Sliced Housekeeping Data from the global variable
     # df = global_variables.all_file_details["df_slice_hk"]
@@ -113,9 +114,13 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     fig, axs = plt.subplots(3, 3, figsize=(15, 6), sharex=True)
     fig.subplots_adjust(hspace=0.165, wspace=0.25, top=0.92)
 
-    fig.suptitle(f"Housekeeping Data from {start_time} to {end_time} for {start_voltage}-{end_voltage} V", fontsize=1.2 * fontsize, x=0.5, y=1.005)
+    # Get the median HV value
+    median_hv_value = df["HV_value"].median()
+    # Round it off to zero decimal places and remove the trailing zeros
+    median_hv_value = f"{median_hv_value:.0f}"
+    fig.suptitle(f"Housekeeping Data from {start_time} to {end_time} @ {median_hv_value} V", fontsize=1.2 * fontsize, x=0.5, y=1.005)
 
-    # Plot the data
+    # Plot the housekeeping data
     for i, key in enumerate(default_key_list):
         # Get rid of NaN values
         df = df.dropna(subset=[key])
@@ -268,7 +273,8 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     # elif global_variables.hv_status is False:
     #     fig.text(0.98, 0.98, "HV OFF", horizontalalignment="right", verticalalignment="top", color="green", fontsize=fontsize, bbox=dict(facecolor="black", alpha=0.5),)
     # Save the figure as png file to the path
-    default_folder = "."
+    if default_folder is None:
+        default_folder = "."
     Path(default_folder).mkdir(parents=True, exist_ok=True)
     # Expand the path to full path
     default_folder = Path(default_folder).expanduser()
@@ -279,7 +285,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
         # Replace space with _
         start_time = start_time.replace(" ", "_")
         end_time = end_time.replace(" ", "_")
-        fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_value_{start_voltage}_{end_voltage}.png"
+        fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_value_{median_hv_value}.png"
     else:
         # In the start and end time, replace the : with _ to avoid confusion with the file name
         start_time = start_time.replace(":", "_")
@@ -287,19 +293,20 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
         # Replace space with _
         start_time = start_time.replace(" ", "_")
         end_time = end_time.replace(" ", "_")
-        fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_value_{start_voltage}_{end_voltage}.png"
+        fig_name = f"lxi_housekeeping_data_{start_time}_{end_time}_hv_value_{median_hv_value}.png"
 
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
     # Close the figure
     plt.close(fig)
     print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
 
-    # Science Figure
+    # Science Figures
 
     fontsize = 18
     label_factor = 1.3
     linewidth = 4.5
     mincnt = 1
+    sci_voltage_limits = [0, 4.12]
 
     # Compute the pulse height by adding all 4 channels together
     df_sci["PulseHeight"] = df_sci["Channel1"] + df_sci["Channel2"] + df_sci["Channel3"] + df_sci["Channel4"]
@@ -313,9 +320,10 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     fig, axs = plt.subplots(3, 3, figsize=(24, 15), sharex=False, sharey=False)
     fig.subplots_adjust(hspace=0.15, wspace=0.40, top=0.95)
 
-    fig.suptitle(f"Science Data from {start_time} to {end_time} for {start_voltage}-{end_voltage} V", fontsize=1.2 * fontsize,)
+    fig.suptitle(f"Science Data from {start_time} to {end_time} @ {median_hv_value} V", fontsize=1.2 * fontsize,)
+
     # Plot the distribution of Channel 1
-    axs[0, 0].hist(df_sci["Channel1"], bins=50, color="#42f5bc", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[0, 0].hist(df_sci["Channel1"], range=sci_voltage_limits, bins=50, color="#42f5bc", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
     axs[0, 0].set_ylabel("Frequency", fontsize=fontsize)
     axs[0, 0].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
     # axs[0, 0].set_xlabel("Channel 1 [V]", fontsize=fontsize)
@@ -335,7 +343,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     )
 
     # Plot the distribution of Channel 2
-    axs[1, 0].hist(df_sci["Channel2"], bins=50, color="#42cef5", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[1, 0].hist(df_sci["Channel2"], range=sci_voltage_limits, bins=50, color="#42cef5", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
     axs[1, 0].set_ylabel("Frequency", fontsize=fontsize)
     # Add x-label (inside the plot)
     axs[1, 0].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
@@ -356,7 +364,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     )
 
     # Plot the distribution of Channel 3
-    axs[0, 1].hist(df_sci["Channel3"], bins=50, color="#f542ef", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[0, 1].hist(df_sci["Channel3"], range=sci_voltage_limits, bins=50, color="#f542ef", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
     axs[0, 1].set_ylabel("Frequency", fontsize=fontsize)
     axs[0, 1].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
     # axs[1, 0].set_xlabel("Channel 3 [V]", fontsize=fontsize)
@@ -376,7 +384,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     )
 
     # Plot the distribution of Channel 4
-    axs[1, 1].hist(df_sci["Channel4"], bins=50, color="#f5a742", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[1, 1].hist(df_sci["Channel4"], range=sci_voltage_limits, bins=50, color="#f5a742", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
     axs[1, 1].set_ylabel("Frequency", fontsize=fontsize)
     axs[1, 1].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
     # axs[1, 1].set_xlabel("Channel 4 [V]", fontsize=fontsize)
@@ -396,7 +404,10 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     )
 
     # Plot the hexbin plot of Channel 1 and Channel 3
-    axs[0, 2].hexbin(df_sci["Channel1"], df_sci["Channel3"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    axs[0, 2].hexbin(df_sci["Channel1"], df_sci["Channel3"], extent=(sci_voltage_limits[0], sci_voltage_limits[1], sci_voltage_limits[0], sci_voltage_limits[1]), gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    # Set the x and y limits
+    axs[0, 2].set_xlim(sci_voltage_limits)
+    axs[0, 2].set_ylim(sci_voltage_limits)
     # Set equal aspect ratio
     axs[0, 2].set_aspect('equal', adjustable='box')
     axs[0, 2].set_xlabel("Channel 1 [V]", fontsize=fontsize)
@@ -417,7 +428,10 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     axs[0, 2].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
 
     # Plot the hexbin plot of Channel 2 and Channel 4
-    axs[1, 2].hexbin(df_sci["Channel2"], df_sci["Channel4"], gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    axs[1, 2].hexbin(df_sci["Channel2"], df_sci["Channel4"], extent=(sci_voltage_limits[0], sci_voltage_limits[1], sci_voltage_limits[0], sci_voltage_limits[1]), gridsize=50, cmap="inferno", alpha=1, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    # Set the x and y limits
+    axs[1, 2].set_xlim(sci_voltage_limits)
+    axs[1, 2].set_ylim(sci_voltage_limits)
     axs[1, 2].set_xlabel("Channel 2 [V]", fontsize=fontsize)
     axs[1, 2].set_ylabel("Channel 4 [V]", fontsize=fontsize)
 
@@ -439,7 +453,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     axs[1, 2].grid(True, which="both", axis="both", color="white", linestyle="--", linewidth=0.2, alpha=0.75)
 
     # Plot the distribution of Pulse Height
-    axs[2, 0].hist(df_sci["PulseHeight"], bins=50, color="w", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
+    axs[2, 0].hist(df_sci["PulseHeight"], range=[0, 16], bins=50, color="w", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
     axs[2, 0].set_ylabel("Frequency", fontsize=fontsize)
     axs[2, 0].set_xlabel("Voltage [V]", fontsize=fontsize, labelpad=-45)
     # axs[2, 0].set_xlabel("Pulse Height [V]", fontsize=fontsize)
@@ -578,7 +592,8 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     # Turn off the axis for the last plot
     axs[2, 1].axis("off")
     # Save the figure as png file to the path
-    default_folder = "."
+    if default_folder is None:
+        default_folder = "."
     Path(default_folder).mkdir(parents=True, exist_ok=True)
     # Expand the path to full path
     default_folder = Path(default_folder).expanduser()
@@ -589,7 +604,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     # Replace space with _
     start_time = start_time.replace(" ", "_")
     end_time = end_time.replace(" ", "_")
-    fig_name = f"detailed_lxi_science_{start_time}_{end_time}_{start_voltage}_{end_voltage}.png"
+    fig_name = f"detailed_lxi_science_{start_time}_{end_time}_{median_hv_value}.png"
 
     fig.savefig(default_folder / fig_name, dpi=300, bbox_inches="tight", pad_inches=0.1)
 
@@ -601,26 +616,40 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
 
 if __name__ == "__main__":
 
-    # Pre reset files
-    # hk_file_name =
-    # "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250131/payload_lexi_1738335417_2491_1738344195_18776_hk_output_L1a.csv"
-    # sci_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1b/sci/20250131/lexi_payload_1738335417_2491_1738344195_18776_sci_output_L1b.csv"
+    # Get the username
+    username = os.getlogin()
+    pre_anomaly = False
+    if pre_anomaly:
+        # Pre reset files
+        hk_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1a/hk/20250131/payload_lexi_1738335417_2491_1738344195_18776_hk_output_L1a.csv"
+        sci_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1b/sci/20250131/lexi_payload_1738335417_2491_1738344195_18776_sci_output_L1b.csv"
 
-    # Post reset files
-    hk_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250131/payload_lexi_1738343895_10505_1738347224_32823_hk_output_L1a.csv"
-    sci_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1b/sci/20250131/lexi_payload_1738343895_10505_1738347224_32823_sci_output_L1b.csv"
+        default_folder = Path("../figures/pre_reset")
+        default_folder = default_folder.expanduser()
+    else:
+        # Post reset files
+        hk_file_name = f"/home/vetinari/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1a/hk/20250131/payload_lexi_1738343895_10505_1738347224_32823_hk_output_L1a.csv"
+        sci_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1b/sci/20250131/lexi_payload_1738343895_10505_1738347224_32823_sci_output_L1b.csv"
+
+        default_folder = Path("../figures/post_reset")
+        default_folder = default_folder.expanduser()
+
     df_hk = pd.read_csv(hk_file_name, index_col="Date", parse_dates=True)
     df_sci = pd.read_csv(sci_file_name, index_col="Date", parse_dates=True)
 
     # Add "HV_value" column to df_hk
-    df_hk["HV_value"] = df_hk["AnodeVoltMon"] * 601.0
+    df_hk["HV_value"] = df_hk["AnodeVoltMon"] * 599
 
+    voltage_lists = np.arange(0, 2200, 5)
+    # Set the start and end voltages to plus minus 10 volts of the nominal value
+    start_voltage_list = [voltage - 2.5 for voltage in voltage_lists]
+    end_voltage_list = [voltage + 2.5 for voltage in voltage_lists]
     # start_voltage_list = [0, 600, 1200, 1400, 1600, 1700, 1800, 1900, 2000, 2100]
     # end_voltage_list = [600, 1200, 1400, 1600, 1700, 1800, 1900, 2000, 2100, 2200]
-    start_voltage_list = [0, 450, 550, 750, 950, 1150, 1325, 1375, 1425, 1475, 1525, 1550, 1575, 1590, 1625, 1675, 1725, 1775, 1825, 1875, 1925, 1975, 2025, 2075, 2125, 2175]
-    end_voltage_list = [450, 550, 750, 950, 1150, 1325, 1375, 1425, 1475, 1525, 1550, 1575, 1590, 1625, 1675, 1725, 1775, 1825, 1875, 1925, 1975, 2025, 2075, 2125, 2175, 2225]
-    start_voltage_list = [1570]
-    end_voltage_list = [1590]
+    # start_voltage_list = [0, 450, 550, 750, 950, 1150, 1325, 1375, 1425, 1475, 1525, 1550, 1575, 1590, 1625, 1675, 1725, 1775, 1825, 1875, 1925, 1975, 2025, 2075, 2125, 2175]
+    # end_voltage_list = [450, 550, 750, 950, 1150, 1325, 1375, 1425, 1475, 1525, 1550, 1575, 1590, 1625, 1675, 1725, 1775, 1825, 1875, 1925, 1975, 2025, 2075, 2125, 2175, 2225]
+    # start_voltage_list = [1570]
+    # end_voltage_list = [1590]
     for start_voltage, end_voltage in zip(start_voltage_list[0:], end_voltage_list[0:]):
         try:
             # Find all the times where the the HV_value was between start_voltage and end_voltage
@@ -660,7 +689,7 @@ if __name__ == "__main__":
             # print(f"Start Time: {start_time}\nEnd Time: {end_time}")
             # Select only the data from df_sci that is between start_time and end_time
             # df_sci_selected = df_sci[(df_sci.index > start_time) & (df_sci.index < end_time)]
-            save_figures(df=df_hv, start_time=start_time, end_time=end_time, df_sci=df_sci_selected, start_voltage=start_voltage, end_voltage=end_voltage)
+            save_figures(df=df_hv, start_time=start_time, end_time=end_time, df_sci=df_sci_selected, start_voltage=start_voltage, end_voltage=end_voltage, default_folder=default_folder)
         except Exception as e:
             print(f"Error: {e} for {start_voltage}-{end_voltage} V")
             continue
