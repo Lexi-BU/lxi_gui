@@ -165,6 +165,8 @@ def save_figures(df=None, start_time=None, end_time=None):
 
         if key == "DeltaEvntCount":
             axs[row, col].set_ylim(0, 1.05 * df[key].max())
+            # Between 0 and 1, set the y-scale linear and logaritmic for the rest
+            
         else:
             axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
 

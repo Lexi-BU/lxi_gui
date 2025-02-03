@@ -5,9 +5,19 @@ import global_variables
 import matplotlib.dates as mdates
 from pathlib import Path
 import pandas as pd
-from matplotlib.ticker import FormatStrFormatter, MaxNLocator
 from functools import reduce
 import os
+from matplotlib.scale import FuncScale
+
+
+def forward(y):
+    """Custom forward scale function"""
+    return np.where(np.abs(y) <= 1, y, np.sign(y) * (1 + np.log10(np.abs(y))))
+
+
+def inverse(y):
+    """Custom inverse scale function"""
+    return np.where(np.abs(y) <= 1, y, np.sign(y) * 10 ** (np.abs(y) - 1))
 
 
 def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_voltage=None, end_voltage=None, default_folder=None):
@@ -15,6 +25,9 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     # Get the Sliced Housekeeping Data from the global variable
     # df = global_variables.all_file_details["df_slice_hk"]
 
+    # Set the time-zone of both start and end times to UTC
+    # start_time = pd.to_datetime(start_time).tz_localize("UTC")
+    # end_time = pd.to_datetime(end_time).tz_localize("UTC")
     # Filter the data to get the data between the start and end time
     df = df.loc[start_time:end_time]
     # Print the maximum and minimum value of index of the data
@@ -171,6 +184,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
 
         if key == "DeltaEvntCount":
             axs[row, col].set_ylim(0, 1.05 * df[key].max())
+            # axs[row, col].set_yscale("function", functions=(forward, inverse))
         else:
             axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
 
@@ -306,7 +320,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     label_factor = 1.3
     linewidth = 4.5
     mincnt = 1
-    sci_voltage_limits = [0, 4.12]
+    sci_voltage_limits = [1.3, 3.3]
 
     # Compute the pulse height by adding all 4 channels together
     df_sci["PulseHeight"] = df_sci["Channel1"] + df_sci["Channel2"] + df_sci["Channel3"] + df_sci["Channel4"]
@@ -320,7 +334,7 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     fig, axs = plt.subplots(3, 3, figsize=(24, 15), sharex=False, sharey=False)
     fig.subplots_adjust(hspace=0.15, wspace=0.40, top=0.95)
 
-    fig.suptitle(f"Science Data from {start_time} to {end_time} @ {median_hv_value} V", fontsize=1.2 * fontsize,)
+    fig.suptitle(f"Science Data from {start_time} to {end_time} @ {median_hv_value} V with channel threshold set to [{sci_voltage_limits[0]}, {sci_voltage_limits[1]}] V", fontsize=1.15 * fontsize,)
 
     # Plot the distribution of Channel 1
     axs[0, 0].hist(df_sci["Channel1"], range=sci_voltage_limits, bins=50, color="#42f5bc", alpha=0.5, log=True, histtype="step", linewidth=linewidth)
@@ -476,8 +490,8 @@ def save_figures(df=None, start_time=None, end_time=None, df_sci=None, start_vol
     # Select only the data where x_mcp_lin and y_mcp_lin are withing +/- 6
     df_sci = df_sci[(df_sci["x_mcp_lin"] < 6) & (df_sci["x_mcp_lin"] > -6) & (df_sci["y_mcp_lin"] < 6) & (df_sci["y_mcp_lin"] > -6)]
     # Only select the data where IsCommanded is False
-    # df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
-    df_sci_cmd_false = df_sci.copy()
+    df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
+    # df_sci_cmd_false = df_sci.copy()
     # Plot the hexbin historagram of between "x_mcp_lin" and "y_mcp_lin". Ignore any bins where the
     # number of points is less than 10
     axs[2, 2].hexbin(df_sci_cmd_false["x_mcp_lin"], df_sci_cmd_false["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
@@ -618,13 +632,13 @@ if __name__ == "__main__":
 
     # Get the username
     username = os.getlogin()
-    pre_anomaly = False
+    pre_anomaly = True
     if pre_anomaly:
         # Pre reset files
-        hk_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1a/hk/20250131/payload_lexi_1738335417_2491_1738344195_18776_hk_output_L1a.csv"
-        sci_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1b/sci/20250131/lexi_payload_1738335417_2491_1738344195_18776_sci_output_L1b.csv"
+        hk_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1a/hk/20250203/payload_lexi_1738599813_14954_1738603113_19045_hk_output_L1a.csv"
+        sci_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1b/sci/20250203/lexi_payload_1738599813_14954_1738603113_19045_sci_output_L1b.csv"
 
-        default_folder = Path("../figures/pre_reset")
+        default_folder = Path("../figures/20250203/")
         default_folder = default_folder.expanduser()
     else:
         # Post reset files
