@@ -635,10 +635,20 @@ if __name__ == "__main__":
     pre_anomaly = True
     if pre_anomaly:
         # Pre reset files
-        hk_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1a/hk/20250203/payload_lexi_1738599813_14954_1738603113_19045_hk_output_L1a.csv"
-        sci_file_name = f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1b/sci/20250203/lexi_payload_1738599813_14954_1738603113_19045_sci_output_L1b.csv"
+        # hk_file_name =
+        # f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1a/hk/20250203/payload_lexi_1738599813_14954_1738603113_19045_hk_output_L1a.csv"
+        # hk_file_name =
+        # "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250203/payload_lexi_1738599813_14954_1738603493_26771_hk_output_L1a.csv"
+        # hk_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250204/payload_lexi_1738679519_25096_1738684022_39800_hk_output_L1a.csv"
+        # sci_file_name =
+        # f"/home/{username}/Desktop/git/Lexi-Bu/lxi_gui/data/from_LEXI/L1b/sci/20250203/lexi_payload_1738599813_14954_1738603113_19045_sci_output_L1b.csv"
+        # sci_file_name =
+        # "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1b/sci/20250203/lexi_payload_1738599813_14954_1738603493_26771_sci_output_L1b.csv"
+        # sci_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1b/sci/20250204/lexi_payload_1738679519_25096_1738684022_39800_sci_output_L1b.csv"
 
-        default_folder = Path("../figures/20250203/")
+        hk_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250204/payload_lexi_1738679519_25096_1738685177_1462_hk_output_L1a.csv"
+        sci_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1b/sci/20250204/lexi_payload_1738679519_25096_1738685177_1462_sci_output_L1b.csv"
+        default_folder = Path("../figures/20250204/")
         default_folder = default_folder.expanduser()
     else:
         # Post reset files

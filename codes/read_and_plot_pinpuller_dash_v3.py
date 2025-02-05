@@ -9,7 +9,7 @@ import colorsys
 
 importlib.reload(lsf)
 
-read_data = True
+read_data = False
 if read_data:
     df = lsf.read_and_plot_all_files()
     available_columns = list(df.columns)
@@ -43,6 +43,7 @@ column_colors = {
     for i, column in enumerate(available_columns)
 }
 
+
 # Function to adjust brightness for different operations
 def adjust_color_brightness(hex_color, factor):
     """Darkens or lightens a color based on the factor"""
@@ -51,6 +52,7 @@ def adjust_color_brightness(hex_color, factor):
     hls = colorsys.rgb_to_hls(*rgb)
     adjusted_rgb = colorsys.hls_to_rgb(hls[0], min(1, max(0, hls[1] * factor)), hls[2])
     return f"#{int(adjusted_rgb[0] * 255):02x}{int(adjusted_rgb[1] * 255):02x}{int(adjusted_rgb[2] * 255):02x}"
+
 
 app = dash.Dash(__name__)
 
@@ -95,12 +97,13 @@ def update_plot(selected_operations, selected_columns):
     fig = px.line(template="plotly_dark")
 
     for col in selected_columns:
-        df[f"{col}_smooth"] = df[col].rolling(window=60, center=True).median()
+        # df[f"{col}_smooth"] = df[col].rolling(window=60, center=True).median()
+        # Apply rolling average over 60 seconds
+        df[f"{col}_smooth"] = df[col].rolling('60s', center=True).mean()
         filtered_df = df[df["operation_number"].isin(selected_operations)]
 
         for i, op in enumerate(selected_operations):
             color_shade = adjust_color_brightness(column_colors[col], 1 - (i * 0.15))  # Adjust brightness per operation
-            
             temp_fig = px.line(
                 filtered_df[filtered_df["operation_number"] == op],
                 x="number_of_data_points",
@@ -122,8 +125,16 @@ def update_plot(selected_operations, selected_columns):
     fig.update_yaxes(showline=True, linewidth=2, linecolor="white", mirror=True)
     fig.update_xaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
     fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
-    fig.update_layout(plot_bgcolor="#121212", paper_bgcolor="#121212", font={"color": "white"})
+    fig.update_layout(plot_bgcolor="#121212", paper_bgcolor="#121212", font={"color": 
+    "white"})
+    # Set the axes labels
+    fig.update_xaxes(title_text="Time since start [Minutes]", title_font=dict(size=20))
+    fig.update_yaxes(title_text=f"{col} {input_key_unit}", title_font=dict(size=20))
+
+    # Save the figure as html
+    fig.write_html(f"{col}_plot.html")
     return fig
+
 
 if __name__ == "__main__":
     host = "127.0.0.3"
