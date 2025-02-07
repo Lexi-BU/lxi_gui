@@ -1597,7 +1597,7 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-5] + '_' + \
                 file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1b.csv'
 
-            save_dir_new_sci = "\\".join(save_dir_list[:-2]) + "\\L1a\\sci\\" + save_dir_list[-1] + "\\"
+            save_dir_new_sci = "\\".join(save_dir_list[:-2]) + "\\L1b\\sci\\" + save_dir_list[-1] + "\\"
             file_name_sci = save_dir_new_sci + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \

@@ -176,12 +176,12 @@ def save_figures(df=None, start_time=None, end_time=None):
 
         if key == "DeltaEvntCount":
             # Between 0 and 1, set the y-scale linear and logaritmic for the rest
-            axs[row, col].set_yscale("function", functions=(forward, inverse))
+            # axs[row, col].set_yscale("function", functions=(forward, inverse))
             # Set the y-ticks to be at 0, 1, 10, 100, 200, 500, 800, 1200, 1500
-            axs[row, col].set_yticks([0, 1, 10, 100, 500, 1500, 5000])
-            axs[row, col].yaxis.set_major_formatter(FormatStrFormatter("%d"))
+            # axs[row, col].set_yticks([0, 1, 10, 100, 500, 1500, 5000])
+            # axs[row, col].yaxis.set_major_formatter(FormatStrFormatter("%d"))
 
-            axs[row, col].set_ylim(0, 1.05 * df[key].max())
+            axs[row, col].set_ylim(0.5, 1.05 * df[key].max())
         else:
             axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
 
