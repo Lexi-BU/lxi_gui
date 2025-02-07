@@ -8,6 +8,17 @@ import glob
 import re
 import pandas as pd
 from matplotlib.ticker import FormatStrFormatter, MaxNLocator
+from matplotlib.scale import FuncScale
+
+
+def forward(y):
+    """Custom forward scale function"""
+    return np.where(np.abs(y) <= 1, y, np.sign(y) * (1 + np.log10(np.abs(y))))
+
+
+def inverse(y):
+    """Custom inverse scale function"""
+    return np.where(np.abs(y) <= 1, y, np.sign(y) * 10 ** (np.abs(y) - 1))
 
 
 def save_figures(df=None, start_time=None, end_time=None):
@@ -164,9 +175,13 @@ def save_figures(df=None, start_time=None, end_time=None):
         )
 
         if key == "DeltaEvntCount":
-            axs[row, col].set_ylim(0, 1.05 * df[key].max())
             # Between 0 and 1, set the y-scale linear and logaritmic for the rest
-            
+            axs[row, col].set_yscale("function", functions=(forward, inverse))
+            # Set the y-ticks to be at 0, 1, 10, 100, 200, 500, 800, 1200, 1500
+            axs[row, col].set_yticks([0, 1, 10, 100, 500, 1500, 5000])
+            axs[row, col].yaxis.set_major_formatter(FormatStrFormatter("%d"))
+
+            axs[row, col].set_ylim(0, 1.05 * df[key].max())
         else:
             axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
 

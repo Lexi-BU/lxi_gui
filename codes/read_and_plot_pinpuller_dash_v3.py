@@ -102,26 +102,29 @@ def update_plot(selected_operations, selected_columns):
     secondary_y = len(selected_columns) == 2
 
     for idx, col in enumerate(selected_columns):
-        df[f"{col}_smooth"] = df[col].rolling('60s', center=True).mean()
+        df[f"{col}_smooth"] = df[col].rolling('15s', center=True).mean()
         filtered_df = df[df["operation_number"].isin(selected_operations)]
         filtered_df = filtered_df[filtered_df["HV_value"] > 1500]
 
         base_color = column_colors[col]  # Unique base color for the column
 
         for i, op in enumerate(selected_operations):
-            shade_factor = 1 - (i * 0.55)  # Adjust shade for different operations
+            # Add a column that counts the data point number
+            temp_df = filtered_df[filtered_df["operation_number"] == op].reset_index(drop=True)
+            temp_df["event_number"] = temp_df.index
+            shade_factor = 1 - (i * 0.25)  # Adjust shade for different operations
             color_shade = adjust_color_brightness(base_color, shade_factor)
 
             # Determine if this column should be on secondary y-axis
             y_axis = "y2" if secondary_y and idx == 1 else "y"
 
             temp_fig = px.line(
-                filtered_df[filtered_df["operation_number"] == op],
-                x="number_of_data_points",
+                temp_df,
+                x="event_number",
                 y=f"{col}_smooth",
-                labels={"number_of_data_points": "Time since start [Minutes]"},
+                labels={"event_number": "Event Number"},
                 color_discrete_sequence=[color_shade],
-                hover_data={"Date": True, col: True, "number_of_data_points": True}
+                hover_data={"Date": True, col: True, "event_number": True, "operation_number": True},
             )
 
             for trace in temp_fig["data"]:
@@ -135,7 +138,7 @@ def update_plot(selected_operations, selected_columns):
         plot_bgcolor="#121212",
         paper_bgcolor="#121212",
         font={"color": "white"},
-        xaxis=dict(title="Time since start [Minutes]", title_font=dict(size=20)),
+        xaxis=dict(title="Event Number", title_font=dict(size=20)),
         yaxis=dict(
             title=f"{selected_columns[0]} {input_key_unit}",
             title_font=dict(size=20),
