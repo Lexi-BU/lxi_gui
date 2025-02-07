@@ -39,14 +39,12 @@ if read_data:
     df["Date"] = df.index
     unique_operations = sorted(df["operation_number"].unique())
 
-# Assign unique base colors for columns
 column_colors = {
     column: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
     for i, column in enumerate(available_columns)
 }
 
 
-# Function to adjust brightness for different operations
 def adjust_color_brightness(hex_color, factor):
     """Darkens or lightens a color based on the factor"""
     hex_color = hex_color.lstrip("#")
@@ -83,9 +81,10 @@ app.layout = html.Div(
                 style={"maxHeight": "150px", "overflowY": "scroll"}
             )
         ]),
-        dcc.Graph(id="line_plot", style={"height": "85vh", "width": "95%"}),
+        dcc.Graph(id="line_plot", style={"height": "85vh", "width": "100%"}),
     ]
 )
+
 
 @app.callback(
     Output("line_plot", "figure"),
@@ -98,77 +97,57 @@ def update_plot(selected_operations, selected_columns):
 
     fig = px.line(template="plotly_dark")
 
-    # Set up dual y-axes if two columns are selected
-    secondary_y = len(selected_columns) == 2
-
     for idx, col in enumerate(selected_columns):
+        # Apply rolling average over 60 seconds
         df[f"{col}_smooth"] = df[col].rolling('60s', center=True).mean()
         filtered_df = df[df["operation_number"].isin(selected_operations)]
+        # Select only those rows where HV_value is greater than 1500
         filtered_df = filtered_df[filtered_df["HV_value"] > 1500]
 
-        base_color = column_colors[col]  # Unique base color for the column
-
         for i, op in enumerate(selected_operations):
-            shade_factor = 1 - (i * 0.55)  # Adjust shade for different operations
-            color_shade = adjust_color_brightness(base_color, shade_factor)
-
-            # Determine if this column should be on secondary y-axis
-            y_axis = "y2" if secondary_y and idx == 1 else "y"
-
+            # Adjust brightness based on operation number
+            color_shade = adjust_color_brightness(column_colors[col], 1 - (i * 0.2))  # Adjust brightness per operation
             temp_fig = px.line(
                 filtered_df[filtered_df["operation_number"] == op],
                 x="number_of_data_points",
                 y=f"{col}_smooth",
-                labels={"number_of_data_points": "Time since start [Minutes]"},
+                labels={
+                    "number_of_data_points": "Time since start [Minutes]",
+                    f"{col}_smooth": f"{col} {input_key_unit}",
+                },
                 color_discrete_sequence=[color_shade],
                 hover_data={"Date": True, col: True, "number_of_data_points": True}
             )
 
             for trace in temp_fig["data"]:
                 trace["name"] = f"{col} - Operation {op}"
-                trace["line"]["color"] = color_shade
-                trace["yaxis"] = y_axis  # Assign to primary or secondary y-axis
+                trace["line"]["color"] = color_shade  # Assign adjusted color
+                # If this is the second column, plot it on the secondary y-axis
+                if idx == 1:
+                    trace["yaxis"] = "y2"
                 fig.add_trace(trace)
 
-    # Modify layout to support dual y-axes if needed
-    fig.update_layout(
-        plot_bgcolor="#121212",
-        paper_bgcolor="#121212",
-        font={"color": "white"},
-        xaxis=dict(title="Time since start [Minutes]", title_font=dict(size=20)),
-        yaxis=dict(
-            title=f"{selected_columns[0]} {input_key_unit}",
-            title_font=dict(size=20),
-            showline=True,
-            linewidth=2,
-            linecolor=column_colors[selected_columns[0]],  # Match color to first column
-        ),
-    )
-
-    if secondary_y:
-        fig.update_layout(
-            yaxis2=dict(
-                title=f"{selected_columns[1]} {input_key_unit}",
-                title_font=dict(size=20),
-                overlaying="y",
-                side="right",
-                showline=True,
-                linewidth=2,
-                linecolor=column_colors[selected_columns[1]],  # Match color to second column
-            )
-        )
-
-    # Set grid style
+    # Update axes and layout
+    fig.update_yaxes(showline=True, linewidth=2, linecolor="white", mirror=True)
     fig.update_xaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
     fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
+    fig.update_layout(plot_bgcolor="#121212", paper_bgcolor="#121212", font={"color": "white"})
+    fig.update_xaxes(title_text="Time since start [Minutes]", title_font=dict(size=20))
 
-    # Save the figure as HTML
-    fig.write_html(f"{selected_columns[0]}_plot.html")
+    # Set y-axis titles
+    if len(selected_columns) > 0:
+        fig.update_yaxes(title_text=f"{selected_columns[0]} {input_key_unit}", title_font=dict(size=20), side="left")
+    if len(selected_columns) > 1:
+        fig.update_yaxes(title_text=f"{selected_columns[1]} {input_key_unit}", title_font=dict(size=20), side="right", overlaying="y")
+
+    # Save the figure as html
+    if len(selected_columns) > 0:
+        fig.write_html(f"{selected_columns[0]}_plot.html")
     return fig
 
 
 if __name__ == "__main__":
-    host = "127.0.0.4"
+    host = "127.0.0.3"
     port = "8050"
     app.run_server(debug=False, host=host, port=port)
     print(f"Dash server running on http://{host}:{port}/")

@@ -13,7 +13,7 @@ def inverse(y):
     return np.where(np.abs(y) <= 1, y, np.sign(y) * 10 ** (np.abs(y) - 1))
 
 
-hk_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250204/payload_lexi_1738679519_25096_1738684713_9851_hk_output_L1a.csv"
+hk_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/L1a/hk/20250204/payload_lexi_1738679519_25096_1738686686_29506_hk_output_L1a.csv"
 
 thuster_file_name = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/from_LEXI/orbit/20250204/LEXI Transit Op 18 - ACS Thruster Cycle Count Data.csv"
 
@@ -26,8 +26,10 @@ df_thruster = pd.read_csv(thuster_file_name, parse_dates=["Time"])
 df_thruster.index = df_thruster["Time"].dt.tz_localize("UTC")
 
 hk_key = "DeltaEvntCount"
-thruster_key = "Sum_All"
+thruster_key = "Sum_3_12"
 
+# Sort the dataframes by index
+df_hk = df_hk.sort_index()
 # Get 1 minute rolling average of hk_key
 df_hk[f"{hk_key}_rolling"] = df_hk[hk_key].rolling("1min").mean()
 
@@ -41,7 +43,7 @@ fig, axs = plt.subplots(1, 1, figsize=(10, 8), sharex=True)
 axs.scatter(df_hk.index, df_hk[hk_key], s=0.5, c="m", alpha=0.5, label=hk_key)
 axs.plot(df_hk.index, df_hk[f"{hk_key}_rolling"], color="w", lw=1.5, label=f"1-minute rolling-{hk_key}")
 twin_ax = axs.twinx()
-twin_ax.plot(df_thruster.index, df_thruster[thruster_key], color="c", lw=1.5, label="Thurst Events", zorder=0)
+twin_ax.plot(df_thruster.index, df_thruster[thruster_key], color="c", lw=1.5, label="Thurst Events\n (pointed towards LEXI)", zorder=0)
 
 axs.set_xlabel("Time [DD HH:MM] (UTC)", fontdict={"fontsize": fontsize})
 axs.set_ylabel(hk_key, fontdict={"color": "m", "alpha": 1, "fontsize": fontsize})
