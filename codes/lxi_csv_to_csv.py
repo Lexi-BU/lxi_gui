@@ -109,6 +109,9 @@ def lxi_csv_to_csv(
                 csv_file_name_list[csv_file_name_list.index("L1b")] = "L1c"
             # Get the csvs folder name from the new csv_file_name_list
             csvs_folder = "\\".join(csv_file_name_list[0:-1])
+            # If "L1a" or "L1b" is in the csv_file_name_list, then replace it with "L1c"
+            if "L1b" in csv_file_name_list:
+                csv_file_name_list[csv_file_name_list.index("L1b")] = "L1c"
             print(csvs_folder)
             if not Path(csvs_folder).exists():
                 Path(csvs_folder).mkdir(parents=True, exist_ok=True)
