@@ -9,7 +9,7 @@ import colorsys
 
 importlib.reload(lsf)
 
-read_data = False
+read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
     # Add HV_value column to df
@@ -166,7 +166,7 @@ def update_plot(selected_operations, selected_columns):
     fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
 
     # Save the figure as HTML
-    fig.write_html(f"{selected_columns[0]}_plot.html")
+    fig.write_html(f"../figures/{selected_columns[0]}_plot.html")
     return fig
 
 

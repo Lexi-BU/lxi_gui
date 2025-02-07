@@ -70,9 +70,9 @@ def lxi_csv_to_csv(
     else:
         if platform.system() == "Linux":
             csv_file_name_list = csv_file.split("/")
-            # If "L1a" is in the csv_file_name_list, then replace it with "L1b"
-            if "L1a" in csv_file_name_list:
-                csv_file_name_list[csv_file_name_list.index("L1a")] = "L1b"
+            # If "L1b" is in the csv_file_name_list, then replace it with "L1c"
+            if "L1b" in csv_file_name_list:
+                csv_file_name_list[csv_file_name_list.index("L1b")] = "L1c"
             # Get the csvs folder name from the new csv_file_name_list
             csvs_folder = "/".join(csv_file_name_list[0:-1])
             print(csvs_folder)
@@ -83,8 +83,8 @@ def lxi_csv_to_csv(
             # If the csvs_file does not exist, create it
             if csvs_file is None:
                 new_csv_file_name = csv_file_name_list[-1].split(".")[0]
-                # Replace the "L1a" with "L1b" in the new_csv_file_name
-                new_csv_file_name = new_csv_file_name.replace("L1a", "L1b")
+                # Replace the "L1b" with "L1c" in the new_csv_file_name
+                new_csv_file_name = new_csv_file_name.replace("L1b", "L1c")
                 print(f"new_csv_file_name: {new_csv_file_name}")
                 csvs_file = (
                     csvs_folder + "/" + new_csv_file_name + ".csv"
@@ -104,9 +104,9 @@ def lxi_csv_to_csv(
                 Path(csvs_file).unlink()
         elif platform.system() == "Windows":
             csv_file_name_list = csv_file.split("\\")
-            # If "L1a" is in the csv_file_name_list, then replace it with "L1b"
-            if "L1a" in csv_file_name_list:
-                csv_file_name_list[csv_file_name_list.index("L1a")] = "L1b"
+            # If "L1b" is in the csv_file_name_list, then replace it with "L1c"
+            if "L1b" in csv_file_name_list:
+                csv_file_name_list[csv_file_name_list.index("L1b")] = "L1c"
             # Get the csvs folder name from the new csv_file_name_list
             csvs_folder = "\\".join(csv_file_name_list[0:-1])
             print(csvs_folder)
@@ -117,8 +117,8 @@ def lxi_csv_to_csv(
             # If the csvs_file does not exist, create it
             if csvs_file is None:
                 new_csv_file_name = csv_file_name_list[-1].split(".")[0]
-                # Replace the "L1a" with "L1b" in the new_csv_file_name
-                new_csv_file_name = new_csv_file_name.replace("L1a", "L1b")
+                # Replace the "L1b" with "L1c" in the new_csv_file_name
+                new_csv_file_name = new_csv_file_name.replace("L1b", "L1c")
                 print(f"new_csv_file_name: {new_csv_file_name}")
                 csvs_file = (
                     csvs_folder + "\\" + new_csv_file_name + ".csv"

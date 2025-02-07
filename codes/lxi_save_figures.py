@@ -721,7 +721,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print(f"Figure saved as \033[1;32m{default_folder / fig_name}\033[0m\n")
 
-    long_time_series_plot()
+    # long_time_series_plot()
 
     print("\033[1;31m Long term time series plot saved.\033[0m\n")
 

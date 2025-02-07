@@ -1046,6 +1046,9 @@ def open_file_b_multiple(file_val=None, t_start=None, t_end=None, multiple_files
         f"\x1b[1;32;255m{file_name_sci}\x1b[0m"
     )
 
+    # Save the "L1c" files
+    lmsc.save_csv()
+
     return file_val
 
 
@@ -1585,14 +1588,14 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
         # Get the file name based on the os path
         if platform.system() == "Windows":
             save_dir_list = save_dir.split("\\")
-            save_dir_new_hk = "\\".join(save_dir_list[:-2]) + "\\L1a\\hk\\" + save_dir_list[-1] + "\\"
+            save_dir_new_hk = "\\".join(save_dir_list[:-2]) + "\\L1b\\hk\\" + save_dir_list[-1] + "\\"
             file_name_hk = save_dir_new_hk + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-5] + '_' + \
-                file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1a.csv'
+                file_name_hk_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1b.csv'
 
             save_dir_new_sci = "\\".join(save_dir_list[:-2]) + "\\L1a\\sci\\" + save_dir_list[-1] + "\\"
             file_name_sci = save_dir_new_sci + \
@@ -1601,45 +1604,45 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("\\")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-5] + '_' + \
-                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1a.csv'
+                file_name_sci_list[-1].split("\\")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1b.csv'
         elif platform.system() == "Linux":
             save_dir_list = save_dir.split("/")
-            save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1a/hk/" + save_dir_list[-1] + "/"
+            save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1b/hk/" + save_dir_list[-1] + "/"
             file_name_hk = save_dir_new_hk + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-5] + '_' + \
-                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1a.csv'
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1b.csv'
 
-            save_dir_new_sci = "/".join(save_dir_list[:-2]) + "/L1a/sci/" + save_dir_list[-1] + "/"
+            save_dir_new_sci = "/".join(save_dir_list[:-2]) + "/L1b/sci/" + save_dir_list[-1] + "/"
             file_name_sci = save_dir_new_sci + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-5] + '_' + \
-                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1a.csv'
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1b.csv'
         elif platform.system() == "Darwin":
             save_dir_list = save_dir.split("/")
-            save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1a/hk/" + save_dir_list[-1] + "/"
+            save_dir_new_hk = "/".join(save_dir_list[:-2]) + "/L1b/hk/" + save_dir_list[-1] + "/"
             file_name_hk = save_dir_new_hk + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-5] + '_' + \
-                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1a.csv'
+                file_name_hk_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_hk_output_L1b.csv'
 
-            save_dir_new_sci = "/".join(save_dir_list[:-2]) + "/L1a/sci/" + save_dir_list[-1] + "/"
+            save_dir_new_sci = "/".join(save_dir_list[:-2]) + "/L1b/sci/" + save_dir_list[-1] + "/"
             file_name_sci = save_dir_new_sci + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[1] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[0] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[2] + '_' + \
                 file_name_hk_list[0].split("/")[-1].split('.')[0].split('_')[3] + '_' + \
                 file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-5] + '_' + \
-                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1a.csv'
+                file_name_sci_list[-1].split("/")[-1].split('.')[0].split('_')[-4] + '_sci_output_L1b.csv'
         else:
             raise OSError("Operating system not supported")
 
@@ -1648,6 +1651,9 @@ def read_binary_file(file_val=None, t_start=None, t_end=None, multiple_files=Fal
             f"The Science File name =\x1b[1;32;255m{file_name_sci} \x1b[0m \n"
         )
         # Save the dataframe to a csv file
+        # Ensure that the folder exists using Path
+        Path(file_name_hk).parent.mkdir(parents=True, exist_ok=True)
+        Path(file_name_sci).parent.mkdir(parents=True, exist_ok=True)
         df_hk.to_csv(file_name_hk, index=False)
         df_sci.to_csv(file_name_sci, index=False)
 
