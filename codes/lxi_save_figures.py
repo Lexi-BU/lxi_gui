@@ -790,6 +790,8 @@ def read_and_plot_all_files():
 
     df_all = pd.concat(df_list)
     df_all["Date"] = pd.to_datetime(df_all["Date"])
+    # Set the timezone to UTC
+    df_all["Date"] = df_all["Date"].dt.tz_localize("UTC")
     df_all.set_index("Date", inplace=True)
     # Ignore any values that are less than 0
     df_all = df_all[df_all > 0]

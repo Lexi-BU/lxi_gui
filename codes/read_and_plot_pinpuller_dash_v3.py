@@ -4,18 +4,20 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 import lxi_save_figures as lsf
+import prepare_thrust_data_files as ptdf
 import importlib
 import colorsys
+import glob
+from pathlib import Path
 
 importlib.reload(lsf)
+importlib.reload(ptdf)
 
-read_data = True
+read_data = False
 if read_data:
     df = lsf.read_and_plot_all_files()
     # Add HV_value column to df
     df["HV_value"] = df["AnodeVoltMon"] * 599
-    available_columns = list(df.columns)
-    default_columns = [available_columns[18]]  # Default to first column
     input_key_unit = "-"
     df["operation_number"] = 1
     df["number_of_data_points"] = 1
@@ -36,8 +38,15 @@ if read_data:
     # df = df.dropna()
     df["operation_number"] = df["operation_number"].astype(int)
     df["number_of_data_points"] = df["number_of_data_points"] / 60
-    df["Date"] = df.index
+    df["DateTime"] = df.index
     unique_operations = sorted(df["operation_number"].unique())
+
+    # Get the thruster data
+    df_thruster = ptdf.prepare_thruster_data()
+    # Merge the two DataFrames, df and df_thruster, on the DateTime index
+    df = pd.merge_asof(df, df_thruster, left_index=True, right_index=True, direction="nearest")
+    available_columns = list(df.columns)
+    default_columns = [available_columns[18]]  # Default to first column
 
 # Assign unique base colors for columns
 column_colors = {
@@ -87,6 +96,7 @@ app.layout = html.Div(
     ]
 )
 
+
 @app.callback(
     Output("line_plot", "figure"),
     [Input("operation_filter", "value"),
@@ -101,10 +111,13 @@ def update_plot(selected_operations, selected_columns):
     # Set up dual y-axes if two columns are selected
     secondary_y = len(selected_columns) == 2
 
+    filtering_length = 90
+    hv_threshold = 1500
+
     for idx, col in enumerate(selected_columns):
-        df[f"{col}_smooth"] = df[col].rolling('15s', center=True).mean()
+        df[f"{col}_smooth"] = df[col].rolling(f"{filtering_length}s", center=False).mean()
         filtered_df = df[df["operation_number"].isin(selected_operations)]
-        filtered_df = filtered_df[filtered_df["HV_value"] > 1500]
+        filtered_df = filtered_df[filtered_df["HV_value"] > hv_threshold][filtering_length:-filtering_length]
 
         base_color = column_colors[col]  # Unique base color for the column
 
@@ -112,7 +125,7 @@ def update_plot(selected_operations, selected_columns):
             # Add a column that counts the data point number
             temp_df = filtered_df[filtered_df["operation_number"] == op].reset_index(drop=True)
             temp_df["event_number"] = temp_df.index
-            shade_factor = 1 - (i * 0.25)  # Adjust shade for different operations
+            shade_factor = 1 - (i * 0.15) if (i * 0.15) < 1 else 2
             color_shade = adjust_color_brightness(base_color, shade_factor)
 
             # Determine if this column should be on secondary y-axis
@@ -124,7 +137,7 @@ def update_plot(selected_operations, selected_columns):
                 y=f"{col}_smooth",
                 labels={"event_number": "Event Number"},
                 color_discrete_sequence=[color_shade],
-                hover_data={"Date": True, col: True, "event_number": True, "operation_number": True},
+                hover_data={"DateTime": True, col: True, "event_number": True, "operation_number": True},
             )
 
             for trace in temp_fig["data"]:
