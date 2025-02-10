@@ -30,7 +30,7 @@ def prepare_thruster_data():
 
     # THP9_CYCLECOUNT = ACS 1 (-X)
     # THP10_CYCLECOUNT = ACS 2 (+Y)
-    # THP11_CYCLECOUNT = ACS 3 (+X)
+    # THP11_CYCLECOUNT = ACS 3 (+X) (LEXI facing)
     # THP12_CYCLECOUNT = ACS 4 (-X)
     # THP13_CYCLECOUNT = ACS 5 (-Z)
     # THP14_CYCLECOUNT = ACS 6 (+X)
@@ -38,7 +38,7 @@ def prepare_thruster_data():
     # THP16_CYCLECOUNT = ACS 8 (-Y)
     # THP17_CYCLECOUNT = ACS 9 (+X)
     # THP18_CYCLECOUNT = ACS 10 (-X)
-    # THP19_CYCLECOUNT = ACS 11 (+Z)
+    # THP19_CYCLECOUNT = ACS 11 (+Z) (LEXI facing)
     # THP20_CYCLECOUNT = ACS 12 (+X)
 
     # For each column in the DataFrame, replace the column name with the ACS thruster name
