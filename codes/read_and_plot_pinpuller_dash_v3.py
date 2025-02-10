@@ -13,7 +13,7 @@ from pathlib import Path
 importlib.reload(lsf)
 importlib.reload(ptdf)
 
-read_data = False
+read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
     # Add HV_value column to df
@@ -98,9 +98,9 @@ app.layout = html.Div(
             html.Label("Filtering Length (s):", style={"color": "white"}),
             dcc.Input(id="filtering_length", type="number", value=15, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
             html.Label("HV Threshold Low:", style={"color": "white"}),
-            dcc.Input(id="hv_threshold_low", type="number", value=1500, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
+            dcc.Input(id="hv_threshold_low", type="number", value=1505, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
             html.Label("HV Threshold High:", style={"color": "white"}),
-            dcc.Input(id="hv_threshold_high", type="number", value=1600, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
+            dcc.Input(id="hv_threshold_high", type="number", value=1520, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
             dcc.Checklist(
                 id="hv_threshold_check",
                 options=[{"label": "Enable HV Threshold", "value": "hv_threshold"}],

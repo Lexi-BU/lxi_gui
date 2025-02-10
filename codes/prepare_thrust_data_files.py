@@ -2,13 +2,18 @@ import pandas as pd
 import glob
 import numpy as np
 from pathlib import Path
+import platform
 
 
 def prepare_thruster_data():
 
-    print("Preparing thruster data...\n")
-    # Get the thruster data
-    thruster_data_folder = "../data/from_LEXI/thruster_data/from_grafana/"
+    print("\nPreparing thruster data...\n")
+    if platform.system() == "Windows":
+        # Get the thruster data
+        thruster_data_folder = "..\\data\\from_LEXI\\thruster_data\\from_grafana\\"    
+    if platform.system() == "Linux":
+        # Get the thruster data
+        thruster_data_folder = "../data/from_LEXI/thruster_data/from_grafana/"
     # Expand the folder path
     thruster_data_folder = Path(thruster_data_folder).expanduser()
     # Get all the CSV files in the folder
@@ -25,6 +30,8 @@ def prepare_thruster_data():
     # Set the timezones to UTC
     df_thruster["Date"] = df_thruster["Date"].dt.tz_localize("UTC")
     df_thruster.set_index("Date", inplace=True)
+    # If there are duplicate indices, keep the first one
+    df_thruster = df_thruster[~df_thruster.index.duplicated(keep="first")]
 
     # Mapping ACS Thrusters to Telemetry:
 
