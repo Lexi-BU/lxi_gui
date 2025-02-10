@@ -9,6 +9,7 @@ import importlib
 import colorsys
 import glob
 from pathlib import Path
+import numpy as np
 
 importlib.reload(lsf)
 importlib.reload(ptdf)
@@ -32,8 +33,7 @@ if read_data:
             number_of_data_points += 1
         df.loc[df.index[i], "number_of_data_points"] = number_of_data_points
         df.loc[df.index[i], "operation_number"] = operation_number
-        if i % 1000 == 0:
-            print(f"Progress: {i}/{len(df)}")
+        print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
 
     # df = df.dropna()
     df["operation_number"] = df["operation_number"].astype(int)
@@ -114,7 +114,14 @@ app.layout = html.Div(
                 value=[],
                 inline=True,
                 style={"marginRight": "1px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "display": "flex", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "200px", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
-            )
+            ),
+            dcc.Checklist(
+                id="log_scale_check",
+                options=[{"label": "Log Scale", "value": "log_scale"}],
+                value=[],
+                inline=True,
+                style={"marginRight": "1px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "display": "flex", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "200px", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
+            ),
         ], style={"marginTop": "10px", "display": "flex", "justifyContent": "center", "gap": "10px", "alignItems": "center"}),
     ]
 )
@@ -128,14 +135,14 @@ app.layout = html.Div(
      Input("hv_threshold_low", "value"),
      Input("hv_threshold_high", "value"),
      Input("hv_threshold_check", "value"),
-     Input("save_fig_check", "value")]
+     Input("save_fig_check", "value"),
+     Input("log_scale_check", "value")],
 )
-def update_plot(selected_operations, selected_columns, filtering_length, hv_threshold_low, hv_threshold_high, hv_threshold_check, save_fig_check):
+def update_plot(selected_operations, selected_columns, filtering_length, hv_threshold_low, hv_threshold_high, hv_threshold_check, save_fig_check, log_scale_check):
     if not selected_columns:
         return px.line(template="plotly_dark", title="No Column Selected")
 
     fig = px.line(template="plotly_dark")
-    secondary_y = len(selected_columns) == 2
 
     # If hv_threshold_check is not checked, then set the hv_threshold_low and hv_threshold_high to
     # None
@@ -153,6 +160,10 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
         # Modify the DateTime column to have the following format: "YYYY-MM-DD HH:MM:SS"
         filtered_df["DateTime"] = filtered_df.index.strftime("%Y-%m-%d %H:%M:%S")
 
+        # If log_scale_check is checked, then ignore all the negative values and zero values
+        if "log_scale" in log_scale_check:
+            filtered_df = filtered_df[filtered_df[col] > 0]
+
         for i, op in enumerate(selected_operations):
             temp_df = filtered_df[filtered_df["operation_number"] == op].reset_index(drop=True)
             temp_df["event_number"] = temp_df.index
@@ -164,14 +175,7 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
             common_hover_data = {"event_number": False, "operation_number": False, "DateTime": False, f"{col}_smooth": False, col: True}  # Common hover data
             specific_hover_data = {col: True, "event_number": False, f"{col}_smooth": False, "DateTime": True, "operation_number": True}  # Only show column-specific data
 
-            hover_data = common_hover_data if idx != 0 else specific_hover_data  # Include common hover data only once
-
-            # hovertemplate = (
-            #     f"Event Number: {{event_number}}\n"  # Display event number
-            #     f"Operation Number: {{operation_number}}\n"  # Display operation number
-            #     f"DateTime: {{DateTime}}\n"  # Display DateTime
-            #     f"{col}: {{:{col}.2g}}\n"  # Limit to 2 significant figures for the current column
-            # )
+            hover_data = common_hover_data if idx != 0 else specific_hover_data
             temp_fig = px.line(
                 temp_df,
                 x="event_number",
@@ -180,7 +184,6 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
                 color_discrete_sequence=[color_shade],
                 hover_data=hover_data,
             )
-
             for trace in temp_fig["data"]:
                 trace["name"] = f"{col} - Operation {op}"
                 trace["line"]["color"] = color_shade
@@ -199,6 +202,7 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
             showline=True,
             linewidth=2,
             linecolor=column_colors[selected_columns[0]],
+            type="log" if "log_scale" in log_scale_check else "linear",
         ),
         hovermode="x unified",
     )
@@ -213,7 +217,8 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
                 side="right",
                 showline=True,
                 linewidth=2,
-                linecolor=column_colors[selected_columns[1]],  # Use color of second column
+                linecolor=column_colors[selected_columns[1]],
+                type="log" if "log_scale" in log_scale_check else "linear",
             )
         )
 
