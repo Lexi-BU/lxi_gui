@@ -136,6 +136,17 @@ def update_graph(
         x_data = df_filtered[x_channel]
         y_data = df_filtered[y_channel]
 
+        threshold = 5  # Values below this will be transparent
+
+        # Custom colorscale:
+        custom_colorscale = [
+            (0.0, "rgba(0,0,0,0)"),   # Fully transparent for values below threshold
+            ((threshold - 1) / 1000, "rgba(255,255,255,1)"),  # White just above threshold
+            (0.2, "lightgray"),
+            (0.5, "yellow"),
+            (1.0, "red")
+        ]
+
         # Create hexbin plot
         fig = go.Figure()
 
@@ -144,10 +155,10 @@ def update_graph(
             go.Histogram2dContour(
                 x=x_data,
                 y=y_data,
-                colorscale="Plasma",
+                colorscale=custom_colorscale,
                 ncontours=20,
                 showscale=True,
-                colorbar=dict(title="Count",), #  tickvals=np.logspace(0.01, 3, 5), ticktext=["1", "10", "100", "1000"]),
+                colorbar=dict(title="Count", tickvals=np.logspace(0.01, 3, 4), ticktext=["1", "10", "100", "1000"]),
                 zmin=5,
                 zmax=1000,
                 zauto=False,
