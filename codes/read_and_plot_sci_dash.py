@@ -7,6 +7,8 @@ from pathlib import Path
 import glob
 import pandas as pd
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 def forward(y):
     """Custom forward scale function"""
@@ -39,6 +41,60 @@ def check_folder_structure():
     return target_folder
 
 
+# Function to process each chunk of the dataframe
+def process_chunk(chunk, start_idx, end_idx):
+    operation_number = 1
+    number_of_data_points = 1
+    chunk_results = []
+
+    for i in range(start_idx, end_idx):
+        if i > 0 and (chunk.index[i] - chunk.index[i - 1]).total_seconds() > 10800:
+            operation_number += 1
+            number_of_data_points = 1
+        else:
+            number_of_data_points += 1
+
+        chunk_results.append((chunk.index[i], operation_number, number_of_data_points))
+
+    return chunk_results
+
+
+# Function to split the dataframe into chunks and process in parallel
+def parallelize_data_processing(df, num_threads=10):
+    chunk_size = len(df) // num_threads
+    chunks = [(i * chunk_size, (i + 1) * chunk_size) for i in range(num_threads)]
+
+    # Adjust the last chunk to cover any remaining rows
+    if len(df) % num_threads != 0:
+        chunks[-1] = (chunks[-1][0], len(df))
+
+    results = []
+
+    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        future_to_chunk = {executor.submit(process_chunk, df, start, end): (start, end) for start, end in chunks}
+
+        for future in as_completed(future_to_chunk):
+            chunk_start, chunk_end = future_to_chunk[future]
+            try:
+                chunk_results = future.result()
+                results.extend(chunk_results)
+            except Exception as e:
+                print(f"Error processing chunk ({chunk_start}, {chunk_end}): {e}")
+
+    # Create a dataframe with the results
+    operation_number_col = [result[1] for result in results]
+    number_of_data_points_col = [result[2] for result in results]
+
+    # Ensure the lists have the same length as the original df
+    assert len(operation_number_col) == len(df), "Mismatch in the length of the results"
+    assert len(number_of_data_points_col) == len(df), "Mismatch in the length of the results"
+
+    df['operation_number'] = operation_number_col
+    df['number_of_data_points'] = number_of_data_points_col
+
+    return df
+
+
 def read_sci_l1c_data():
     parent_folder = check_folder_structure()
     print(f"Reading data from: {parent_folder}\n")
@@ -48,25 +104,48 @@ def read_sci_l1c_data():
 
     print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the {parent_folder}\n")
 
-    df_list = []
-    for i, csv_file in enumerate(csv_files[-3:-1]):
-        # Print the progress
-        print(f"Reading file ==> \x1b[1;32;255m {np.round(i / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
-        df = pd.read_csv(csv_file)
-        df_list.append(df)
+    # Define the number of threads (adjust as needed based on the number of files)
+    num_threads = 4
+    chunk_size = len(csv_files) // num_threads
+    chunks = [(i * chunk_size, (i + 1) * chunk_size) for i in range(num_threads)]
 
+    # Ensure the last chunk covers all remaining files
+    if len(csv_files) % num_threads != 0:
+        chunks[-1] = (chunks[-1][0], len(csv_files))
+
+    def read_files_chunk(start_idx, end_idx):
+        chunk_list = []
+        for i in range(start_idx, end_idx):
+            print(f"Reading file ==> \x1b[1;32;255m {np.round(i / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
+            df = pd.read_csv(csv_files[i])
+            chunk_list.append(df)
+        return chunk_list
+
+    # Use ThreadPoolExecutor to read CSV files in parallel
+    df_list = []
+    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        future_to_chunk = {executor.submit(read_files_chunk, start, end): (start, end) for start, end in chunks}
+
+        for future in as_completed(future_to_chunk):
+            try:
+                chunk_data = future.result()
+                df_list.extend(chunk_data)  # Combine the results from each chunk
+            except Exception as e:
+                print(f"Error processing chunk: {e}")
+
+    # Concatenate all dataframes from the chunks
     df_all = pd.concat(df_list)
 
     # Set the Date column as the index
     df_all["Date"] = pd.to_datetime(df_all["Date"])
-    # Set the timezones to UTC
+    # Set the timezones to UTC (optional)
     # df_all["Date"] = df_all["Date"].dt.tz_localize("UTC")
     df_all = df_all.set_index("Date", inplace=False)
 
     return df_all
 
 
-read_data = False
+read_data = True
 if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()
@@ -76,17 +155,23 @@ if read_data:
     operation_number = 1
     number_of_data_points = 1
 
-    for i in range(1, len(df)):
-        if (df.index[i] - df.index[i - 1]).total_seconds() > 10800:
-            operation_number += 1
-            number_of_data_points = 1
-        else:
-            number_of_data_points += 1
-        df.loc[df.index[i], "number_of_data_points"] = number_of_data_points
-        df.loc[df.index[i], "operation_number"] = operation_number
+    # Process the dataframe in parallel
+    df = parallelize_data_processing(df)
 
-        # Print the progress
+    # Print the progress (optional, could be done more efficiently in parallel with a callback or progress bar)
+    for i in range(1, len(df)):
         print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
+    # for i in range(1, len(df)):
+    #     if (df.index[i] - df.index[i - 1]).total_seconds() > 10800:
+    #         operation_number += 1
+    #         number_of_data_points = 1
+    #     else:
+    #         number_of_data_points += 1
+    #     df.loc[df.index[i], "number_of_data_points"] = number_of_data_points
+    #     df.loc[df.index[i], "operation_number"] = operation_number
+
+    #     # Print the progress
+    #     print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
 
 
 app = dash.Dash(__name__)
