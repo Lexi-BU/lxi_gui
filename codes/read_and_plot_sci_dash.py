@@ -1,14 +1,11 @@
 import numpy as np
-import plotly.express as px
+import plotly.graph_objects as go
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import matplotlib.dates as mdates
 from pathlib import Path
 import glob
 import pandas as pd
-from matplotlib.ticker import FormatStrFormatter, MaxNLocator
-from matplotlib.scale import FuncScale
 
 
 def forward(y):
@@ -52,7 +49,7 @@ def read_sci_l1c_data():
     print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the {parent_folder}\n")
 
     df_list = []
-    for i, csv_file in enumerate(csv_files[0:2]):
+    for i, csv_file in enumerate(csv_files[-3:-1]):
         # Print the progress
         print(f"Reading file ==> \x1b[1;32;255m {np.round(i / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
         df = pd.read_csv(csv_file)
@@ -69,7 +66,7 @@ def read_sci_l1c_data():
     return df_all
 
 
-read_data = True
+read_data = False
 if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()
@@ -94,9 +91,8 @@ if read_data:
 
 app = dash.Dash(__name__)
 
-
 app.layout = html.Div(
-    style={"height": "99vh", "width": "99vw", "backgroundColor": "#121212", "color": "white", "padding": "0px", "overflow": "hidden", "display": "flex", "flexDirection": "column", "alignItems": "left", "justifyContent": "center", "marginLeft": "0vw", "marginRight": "0vw", "justify": "center"},
+    style={"height": "90vh", "width": "99vw", "backgroundColor": "#121212", "color": "white", "padding": "0px", "overflow": "scroll", "display": "flex", "flexDirection": "column", "alignItems": "left", "justifyContent": "center", "marginLeft": "0vw", "marginRight": "0vw", "justify": "center"},
     children=[
         # Add four check boxes corresponding to the four Channels
         html.Div(
@@ -111,102 +107,166 @@ app.layout = html.Div(
                         {"label": "Channel 4", "value": "Channel4"},
                     ],
                     inline=True,
-                    value=["Channel1", "", "Channel3", ""],
+                    value=["Channel1", "Channel2", "Channel3", "Channel4"],
                     style={"color": "white"},
                 )
             ],
         ),
         # Add the input boxes for minimum and maximum value of each channel
+        html.Div(id="input_boxes", style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"}),
+        # Add the dropdown menu and checkboxes in the same row
         html.Div(
-            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center", "marginTop": "10px"},
             children=[
-                dcc.Input(id="min_value_channel_1", type="number", placeholder="Min Value", style={"color": "black"}),
-                dcc.Input(id="max_value_channel_1", type="number", placeholder="Max Value", style={"color": "black"}),
-                dcc.Input(id="min_value_channel_2", type="number", placeholder="Min Value", style={"color": "black"}),
-                dcc.Input(id="max_value_channel_2", type="number", placeholder="Max Value", style={"color": "black"}),
-                dcc.Input(id="min_value_channel_3", type="number", placeholder="Min Value", style={"color": "black"}),
-                dcc.Input(id="max_value_channel_3", type="number", placeholder="Max Value", style={"color": "black"}),
-                dcc.Input(id="min_value_channel_4", type="number", placeholder="Min Value", style={"color": "black"}),
-                dcc.Input(id="max_value_channel_4", type="number", placeholder="Max Value", style={"color": "black"}),
-            ],
-        ),
-
-        # Add the dropdown menu for to select the operation number
-        html.Div(
-            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
-            children=[
+                # Dropdown for operation number
                 dcc.Dropdown(
                     id="operation_number_dropdown",
-                    options=[{"label": f"Operation {i}", "value": i} for i in range(1, operation_number + 1)],
+                    options=[{"label": f"Operation {i}", "value": i} for i in range(1, 3)],
                     value=1,
                     className="dark-dropdown",
-                    style={"width": "50%", "marginBottom": "2px", "marginTop": "2px", "marginLeft": "5px", "marginRight": "5px"},
-                )
-            ],
-        ),
-        # Add a checkbox for "IsCommanded" event to be considered or not
-        html.Div(
-            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
-            children=[
+                    style={"width": "200px", "marginRight": "20px", "color": "black"},
+                ),
+                # Checkbox for "IsCommanded"
                 dcc.Checklist(
                     id="is_commanded_checkbox",
                     options=[{"label": "IsCommanded", "value": "is_commanded"}],
                     value=[],
-                    style={"color": "white"},
-                )
-            ],
-        ),
-        # Add a checkbox for "lin_correction" to be applied or not
-        html.Div(
-            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
-            children=[
+                    style={"color": "white", "marginRight": "20px"},
+                ),
+                # Checkbox for "Linear Correction"
                 dcc.Checklist(
                     id="lin_correction_checkbox",
                     options=[{"label": "Linear Correction", "value": "lin_correction"}],
-                    value=[],
+                    value=["lin_correction"],
                     style={"color": "white"},
-                )
+                ),
+                # Add two input boxes for zmin and zmax
+                html.Label("Zmin", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                dcc.Input(id="zmin", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px"}),
+                html.Label("Zmax", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                dcc.Input(id="zmax", type="number", placeholder="Zmax", style={"color": "black"}),
+                html.Label("Zmin (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                dcc.Input(id="zmin_xy", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px"}),
+                html.Label("Zmax (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                dcc.Input(id="zmax_xy", type="number", placeholder="Zmax", style={"color": "black"}),
             ],
         ),
-        # Add the graph
-        dcc.Graph(id="line_plot", style={"height": "70vh", "width": "95vw", "overflow": "hidden"}),
+        # Add tabs for additional graphs
+        dcc.Tabs(
+            id="tabs",
+            value="tab-1",
+            children=[
+                dcc.Tab(
+                    label="Channel Graphs",
+                    value="graphs",
+                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "100%"},
+                    children=[
+                        html.Div(
+                            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+                            children=[
+                                dcc.Graph(id="channel_1_3", style={"width": "50%", "height": "100%"}),
+                                dcc.Graph(id="channel_2_4", style={"width": "50%", "height": "100%"}),
+                            ],
+                        ),
+                    ],
+                ),
+                dcc.Tab(
+                    label="X-Y Positions",
+                    value="tab-2",
+                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "100%"},
+                    children=[
+                        # Content for the second tab
+                        html.Div(
+                            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+                            children=[
+                                dcc.Graph(id="x_y_positions", style={"width": "100%", "height": "100%"}),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        ),
     ],
 )
 
 
 @app.callback(
-    Output("line_plot", "figure"),
+    Output("input_boxes", "children"),
+    [Input("channel_checklist", "value")]
+)
+def update_input_boxes(selected_channels):
+    input_boxes = []
+    for channel in selected_channels:
+        input_boxes.append(dcc.Input(id=f"min_value_{channel}", type="number", placeholder=f"Min {channel}", style={"color": "black", "marginRight": "10px"}))
+        input_boxes.append(dcc.Input(id=f"max_value_{channel}", type="number", placeholder=f"Max {channel}", style={"color": "black", "marginRight": "10px"}))
+    return input_boxes
+
+
+@app.callback(
+    Output("channel_1_3", "figure"),
     [
         Input("channel_checklist", "value"),
-        Input("min_value_channel_1", "value"),
-        Input("max_value_channel_1", "value"),
-        Input("min_value_channel_2", "value"),
-        Input("max_value_channel_2", "value"),
-        Input("min_value_channel_3", "value"),
-        Input("max_value_channel_3", "value"),
-        Input("min_value_channel_4", "value"),
-        Input("max_value_channel_4", "value"),
+        Input("min_value_Channel1", "value"),
+        Input("max_value_Channel1", "value"),
+        Input("min_value_Channel2", "value"),
+        Input("max_value_Channel2", "value"),
+        Input("min_value_Channel3", "value"),
+        Input("max_value_Channel3", "value"),
+        Input("min_value_Channel4", "value"),
+        Input("max_value_Channel4", "value"),
         Input("operation_number_dropdown", "value"),
         Input("is_commanded_checkbox", "value"),
         Input("lin_correction_checkbox", "value"),
+        Input("zmin", "value"),
+        Input("zmax", "value"),
     ],
 )
 def update_graph(
     channel_checklist,
-    min_value_channel_1,
-    max_value_channel_1,
-    min_value_channel_2,
-    max_value_channel_2,
-    min_value_channel_3,
-    max_value_channel_3,
-    min_value_channel_4,
-    max_value_channel_4,
+    min_value_channel1,
+    max_value_channel1,
+    min_value_channel2,
+    max_value_channel2,
+    min_value_channel3,
+    max_value_channel3,
+    min_value_channel4,
+    max_value_channel4,
     operation_number_dropdown,
     is_commanded_checkbox,
     lin_correction_checkbox,
+    zmin,
+    zmax,
 ):
     # Filter the data based on the operation number
     df_filtered = df[df["operation_number"] == operation_number_dropdown]
+
+    # If the min or max values are not provided, set them to 0 and 4.51 respectively
+    for channel in channel_checklist:
+        if channel == "Channel1":
+            if min_value_channel1 is None:
+                min_value_channel1 = 1.3
+            if max_value_channel1 is None:
+                max_value_channel1 = 3.3
+        elif channel == "Channel2":
+            if min_value_channel2 is None:
+                min_value_channel2 = 1.3
+            if max_value_channel2 is None:
+                max_value_channel2 = 3.3
+        elif channel == "Channel3":
+            if min_value_channel3 is None:
+                min_value_channel3 = 1.3
+            if max_value_channel3 is None:
+                max_value_channel3 = 3.3
+        elif channel == "Channel4":
+            if min_value_channel4 is None:
+                min_value_channel4 = 1.3
+            if max_value_channel4 is None:
+                max_value_channel4 = 3.3
+    # Filter the data based on the min and max values of each channel
+    df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+
+    # Print the min max value of each channel
+    print(min_value_channel1, max_value_channel1, min_value_channel2, max_value_channel2, min_value_channel3, max_value_channel3, min_value_channel4, max_value_channel4)
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
@@ -214,18 +274,445 @@ def update_graph(
     else:
         df_filtered = df_filtered[~df_filtered["IsCommanded"]]
 
-    # Apply linear correction
+    if "Channel1" and "Channel3" in channel_checklist:
+        x_channel, y_channel = "Channel1", "Channel3"
+        x_data = df_filtered[x_channel]
+        y_data = df_filtered[y_channel]
+
+        threshold = 5  # Values below this will be transparent
+
+        # Custom colorscale:
+        custom_colorscale = [
+            (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
+            ((threshold - 1) / 1000, "white"),  # White just above threshold
+            (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
+            (0.3, "#5a01a7"),  # Purple
+            (0.5, "#9c179e"),  # Magenta
+            (0.7, "#e16462"),  # Orange-red
+            (0.9, "#fca636"),  # Orange-yellow
+            (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
+        ]
+        bin_numbers = 100
+
+        # If zmin and zmax are not provided, set them to 1 and 120 respectively
+        if zmin is None:
+            zmin = 1
+        if zmax is None:
+            zmax = 120
+
+        # Define the tick values dynamically using log scale
+        tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
+        ticktext = [str(int(i)) for i in tickvals]
+        # Create hexbin plot
+        fig = go.Figure()
+
+        # Add hexbin trace
+        fig.add_trace(
+            go.Histogram2dContour(
+                x=x_data,
+                y=y_data,
+                colorscale=custom_colorscale,
+                ncontours=bin_numbers,
+                showscale=True,
+                colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+                zmin=zmin,
+                zmax=zmax,
+                zauto=False,
+            )
+        )
+
+        # Set the x and y aspect ratio to be equal
+        # fig.update_layout(aspectmode="equal")
+
+        x_counts, x_bins = np.histogram(x_data, bins=100)
+        y_counts, y_bins = np.histogram(y_data, bins=100)
+
+        x_step_x = 0.5 * (x_bins[:-1] + x_bins[1:])
+        # x_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+
+        # y_step_x = 0.5 * (y_bins[:-1] + y_bins[1:])
+        y_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+
+        fig.add_trace(
+            go.Scatter(
+                x=x_step_x,
+                y=x_counts,
+                yaxis="y2",
+                mode="lines",
+                line=dict(color="rgba(120, 240, 189, 1)"),
+                name=f"{x_channel} Histogram",
+                line_shape="hvh",
+                # Set the y-axis scale to log
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=y_counts,
+                y=y_step_y,
+                xaxis="x2",
+                mode="lines",
+                line=dict(color="rgba(224, 83, 230, 1)"),
+                name=f"{y_channel} Histogram",
+                line_shape="hv",
+            )
+        )
+        # Update layout for subplots
+        fig.update_layout(
+            xaxis=dict(title=x_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="y", range=[min_value_channel1, max_value_channel1]),
+            yaxis=dict(title=y_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="x", range=[min_value_channel3, max_value_channel3]),
+            xaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log"),
+            yaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log"),
+            bargap=0,
+            showlegend=False,
+            # title="Hexbin Plot with Histograms",
+            plot_bgcolor="#121212",
+            paper_bgcolor="#121212",
+            # Set the font color to white
+            font=dict(color="white"),
+        )
+
+        return fig
+    else:
+        return go.Figure()
+
+
+@app.callback(
+    Output("channel_2_4", "figure"),
+    [
+        Input("channel_checklist", "value"),
+        Input("min_value_Channel1", "value"),
+        Input("max_value_Channel1", "value"),
+        Input("min_value_Channel2", "value"),
+        Input("max_value_Channel2", "value"),
+        Input("min_value_Channel3", "value"),
+        Input("max_value_Channel3", "value"),
+        Input("min_value_Channel4", "value"),
+        Input("max_value_Channel4", "value"),
+        Input("operation_number_dropdown", "value"),
+        Input("is_commanded_checkbox", "value"),
+        Input("lin_correction_checkbox", "value"),
+        Input("zmin", "value"),
+        Input("zmax", "value"),
+    ],
+)
+def update_histogram(
+    channel_checklist,
+    min_value_channel1,
+    max_value_channel1,
+    min_value_channel2,
+    max_value_channel2,
+    min_value_channel3,
+    max_value_channel3,
+    min_value_channel4,
+    max_value_channel4,
+    operation_number_dropdown,
+    is_commanded_checkbox,
+    lin_correction_checkbox,
+    zmin,
+    zmax,
+):
+    # Filter the data based on the operation number
+    df_filtered = df[df["operation_number"] == operation_number_dropdown]
+
+    # If the min or max values are not provided, set them to 0 and 4.51 respectively
+    for channel in channel_checklist:
+        if channel == "Channel1":
+            if min_value_channel1 is None:
+                min_value_channel1 = 1.3
+            if max_value_channel1 is None:
+                max_value_channel1 = 3.3
+        elif channel == "Channel2":
+            if min_value_channel2 is None:
+                min_value_channel2 = 1.3
+            if max_value_channel2 is None:
+                max_value_channel2 = 3.3
+        elif channel == "Channel3":
+            if min_value_channel3 is None:
+                min_value_channel3 = 1.3
+            if max_value_channel3 is None:
+                max_value_channel3 = 3.3
+        elif channel == "Channel4":
+            if min_value_channel4 is None:
+                min_value_channel4 = 1.3
+            if max_value_channel4 is None:
+                max_value_channel4 = 3.3
+
+    # Filter the data based on the min and max values of each channel
+    df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+
+    # Filter the data based on the IsCommanded event
+    if "is_commanded" in is_commanded_checkbox:
+        df_filtered = df_filtered
+    else:
+        df_filtered = df_filtered[~df_filtered["IsCommanded"]]
+
+    if "Channel2" and "Channel4" in channel_checklist:
+        x_channel, y_channel = "Channel2", "Channel4"
+        x_data = df_filtered[x_channel]
+        y_data = df_filtered[y_channel]
+
+        threshold = 5
+
+        # Custom colorscale:
+        custom_colorscale = [
+            (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
+            ((threshold - 1) / 1000, "white"),  # White just above threshold
+            (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
+            (0.3, "#5a01a7"),  # Purple
+            (0.5, "#9c179e"),  # Magenta
+            (0.7, "#e16462"),  # Orange-red
+            (0.9, "#fca636"),  # Orange-yellow
+            (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
+        ]
+        bin_numbers = 100
+        # If zmin and zmax are not provided, set them to 1 and 120 respectively
+        if zmin is None:
+            zmin = 1
+        if zmax is None:
+            zmax = 120
+
+        # Define the tick values dynamically using log scale
+        tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
+        ticktext = [str(int(i)) for i in tickvals]
+        # Create hexbin plot
+        fig = go.Figure()
+
+        # Add hexbin trace
+        fig.add_trace(
+            go.Histogram2dContour(
+                x=x_data,
+                y=y_data,
+                colorscale=custom_colorscale,
+                ncontours=bin_numbers,
+                showscale=True,
+                colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+                zmin=zmin,
+                zmax=zmax,
+                zauto=False,
+            )
+        )
+
+        # Set the x and y aspect ratio to be equal
+        # fig.update_layout(aspectmode="equal")
+
+        x_counts, x_bins = np.histogram(x_data, bins=100)
+        y_counts, y_bins = np.histogram(y_data, bins=100)
+
+        x_step_x = 0.5 * (x_bins[:-1] + x_bins[1:])
+        # x_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+        y_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+        # y_step_x = 0.5 * (y_bins[:-1] + y_bins[1:])
+
+        fig.add_trace(
+            go.Scatter(
+                x=x_step_x,
+                y=x_counts,
+                yaxis="y2",
+                mode="lines",
+                line=dict(color="rgba(107, 202, 240, 1)"),
+                name=f"{x_channel} Histogram",
+                line_shape="hvh",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=y_counts,
+                y=y_step_y,
+                xaxis="x2",
+                mode="lines",
+                line=dict(color="rgba(231, 169, 86, 1)"),
+                name=f"{y_channel} Histogram",
+                line_shape="hv",
+            )
+        )
+        # Update layout for subplots
+        fig.update_layout(
+            xaxis=dict(title=x_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="y", range=[min_value_channel2, max_value_channel2]),
+            yaxis=dict(title=y_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="x", range=[min_value_channel4, max_value_channel4]),
+            xaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log"),
+            yaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log"),
+            bargap=0,
+            showlegend=False,
+            # title="Hexbin Plot with Histograms",
+            plot_bgcolor="#121212",
+            paper_bgcolor="#121212",
+            # Set the font color to white
+            font=dict(color="white"),
+        )
+
+        return fig
+    else:
+        return go.Figure()
+
+
+@app.callback(
+    Output("x_y_positions", "figure"),
+    [
+        Input("channel_checklist", "value"),
+        Input("min_value_Channel1", "value"),
+        Input("max_value_Channel1", "value"),
+        Input("min_value_Channel2", "value"),
+        Input("max_value_Channel2", "value"),
+        Input("min_value_Channel3", "value"),
+        Input("max_value_Channel3", "value"),
+        Input("min_value_Channel4", "value"),
+        Input("max_value_Channel4", "value"),
+        Input("operation_number_dropdown", "value"),
+        Input("is_commanded_checkbox", "value"),
+        Input("lin_correction_checkbox", "value"),
+        Input("zmin_xy", "value"),
+        Input("zmax_xy", "value"),
+    ],
+)
+def update_x_y_positions(
+    channel_checklist,
+    min_value_channel1,
+    max_value_channel1,
+    min_value_channel2,
+    max_value_channel2,
+    min_value_channel3,
+    max_value_channel3,
+    min_value_channel4,
+    max_value_channel4,
+    operation_number_dropdown,
+    is_commanded_checkbox,
+    lin_correction_checkbox,
+    zmin,
+    zmax,
+):
+    # Filter the data based on the operation number
+    df_filtered = df[df["operation_number"] == operation_number_dropdown]
+
+    # If the min or max values are not provided, set them to 0 and 4.51 respectively
+    for channel in channel_checklist:
+        if channel == "Channel1":
+            if min_value_channel1 is None:
+                min_value_channel1 = 1.3
+            if max_value_channel1 is None:
+                max_value_channel1 = 3.3
+        elif channel == "Channel2":
+            if min_value_channel2 is None:
+                min_value_channel2 = 1.3
+            if max_value_channel2 is None:
+                max_value_channel2 = 3.3
+        elif channel == "Channel3":
+            if min_value_channel3 is None:
+                min_value_channel3 = 1.3
+            if max_value_channel3 is None:
+                max_value_channel3 = 3.3
+        elif channel == "Channel4":
+            if min_value_channel4 is None:
+                min_value_channel4 = 1.3
+            if max_value_channel4 is None:
+                max_value_channel4 = 3.3
+
+    # Filter the data based on the min and max values of each channel
+    df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+
+    # Filter the data based on the IsCommanded event
+    if "is_commanded" in is_commanded_checkbox:
+        df_filtered = df_filtered
+    else:
+        df_filtered = df_filtered[~df_filtered["IsCommanded"]]
+
+    # Check if lin_correction is selected
     if "lin_correction" in lin_correction_checkbox:
-        df_filtered["Channel_1"] = df_filtered["Channel_1"] * 2
+        x_plot_key = "x_mcp_lin"
+        y_plot_key = "y_mcp_lin"
+    else:
+        x_plot_key = "x_mcp"
+        y_plot_key = "y_mcp"
 
-    # Create a figure
-    fig = px.line(df_filtered, x=df_filtered.index, y=channel_checklist, title="Line Plot")
+    threshold = 5
 
-    # Update the x-axis
-    fig.update_xaxes(title_text="Date", tickformat="%H:%M:%S", tickangle=45, tickfont=dict(size=10), showgrid=True, gridwidth=1, gridcolor="gray")
+    # Custom colorscale:
+    custom_colorscale = [
+        (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
+        ((threshold - 1) / 1000, "white"),  # White just above threshold
+        (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
+        (0.3, "#5a01a7"),  # Purple
+        (0.5, "#9c179e"),  # Magenta
+        (0.7, "#e16462"),  # Orange-red
+        (0.9, "#fca636"),  # Orange-yellow
+        (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
+    ]
+    bin_numbers = 100
 
-    # Update the y-axis
-    fig.update_yaxes(title_text="Value", showgrid=True, gridwidth=1, gridcolor="gray")
+    if zmin is None:
+        zmin = 1
+    if zmax is None:
+        zmax = 120
+
+    # Define the tick values dynamically using log scale
+    tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
+    ticktext = [str(int(i)) for i in tickvals]
+    # Create hexbin plot
+    fig = go.Figure()
+
+    # Add a histogram trace
+    fig.add_trace(
+        go.Histogram2d(
+            x=df_filtered[x_plot_key],
+            y=df_filtered[y_plot_key],
+            colorscale=custom_colorscale,
+            nbinsx=bin_numbers,
+            nbinsy=bin_numbers,
+            showscale=True,
+            colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+            zmin=zmin,
+            zmax=zmax,
+            zauto=False,
+        )
+    )
+
+    # Set the x and y aspect ratio to be equal
+    # fig.update_layout(aspectmode="equal")
+
+    x_counts, x_bins = np.histogram(df_filtered[x_plot_key], bins=100)
+    y_counts, y_bins = np.histogram(df_filtered[y_plot_key], bins=100)
+
+    x_step_x = 0.5 * (x_bins[:-1] + x_bins[1:])
+    # x_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+    # y_step_x = 0.5 * (y_bins[:-1] + y_bins[1:])
+    y_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+
+    fig.add_trace(
+        go.Scatter(
+            x=x_step_x,
+            y=x_counts,
+            yaxis="y2",
+            mode="lines",
+            line=dict(color="green"),
+            name="X",
+            line_shape="hvh",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=y_counts,
+            y=y_step_y,
+            xaxis="x2",
+            mode="lines",
+            line=dict(color="green"),
+            name="Y",
+            line_shape="hvh",
+        )
+    )
+
+    # Update layout for subplots
+    fig.update_layout(
+        xaxis=dict(title="X [cm]", domain=[0, 0.85], gridcolor="rgba(255, 255, 255, 0.2)", showgrid=True, scaleanchor="y", range=[-5, 5], autorange=False),
+        yaxis=dict(title="Y [cm]", domain=[0, 0.85], gridcolor="rgba(255, 255, 255, 0.2)", showgrid=True, scaleanchor="x", range=[-5, 5], autorange=False),
+        xaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log", range=[-5, 5], autorange=False),
+        yaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log", range=[-5, 5], autorange=False),
+        bargap=0,
+        showlegend=False,
+        # title="Hexbin Plot with Histograms",
+        plot_bgcolor="#121212",
+        paper_bgcolor="#121212",
+        # Set the font color to white
+        font=dict(color="white"),
+    )
 
     return fig
 
