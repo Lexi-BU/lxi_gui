@@ -59,7 +59,6 @@ def read_sci_l1c_data():
         df_list.append(df)
 
     df_all = pd.concat(df_list)
-    print(df_all.head())
 
     # Set the Date column as the index
     df_all["Date"] = pd.to_datetime(df_all["Date"])
@@ -67,12 +66,10 @@ def read_sci_l1c_data():
     # df_all["Date"] = df_all["Date"].dt.tz_localize("UTC")
     df_all = df_all.set_index("Date", inplace=False)
 
-    print(df_all.head())
-
     return df_all
 
 
-read_data = False
+read_data = True
 if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()

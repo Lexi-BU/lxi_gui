@@ -119,7 +119,6 @@ def update_graph(
 ):
     # Filter the data based on the operation number
     df_filtered = df[df["operation_number"] == operation_number_dropdown]
-    print(f"df_filtered: {df_filtered.keys()}")
 
     # Filter the data based on the IsCommanded event
     # if "is_commanded" in is_commanded_checkbox:
@@ -131,7 +130,6 @@ def update_graph(
     # if "lin_correction" in lin_correction_checkbox:
     #     df_filtered["Channel1"] = df_filtered["Channel1"] * 2
 
-    print(f"channel_checklist: {channel_checklist}")
     # Check if exactly two channels are selected
     if "Channel1" and "Channel3" in channel_checklist:
         x_channel, y_channel = "Channel1", "Channel3"
@@ -149,31 +147,44 @@ def update_graph(
                 colorscale="Plasma",
                 ncontours=20,
                 showscale=True,
-                colorbar=dict(title="Count", tickvals=np.logspace(0.01, 3, 4), ticktext=["1", "10", "100", "1000"]),
-                zmin=1,
+                colorbar=dict(title="Count",), #  tickvals=np.logspace(0.01, 3, 5), ticktext=["1", "10", "100", "1000"]),
+                zmin=5,
                 zmax=1000,
                 zauto=False,
             )
         )
 
-        # Add histograms along the x and y axes
-        fig.add_trace(
-            go.Histogram(
-                x=x_data,
-                yaxis="y2",
-                marker=dict(color="rgba(0,0,0,0.5)"),
-                name=f"{x_channel} Histogram",
-            )
-        )
-        fig.add_trace(
-            go.Histogram(
-                y=y_data,
-                xaxis="x2",
-                marker=dict(color="rgba(0,0,0,0.5)"),
-                name=f"{y_channel} Histogram",
-            )
-        )
+        x_counts, x_bins = np.histogram(x_data, bins=100)
+        y_counts, y_bins = np.histogram(y_data, bins=100)
 
+        x_step_x = 0.5 * (x_bins[:-1] + x_bins[1:])
+        # x_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+
+        # y_step_x = 0.5 * (y_bins[:-1] + y_bins[1:])
+        y_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
+
+        fig.add_trace(
+            go.Scatter(
+                x=x_step_x,
+                y=x_counts,
+                yaxis="y2",
+                mode="lines",
+                line=dict(color="green"),
+                name=f"{x_channel} Histogram",
+                line_shape="hvh",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=y_counts,
+                y=y_step_y,
+                xaxis="x2",
+                mode="lines",
+                line=dict(color="green"),
+                name=f"{y_channel} Histogram",
+                line_shape="hvh",
+            )
+        )
         # Update layout for subplots
         fig.update_layout(
             xaxis=dict(title=x_channel, domain=[0, 0.85], showgrid=False),
