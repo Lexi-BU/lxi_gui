@@ -155,7 +155,7 @@ def update_graph(
             go.Histogram2dContour(
                 x=x_data,
                 y=y_data,
-                colorscale=custom_colorscale,
+                colorscale="plasma",
                 ncontours=20,
                 showscale=True,
                 colorbar=dict(title="Count", tickvals=np.logspace(0.01, 3, 4), ticktext=["1", "10", "100", "1000"]),
