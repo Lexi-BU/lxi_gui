@@ -72,7 +72,8 @@ def read_sci_l1c_data():
     return df_all
 
 
-if __name__ == "__main__":
+read_data = False
+if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()
     # Add operation number to the data
@@ -92,3 +93,148 @@ if __name__ == "__main__":
 
         # Print the progress
         print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
+
+
+app = dash.Dash(__name__)
+
+
+app.layout = html.Div(
+    style={"height": "99vh", "width": "99vw", "backgroundColor": "#121212", "color": "white", "padding": "0px", "overflow": "hidden", "display": "flex", "flexDirection": "column", "alignItems": "left", "justifyContent": "center", "marginLeft": "0vw", "marginRight": "0vw", "justify": "center"},
+    children=[
+        # Add four check boxes corresponding to the four Channels
+        html.Div(
+            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+            children=[
+                dcc.Checklist(
+                    id="channel_checklist",
+                    options=[
+                        {"label": "Channel 1", "value": "Channel1"},
+                        {"label": "Channel 2", "value": "Channel2"},
+                        {"label": "Channel 3", "value": "Channel3"},
+                        {"label": "Channel 4", "value": "Channel4"},
+                    ],
+                    inline=True,
+                    value=["Channel1", "", "Channel3", ""],
+                    style={"color": "white"},
+                )
+            ],
+        ),
+        # Add the input boxes for minimum and maximum value of each channel
+        html.Div(
+            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+            children=[
+                dcc.Input(id="min_value_channel_1", type="number", placeholder="Min Value", style={"color": "black"}),
+                dcc.Input(id="max_value_channel_1", type="number", placeholder="Max Value", style={"color": "black"}),
+                dcc.Input(id="min_value_channel_2", type="number", placeholder="Min Value", style={"color": "black"}),
+                dcc.Input(id="max_value_channel_2", type="number", placeholder="Max Value", style={"color": "black"}),
+                dcc.Input(id="min_value_channel_3", type="number", placeholder="Min Value", style={"color": "black"}),
+                dcc.Input(id="max_value_channel_3", type="number", placeholder="Max Value", style={"color": "black"}),
+                dcc.Input(id="min_value_channel_4", type="number", placeholder="Min Value", style={"color": "black"}),
+                dcc.Input(id="max_value_channel_4", type="number", placeholder="Max Value", style={"color": "black"}),
+            ],
+        ),
+
+        # Add the dropdown menu for to select the operation number
+        html.Div(
+            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+            children=[
+                dcc.Dropdown(
+                    id="operation_number_dropdown",
+                    options=[{"label": f"Operation {i}", "value": i} for i in range(1, operation_number + 1)],
+                    value=1,
+                    className="dark-dropdown",
+                    style={"width": "50%", "marginBottom": "2px", "marginTop": "2px", "marginLeft": "5px", "marginRight": "5px"},
+                )
+            ],
+        ),
+        # Add a checkbox for "IsCommanded" event to be considered or not
+        html.Div(
+            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+            children=[
+                dcc.Checklist(
+                    id="is_commanded_checkbox",
+                    options=[{"label": "IsCommanded", "value": "is_commanded"}],
+                    value=[],
+                    style={"color": "white"},
+                )
+            ],
+        ),
+        # Add a checkbox for "lin_correction" to be applied or not
+        html.Div(
+            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+            children=[
+                dcc.Checklist(
+                    id="lin_correction_checkbox",
+                    options=[{"label": "Linear Correction", "value": "lin_correction"}],
+                    value=[],
+                    style={"color": "white"},
+                )
+            ],
+        ),
+        # Add the graph
+        dcc.Graph(id="line_plot", style={"height": "70vh", "width": "95vw", "overflow": "hidden"}),
+    ],
+)
+
+
+@app.callback(
+    Output("line_plot", "figure"),
+    [
+        Input("channel_checklist", "value"),
+        Input("min_value_channel_1", "value"),
+        Input("max_value_channel_1", "value"),
+        Input("min_value_channel_2", "value"),
+        Input("max_value_channel_2", "value"),
+        Input("min_value_channel_3", "value"),
+        Input("max_value_channel_3", "value"),
+        Input("min_value_channel_4", "value"),
+        Input("max_value_channel_4", "value"),
+        Input("operation_number_dropdown", "value"),
+        Input("is_commanded_checkbox", "value"),
+        Input("lin_correction_checkbox", "value"),
+    ],
+)
+def update_graph(
+    channel_checklist,
+    min_value_channel_1,
+    max_value_channel_1,
+    min_value_channel_2,
+    max_value_channel_2,
+    min_value_channel_3,
+    max_value_channel_3,
+    min_value_channel_4,
+    max_value_channel_4,
+    operation_number_dropdown,
+    is_commanded_checkbox,
+    lin_correction_checkbox,
+):
+    # Filter the data based on the operation number
+    df_filtered = df[df["operation_number"] == operation_number_dropdown]
+
+    # Filter the data based on the IsCommanded event
+    if "is_commanded" in is_commanded_checkbox:
+        df_filtered = df_filtered
+    else:
+        df_filtered = df_filtered[~df_filtered["IsCommanded"]]
+
+    # Apply linear correction
+    if "lin_correction" in lin_correction_checkbox:
+        df_filtered["Channel_1"] = df_filtered["Channel_1"] * 2
+
+    # Create a figure
+    fig = px.line(df_filtered, x=df_filtered.index, y=channel_checklist, title="Line Plot")
+
+    # Update the x-axis
+    fig.update_xaxes(title_text="Date", tickformat="%H:%M:%S", tickangle=45, tickfont=dict(size=10), showgrid=True, gridwidth=1, gridcolor="gray")
+
+    # Update the y-axis
+    fig.update_yaxes(title_text="Value", showgrid=True, gridwidth=1, gridcolor="gray")
+
+    return fig
+
+
+if __name__ == "__main__":
+    host = "127.0.0.5"
+    port = "8050"
+    app.run_server(host=host, port=port, debug=False)
+    print(f"Running on http://{host}:{port}/")
