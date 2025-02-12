@@ -7,6 +7,8 @@ from pathlib import Path
 import glob
 import pandas as pd
 import time
+# import matplotlib
+# matplotlib.use("Agg")
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -122,7 +124,7 @@ def add_operation_numbers(df):
 
 
 start_time = time.time()
-read_data = True
+read_data = False
 if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()
@@ -149,7 +151,7 @@ app = dash.Dash(__name__)
 
 app.layout = html.Div(
     style={
-        "height": "150vh",
+        "height": "100vh",
         "width": "99vw",
         "backgroundColor": "#121212",
         "color": "white",
@@ -228,7 +230,7 @@ app.layout = html.Div(
         # Add tabs for additional graphs
         dcc.Tabs(
             id="tabs",
-            value="tab-1",
+            value="tab-2",
             children=[
                 dcc.Tab(
                     label="Channel Graphs",
@@ -341,9 +343,6 @@ def update_graph(
     # Filter the data based on the min and max values of each channel
     df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
 
-    # Print the min max value of each channel
-    print(min_value_channel1, max_value_channel1, min_value_channel2, max_value_channel2, min_value_channel3, max_value_channel3, min_value_channel4, max_value_channel4)
-
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
         df_filtered = df_filtered
@@ -357,17 +356,6 @@ def update_graph(
 
         threshold = 5  # Values below this will be transparent
 
-        # Custom colorscale:
-        custom_colorscale = [
-            (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
-            ((threshold - 1) / 1000, "white"),  # White just above threshold
-            (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
-            (0.3, "#5a01a7"),  # Purple
-            (0.5, "#9c179e"),  # Magenta
-            (0.7, "#e16462"),  # Orange-red
-            (0.9, "#fca636"),  # Orange-yellow
-            (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
-        ]
 
         # If zmin and zmax are not provided, set them to 1 and 120 respectively
         if zmin is None:
@@ -376,27 +364,57 @@ def update_graph(
             zmax = 120
         if nbins is None:
             nbins = 50
+        # Custom colorscale:
+        custom_colorscale = [
+            (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
+            ((zmin - 1) / 1000, "white"),  # White just above threshold
+            (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
+            (0.3, "#5a01a7"),  # Purple
+            (0.5, "#9c179e"),  # Magenta
+            (0.7, "#e16462"),  # Orange-red
+            (0.9, "#fca636"),  # Orange-yellow
+            (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
+        ]
         # Define the tick values dynamically using log scale
         tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
-        ticktext = [str(int(i)) for i in tickvals]
+        ticktext = [f"{val:.1f}" for val in tickvals]
         # Create hexbin plot
+
+        hist, x_edges, y_edges = np.histogram2d(x_data, y_data, bins=nbins)
+        # x_edges = np.append(x_edges, x_edges[-1] + (x_edges[-1] - x_edges[-2]))
+        # y_edges = np.append(y_edges, y_edges[-1] + (y_edges[-1] - y_edges[-2]))
+        # x_data = np.repeat(x_edges[:-1], hist.flatten())
+        # y_data = np.repeat(y_edges[:-1], hist.flatten())
+        # Filter out values below the threshold
+        hist[hist < zmin] = 0
         fig = go.Figure()
 
-        # Add hexbin trace
         fig.add_trace(
-            go.Histogram2d(
-                x=x_data,
-                y=y_data,
-                colorscale=custom_colorscale,
-                # ncontours=bin_numbers,
-                nbinsx=nbins,
-                nbinsy=nbins,
+            go.Heatmap(
+                x=x_edges,
+                y=y_edges,
+                z=hist.T,
+                colorscale="inferno",
                 showscale=True,
-                colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+                colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext, tickmode="array", thickness=15),
                 zmin=zmin,
                 zmax=zmax,
                 zauto=False,
             )
+            # go.Histogram2d(
+            #     x=x_data,
+            #     y=y_data,
+            #     z=hist.flatten(),
+            #     colorscale="inferno_r",
+            #     # ncontours=bin_numbers,
+            #     nbinsx=nbins,
+            #     nbinsy=nbins,
+            #     showscale=True,
+            #     colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+            #     zmin=zmin,
+            #     zmax=zmax,
+            #     zauto=True,
+            # )
         )
 
         # Set the x and y aspect ratio to be equal
@@ -436,6 +454,7 @@ def update_graph(
         )
         # Update layout for subplots
         fig.update_layout(
+            height=900,
             xaxis=dict(title=x_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="y", range=[min_value_channel1, max_value_channel1]),
             yaxis=dict(title=y_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="x", range=[min_value_channel3, max_value_channel3]),
             xaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log"),
@@ -533,6 +552,13 @@ def update_histogram(
 
         threshold = 5
 
+        # If zmin and zmax are not provided, set them to 1 and 120 respectively
+        if zmin is None:
+            zmin = 1
+        if zmax is None:
+            zmax = 120
+        if nbins is None:
+            nbins = 50
         # Custom colorscale:
         custom_colorscale = [
             (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
@@ -545,35 +571,44 @@ def update_histogram(
             (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
         ]
 
-        # If zmin and zmax are not provided, set them to 1 and 120 respectively
-        if zmin is None:
-            zmin = 1
-        if zmax is None:
-            zmax = 120
-        if nbins is None:
-            nbins = 50
         # Define the tick values dynamically using log scale
         tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
         ticktext = [str(int(i)) for i in tickvals]
-        # Create hexbin plot
+
+        hist, x_edges, y_edges = np.histogram2d(x_data, y_data, bins=nbins)
+        # Filter out values below the threshold
+        hist[hist < zmin] = 0
+
         fig = go.Figure()
 
-        # Add hexbin trace
         fig.add_trace(
-            go.Histogram2d(
-                x=x_data,
-                y=y_data,
-                colorscale=custom_colorscale,
-                # ncontours=bin_numbers,
-                nbinsx=nbins,
-                nbinsy=nbins,
+            go.Heatmap(
+                x=x_edges,
+                y=y_edges,
+                z=hist.T,
+                colorscale="inferno",
                 showscale=True,
-                colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+                colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext, tickmode="array", thickness=15),
                 zmin=zmin,
                 zmax=zmax,
                 zauto=False,
             )
+            # go.Histogram2d(
+            #     x=x_data,
+            #     y=y_data,
+            #     z=hist.flatten(),
+            #     colorscale="inferno_r",
+            #     # ncontours=bin_numbers,
+            #     nbinsx=nbins,
+            #     nbinsy=nbins,
+            #     showscale=True,
+            #     colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+            #     zmin=zmin,
+            #     zmax=zmax,
+            #     zauto=True,
+            # )
         )
+
 
         # Set the x and y aspect ratio to be equal
         # fig.update_layout(aspectmode="equal")
@@ -610,6 +645,7 @@ def update_histogram(
         )
         # Update layout for subplots
         fig.update_layout(
+            height=900,
             xaxis=dict(title=x_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="y", range=[min_value_channel2, max_value_channel2]),
             yaxis=dict(title=y_channel, domain=[0, 0.85], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", scaleanchor="x", range=[min_value_channel4, max_value_channel4]),
             xaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log"),
@@ -708,12 +744,17 @@ def update_x_y_positions(
         x_plot_key = "x_mcp"
         y_plot_key = "y_mcp"
 
-    threshold = 5
+    if zmin is None:
+        zmin = 1
+    if zmax is None:
+        zmax = 120
+    if nbins is None:
+        nbins = 50
 
     # Custom colorscale:
     custom_colorscale = [
         (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
-        ((threshold - 1) / 1000, "white"),  # White just above threshold
+        ((zmin - 1) / 1000, "white"),  # White just above threshold
         (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
         (0.3, "#5a01a7"),  # Purple
         (0.5, "#9c179e"),  # Magenta
@@ -722,33 +763,73 @@ def update_x_y_positions(
         (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
     ]
 
-    if zmin is None:
-        zmin = 1
-    if zmax is None:
-        zmax = 120
-    if nbins is None:
-        nbins = 50
-
     # Define the tick values dynamically using log scale
     tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
     ticktext = [str(int(i)) for i in tickvals]
-    # Create hexbin plot
+
+    hist, x_edges, y_edges = np.histogram2d(df_filtered[x_plot_key], df_filtered[y_plot_key], bins=nbins)
+    # Filter out values below the threshold
+    hist[hist < zmin] = 0
+
     fig = go.Figure()
 
     # Add a histogram trace
     fig.add_trace(
-        go.Histogram2d(
-            x=df_filtered[x_plot_key],
-            y=df_filtered[y_plot_key],
-            colorscale=custom_colorscale,
-            nbinsx=nbins,
-            nbinsy=nbins,
+        go.Heatmap(
+            x=x_edges,
+            y=y_edges,
+            z=hist.T,
+            colorscale="inferno",
             showscale=True,
-            colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+            colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext, tickmode="array", thickness=15),
             zmin=zmin,
             zmax=zmax,
             zauto=False,
         )
+        # go.Histogram2d(
+        #     x=df_filtered[x_plot_key],
+        #     y=df_filtered[y_plot_key],
+        #     colorscale=custom_colorscale,
+        #     nbinsx=nbins,
+        #     nbinsy=nbins,
+        #     showscale=True,
+        #     colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
+        #     zmin=zmin,
+        #     zmax=zmax,
+        #     zauto=False,
+        # )
+    )
+
+    # Add a circle of radius 5 around the origin
+    theta = np.linspace(0, 2 * np.pi, 100)  # Angles for the circle
+    circle_x = 5 * np.cos(theta)  # x-coordinates of the circle
+    circle_y = 5 * np.sin(theta)  # y-coordinates of the circle
+
+    fig.add_trace(
+        go.Scatter(
+            x=circle_x,
+            y=circle_y,
+            mode="lines",
+            line=dict(color="cyan", width=2),  # Customize circle color and line width
+            name="Circle (r=5)",
+        )
+    )
+
+    # Add annotation with text and arrow
+    fig.add_annotation(
+        x=5 * np.cos(np.pi / 4),  # x-coordinate of the arrow tip (edge of the circle)
+        y=5 * np.sin(np.pi / 4),  # y-coordinate of the arrow tip (edge of the circle)
+        text="Effective area",  # Text to display
+        showarrow=True,  # Show arrow
+        ax=50,  # Arrow length in x-direction (positive = right, negative = left)
+        ay=-50,  # Arrow length in y-direction (positive = down, negative = up)
+        arrowhead=2,  # Arrowhead style
+        arrowsize=1.5,  # Arrow size
+        font=dict(size=14, color="white"),  # Font settings for the text
+        bordercolor="white",  # Border color of the text box
+        borderwidth=1,  # Border width of the text box
+        borderpad=4,  # Padding between text and border
+        bgcolor="black",  # Background color of the text box
     )
 
     # Set the x and y aspect ratio to be equal
@@ -787,6 +868,7 @@ def update_x_y_positions(
 
     # Update layout for subplots
     fig.update_layout(
+        height=900,
         xaxis=dict(title="X [cm]", domain=[0, 0.85], gridcolor="rgba(255, 255, 255, 0.2)", showgrid=True, scaleanchor="y", range=[-5, 5], autorange=False),
         yaxis=dict(title="Y [cm]", domain=[0, 0.85], gridcolor="rgba(255, 255, 255, 0.2)", showgrid=True, scaleanchor="x", range=[-5, 5], autorange=False),
         xaxis2=dict(domain=[0.85, 1], showgrid=True, gridcolor="rgba(255, 255, 255, 0.2)", type="log", range=[-5, 5], autorange=False),
