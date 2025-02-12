@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 from pathlib import Path
 import glob
 import pandas as pd
+import time
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -36,63 +37,12 @@ def check_folder_structure():
             return target_folder
 
     print("\033[1;91m Folder structure not found.\033[0m\n")
-    # Cd into the target folder
-
     return target_folder
 
 
-# Function to process each chunk of the dataframe
-def process_chunk(chunk, start_idx, end_idx):
-    operation_number = 1
-    number_of_data_points = 1
-    chunk_results = []
-
-    for i in range(start_idx, end_idx):
-        if i > 0 and (chunk.index[i] - chunk.index[i - 1]).total_seconds() > 10800:
-            operation_number += 1
-            number_of_data_points = 1
-        else:
-            number_of_data_points += 1
-
-        chunk_results.append((chunk.index[i], operation_number, number_of_data_points))
-
-    return chunk_results
-
-
-# Function to split the dataframe into chunks and process in parallel
-def parallelize_data_processing(df, num_threads=10):
-    chunk_size = len(df) // num_threads
-    chunks = [(i * chunk_size, (i + 1) * chunk_size) for i in range(num_threads)]
-
-    # Adjust the last chunk to cover any remaining rows
-    if len(df) % num_threads != 0:
-        chunks[-1] = (chunks[-1][0], len(df))
-
-    results = []
-
-    with ThreadPoolExecutor(max_workers=num_threads) as executor:
-        future_to_chunk = {executor.submit(process_chunk, df, start, end): (start, end) for start, end in chunks}
-
-        for future in as_completed(future_to_chunk):
-            chunk_start, chunk_end = future_to_chunk[future]
-            try:
-                chunk_results = future.result()
-                results.extend(chunk_results)
-            except Exception as e:
-                print(f"Error processing chunk ({chunk_start}, {chunk_end}): {e}")
-
-    # Create a dataframe with the results
-    operation_number_col = [result[1] for result in results]
-    number_of_data_points_col = [result[2] for result in results]
-
-    # Ensure the lists have the same length as the original df
-    assert len(operation_number_col) == len(df), "Mismatch in the length of the results"
-    assert len(number_of_data_points_col) == len(df), "Mismatch in the length of the results"
-
-    df['operation_number'] = operation_number_col
-    df['number_of_data_points'] = number_of_data_points_col
-
-    return df
+def read_csv_file(csv_file):
+    """Helper function to read a single CSV file."""
+    return pd.read_csv(csv_file)
 
 
 def read_sci_l1c_data():
@@ -100,84 +50,118 @@ def read_sci_l1c_data():
     print(f"Reading data from: {parent_folder}\n")
 
     file_name_format = "lexi_payload_*_*_*_*_sci_output_L1c.csv"
-    csv_files = np.sort(glob.glob(str(parent_folder / "**" / file_name_format), recursive=True))
+    csv_files = np.sort(glob.glob(str(parent_folder / "**" / file_name_format), recursive=True))[:]
 
     print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the {parent_folder}\n")
 
-    # Define the number of threads (adjust as needed based on the number of files)
-    num_threads = 4
-    chunk_size = len(csv_files) // num_threads
-    chunks = [(i * chunk_size, (i + 1) * chunk_size) for i in range(num_threads)]
-
-    # Ensure the last chunk covers all remaining files
-    if len(csv_files) % num_threads != 0:
-        chunks[-1] = (chunks[-1][0], len(csv_files))
-
-    def read_files_chunk(start_idx, end_idx):
-        chunk_list = []
-        for i in range(start_idx, end_idx):
-            print(f"Reading file ==> \x1b[1;32;255m {np.round(i / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
-            df = pd.read_csv(csv_files[i])
-            chunk_list.append(df)
-        return chunk_list
-
-    # Use ThreadPoolExecutor to read CSV files in parallel
     df_list = []
-    with ThreadPoolExecutor(max_workers=num_threads) as executor:
-        future_to_chunk = {executor.submit(read_files_chunk, start, end): (start, end) for start, end in chunks}
+    with ThreadPoolExecutor() as executor:
+        # Submit tasks to read CSV files in parallel
+        future_to_file = {executor.submit(read_csv_file, csv_file): csv_file for csv_file in csv_files}
 
-        for future in as_completed(future_to_chunk):
+        for i, future in enumerate(as_completed(future_to_file)):
+            csv_file = future_to_file[future]
             try:
-                chunk_data = future.result()
-                df_list.extend(chunk_data)  # Combine the results from each chunk
+                df = future.result()
+                df_list.append(df)
+                print(f"Reading file ==> \x1b[1;32;255m {np.round((i + 1) / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
             except Exception as e:
-                print(f"Error processing chunk: {e}")
+                print(f"Error reading file {csv_file}: {e}")
 
-    # Concatenate all dataframes from the chunks
     df_all = pd.concat(df_list)
 
     # Set the Date column as the index
     df_all["Date"] = pd.to_datetime(df_all["Date"])
-    # Set the timezones to UTC (optional)
-    # df_all["Date"] = df_all["Date"].dt.tz_localize("UTC")
     df_all = df_all.set_index("Date", inplace=False)
+    # Sort the data based on the Date index
+    df_all = df_all.sort_index()
 
     return df_all
 
 
-read_data = True
+def add_operation_numbers(df):
+    """Add operation numbers and data points in parallel."""
+    operation_number = 1
+    number_of_data_points = 1
+    start_time = time.time()  # Track start time
+
+    def process_row(i):
+        nonlocal operation_number, number_of_data_points
+        if (df.index[i] - df.index[i - 1]).total_seconds() > 10800:
+            operation_number += 1
+            number_of_data_points = 1
+        else:
+            number_of_data_points += 1
+        return i, operation_number, number_of_data_points
+
+    with ThreadPoolExecutor() as executor:
+        # Submit tasks to process rows in parallel
+        future_to_index = {executor.submit(process_row, i): i for i in range(1, len(df))}
+
+        for future in as_completed(future_to_index):
+            i, op_num, data_points = future.result()
+            df.loc[df.index[i], "number_of_data_points"] = data_points
+            df.loc[df.index[i], "operation_number"] = op_num
+
+            # Calculate elapsed time and estimated time remaining
+            elapsed_time = time.time() - start_time
+            avg_time_per_row = elapsed_time / i if i > 0 else 0
+            estimated_total_time = avg_time_per_row * len(df)
+            remaining_time = estimated_total_time - elapsed_time
+
+            # Improved progress message with time estimates
+            print(
+                f"Progress: {np.round(i / len(df) * 100, 6)}% complete | "
+                # f"Operation {op_num} of {len(df)} | "
+                f"Elapsed: {np.round(elapsed_time, 6)}s | ",
+                # f"Remaining: {np.round(remaining_time, 2)}s",
+                end="\r"
+            )
+
+    return df
+
+
+start_time = time.time()
+read_data = False
 if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()
     # Add operation number to the data
     df["operation_number"] = 1
     df["number_of_data_points"] = 1
-    operation_number = 1
-    number_of_data_points = 1
 
-    # Process the dataframe in parallel
-    df = parallelize_data_processing(df)
+    # Parallelize the operation number assignment
+    df = add_operation_numbers(df)
 
-    # Print the progress (optional, could be done more efficiently in parallel with a callback or progress bar)
-    for i in range(1, len(df)):
-        print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
-    # for i in range(1, len(df)):
-    #     if (df.index[i] - df.index[i - 1]).total_seconds() > 10800:
-    #         operation_number += 1
-    #         number_of_data_points = 1
-    #     else:
-    #         number_of_data_points += 1
-    #     df.loc[df.index[i], "number_of_data_points"] = number_of_data_points
-    #     df.loc[df.index[i], "operation_number"] = operation_number
+    end_time = time.time()
 
-    #     # Print the progress
-    #     print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
+    print(f"\n\nTotal time taken: {np.round(end_time - start_time, 3)} seconds\n")
+
+    # Save the data to a pickle file
+    df.to_pickle("../data/df_all.pkl")
+else:
+    # Load the data from the pickle file
+    # df = pd.read_pickle("../data/df_all.pkl")
+    pass
 
 
 app = dash.Dash(__name__)
 
 app.layout = html.Div(
-    style={"height": "90vh", "width": "99vw", "backgroundColor": "#121212", "color": "white", "padding": "0px", "overflow": "scroll", "display": "flex", "flexDirection": "column", "alignItems": "left", "justifyContent": "center", "marginLeft": "0vw", "marginRight": "0vw", "justify": "center"},
+    style={
+        "height": "150vh",
+        "width": "99vw",
+        "backgroundColor": "#121212",
+        "color": "white",
+        "padding": "0px",
+        "overflow": "scroll",
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "left",
+        "justifyContent": "flex-start",
+        "marginLeft": "0vw",
+        "marginRight": "0vw",
+        "justify": "center"},
     children=[
         # Add four check boxes corresponding to the four Channels
         html.Div(
@@ -206,8 +190,9 @@ app.layout = html.Div(
                 # Dropdown for operation number
                 dcc.Dropdown(
                     id="operation_number_dropdown",
-                    options=[{"label": f"Operation {i}", "value": i} for i in range(1, 3)],
-                    value=1,
+                    options=[{"label": f"Operation {i}", "value": i} for i in range(1, len(df["operation_number"].unique()) + 1)],
+                    # Set the default value to the last operation number
+                    value=df["operation_number"].unique()[-1],
                     className="dark-dropdown",
                     style={"width": "200px", "marginRight": "20px", "color": "black"},
                 ),
@@ -227,13 +212,17 @@ app.layout = html.Div(
                 ),
                 # Add two input boxes for zmin and zmax
                 html.Label("Zmin", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmin", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px"}),
+                dcc.Input(id="zmin", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px", "width": "70px"}),
                 html.Label("Zmax", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmax", type="number", placeholder="Zmax", style={"color": "black"}),
+                dcc.Input(id="zmax", type="number", placeholder="Zmax", style={"color": "black", "width": "70px"}),
                 html.Label("Zmin (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmin_xy", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px"}),
+                dcc.Input(id="zmin_xy", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px", "width": "70px"}),
                 html.Label("Zmax (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmax_xy", type="number", placeholder="Zmax", style={"color": "black"}),
+                dcc.Input(id="zmax_xy", type="number", placeholder="Zmax", style={"color": "black", "width": "70px"}),
+                html.Label("Bins (v)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                dcc.Input(id="nbins", type="number", placeholder="Bins", style={"color": "black", "width": "70px"}),
+                html.Label("Bins (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                dcc.Input(id="nbins_xy", type="number", placeholder="Bins", style={"color": "black", "width": "70px"}),
             ],
         ),
         # Add tabs for additional graphs
@@ -244,7 +233,7 @@ app.layout = html.Div(
                 dcc.Tab(
                     label="Channel Graphs",
                     value="graphs",
-                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "100%"},
+                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "20%"},
                     children=[
                         html.Div(
                             style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
@@ -258,7 +247,7 @@ app.layout = html.Div(
                 dcc.Tab(
                     label="X-Y Positions",
                     value="tab-2",
-                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "100%"},
+                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "20%"},
                     children=[
                         # Content for the second tab
                         html.Div(
@@ -282,8 +271,8 @@ app.layout = html.Div(
 def update_input_boxes(selected_channels):
     input_boxes = []
     for channel in selected_channels:
-        input_boxes.append(dcc.Input(id=f"min_value_{channel}", type="number", placeholder=f"Min {channel}", style={"color": "black", "marginRight": "10px"}))
-        input_boxes.append(dcc.Input(id=f"max_value_{channel}", type="number", placeholder=f"Max {channel}", style={"color": "black", "marginRight": "10px"}))
+        input_boxes.append(dcc.Input(id=f"min_value_{channel}", type="number", placeholder=f"Min {channel[-1]}", style={"color": "black", "marginRight": "10px", "width": "70px"}))
+        input_boxes.append(dcc.Input(id=f"max_value_{channel}", type="number", placeholder=f"Max {channel[-1]}", style={"color": "black", "marginRight": "10px", "width": "70px"}))
     return input_boxes
 
 
@@ -304,6 +293,7 @@ def update_input_boxes(selected_channels):
         Input("lin_correction_checkbox", "value"),
         Input("zmin", "value"),
         Input("zmax", "value"),
+        Input("nbins", "value"),
     ],
 )
 def update_graph(
@@ -321,6 +311,7 @@ def update_graph(
     lin_correction_checkbox,
     zmin,
     zmax,
+    nbins,
 ):
     # Filter the data based on the operation number
     df_filtered = df[df["operation_number"] == operation_number_dropdown]
@@ -377,14 +368,14 @@ def update_graph(
             (0.9, "#fca636"),  # Orange-yellow
             (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
         ]
-        bin_numbers = 100
 
         # If zmin and zmax are not provided, set them to 1 and 120 respectively
         if zmin is None:
             zmin = 1
         if zmax is None:
             zmax = 120
-
+        if nbins is None:
+            nbins = 50
         # Define the tick values dynamically using log scale
         tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
         ticktext = [str(int(i)) for i in tickvals]
@@ -393,11 +384,13 @@ def update_graph(
 
         # Add hexbin trace
         fig.add_trace(
-            go.Histogram2dContour(
+            go.Histogram2d(
                 x=x_data,
                 y=y_data,
                 colorscale=custom_colorscale,
-                ncontours=bin_numbers,
+                # ncontours=bin_numbers,
+                nbinsx=nbins,
+                nbinsy=nbins,
                 showscale=True,
                 colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
                 zmin=zmin,
@@ -478,6 +471,7 @@ def update_graph(
         Input("lin_correction_checkbox", "value"),
         Input("zmin", "value"),
         Input("zmax", "value"),
+        Input("nbins", "value"),
     ],
 )
 def update_histogram(
@@ -495,6 +489,7 @@ def update_histogram(
     lin_correction_checkbox,
     zmin,
     zmax,
+    nbins,
 ):
     # Filter the data based on the operation number
     df_filtered = df[df["operation_number"] == operation_number_dropdown]
@@ -549,13 +544,14 @@ def update_histogram(
             (0.9, "#fca636"),  # Orange-yellow
             (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
         ]
-        bin_numbers = 100
+
         # If zmin and zmax are not provided, set them to 1 and 120 respectively
         if zmin is None:
             zmin = 1
         if zmax is None:
             zmax = 120
-
+        if nbins is None:
+            nbins = 50
         # Define the tick values dynamically using log scale
         tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
         ticktext = [str(int(i)) for i in tickvals]
@@ -564,11 +560,13 @@ def update_histogram(
 
         # Add hexbin trace
         fig.add_trace(
-            go.Histogram2dContour(
+            go.Histogram2d(
                 x=x_data,
                 y=y_data,
                 colorscale=custom_colorscale,
-                ncontours=bin_numbers,
+                # ncontours=bin_numbers,
+                nbinsx=nbins,
+                nbinsy=nbins,
                 showscale=True,
                 colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
                 zmin=zmin,
@@ -647,6 +645,7 @@ def update_histogram(
         Input("lin_correction_checkbox", "value"),
         Input("zmin_xy", "value"),
         Input("zmax_xy", "value"),
+        Input("nbins_xy", "value"),
     ],
 )
 def update_x_y_positions(
@@ -664,6 +663,7 @@ def update_x_y_positions(
     lin_correction_checkbox,
     zmin,
     zmax,
+    nbins,
 ):
     # Filter the data based on the operation number
     df_filtered = df[df["operation_number"] == operation_number_dropdown]
@@ -721,12 +721,13 @@ def update_x_y_positions(
         (0.9, "#fca636"),  # Orange-yellow
         (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
     ]
-    bin_numbers = 100
 
     if zmin is None:
         zmin = 1
     if zmax is None:
         zmax = 120
+    if nbins is None:
+        nbins = 50
 
     # Define the tick values dynamically using log scale
     tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
@@ -740,8 +741,8 @@ def update_x_y_positions(
             x=df_filtered[x_plot_key],
             y=df_filtered[y_plot_key],
             colorscale=custom_colorscale,
-            nbinsx=bin_numbers,
-            nbinsy=bin_numbers,
+            nbinsx=nbins,
+            nbinsy=nbins,
             showscale=True,
             colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
             zmin=zmin,
