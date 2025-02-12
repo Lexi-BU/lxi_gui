@@ -25,7 +25,7 @@ def check_folder_structure():
     # Start from the current directory and go up to 3 levels
     current_path = Path.cwd()
 
-    for i in range(4):
+    for i in range(10):
         # Get the current directory by moving up 'i' levels
         check_path = current_path.parents[i] if i < len(current_path.parents) else current_path
 
@@ -111,7 +111,7 @@ def add_operation_numbers(df):
 
             # Improved progress message with time estimates
             print(
-                f"Progress: {np.round(i / len(df) * 100, 6)}% complete | "
+                f"Progress: {np.round(i / len(df) * 100, 3)}% complete | "
                 # f"Operation {op_num} of {len(df)} | "
                 f"Elapsed: {np.round(elapsed_time, 6)}s | ",
                 # f"Remaining: {np.round(remaining_time, 2)}s",
@@ -122,7 +122,7 @@ def add_operation_numbers(df):
 
 
 start_time = time.time()
-read_data = False
+read_data = True
 if read_data:
     # Check the folder structure
     df = read_sci_l1c_data()
