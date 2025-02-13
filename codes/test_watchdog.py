@@ -1,26 +1,20 @@
+import time
 import numpy as np
-import plotly.graph_objects as go
+import pandas as pd
+import glob
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output
-from pathlib import Path
-import glob
-import pandas as pd
-import time
-# import matplotlib
-# matplotlib.use("Agg")
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from dash.dependencies import Input, Output, State
+import plotly.graph_objects as go
+import threading
 
 
-def forward(y):
-    """Custom forward scale function"""
-    return np.where(np.abs(y) <= 1, y, np.sign(y) * (1 + np.log10(np.abs(y))))
-
-
-def inverse(y):
-    """Custom inverse scale function"""
-    return np.where(np.abs(y) <= 1, y, np.sign(y) * 10 ** (np.abs(y) - 1))
+# Global dataframe to store the data
+df_all = pd.DataFrame()
 
 
 def check_folder_structure():
@@ -44,7 +38,19 @@ def check_folder_structure():
 
 def read_csv_file(csv_file):
     """Helper function to read a single CSV file."""
-    return pd.read_csv(csv_file)
+    try:
+        # Attempt to read the file
+        df = pd.read_csv(csv_file)
+        if df.empty:
+            print(f"File is empty: {csv_file}")
+            return None
+        return df
+    except pd.errors.EmptyDataError:
+        print(f"File is empty or corrupted: {csv_file}")
+        return None
+    except Exception as e:
+        print(f"Error reading file {csv_file}: {e}")
+        return None
 
 
 def read_sci_l1c_data():
@@ -65,8 +71,9 @@ def read_sci_l1c_data():
             csv_file = future_to_file[future]
             try:
                 df = future.result()
-                df_list.append(df)
-                print(f"Reading file ==> \x1b[1;32;255m {np.round((i + 1) / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
+                if df is not None:
+                    df_list.append(df)
+                    print(f"Reading file ==> \x1b[1;32;255m {np.round((i + 1) / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
             except Exception as e:
                 print(f"Error reading file {csv_file}: {e}")
 
@@ -81,189 +88,211 @@ def read_sci_l1c_data():
     return df_all
 
 
-def add_operation_numbers(df):
-    """Add operation numbers and data points in parallel."""
-    operation_number = 1
+def add_operation_numbers(df, last_operation_number=0):
+    """Add operation numbers and data points."""
+    operation_number = last_operation_number + 1
     number_of_data_points = 1
     start_time = time.time()  # Track start time
 
-    def process_row(i):
-        nonlocal operation_number, number_of_data_points
+    # Initialize columns if they don't exist
+    if "operation_number" not in df.columns:
+        df["operation_number"] = 1
+    if "number_of_data_points" not in df.columns:
+        df["number_of_data_points"] = 1
+
+    # Iterate through the dataframe and update operation numbers
+    for i in range(1, len(df)):
         if (df.index[i] - df.index[i - 1]).total_seconds() > 10800:
             operation_number += 1
             number_of_data_points = 1
         else:
             number_of_data_points += 1
-        return i, operation_number, number_of_data_points
+        df.loc[df.index[i], "operation_number"] = operation_number
+        df.loc[df.index[i], "number_of_data_points"] = number_of_data_points
 
-    with ThreadPoolExecutor() as executor:
-        # Submit tasks to process rows in parallel
-        future_to_index = {executor.submit(process_row, i): i for i in range(1, len(df))}
+        # Calculate elapsed time and estimated time remaining
+        elapsed_time = time.time() - start_time
 
-        for future in as_completed(future_to_index):
-            i, op_num, data_points = future.result()
-            df.loc[df.index[i], "number_of_data_points"] = data_points
-            df.loc[df.index[i], "operation_number"] = op_num
-
-            # Calculate elapsed time and estimated time remaining
-            elapsed_time = time.time() - start_time
-            avg_time_per_row = elapsed_time / i if i > 0 else 0
-            estimated_total_time = avg_time_per_row * len(df)
-            remaining_time = estimated_total_time - elapsed_time
-
-            # Improved progress message with time estimates
-            print(
-                f"Progress: {np.round(i / len(df) * 100, 3)}% complete | "
-                # f"Operation {op_num} of {len(df)} | "
-                f"Elapsed: {np.round(elapsed_time, 6)}s | ",
-                # f"Remaining: {np.round(remaining_time, 2)}s",
-                end="\r"
-            )
+        # Improved progress message with time estimates
+        print(
+            f"Progress: {np.round(i / len(df) * 100, 3)}% complete | "
+            f"Elapsed: {np.round(elapsed_time, 6)}s | ",
+            end="\r"
+        )
 
     return df
 
 
-start_time = time.time()
-read_data = False
-if read_data:
-    # Check the folder structure
-    df = read_sci_l1c_data()
-    # Add operation number to the data
-    df["operation_number"] = 1
-    df["number_of_data_points"] = 1
+class NewFileHandler(FileSystemEventHandler):
+    def on_created(self, event):
+        global df_all
+        if event.is_directory:
+            return
+        if event.src_path.endswith(".csv"):
+            print(f"New file detected: {event.src_path}")
+            # Wait for the file to be fully written
+            time.sleep(2)  # Adjust the delay as needed
+            retries = 3
+            for attempt in range(retries):
+                try:
+                    new_df = read_csv_file(event.src_path)
+                    if new_df is not None:
+                        new_df["Date"] = pd.to_datetime(new_df["Date"])
+                        new_df = new_df.set_index("Date", inplace=False)
+                        # Get the last operation number from the existing dataframe
+                        last_operation_number = np.max(df_all["operation_number"].unique())
+                        # Add the operation numbers to the new dataframe
+                        new_df = add_operation_numbers(new_df, last_operation_number)
+                        df_all = pd.concat([df_all, new_df])
+                        df_all = df_all.sort_index()
+                        print(f"Dataframe updated with new file: {event.src_path}")
+                        # Recalculate operation numbers for the entire dataframe
+                        df_all = add_operation_numbers(df_all)
+                        break
+                    else:
+                        print(f"File is empty or could not be read: {event.src_path}")
+                except Exception as e:
+                    print(f"Attempt {attempt + 1} failed for file {event.src_path}: {e}")
+                    time.sleep(1)  # Wait before retrying
+            else:
+                print(f"Failed to read file after {retries} attempts: {event.src_path}")
 
-    # Parallelize the operation number assignment
-    df = add_operation_numbers(df)
 
-    end_time = time.time()
+def start_watching(target_folder):
+    event_handler = NewFileHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path=target_folder, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
-    print(f"\n\nTotal time taken: {np.round(end_time - start_time, 3)} seconds\n")
 
-    # Save the data to a pickle file
-    df.to_pickle("../data/df_all.pkl")
-else:
-    # Load the data from the pickle file
-    # df = pd.read_pickle("../data/df_all.pkl")
-    pass
-
-
+# Initialize Dash app
 app = dash.Dash(__name__)
 
-app.layout = html.Div(
-    style={
-        "height": "100vh",
-        "width": "99vw",
-        "backgroundColor": "#121212",
-        "color": "white",
-        "padding": "0px",
-        "overflow": "scroll",
-        "display": "flex",
-        "flexDirection": "column",
-        "alignItems": "left",
-        "justifyContent": "flex-start",
-        "marginLeft": "0vw",
-        "marginRight": "0vw",
-        "justify": "center"},
-    children=[
-        # Add four check boxes corresponding to the four Channels
-        html.Div(
-            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
-            children=[
-                dcc.Checklist(
-                    id="channel_checklist",
-                    options=[
-                        {"label": "Channel 1", "value": "Channel1"},
-                        {"label": "Channel 2", "value": "Channel2"},
-                        {"label": "Channel 3", "value": "Channel3"},
-                        {"label": "Channel 4", "value": "Channel4"},
-                    ],
-                    inline=True,
-                    value=["Channel1", "Channel2", "Channel3", "Channel4"],
-                    style={"color": "white"},
-                )
-            ],
-        ),
-        # Add the input boxes for minimum and maximum value of each channel
-        html.Div(id="input_boxes", style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"}),
-        # Add the dropdown menu and checkboxes in the same row
-        html.Div(
-            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center", "marginTop": "10px"},
-            children=[
-                # Dropdown for operation number
-                dcc.Dropdown(
-                    id="operation_number_dropdown",
-                    options=[{"label": f"Operation {i}", "value": i} for i in range(1, len(df["operation_number"].unique()) + 1)],
-                    # Set the default value to the last operation number
-                    value=df["operation_number"].unique()[-1],
-                    className="dark-dropdown",
-                    style={"width": "200px", "marginRight": "20px", "color": "black"},
-                ),
-                # Checkbox for "IsCommanded"
-                dcc.Checklist(
-                    id="is_commanded_checkbox",
-                    options=[{"label": "IsCommanded", "value": "is_commanded"}],
-                    value=[],
-                    style={"color": "white", "marginRight": "20px"},
-                ),
-                # Checkbox for "Linear Correction"
-                dcc.Checklist(
-                    id="lin_correction_checkbox",
-                    options=[{"label": "Linear Correction", "value": "lin_correction"}],
-                    value=["lin_correction"],
-                    style={"color": "white"},
-                ),
-                # Add two input boxes for zmin and zmax
-                html.Label("Zmin", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmin", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px", "width": "70px"}),
-                html.Label("Zmax", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmax", type="number", placeholder="Zmax", style={"color": "black", "width": "70px"}),
-                html.Label("Zmin (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmin_xy", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px", "width": "70px"}),
-                html.Label("Zmax (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="zmax_xy", type="number", placeholder="Zmax", style={"color": "black", "width": "70px"}),
-                html.Label("Bins (v)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="nbins", type="number", placeholder="Bins", style={"color": "black", "width": "70px"}),
-                html.Label("Bins (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
-                dcc.Input(id="nbins_xy", type="number", placeholder="Bins", style={"color": "black", "width": "70px"}),
-            ],
-        ),
-        # Add tabs for additional graphs
-        dcc.Tabs(
-            id="tabs",
-            value="tab-2",
-            children=[
-                dcc.Tab(
-                    label="Channel Graphs",
-                    value="graphs",
-                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "20%"},
-                    children=[
-                        html.Div(
-                            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
-                            children=[
-                                dcc.Graph(id="channel_1_3", style={"width": "50%", "height": "100%"}),
-                                dcc.Graph(id="channel_2_4", style={"width": "50%", "height": "100%"}),
-                            ],
-                        ),
-                    ],
-                ),
-                dcc.Tab(
-                    label="X-Y Positions",
-                    value="tab-2",
-                    style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "20%"},
-                    children=[
-                        # Content for the second tab
-                        html.Div(
-                            style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
-                            children=[
-                                dcc.Graph(id="x_y_positions", style={"width": "100%", "height": "100%"}),
-                            ],
-                        ),
-                    ],
-                ),
-            ],
-        ),
-    ],
-)
+
+def create_app_layout(df_all):
+    return html.Div(
+        style={
+            "height": "100vh",
+            "width": "99vw",
+            "backgroundColor": "#121212",
+            "color": "white",
+            "padding": "0px",
+            "overflow": "scroll",
+            "display": "flex",
+            "flexDirection": "column",
+            "alignItems": "left",
+            "justifyContent": "flex-start",
+            "marginLeft": "0vw",
+            "marginRight": "0vw",
+            "justify": "center"},
+        children=[
+            # Add a button to manually update the layout
+            html.Button("Update Layout", id="update-layout-button", n_clicks=0, style={"margin": "10px"}),
+            # Add four check boxes corresponding to the four Channels
+            html.Div(
+                style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+                children=[
+                    dcc.Checklist(
+                        id="channel_checklist",
+                        options=[
+                            {"label": "Channel 1", "value": "Channel1"},
+                            {"label": "Channel 2", "value": "Channel2"},
+                            {"label": "Channel 3", "value": "Channel3"},
+                            {"label": "Channel 4", "value": "Channel4"},
+                        ],
+                        inline=True,
+                        value=["Channel1", "Channel2", "Channel3", "Channel4"],
+                        style={"color": "white"},
+                    )
+                ],
+            ),
+            # Add the input boxes for minimum and maximum value of each channel
+            html.Div(id="input_boxes", style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"}),
+            # Add the dropdown menu and checkboxes in the same row
+            html.Div(
+                style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center", "marginTop": "10px"},
+                children=[
+                    # Dropdown for operation number
+                    dcc.Dropdown(
+                        id="operation_number_dropdown",
+                        options=[{"label": f"Operation {i}", "value": i} for i in range(1, len(df_all["operation_number"].unique()) + 1)],
+                        # Set the default value to the last operation number
+                        value=df_all["operation_number"].unique()[-1],
+                        className="dark-dropdown",
+                        style={"width": "200px", "marginRight": "20px", "color": "black"},
+                    ),
+                    # Checkbox for "IsCommanded"
+                    dcc.Checklist(
+                        id="is_commanded_checkbox",
+                        options=[{"label": "IsCommanded", "value": "is_commanded"}],
+                        value=[],
+                        style={"color": "white", "marginRight": "20px"},
+                    ),
+                    # Checkbox for "Linear Correction"
+                    dcc.Checklist(
+                        id="lin_correction_checkbox",
+                        options=[{"label": "Linear Correction", "value": "lin_correction"}],
+                        value=["lin_correction"],
+                        style={"color": "white"},
+                    ),
+                    # Add two input boxes for zmin and zmax
+                    html.Label("Zmin", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                    dcc.Input(id="zmin", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px", "width": "70px"}),
+                    html.Label("Zmax", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                    dcc.Input(id="zmax", type="number", placeholder="Zmax", style={"color": "black", "width": "70px"}),
+                    html.Label("Zmin (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                    dcc.Input(id="zmin_xy", type="number", placeholder="Zmin", style={"color": "black", "marginRight": "10px", "width": "70px"}),
+                    html.Label("Zmax (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                    dcc.Input(id="zmax_xy", type="number", placeholder="Zmax", style={"color": "black", "width": "70px"}),
+                    html.Label("Bins (v)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                    dcc.Input(id="nbins", type="number", placeholder="Bins", style={"color": "black", "width": "70px"}),
+                    html.Label("Bins (x, y)", style={"color": "white", "marginLeft": "10px", "marginRight": "10px"}),
+                    dcc.Input(id="nbins_xy", type="number", placeholder="Bins", style={"color": "black", "width": "70px"}),
+                ],
+            ),
+            # Add tabs for additional graphs
+            dcc.Tabs(
+                id="tabs",
+                value="tab-2",
+                children=[
+                    dcc.Tab(
+                        label="Channel Graphs",
+                        value="graphs",
+                        style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "20%"},
+                        children=[
+                            html.Div(
+                                style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+                                children=[
+                                    dcc.Graph(id="channel_1_3", style={"width": "50%", "height": "100%"}),
+                                    dcc.Graph(id="channel_2_4", style={"width": "50%", "height": "100%"}),
+                                ],
+                            ),
+                        ],
+                    ),
+                    dcc.Tab(
+                        label="X-Y Positions",
+                        value="tab-2",
+                        style={"backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "width": "100%", "height": "20%"},
+                        children=[
+                            # Content for the second tab
+                            html.Div(
+                                style={"display": "flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "center"},
+                                children=[
+                                    dcc.Graph(id="x_y_positions", style={"width": "100%", "height": "100%"}),
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
 
 
 @app.callback(
@@ -316,7 +345,7 @@ def update_graph(
     nbins,
 ):
     # Filter the data based on the operation number
-    df_filtered = df[df["operation_number"] == operation_number_dropdown]
+    df_all_filtered = df_all[df_all["operation_number"] == operation_number_dropdown]
 
     # If the min or max values are not provided, set them to 0 and 4.51 respectively
     for channel in channel_checklist:
@@ -341,21 +370,18 @@ def update_graph(
             if max_value_channel4 is None:
                 max_value_channel4 = 3.3
     # Filter the data based on the min and max values of each channel
-    df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+    df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
-        df_filtered = df_filtered
+        df_all_filtered = df_all_filtered
     else:
-        df_filtered = df_filtered[~df_filtered["IsCommanded"]]
+        df_all_filtered = df_all_filtered[~df_all_filtered["IsCommanded"]]
 
     if "Channel1" and "Channel3" in channel_checklist:
         x_channel, y_channel = "Channel1", "Channel3"
-        x_data = df_filtered[x_channel]
-        y_data = df_filtered[y_channel]
-
-        threshold = 5  # Values below this will be transparent
-
+        x_data = df_all_filtered[x_channel]
+        y_data = df_all_filtered[y_channel]
 
         # If zmin and zmax are not provided, set them to 1 and 120 respectively
         if zmin is None:
@@ -364,17 +390,6 @@ def update_graph(
             zmax = 120
         if nbins is None:
             nbins = 50
-        # Custom colorscale:
-        custom_colorscale = [
-            (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
-            ((zmin - 1) / 1000, "white"),  # White just above threshold
-            (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
-            (0.3, "#5a01a7"),  # Purple
-            (0.5, "#9c179e"),  # Magenta
-            (0.7, "#e16462"),  # Orange-red
-            (0.9, "#fca636"),  # Orange-yellow
-            (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
-        ]
         # Define the tick values dynamically using log scale
         tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
         ticktext = [f"{val:.1f}" for val in tickvals]
@@ -511,7 +526,7 @@ def update_histogram(
     nbins,
 ):
     # Filter the data based on the operation number
-    df_filtered = df[df["operation_number"] == operation_number_dropdown]
+    df_all_filtered = df_all[df_all["operation_number"] == operation_number_dropdown]
 
     # If the min or max values are not provided, set them to 0 and 4.51 respectively
     for channel in channel_checklist:
@@ -537,18 +552,18 @@ def update_histogram(
                 max_value_channel4 = 3.3
 
     # Filter the data based on the min and max values of each channel
-    df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+    df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
-        df_filtered = df_filtered
+        df_all_filtered = df_all_filtered
     else:
-        df_filtered = df_filtered[~df_filtered["IsCommanded"]]
+        df_all_filtered = df_all_filtered[~df_all_filtered["IsCommanded"]]
 
     if "Channel2" and "Channel4" in channel_checklist:
         x_channel, y_channel = "Channel2", "Channel4"
-        x_data = df_filtered[x_channel]
-        y_data = df_filtered[y_channel]
+        x_data = df_all_filtered[x_channel]
+        y_data = df_all_filtered[y_channel]
 
         threshold = 5
 
@@ -559,17 +574,6 @@ def update_histogram(
             zmax = 120
         if nbins is None:
             nbins = 50
-        # Custom colorscale:
-        custom_colorscale = [
-            (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
-            ((threshold - 1) / 1000, "white"),  # White just above threshold
-            (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
-            (0.3, "#5a01a7"),  # Purple
-            (0.5, "#9c179e"),  # Magenta
-            (0.7, "#e16462"),  # Orange-red
-            (0.9, "#fca636"),  # Orange-yellow
-            (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
-        ]
 
         # Define the tick values dynamically using log scale
         tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
@@ -593,25 +597,7 @@ def update_histogram(
                 zmax=zmax,
                 zauto=False,
             )
-            # go.Histogram2d(
-            #     x=x_data,
-            #     y=y_data,
-            #     z=hist.flatten(),
-            #     colorscale="inferno_r",
-            #     # ncontours=bin_numbers,
-            #     nbinsx=nbins,
-            #     nbinsy=nbins,
-            #     showscale=True,
-            #     colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
-            #     zmin=zmin,
-            #     zmax=zmax,
-            #     zauto=True,
-            # )
         )
-
-
-        # Set the x and y aspect ratio to be equal
-        # fig.update_layout(aspectmode="equal")
 
         x_counts, x_bins = np.histogram(x_data, bins=100)
         y_counts, y_bins = np.histogram(y_data, bins=100)
@@ -702,7 +688,7 @@ def update_x_y_positions(
     nbins,
 ):
     # Filter the data based on the operation number
-    df_filtered = df[df["operation_number"] == operation_number_dropdown]
+    df_all_filtered = df_all[df_all["operation_number"] == operation_number_dropdown]
 
     # If the min or max values are not provided, set them to 0 and 4.51 respectively
     for channel in channel_checklist:
@@ -728,13 +714,13 @@ def update_x_y_positions(
                 max_value_channel4 = 3.3
 
     # Filter the data based on the min and max values of each channel
-    df_filtered = df_filtered[df_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+    df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
-        df_filtered = df_filtered
+        df_all_filtered = df_all_filtered
     else:
-        df_filtered = df_filtered[~df_filtered["IsCommanded"]]
+        df_all_filtered = df_all_filtered[~df_all_filtered["IsCommanded"]]
 
     # Check if lin_correction is selected
     if "lin_correction" in lin_correction_checkbox:
@@ -750,24 +736,11 @@ def update_x_y_positions(
         zmax = 120
     if nbins is None:
         nbins = 50
-
-    # Custom colorscale:
-    custom_colorscale = [
-        (0.0, "rgba(0,0,0,0)"),  # Fully transparent for values below threshold
-        ((zmin - 1) / 1000, "white"),  # White just above threshold
-        (0.1, "#0d0887"),  # Dark purple (Plasma colormap start)
-        (0.3, "#5a01a7"),  # Purple
-        (0.5, "#9c179e"),  # Magenta
-        (0.7, "#e16462"),  # Orange-red
-        (0.9, "#fca636"),  # Orange-yellow
-        (1.0, "#f0f921")   # Bright yellow (Plasma colormap end)
-    ]
-
     # Define the tick values dynamically using log scale
     tickvals = np.logspace(np.log10(zmin), np.log10(zmax), num=4)
     ticktext = [str(int(i)) for i in tickvals]
 
-    hist, x_edges, y_edges = np.histogram2d(df_filtered[x_plot_key], df_filtered[y_plot_key], bins=nbins)
+    hist, x_edges, y_edges = np.histogram2d(df_all_filtered[x_plot_key], df_all_filtered[y_plot_key], bins=nbins)
     # Filter out values below the threshold
     hist[hist < zmin] = 0
 
@@ -786,18 +759,6 @@ def update_x_y_positions(
             zmax=zmax,
             zauto=False,
         )
-        # go.Histogram2d(
-        #     x=df_filtered[x_plot_key],
-        #     y=df_filtered[y_plot_key],
-        #     colorscale=custom_colorscale,
-        #     nbinsx=nbins,
-        #     nbinsy=nbins,
-        #     showscale=True,
-        #     colorbar=dict(title="Count", tickvals=tickvals, ticktext=ticktext),
-        #     zmin=zmin,
-        #     zmax=zmax,
-        #     zauto=False,
-        # )
     )
 
     # Add a circle of radius 5 around the origin
@@ -832,11 +793,8 @@ def update_x_y_positions(
         bgcolor="black",  # Background color of the text box
     )
 
-    # Set the x and y aspect ratio to be equal
-    # fig.update_layout(aspectmode="equal")
-
-    x_counts, x_bins = np.histogram(df_filtered[x_plot_key], bins=100)
-    y_counts, y_bins = np.histogram(df_filtered[y_plot_key], bins=100)
+    x_counts, x_bins = np.histogram(df_all_filtered[x_plot_key], bins=100)
+    y_counts, y_bins = np.histogram(df_all_filtered[y_plot_key], bins=100)
 
     x_step_x = 0.5 * (x_bins[:-1] + x_bins[1:])
     # x_step_y = 0.5 * (y_bins[:-1] + y_bins[1:])
@@ -885,8 +843,34 @@ def update_x_y_positions(
     return fig
 
 
+# Callback to update the app layout when the button is clicked
+@app.callback(
+    Output("app-layout", "children"),
+    [Input("update-layout-button", "n_clicks")],
+    [State("app-layout", "children")]
+)
+def update_layout(n_clicks, current_layout):
+    global df_all
+    return create_app_layout(df_all)
+
+
 if __name__ == "__main__":
-    host = "127.0.0.5"
-    port = "8050"
-    app.run_server(host=host, port=port, debug=False)
-    print(f"Running on http://{host}:{port}/")
+    # Load initial data
+    target_folder = check_folder_structure()
+    if target_folder:
+        df_all = read_sci_l1c_data()
+        df_all = add_operation_numbers(df_all)
+
+        # Set the initial app layout
+        app.layout = html.Div(id="app-layout", children=create_app_layout(df_all))
+
+        # Start the file watcher in a separate thread
+        watcher_thread = threading.Thread(target=start_watching, args=(target_folder,))
+        watcher_thread.daemon = True
+        watcher_thread.start()
+
+        # Run the Dash app
+        host = "127.0.0.5"
+        port = "8050"
+        app.run_server(host=host, port=port, debug=False)
+        print(f"Running on http://{host}:{port}/")
