@@ -21,7 +21,7 @@ def check_folder_structure():
     # Start from the current directory and go up to 3 levels
     current_path = Path.cwd()
 
-    for i in range(10):
+    for i in range(5):
         # Get the current directory by moving up 'i' levels
         check_path = current_path.parents[i] if i < len(current_path.parents) else current_path
 
@@ -53,8 +53,8 @@ def read_csv_file(csv_file):
         return None
 
 
-def read_sci_l1c_data():
-    parent_folder = check_folder_structure()
+def read_sci_l1c_data(parent_folder):
+    # parent_folder = check_folder_structure()
     print(f"Reading data from: {parent_folder}\n")
 
     file_name_format = "lexi_payload_*_*_*_*_sci_output_L1c.csv"
@@ -80,7 +80,22 @@ def read_sci_l1c_data():
     df_all = pd.concat(df_list)
 
     # Set the Date column as the index
-    df_all["Date"] = pd.to_datetime(df_all["Date"])
+    # Try parsing with fractional seconds first
+    df_all["Date"] = pd.to_datetime(df_all["Date"], format="%Y-%m-%d %H:%M:%S.%f%z", errors="coerce")
+
+    # Fill NaT values by parsing without fractional seconds
+    df_all["Date"] = df_all["Date"].fillna(pd.to_datetime(df_all["Date"], format="%Y-%m-%d %H:%M:%S%z", errors="coerce"))
+
+    print(df.Date[124135:124140]]
+)
+    # Drop the rows with NaT values in the Date column
+    df_all = df_all.dropna(subset=["Date"])
+
+    # try:
+    #     df_all["Date"] = pd.to_datetime(df_all["Date"])
+    # except Exception:
+    #     # Try the mixed format
+    #     df_all["Date"] = pd.to_datetime(df_all["Date"], format="ISO8601", errors="coerce")
     df_all = df_all.set_index("Date", inplace=False)
     # Sort the data based on the Date index
     df_all = df_all.sort_index()
@@ -90,8 +105,12 @@ def read_sci_l1c_data():
 
 def add_operation_numbers(df, last_operation_number=0):
     """Add operation numbers and data points."""
-    operation_number = last_operation_number + 1
-    number_of_data_points = 1
+    if last_operation_number == 0:
+        operation_number = last_operation_number + 1
+        number_of_data_points = 1
+    else:
+        operation_number = last_operation_number + 1
+        number_of_data_points = 1
     start_time = time.time()  # Track start time
 
     # Initialize columns if they don't exist
@@ -129,7 +148,7 @@ class NewFileHandler(FileSystemEventHandler):
         if event.is_directory:
             return
         if event.src_path.endswith(".csv"):
-            print(f"New file detected: {event.src_path}")
+            print(f"New file detected: \033[1;91m{event.src_path}\033[0m\n")
             # Wait for the file to be fully written
             time.sleep(2)  # Adjust the delay as needed
             retries = 3
@@ -145,9 +164,9 @@ class NewFileHandler(FileSystemEventHandler):
                         new_df = add_operation_numbers(new_df, last_operation_number)
                         df_all = pd.concat([df_all, new_df])
                         df_all = df_all.sort_index()
-                        print(f"Dataframe updated with new file: {event.src_path}")
+                        print(f"Dataframe updated with new file: \033[1;32m {event.src_path}\033[0m\n")
                         # Recalculate operation numbers for the entire dataframe
-                        df_all = add_operation_numbers(df_all)
+                        # df_all = add_operation_numbers(df_all)
                         break
                     else:
                         print(f"File is empty or could not be read: {event.src_path}")
@@ -209,7 +228,18 @@ def create_app_layout(df_all):
                         inline=True,
                         value=["Channel1", "Channel2", "Channel3", "Channel4"],
                         style={"color": "white"},
-                    )
+                    ),
+                    dcc.Checklist(
+                        id="channel_value_checklist",
+                        options=[
+                            {"label": "Channel Min", "value": "channel_min"},
+                            {"label": "Channel Max", "value": "channel_max"},
+                        ]
+                        ,
+                        inline=True,
+                        value=["channel_min", "channel_max"],
+                        style={"color": "white"},
+                    ),
                 ],
             ),
             # Add the input boxes for minimum and maximum value of each channel
@@ -319,6 +349,7 @@ def update_input_boxes(selected_channels):
         Input("max_value_Channel3", "value"),
         Input("min_value_Channel4", "value"),
         Input("max_value_Channel4", "value"),
+        Input("channel_value_checklist", "value"),
         Input("operation_number_dropdown", "value"),
         Input("is_commanded_checkbox", "value"),
         Input("lin_correction_checkbox", "value"),
@@ -337,6 +368,7 @@ def update_graph(
     max_value_channel3,
     min_value_channel4,
     max_value_channel4,
+    channel_value_checklist,
     operation_number_dropdown,
     is_commanded_checkbox,
     lin_correction_checkbox,
@@ -344,31 +376,34 @@ def update_graph(
     zmax,
     nbins,
 ):
-    # Filter the data based on the operation number
+    # Filter data based on operation number
     df_all_filtered = df_all[df_all["operation_number"] == operation_number_dropdown]
 
-    # If the min or max values are not provided, set them to 0 and 4.51 respectively
-    for channel in channel_checklist:
-        if channel == "Channel1":
-            if min_value_channel1 is None:
-                min_value_channel1 = 1.3
-            if max_value_channel1 is None:
-                max_value_channel1 = 3.3
-        elif channel == "Channel2":
-            if min_value_channel2 is None:
-                min_value_channel2 = 1.3
-            if max_value_channel2 is None:
-                max_value_channel2 = 3.3
-        elif channel == "Channel3":
-            if min_value_channel3 is None:
-                min_value_channel3 = 1.3
-            if max_value_channel3 is None:
-                max_value_channel3 = 3.3
-        elif channel == "Channel4":
-            if min_value_channel4 is None:
-                min_value_channel4 = 1.3
-            if max_value_channel4 is None:
-                max_value_channel4 = 3.3
+    # Define default min/max values
+    default_min, default_max = 1.3, 3.3
+    override_min, override_max = 0, 4.51
+
+    # Map channel names to min/max values
+    channel_limits = {
+        "Channel1": [min_value_channel1, max_value_channel1],
+        "Channel2": [min_value_channel2, max_value_channel2],
+        "Channel3": [min_value_channel3, max_value_channel3],
+        "Channel4": [min_value_channel4, max_value_channel4],
+    }
+
+    # Update limits based on user selection
+    for channel, limits in channel_limits.items():
+        if limits[0] is None:
+            limits[0] = override_min if "channel_min" in channel_value_checklist else default_min
+        if limits[1] is None:
+            limits[1] = override_max if "channel_max" in channel_value_checklist else default_max
+
+    # Unpack updated values
+    min_value_channel1, max_value_channel1 = channel_limits["Channel1"]
+    min_value_channel2, max_value_channel2 = channel_limits["Channel2"]
+    min_value_channel3, max_value_channel3 = channel_limits["Channel3"]
+    min_value_channel4, max_value_channel4 = channel_limits["Channel4"]
+
     # Filter the data based on the min and max values of each channel
     df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
 
@@ -500,6 +535,7 @@ def update_graph(
         Input("max_value_Channel3", "value"),
         Input("min_value_Channel4", "value"),
         Input("max_value_Channel4", "value"),
+        Input("channel_value_checklist", "value"),
         Input("operation_number_dropdown", "value"),
         Input("is_commanded_checkbox", "value"),
         Input("lin_correction_checkbox", "value"),
@@ -518,6 +554,7 @@ def update_histogram(
     max_value_channel3,
     min_value_channel4,
     max_value_channel4,
+    channel_value_checklist,
     operation_number_dropdown,
     is_commanded_checkbox,
     lin_correction_checkbox,
@@ -525,34 +562,37 @@ def update_histogram(
     zmax,
     nbins,
 ):
-    # Filter the data based on the operation number
+    # Filter data based on operation number
     df_all_filtered = df_all[df_all["operation_number"] == operation_number_dropdown]
 
-    # If the min or max values are not provided, set them to 0 and 4.51 respectively
-    for channel in channel_checklist:
-        if channel == "Channel1":
-            if min_value_channel1 is None:
-                min_value_channel1 = 1.3
-            if max_value_channel1 is None:
-                max_value_channel1 = 3.3
-        elif channel == "Channel2":
-            if min_value_channel2 is None:
-                min_value_channel2 = 1.3
-            if max_value_channel2 is None:
-                max_value_channel2 = 3.3
-        elif channel == "Channel3":
-            if min_value_channel3 is None:
-                min_value_channel3 = 1.3
-            if max_value_channel3 is None:
-                max_value_channel3 = 3.3
-        elif channel == "Channel4":
-            if min_value_channel4 is None:
-                min_value_channel4 = 1.3
-            if max_value_channel4 is None:
-                max_value_channel4 = 3.3
+    # Define default min/max values
+    default_min, default_max = 1.3, 3.3
+    override_min, override_max = 0, 4.51
+
+    # Map channel names to min/max values
+    channel_limits = {
+        "Channel1": [min_value_channel1, max_value_channel1],
+        "Channel2": [min_value_channel2, max_value_channel2],
+        "Channel3": [min_value_channel3, max_value_channel3],
+        "Channel4": [min_value_channel4, max_value_channel4],
+    }
+
+    # Update limits based on user selection
+    for channel, limits in channel_limits.items():
+        if limits[0] is None:
+            limits[0] = override_min if "channel_min" in channel_value_checklist else default_min
+        if limits[1] is None:
+            limits[1] = override_max if "channel_max" in channel_value_checklist else default_max
+
+    # Unpack updated values
+    min_value_channel1, max_value_channel1 = channel_limits["Channel1"]
+    min_value_channel2, max_value_channel2 = channel_limits["Channel2"]
+    min_value_channel3, max_value_channel3 = channel_limits["Channel3"]
+    min_value_channel4, max_value_channel4 = channel_limits["Channel4"]
 
     # Filter the data based on the min and max values of each channel
     df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
@@ -662,12 +702,13 @@ def update_histogram(
         Input("max_value_Channel3", "value"),
         Input("min_value_Channel4", "value"),
         Input("max_value_Channel4", "value"),
+        Input("channel_value_checklist", "value"),
         Input("operation_number_dropdown", "value"),
         Input("is_commanded_checkbox", "value"),
         Input("lin_correction_checkbox", "value"),
-        Input("zmin_xy", "value"),
-        Input("zmax_xy", "value"),
-        Input("nbins_xy", "value"),
+        Input("zmin", "value"),
+        Input("zmax", "value"),
+        Input("nbins", "value"),
     ],
 )
 def update_x_y_positions(
@@ -680,6 +721,7 @@ def update_x_y_positions(
     max_value_channel3,
     min_value_channel4,
     max_value_channel4,
+    channel_value_checklist,
     operation_number_dropdown,
     is_commanded_checkbox,
     lin_correction_checkbox,
@@ -690,31 +732,34 @@ def update_x_y_positions(
     # Filter the data based on the operation number
     df_all_filtered = df_all[df_all["operation_number"] == operation_number_dropdown]
 
-    # If the min or max values are not provided, set them to 0 and 4.51 respectively
-    for channel in channel_checklist:
-        if channel == "Channel1":
-            if min_value_channel1 is None:
-                min_value_channel1 = 1.3
-            if max_value_channel1 is None:
-                max_value_channel1 = 3.3
-        elif channel == "Channel2":
-            if min_value_channel2 is None:
-                min_value_channel2 = 1.3
-            if max_value_channel2 is None:
-                max_value_channel2 = 3.3
-        elif channel == "Channel3":
-            if min_value_channel3 is None:
-                min_value_channel3 = 1.3
-            if max_value_channel3 is None:
-                max_value_channel3 = 3.3
-        elif channel == "Channel4":
-            if min_value_channel4 is None:
-                min_value_channel4 = 1.3
-            if max_value_channel4 is None:
-                max_value_channel4 = 3.3
+    # Define default min/max values
+    default_min, default_max = 1.3, 3.3
+    override_min, override_max = 0, 4.51
+
+    # Map channel names to min/max values
+    channel_limits = {
+        "Channel1": [min_value_channel1, max_value_channel1],
+        "Channel2": [min_value_channel2, max_value_channel2],
+        "Channel3": [min_value_channel3, max_value_channel3],
+        "Channel4": [min_value_channel4, max_value_channel4],
+    }
+
+    # Update limits based on user selection
+    for channel, limits in channel_limits.items():
+        if limits[0] is None:
+            limits[0] = override_min if "channel_min" in channel_value_checklist else default_min
+        if limits[1] is None:
+            limits[1] = override_max if "channel_max" in channel_value_checklist else default_max
+
+    # Unpack updated values
+    min_value_channel1, max_value_channel1 = channel_limits["Channel1"]
+    min_value_channel2, max_value_channel2 = channel_limits["Channel2"]
+    min_value_channel3, max_value_channel3 = channel_limits["Channel3"]
+    min_value_channel4, max_value_channel4 = channel_limits["Channel4"]
 
     # Filter the data based on the min and max values of each channel
     df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
+
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
@@ -858,7 +903,8 @@ if __name__ == "__main__":
     # Load initial data
     target_folder = check_folder_structure()
     if target_folder:
-        df_all = read_sci_l1c_data()
+        df_all = read_sci_l1c_data(target_folder)
+        # If the maximum value of operation number is not 1, add operation numbers
         df_all = add_operation_numbers(df_all)
 
         # Set the initial app layout

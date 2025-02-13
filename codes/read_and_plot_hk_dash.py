@@ -10,6 +10,7 @@ import colorsys
 import glob
 from pathlib import Path
 import numpy as np
+from builtins import min, max
 
 importlib.reload(lsf)
 importlib.reload(ptdf)
@@ -48,6 +49,23 @@ if read_data:
     available_columns = list(df.columns)
     default_columns = [available_columns[18]]  # Default to first column
 
+    # Save the DataFrame to a pickled file
+    df.to_pickle("../data/processed_data.pkl")
+else:
+    # Load the DataFrame from the pickled file
+    df = pd.read_pickle("/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/processed_data.pkl")
+    input_key_unit = "-"
+    df.index = pd.to_datetime(df.index)
+    available_columns = list(df.columns)
+    default_columns = [available_columns[18]]
+    # Default to first column
+    # Get the unique operations from the DataFrame
+    unique_operations = sorted(df["operation_number"].unique())
+    # Modify the index column to have the following format: "YYYY-MM-DD HH:MM:SS"
+    # df["DateTime"] = df.index.strftime("%Y-%m-%d %H:%M:%S.%f")
+    # df.set_index("DateTime", inplace=True)
+
+
 # Assign unique base colors for columns
 column_colors = {
     column: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
@@ -56,6 +74,17 @@ column_colors = {
 
 
 # Function to adjust brightness for different operations
+# def adjust_color_brightness(hex_color, factor):
+#     """Darkens or lightens a color based on the factor"""
+#     hex_color = hex_color.lstrip("#")
+#     rgb = tuple(int(hex_color[i : i + 2], 16) / 255.0 for i in (0, 2, 4))
+#     hls = colorsys.rgb_to_hls(*rgb)
+#     # adjusted_rgb = colorsys.hls_to_rgb(int(hls[0]), int(min(1, max(0, hls[1] * factor))), int(hls[2]))
+#     adjusted_rgb = colorsys.hls_to_rgb(hls[0], min(1, max(0, hls[1] * factor)), hls[2])
+# 
+#     return f"#{int(adjusted_rgb[0] * 255):02x}{int(adjusted_rgb[1] * 255):02x}{int(adjusted_rgb[2] * 255):02x}"
+
+
 def adjust_color_brightness(hex_color, factor):
     """Darkens or lightens a color based on the factor"""
     hex_color = hex_color.lstrip("#")
@@ -158,7 +187,7 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
         filtered_df[col] = filtered_df[col].round(2)
         base_color = column_colors[col]
         # Modify the DateTime column to have the following format: "YYYY-MM-DD HH:MM:SS"
-        filtered_df["DateTime"] = filtered_df.index.strftime("%Y-%m-%d %H:%M:%S")
+        filtered_df["DateTime"] = filtered_df.index.strftime("%Y-%m-%d %H:%M:%S.%f")
 
         # If log_scale_check is checked, then ignore all the negative values and zero values
         if "log_scale" in log_scale_check:
@@ -167,7 +196,7 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
         for i, op in enumerate(selected_operations):
             temp_df = filtered_df[filtered_df["operation_number"] == op].reset_index(drop=True)
             temp_df["event_number"] = temp_df.index
-            shade_factor = 1 - (i * 0.15) if (i * 0.15) < 1 else 2
+            shade_factor = 1 - (i * 0.15) if (i * 0.15) < 1 else 0.85
             color_shade = adjust_color_brightness(base_color, shade_factor)
             y_axis = "y" if idx == 0 else "y2"
 
