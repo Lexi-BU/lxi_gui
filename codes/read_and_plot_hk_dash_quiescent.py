@@ -16,7 +16,7 @@ from builtins import min, max
 importlib.reload(lsf)
 importlib.reload(ptdf)
 
-read_data = False
+read_data = True
 if read_data:
     df = dapd.get_data_dataframes()
     # Add HV_value column to df
