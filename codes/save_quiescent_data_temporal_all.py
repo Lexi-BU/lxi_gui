@@ -16,13 +16,9 @@ importlib.reload(dapd)
 def main():
     # Load the DataFrame from the pickled file
     read_data = True
-    # Set the t_start and t_end to 2 hours before and the current time (in UTC)
-    current_utc_time = pd.Timestamp.now(tz="UTC")
-    t_start = (current_utc_time - pd.Timedelta(hours=4)).strftime("%Y-%m-%d %H:%M:%S")
-    t_end = current_utc_time.strftime("%Y-%m-%d %H:%M:%S")
-    print(f"t_start: {t_start}, t_end: {t_end}")
+
     if read_data:
-        df = dapd.get_data_dataframes(t_start=t_start, t_end=t_end, time_threshold=10, download_data=True)
+        df = dapd.get_data_dataframes(download_data=False)
         # Add HV_value column to df
         df["HV_value"] = df["AnodeVoltMon"] * 599
         input_key_unit = "-"
@@ -135,8 +131,8 @@ def main():
         current_time = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
         fig.update_layout(title=f"{key} Operations - {'_'.join(map(str, selected_operations))} - {current_time} [ET]")
         # Save the figure
-        fig_name = f"{key}_Operations_{'_'.join(map(str, selected_operations))}_2hours"
-        folder_name = "~/Dropbox/quiescent_mode_figures/last_2hours/"
+        fig_name = f"{key}_Operations_{'_'.join(map(str, selected_operations))}_since_start"
+        folder_name = "~/Dropbox/quiescent_mode_figures/since_start/"
         # Expand the folder name
         folder_name = Path(folder_name).expanduser().resolve()
         # Create the folder if it doesn't exist
@@ -151,4 +147,4 @@ def main():
 # Run the main function every 5 minutes
 while True:
     main()
-    time.sleep(200)  # Sleep for 5 minutes (300 seconds)
+    time.sleep(900)  # Sleep for 15 minutes (900 seconds)
