@@ -914,7 +914,7 @@ if __name__ == "__main__":
         watcher_thread.start()
 
         # Run the Dash app
-        host = "127.0.0.5"
+        host = "127.0.0.1"
         port = "8050"
         app.run_server(host=host, port=port, debug=False)
         print(f"Running on http://{host}:{port}/")
