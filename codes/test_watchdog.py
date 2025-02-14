@@ -85,11 +85,6 @@ def read_sci_l1c_data(parent_folder):
 
     # Fill NaT values by parsing without fractional seconds
     df_all["Date"] = df_all["Date"].fillna(pd.to_datetime(df_all["Date"], format="%Y-%m-%d %H:%M:%S%z", errors="coerce"))
-    try:
-        print(df_all["Date"][124135:124140])
-    except Exception:
-        print(df_all["Date"])
-        print("\n\n\nIndex out of range\n\n\n")
 
     # Drop the rows with NaT values in the Date column
     df_all = df_all.dropna(subset=["Date"])
@@ -153,7 +148,7 @@ class NewFileHandler(FileSystemEventHandler):
         if event.src_path.endswith(".csv"):
             print(f"New file detected: \033[1;91m{event.src_path}\033[0m\n")
             # Wait for the file to be fully written
-            time.sleep(2)  # Adjust the delay as needed
+            time.sleep(15)  # Adjust the delay as needed
             retries = 3
             for attempt in range(retries):
                 try:
