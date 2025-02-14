@@ -31,7 +31,7 @@ log_folder = Path(log_folder).expanduser().resolve()
 if not Path(log_folder).exists():
     Path(log_folder).mkdir(parents=True, exist_ok=True)
 
-file_handler = logging.FileHandler(log_folder / "log/lxi_read_binary_data.log")
+file_handler = logging.FileHandler(log_folder / "lxi_read_binary_data.log")
 file_handler.setFormatter(formatter)
 
 # stream_handler = logging.StreamHandler()
