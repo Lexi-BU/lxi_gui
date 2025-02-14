@@ -28,9 +28,12 @@ logger.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
 # Check if the log folder exists. If not, create it
-Path("../log").mkdir(parents=True, exist_ok=True)
+log_folder = "../log/"
+log_folder = Path(log_folder).expanduser().resolve()
+if not Path(log_folder).exists():
+    Path(log_folder).mkdir(parents=True, exist_ok=True)
 
-file_handler = logging.FileHandler("../log/lxi_misc_codes.log")
+file_handler = logging.FileHandler(f"{log_folder}/lxi_misc_codes.log")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
