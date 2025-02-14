@@ -16,7 +16,7 @@ importlib.reload(lmsc)
 importlib.reload(lpf)
 
 
-def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end="2025-02-17 00:00:00"):
+def get_data_dataframes(time_threshold=60, t_start="2025-02-14 00:00:00", t_end="2025-02-17 00:00:00"):
 
     # Download data
     lmsc.download_latest_files(time_threshold=time_threshold)

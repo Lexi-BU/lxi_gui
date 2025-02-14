@@ -11,7 +11,7 @@ from builtins import min, max
 importlib.reload(dapd)
 
 # Load the DataFrame from the pickled file
-read_data = False
+read_data = True
 if read_data:
     df = dapd.get_data_dataframes()
     # Add HV_value column to df
@@ -133,5 +133,5 @@ for key in plot_key_list:
     # Expand the folder name
     folder_name = Path(folder_name).expanduser().resolve()
     # Save the figure
-    fig.write_html(f"{folder_name}/{fig_name}_plot.html")
+    # fig.write_html(f"{folder_name}/{fig_name}_plot.html")
     print(f"Figure saved as \033[1;32m{fig_name}_plot.html\033[0m at \033[1;91m{current_time}\033[0m\n \n")
