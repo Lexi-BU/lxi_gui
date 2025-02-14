@@ -25,7 +25,7 @@ logger.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 
 # Check if the log folder exists, if not then create it
-log_folder = "../log/"
+log_folder = "/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/log/"
 log_folder = Path(log_folder).expanduser().resolve()
 if not Path(log_folder).exists():
     # Print the path in green color
