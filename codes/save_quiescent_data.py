@@ -134,4 +134,6 @@ for key in plot_key_list:
     folder_name = Path(folder_name).expanduser().resolve()
     # Save the figure
     fig.write_html(f"{folder_name}/{fig_name}_plot.html")
+    # Save figures as png as well
+    fig.write_image(f"{folder_name}/{fig_name}_plot.png")
     print(f"Figure saved as \033[1;32m{fig_name}_plot.html\033[0m at \033[1;91m{current_time}\033[0m\n \n")
