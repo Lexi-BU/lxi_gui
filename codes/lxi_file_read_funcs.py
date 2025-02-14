@@ -28,9 +28,9 @@ formatter = logging.Formatter("%(asctime)s:%(name)s:%(message)s")
 log_folder = "../log/"
 log_folder = Path(log_folder).expanduser().resolve()
 if not Path(log_folder).exists():
-    Path(log_folder).mkdir(parents=True, exist_ok=True)
     # Print the path in green color
     print(f"\033[92mThe log folder is created at {log_folder}\033[0m")
+    Path(log_folder).mkdir(parents=True, exist_ok=True)
 
 file_handler = logging.FileHandler(log_folder / "lxi_file_read_funcs.log")
 file_handler.setFormatter(formatter)
