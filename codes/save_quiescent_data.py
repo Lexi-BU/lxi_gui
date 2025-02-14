@@ -129,11 +129,11 @@ for key in plot_key_list:
     fig.update_layout(title=f"{key} Operations - {'_'.join(map(str, selected_operations))} - {current_time}")
     # Save the figure
     fig_name = f"{key}_Operations_{'_'.join(map(str, selected_operations))}"
-    folder_name = "~/Dropbox/quiescent_mode_figures/"
+    folder_name = "~/Dropbox/quiescent_mode_figures_test/"
     # Expand the folder name
     folder_name = Path(folder_name).expanduser().resolve()
     # Save the figure
     fig.write_html(f"{folder_name}/{fig_name}_plot.html")
     # Save figures as png as well
-    fig.write_image(f"{folder_name}/{fig_name}_plot.png")
+    fig.write_image(f"{folder_name}/{fig_name}_plot.png", width=1920, height=1080)
     print(f"Figure saved as \033[1;32m{fig_name}_plot.html\033[0m at \033[1;91m{current_time}\033[0m\n \n")
