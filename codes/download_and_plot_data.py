@@ -58,4 +58,6 @@ def get_data_dataframes(time_threshold=60, t_start="2025-02-14 00:00:00", t_end=
 
     df_hk, df_sci, df_sci_l1b, file_name_hk, file_name_sci = lpf.read_binary_file(file_val="../data/from_LEXI/quiescent_data", t_start=t_start, t_end=t_end, multiple_files=True)
 
+    # Ignore first 600 seconds of data
+    df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]
     return df_hk
