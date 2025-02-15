@@ -15,26 +15,24 @@ from builtins import min, max
 importlib.reload(lsf)
 importlib.reload(ptdf)
 
-read_data = True
+read_data = False
 if read_data:
     df = lsf.read_and_plot_all_files()
     # Add HV_value column to df
     df["HV_value"] = df["AnodeVoltMon"] * 599
     input_key_unit = "-"
-    df["operation_number"] = 1
-    df["number_of_data_points"] = 1
-    operation_number = 1
-    number_of_data_points = 1
 
-    for i in range(1, len(df)):
-        if (df.index[i] - df.index[i - 1]).total_seconds() > 10800:
-            operation_number += 1
-            number_of_data_points = 1
-        else:
-            number_of_data_points += 1
-        df.loc[df.index[i], "number_of_data_points"] = number_of_data_points
-        df.loc[df.index[i], "operation_number"] = operation_number
-        print(f"Adding operation number ==> \x1b[1;32;255m {np.round(i / len(df) * 100, 6)}\x1b[0m % complete", end="\r")
+    # Threshold for the time difference between two consecutive data points
+    threshold = pd.Timedelta(hours=1)
+
+    #  Create a boolean mask where True indicates the start of a new operation
+    new_operation_mask = df.index.to_series().diff() > threshold
+
+    # Step 2: Assign operation numbers
+    df['operation_number'] = new_operation_mask.cumsum()
+
+    # Step 3: Count the number of data points in each operation
+    df['number_of_data_points'] = df.groupby('operation_number')['operation_number'].transform('count')
 
     # df = df.dropna()
     df["operation_number"] = df["operation_number"].astype(int)
@@ -53,17 +51,13 @@ if read_data:
     df.to_pickle("../data/processed_data.pkl")
 else:
     # Load the DataFrame from the pickled file
-    df = pd.read_pickle("/home/cephadrius/Desktop/git/Lexi-BU/lxi_gui/data/processed_data.pkl")
+    df = pd.read_pickle("../data/processed_data.pkl")
     input_key_unit = "-"
     df.index = pd.to_datetime(df.index)
     available_columns = list(df.columns)
     default_columns = [available_columns[18]]
-    # Default to first column
     # Get the unique operations from the DataFrame
     unique_operations = sorted(df["operation_number"].unique())
-    # Modify the index column to have the following format: "YYYY-MM-DD HH:MM:SS"
-    # df["DateTime"] = df.index.strftime("%Y-%m-%d %H:%M:%S.%f")
-    # df.set_index("DateTime", inplace=True)
 
 
 # Assign unique base colors for columns
@@ -71,18 +65,6 @@ column_colors = {
     column: px.colors.qualitative.Plotly[i % len(px.colors.qualitative.Plotly)]
     for i, column in enumerate(available_columns)
 }
-
-
-# Function to adjust brightness for different operations
-# def adjust_color_brightness(hex_color, factor):
-#     """Darkens or lightens a color based on the factor"""
-#     hex_color = hex_color.lstrip("#")
-#     rgb = tuple(int(hex_color[i : i + 2], 16) / 255.0 for i in (0, 2, 4))
-#     hls = colorsys.rgb_to_hls(*rgb)
-#     # adjusted_rgb = colorsys.hls_to_rgb(int(hls[0]), int(min(1, max(0, hls[1] * factor))), int(hls[2]))
-#     adjusted_rgb = colorsys.hls_to_rgb(hls[0], min(1, max(0, hls[1] * factor)), hls[2])
-# 
-#     return f"#{int(adjusted_rgb[0] * 255):02x}{int(adjusted_rgb[1] * 255):02x}{int(adjusted_rgb[2] * 255):02x}"
 
 
 def adjust_color_brightness(hex_color, factor):
@@ -99,18 +81,30 @@ app = dash.Dash(__name__)
 app.layout = html.Div(
     style={"height": "99vh", "width": "99vw", "backgroundColor": "#121212", "color": "white", "padding": "0px", "overflow": "hidden", "display": "flex", "flexDirection": "column", "alignItems": "left", "justifyContent": "center", "marginLeft": "0vw", "marginRight": "0vw", "justify": "center"},
     children=[
-        # html.H1("Select Columns and Operations", style={"textAlign": "center", "color": "white"}),
         html.Div([
-            html.Label("Select Columns:", style={"color": "white"}),
-            dcc.Dropdown(
-                id="column_selector",
-                options=[{"label": col, "value": col} for col in available_columns],
-                value=default_columns,
-                multi=True,
-                clearable=False,
-                className="dark-dropdown"
-            )
-        ], style={"width": "50%", "marginBottom": "2px", "marginTop": "2px", "marginLeft": "5px", "marginRight": "5px"}),
+            html.Div([
+                html.Label("Select Columns:", style={"color": "white"}),
+                dcc.Dropdown(
+                    id="column_selector",
+                    options=[{"label": col, "value": col} for col in available_columns],
+                    value=default_columns,
+                    multi=True,
+                    clearable=False,
+                    className="dark-dropdown"
+                )
+            ], style={"width": "50%", "marginBottom": "2px", "marginTop": "2px", "marginLeft": "5px", "marginRight": "5px"}),
+            html.Div([
+                html.Label("Select X-Axis Type:", style={"color": "white"}),
+                dcc.Dropdown(
+                    id="x_axis_selector",
+                    options=[{"label": "Event Number", "value": "event_number"}, {"label": "DateTime", "value": "DateTime"}],
+                    value="event_number",
+                    clearable=False,
+                    className="dark-dropdown",
+                )
+            ], style={"width": "50%", "marginLeft": "5px", "marginRight": "5px"})
+        ], style={"display": "flex", "alignItems": "center"}),
+
         html.Div([
             html.Label("Select Operations:", style={"color": "white"}),
             dcc.Checklist(
@@ -150,7 +144,7 @@ app.layout = html.Div(
                 value=[],
                 inline=True,
                 style={"marginRight": "1px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "display": "flex", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "200px", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
-            ),
+            )
         ], style={"marginTop": "10px", "display": "flex", "justifyContent": "center", "gap": "10px", "alignItems": "center"}),
     ]
 )
@@ -165,9 +159,10 @@ app.layout = html.Div(
      Input("hv_threshold_high", "value"),
      Input("hv_threshold_check", "value"),
      Input("save_fig_check", "value"),
-     Input("log_scale_check", "value")],
+     Input("log_scale_check", "value"),
+     Input("x_axis_selector", "value")]
 )
-def update_plot(selected_operations, selected_columns, filtering_length, hv_threshold_low, hv_threshold_high, hv_threshold_check, save_fig_check, log_scale_check):
+def update_plot(selected_operations, selected_columns, filtering_length, hv_threshold_low, hv_threshold_high, hv_threshold_check, save_fig_check, log_scale_check, x_axis_selector):
     if not selected_columns:
         return px.line(template="plotly_dark", title="No Column Selected")
 
@@ -207,7 +202,7 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
             hover_data = common_hover_data if idx != 0 else specific_hover_data
             temp_fig = px.line(
                 temp_df,
-                x="event_number",
+                x=x_axis_selector,
                 y=f"{col}_smooth",
                 labels={"event_number": "Event Number"},
                 color_discrete_sequence=[color_shade],
@@ -224,7 +219,7 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
         plot_bgcolor="#121212",
         paper_bgcolor="#121212",
         font={"color": "white"},
-        xaxis=dict(title="Event Number", title_font=dict(size=20)),
+        xaxis=dict(title=f"{x_axis_selector}", title_font=dict(size=20)),
         yaxis=dict(
             title=f"{selected_columns[0]} {input_key_unit}",
             title_font=dict(size=20),

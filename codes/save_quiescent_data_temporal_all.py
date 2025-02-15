@@ -18,7 +18,7 @@ def main():
     read_data = True
 
     if read_data:
-        df = dapd.get_data_dataframes(download_data=False)
+        df = dapd.get_data_dataframes(download_data=True, time_threshold=30)
         # Add HV_value column to df
         df["HV_value"] = df["AnodeVoltMon"] * 599
         input_key_unit = "-"
@@ -28,7 +28,8 @@ def main():
 
         available_columns = list(df.columns)
         default_columns = [available_columns[3]]  # Default to first column
-
+        # Sort the DataFrame by the index
+        df = df.sort_index()
         # Save the DataFrame to a pickled file
         df.to_pickle("../data/from_LEXI/quiescent_data/processed_data.pkl")
     else:

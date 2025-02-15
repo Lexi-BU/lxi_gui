@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import glob
+import shutil
 
 from pathlib import Path
 from watchdog.observers import Observer
@@ -20,7 +21,7 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
 
     # Download data
     if download_data:
-     lmsc.download_latest_files(time_threshold=time_threshold)
+        lmsc.download_latest_files(time_threshold=time_threshold)
 
     folder_val = "../data/from_LEXI/orbit/"
     folder_val = Path(folder_val).expanduser().resolve()
@@ -46,25 +47,25 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
         and (int(file_val.split("/")[-1].split("_")[2]) <= t_end_unix)
     ]
     # If file_val_list is more than 24, then select the last 24 files
-    if download_data:
-        if len(file_val_list) > 25:
-            file_val_list = file_val_list[-25:]
-            # Get the maximum time from the file names
-            max_time = max(
-                [int(file_val.split("/")[-1].split("_")[2]) for file_val in file_val_list]
-            )
-            # Convert the maximum time to datetime
-            t_end = datetime.datetime.fromtimestamp(max_time, tz=datetime.timezone.utc)
-            # Define t_end as 2 hours before t_start
-            t_start = (t_end - datetime.timedelta(hours=2, minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
-            t_end = t_end.strftime("%Y-%m-%d %H:%M:%S")
+    # if download_data:
+    #     if len(file_val_list) > 25:
+    #         file_val_list = file_val_list[-25:]
+    #         # Get the maximum time from the file names
+    #         max_time = max(
+    #             [int(file_val.split("/")[-1].split("_")[2]) for file_val in file_val_list]
+    #         )
+    #         # Convert the maximum time to datetime
+    #         t_end = datetime.datetime.fromtimestamp(max_time, tz=datetime.timezone.utc)
+    #         # Define t_end as 2 hours before t_start
+    #         t_start = (t_end - datetime.timedelta(hours=2, minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
+    #         t_end = t_end.strftime("%Y-%m-%d %H:%M:%S")
 
     # Copy all the files in the list to the "quiescent_data" folder
     for file_val in file_val_list:
         # Check if the file exists in the "quiescent_data" folder
         if not Path(f"../data/from_LEXI/quiescent_data/{Path(file_val).name}").exists():
             # Copy the files to the "quiescent_data" folder
-            Path(file_val).replace(f"../data/from_LEXI/quiescent_data/{Path(file_val).name}")
+            shutil.copy(file_val, "../data/from_LEXI/quiescent_data")
         else:
             # print(f"File {Path(file_val).name} already exists in the quiescent_data folder")
             pass
@@ -74,7 +75,7 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
     df_hk, df_sci, df_sci_l1b, file_name_hk, file_name_sci = lpf.read_binary_file(file_val="../data/from_LEXI/quiescent_data", t_start=t_start, t_end=t_end, multiple_files=True)
 
     if download_data:
-        pass
+        df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]
     else:
         # Ignore first 600 seconds of data
         df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]

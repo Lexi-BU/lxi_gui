@@ -33,6 +33,8 @@ def main():
         available_columns = list(df.columns)
         default_columns = [available_columns[3]]  # Default to first column
 
+        # Sort the DataFrame by the index
+        df = df.sort_index()
         # Save the DataFrame to a pickled file
         df.to_pickle("../data/from_LEXI/quiescent_data/processed_data.pkl")
     else:
