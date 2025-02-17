@@ -18,7 +18,7 @@ def main():
     read_data = True
 
     if read_data:
-        df, t_start, t_end = dapd.get_data_dataframes(download_data=True, time_threshold=30, all_files=True)
+        df, t_start, t_end = dapd.get_data_dataframes(download_data=False, time_threshold=30, all_files=True)
         # Add HV_value column to df
         df["HV_value"] = df["AnodeVoltMon"] * 599
         input_key_unit = "-"
@@ -56,12 +56,12 @@ def main():
         return f"#{int(adjusted_rgb[0] * 255):02x}{int(adjusted_rgb[1] * 255):02x}{int(adjusted_rgb[2] * 255):02x}"
 
     # Define a plot key list
-    plot_key_list = ["PinPullerTemp", "LEXIbaseTemp", "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon"]
+    plot_key_list = ["PinPullerTemp", "LEXIbaseTemp", "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon", "DeltaEvntCount", "DeltaDroppedCount", "DeltaLostEvntCount", "HV_value"]
 
     # Define the parameters for the plot
     selected_operations = [unique_operations[-1]]
     selected_columns = default_columns
-    filtering_length = 15
+    filtering_length = 120
     hv_threshold_low = 0
     hv_threshold_high = 2100
     hv_threshold_check = ["hv_threshold"]
@@ -76,6 +76,8 @@ def main():
         # Generate the figure for the current key
         fig = px.line(template="plotly_dark")
 
+        # Ignore all values that are less than 0
+        df[key] = df[key].apply(lambda x: x if x > 0 else np.nan)
         df[f"{key}_smooth"] = df[key].rolling(f"{filtering_length}s", center=False).mean()
         filtered_df = df[df["operation_number"].isin(selected_operations)]
         filtered_df = filtered_df[(filtered_df["HV_value"] > hv_threshold_low) & (filtered_df["HV_value"] < hv_threshold_high)][filtering_length:-filtering_length]
@@ -84,8 +86,12 @@ def main():
         base_color = column_colors[key]
         filtered_df["DateTime"] = filtered_df.index.strftime("%Y-%m-%d %H:%M:%S.%f")
 
-        if "log_scale" in log_scale_check:
-            filtered_df = filtered_df[filtered_df[key] > 0]
+        # if "log_scale" in log_scale_check:
+        filtered_df = filtered_df[filtered_df[key] > 0]
+        # Select only those smooth key values that are greater than 0
+        # if key == "PinPullerTemp":
+        #     filtered_df = filtered_df[filtered_df[f"{key}"] > 0]
+        #     filtered_df = filtered_df[filtered_df[f"{key}_smooth"] > 50]
 
         for i, op in enumerate(selected_operations):
             temp_df = filtered_df[filtered_df["operation_number"] == op].reset_index(drop=True)
@@ -180,7 +186,7 @@ def main():
 while True:
     try:
         main()
-        time.sleep(900)  # Sleep for 15 minutes (900 seconds)
+        time.sleep(10)  # Sleep for 15 minutes (900 seconds)
     except Exception:
-        time.sleep(900)
+        time.sleep(10)
         
