@@ -53,7 +53,8 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     default_key_list = [
         "HVsupplyTemp",
-        "LEXIbaseTemp",
+        "DeltaDroppedCount",
+        # "LEXIbaseTemp",
         "PinPullerTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
@@ -589,10 +590,13 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Select only the data where x_mcp_lin and y_mcp_lin are withing +/- 6
     df_sci = df_sci[(df_sci["x_mcp_lin"] < 6) & (df_sci["x_mcp_lin"] > -6) & (df_sci["y_mcp_lin"] < 6) & (df_sci["y_mcp_lin"] > -6)]
     # Only select the data where IsCommanded is False
-    df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
+    # df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
     # Plot the hexbin historagram of between "x_mcp_lin" and "y_mcp_lin". Ignore any bins where the
     # number of points is less than 10
-    axs[2, 2].hexbin(df_sci_cmd_false["x_mcp_lin"], df_sci_cmd_false["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    try:
+        axs[2, 2].hexbin(df_sci_cmd_false["x_mcp_lin"], df_sci_cmd_false["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
+    except Exception:
+        axs[2, 2].hexbin(df_sci["x_mcp_lin"], df_sci["y_mcp_lin"], gridsize=50, cmap="plasma", alpha=1, mincnt=mincnt, norm=mpl.colors.LogNorm(vmin=mincnt),)
     axs[2, 2].set_xlabel("X [cm]", fontsize=fontsize)
     axs[2, 2].set_ylabel("Y [cm]", fontsize=fontsize)
     # Set equal aspect ratio
@@ -848,6 +852,7 @@ def long_time_series_plot():
     default_key_list = [
         "HVsupplyTemp",
         "LEXIbaseTemp",
+        # "DeltaDroppedCount",
         "PinPullerTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
@@ -1109,9 +1114,3 @@ def long_time_series_plot():
     print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
 
     return daily_median, daily_10p, daily_90p
-
-
-if __name__ == "__main__":
-    save_figures()
-#     long_time_series_plot()
-#     df = read_and_plot_all_files()
