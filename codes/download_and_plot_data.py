@@ -17,7 +17,7 @@ importlib.reload(lmsc)
 importlib.reload(lpf)
 
 
-def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end="2025-02-17 00:00:00", download_data=True):
+def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end="2025-02-19 00:00:00", download_data=True, all_files=False):
 
     # Download data
     if download_data:
@@ -47,18 +47,18 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
         and (int(file_val.split("/")[-1].split("_")[2]) <= t_end_unix)
     ]
     # If file_val_list is more than 24, then select the last 24 files
-    # if download_data:
-    #     if len(file_val_list) > 25:
-    #         file_val_list = file_val_list[-25:]
-    #         # Get the maximum time from the file names
-    #         max_time = max(
-    #             [int(file_val.split("/")[-1].split("_")[2]) for file_val in file_val_list]
-    #         )
-    #         # Convert the maximum time to datetime
-    #         t_end = datetime.datetime.fromtimestamp(max_time, tz=datetime.timezone.utc)
-    #         # Define t_end as 2 hours before t_start
-    #         t_start = (t_end - datetime.timedelta(hours=2, minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
-    #         t_end = t_end.strftime("%Y-%m-%d %H:%M:%S")
+    if not all_files:
+        if len(file_val_list) > 25:
+            file_val_list = file_val_list[-25:]
+            # Get the maximum time from the file names
+            max_time = max(
+                [int(file_val.split("/")[-1].split("_")[2]) for file_val in file_val_list]
+            )
+            # Convert the maximum time to datetime
+            t_end = datetime.datetime.fromtimestamp(max_time, tz=datetime.timezone.utc)
+            # Define t_end as 2 hours before t_start
+            t_start = (t_end - datetime.timedelta(hours=2, minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
+            t_end = t_end.strftime("%Y-%m-%d %H:%M:%S")
 
     # Copy all the files in the list to the "quiescent_data" folder
     for file_val in file_val_list:
@@ -74,9 +74,10 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
 
     df_hk, df_sci, df_sci_l1b, file_name_hk, file_name_sci = lpf.read_binary_file(file_val="../data/from_LEXI/quiescent_data", t_start=t_start, t_end=t_end, multiple_files=True)
 
-    if download_data:
+    if all_files:
         df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]
     else:
         # Ignore first 600 seconds of data
-        df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]
-    return df_hk
+        #  df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]
+        pass
+    return df_hk, t_start, t_end

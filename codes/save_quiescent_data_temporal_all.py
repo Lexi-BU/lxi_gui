@@ -18,7 +18,7 @@ def main():
     read_data = True
 
     if read_data:
-        df = dapd.get_data_dataframes(download_data=True, time_threshold=30)
+        df, t_start, t_end = dapd.get_data_dataframes(download_data=True, time_threshold=30, all_files=True)
         # Add HV_value column to df
         df["HV_value"] = df["AnodeVoltMon"] * 599
         input_key_unit = "-"
@@ -124,13 +124,44 @@ def main():
             ),
             hovermode="x unified",
         )
+        # Increase the tick label font size
+        fig.update_xaxes(tickfont=dict(size=20))
+        fig.update_yaxes(tickfont=dict(size=20))
+        # Get the median value of the key and its maximum and minimum values
+        median_value = filtered_df[key].median()
+        max_value = filtered_df[key].max()
+        min_value = filtered_df[key].min()
+
+        # Add the median, maximum and minimum values to the figure at top left
+        fig.add_annotation(
+            xref="paper",
+            yref="paper",
+            x=0.98,
+            y=0.98,
+            text=f"Median: {median_value:.2f}<br>Max: {max_value:.2f}<br>Min: {min_value:.2f}",
+            showarrow=False,
+            font=dict(size=22, color="white"),
+            bgcolor="#121212",
+            bordercolor="#121212",
+            borderwidth=1,
+        )
 
         fig.update_xaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
         fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
 
+        t_start_time = filtered_df.index[0].strftime("%Y-%m-%d %H:%M:%S")
+        t_end_time = filtered_df.index[-1].strftime("%Y-%m-%d %H:%M:%S")
         # Get the current time and add it to the title
         current_time = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-        fig.update_layout(title=f"{key} Operations - {'_'.join(map(str, selected_operations))} - {current_time} [ET]")
+        fig.update_layout(
+            title=(
+                f"{key} - [{'_'.join(map(str, selected_operations))}] Data from "
+                f"<span style='color: green;'>{t_start_time}</span> to "
+                f"<span style='color: red;'>{t_end_time}</span> (Figure updated at "
+                f"<span style='color: magenta;'>{current_time}</span> [ET])"
+            ),
+            title_font=dict(size=24)
+        )
         # Save the figure
         fig_name = f"{key}_Operations_{'_'.join(map(str, selected_operations))}_since_start"
         folder_name = "~/Dropbox/quiescent_mode_figures/since_start/"
@@ -147,5 +178,9 @@ def main():
 
 # Run the main function every 5 minutes
 while True:
-    main()
-    time.sleep(900)  # Sleep for 15 minutes (900 seconds)
+    try:
+        main()
+        time.sleep(900)  # Sleep for 15 minutes (900 seconds)
+    except Exception:
+        time.sleep(900)
+        

@@ -18,11 +18,11 @@ def main():
     read_data = True
     # Set the t_start and t_end to 2 hours before and the current time (in UTC)
     current_utc_time = pd.Timestamp.now(tz="UTC")
-    t_start = (current_utc_time - pd.Timedelta(hours=4)).strftime("%Y-%m-%d %H:%M:%S")
+    t_start = (current_utc_time - pd.Timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S")
     t_end = current_utc_time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"t_start: {t_start}, t_end: {t_end}")
     if read_data:
-        df = dapd.get_data_dataframes(t_start=t_start, t_end=t_end, time_threshold=10, download_data=True)
+        df, t_start, t_end = dapd.get_data_dataframes(t_start=t_start, t_end=t_end, time_threshold=10, download_data=True)
         # Add HV_value column to df
         df["HV_value"] = df["AnodeVoltMon"] * 599
         input_key_unit = "-"
@@ -129,13 +129,44 @@ def main():
             ),
             hovermode="x unified",
         )
+        # Increase the tick label font size
+        fig.update_xaxes(tickfont=dict(size=20))
+        fig.update_yaxes(tickfont=dict(size=20))
+        # Get the median value of the key and its maximum and minimum values
+        median_value = filtered_df[key].median()
+        max_value = filtered_df[key].max()
+        min_value = filtered_df[key].min()
+
+        # Add the median, maximum and minimum values to the figure at top left
+        fig.add_annotation(
+            xref="paper",
+            yref="paper",
+            x=0.98,
+            y=0.98,
+            text=f"Median: {median_value:.2f}<br>Max: {max_value:.2f}<br>Min: {min_value:.2f}",
+            showarrow=False,
+            font=dict(size=22, color="white"),
+            bgcolor="#121212",
+            bordercolor="#121212",
+            borderwidth=1,
+        )
 
         fig.update_xaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
         fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
 
+        t_start_time = pd.Timestamp(t_start).strftime("%H:%M:%S")
+        t_end_time = pd.Timestamp(t_end).strftime("%H:%M:%S")
         # Get the current time and add it to the title
         current_time = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-        fig.update_layout(title=f"{key} Operations - {'_'.join(map(str, selected_operations))} - {current_time} [ET]")
+        fig.update_layout(
+            title=(
+                f"{key} - [{'_'.join(map(str, selected_operations))}] Data from "
+                f"<span style='color: green;'>{t_start_time}</span> to "
+                f"<span style='color: red;'>{t_end_time}</span> (Figure updated at "
+                f"<span style='color: magenta;'>{current_time}</span> [ET])"
+            ),
+            title_font=dict(size=24)
+        )
         # Save the figure
         fig_name = f"{key}_Operations_{'_'.join(map(str, selected_operations))}_2hours"
         folder_name = "~/Dropbox/quiescent_mode_figures/last_2hours/"
@@ -152,5 +183,8 @@ def main():
 
 # Run the main function every 5 minutes
 while True:
-    main()
-    time.sleep(200)  # Sleep for 5 minutes (300 seconds)
+    try:
+        main()
+        time.sleep(240)  # Sleep for 5 minutes (300 seconds)
+    except Exception:
+        time.sleep(240)
