@@ -1,21 +1,22 @@
-import pandas as pd
-import plotly.express as px
-import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
-import lxi_save_figures as lsf
-import prepare_thrust_data_files as ptdf
-import importlib
 import colorsys
 import glob
+import importlib
+from builtins import max, min
 from pathlib import Path
+
+import dash
+import lxi_save_figures as lsf
 import numpy as np
-from builtins import min, max
+import pandas as pd
+import plotly.express as px
+import prepare_thrust_data_files as ptdf
+from dash import dcc, html
+from dash.dependencies import Input, Output
 
 importlib.reload(lsf)
 importlib.reload(ptdf)
 
-read_data = False
+read_data = True
 if read_data:
     df = lsf.read_and_plot_all_files()
     # Add HV_value column to df
@@ -29,10 +30,12 @@ if read_data:
     new_operation_mask = df.index.to_series().diff() > threshold
 
     # Step 2: Assign operation numbers
-    df['operation_number'] = new_operation_mask.cumsum()
+    df["operation_number"] = new_operation_mask.cumsum()
 
     # Step 3: Count the number of data points in each operation
-    df['number_of_data_points'] = df.groupby('operation_number')['operation_number'].transform('count')
+    df["number_of_data_points"] = df.groupby("operation_number")["operation_number"].transform(
+        "count"
+    )
 
     # df = df.dropna()
     df["operation_number"] = df["operation_number"].astype(int)
@@ -79,90 +82,259 @@ def adjust_color_brightness(hex_color, factor):
 app = dash.Dash(__name__)
 
 app.layout = html.Div(
-    style={"height": "99vh", "width": "99vw", "backgroundColor": "#121212", "color": "white", "padding": "0px", "overflow": "hidden", "display": "flex", "flexDirection": "column", "alignItems": "left", "justifyContent": "center", "marginLeft": "0vw", "marginRight": "0vw", "justify": "center"},
+    style={
+        "height": "99vh",
+        "width": "99vw",
+        "backgroundColor": "#121212",
+        "color": "white",
+        "padding": "0px",
+        "overflow": "hidden",
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "left",
+        "justifyContent": "center",
+        "marginLeft": "0vw",
+        "marginRight": "0vw",
+        "justify": "center",
+    },
     children=[
-        html.Div([
-            html.Div([
-                html.Label("Select Columns:", style={"color": "white"}),
-                dcc.Dropdown(
-                    id="column_selector",
-                    options=[{"label": col, "value": col} for col in available_columns],
-                    value=default_columns,
-                    multi=True,
-                    clearable=False,
-                    className="dark-dropdown"
-                )
-            ], style={"width": "50%", "marginBottom": "2px", "marginTop": "2px", "marginLeft": "5px", "marginRight": "5px"}),
-            html.Div([
-                html.Label("Select X-Axis Type:", style={"color": "white"}),
-                dcc.Dropdown(
-                    id="x_axis_selector",
-                    options=[{"label": "Event Number", "value": "event_number"}, {"label": "DateTime", "value": "DateTime"}],
-                    value="event_number",
-                    clearable=False,
-                    className="dark-dropdown",
-                )
-            ], style={"width": "50%", "marginLeft": "5px", "marginRight": "5px"})
-        ], style={"display": "flex", "alignItems": "center"}),
-
-        html.Div([
-            html.Label("Select Operations:", style={"color": "white"}),
-            dcc.Checklist(
-                id="operation_filter",
-                options=[{"label": f"Operation {op}", "value": op} for op in unique_operations],
-                value=[unique_operations[-1]],
-                inline=True,
-                # style={"maxHeight": "150px", "overflowY": "hidden"}
-                style={"display": "grid", "gridTemplateColumns": "repeat(11, 1fr)", "maxWidth": "100%", "marginRight": "1px", "marginLeft": "5px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "98%", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
-            )
-        ]),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.Label("Select Columns:", style={"color": "white"}),
+                        dcc.Dropdown(
+                            id="column_selector",
+                            options=[{"label": col, "value": col} for col in available_columns],
+                            value=default_columns,
+                            multi=True,
+                            clearable=False,
+                            className="dark-dropdown",
+                        ),
+                    ],
+                    style={
+                        "width": "50%",
+                        "marginBottom": "2px",
+                        "marginTop": "2px",
+                        "marginLeft": "5px",
+                        "marginRight": "5px",
+                    },
+                ),
+                html.Div(
+                    [
+                        html.Label("Select X-Axis Type:", style={"color": "white"}),
+                        dcc.Dropdown(
+                            id="x_axis_selector",
+                            options=[
+                                {"label": "Event Number", "value": "event_number"},
+                                {"label": "DateTime", "value": "DateTime"},
+                            ],
+                            value="event_number",
+                            clearable=False,
+                            className="dark-dropdown",
+                        ),
+                    ],
+                    style={"width": "50%", "marginLeft": "5px", "marginRight": "5px"},
+                ),
+            ],
+            style={"display": "flex", "alignItems": "center"},
+        ),
+        html.Div(
+            [
+                html.Label("Select Operations:", style={"color": "white"}),
+                dcc.Checklist(
+                    id="operation_filter",
+                    options=[{"label": f"Operation {op}", "value": op} for op in unique_operations],
+                    value=[unique_operations[-1]],
+                    inline=True,
+                    # style={"maxHeight": "150px", "overflowY": "hidden"}
+                    style={
+                        "display": "grid",
+                        "gridTemplateColumns": "repeat(11, 1fr)",
+                        "maxWidth": "100%",
+                        "marginRight": "1px",
+                        "marginLeft": "5px",
+                        "marginBottom": "1px",
+                        "marginTop": "1px",
+                        "color": "white",
+                        "alignItems": "center",
+                        "gap": "2px",
+                        "justifyContent": "center",
+                        "width": "98%",
+                        "flexDirection": "row",
+                        "padding": "5px",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "backgroundColor": "#121212",
+                        "overflow": "hidden",
+                    },
+                ),
+            ]
+        ),
         dcc.Graph(id="line_plot", style={"height": "70vh", "width": "95vw", "overflow": "hidden"}),
-        html.Div([
-            html.Label("Filtering Length (s):", style={"color": "white"}),
-            dcc.Input(id="filtering_length", type="number", value=15, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
-            html.Label("HV Threshold Low:", style={"color": "white"}),
-            dcc.Input(id="hv_threshold_low", type="number", value=1505, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
-            html.Label("HV Threshold High:", style={"color": "white"}),
-            dcc.Input(id="hv_threshold_high", type="number", value=1520, style={"marginRight": "10px", "width": "50px", "textAlign": "center", "backgroundColor": "#121212", "color": "white", "border": "1px solid white", "borderRadius": "5px", "padding": "5px", "marginBottom": "10px", "marginTop": "10px"}),
-            dcc.Checklist(
-                id="hv_threshold_check",
-                options=[{"label": "Enable HV Threshold", "value": "hv_threshold"}],
-                value=["hv_threshold"],
-                inline=True,
-                style={"marginRight": "1px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "display": "flex", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "200px", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
-            ),
-            dcc.Checklist(
-                id="save_fig_check",
-                options=[{"label": "Save Figure", "value": "save_fig"}],
-                value=[],
-                inline=True,
-                style={"marginRight": "1px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "display": "flex", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "200px", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
-            ),
-            dcc.Checklist(
-                id="log_scale_check",
-                options=[{"label": "Log Scale", "value": "log_scale"}],
-                value=[],
-                inline=True,
-                style={"marginRight": "1px", "marginBottom": "1px", "marginTop": "1px", "color": "white", "display": "flex", "alignItems": "center", "gap": "2px", "justifyContent": "center", "width": "200px", "flexDirection": "row", "padding": "5px", "border": "1px solid white", "borderRadius": "5px", "backgroundColor": "#121212", "overflow": "hidden"}
-            )
-        ], style={"marginTop": "10px", "display": "flex", "justifyContent": "center", "gap": "10px", "alignItems": "center"}),
-    ]
+        html.Div(
+            [
+                html.Label("Filtering Length (s):", style={"color": "white"}),
+                dcc.Input(
+                    id="filtering_length",
+                    type="number",
+                    value=15,
+                    style={
+                        "marginRight": "10px",
+                        "width": "50px",
+                        "textAlign": "center",
+                        "backgroundColor": "#121212",
+                        "color": "white",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "padding": "5px",
+                        "marginBottom": "10px",
+                        "marginTop": "10px",
+                    },
+                ),
+                html.Label("HV Threshold Low:", style={"color": "white"}),
+                dcc.Input(
+                    id="hv_threshold_low",
+                    type="number",
+                    value=1505,
+                    style={
+                        "marginRight": "10px",
+                        "width": "50px",
+                        "textAlign": "center",
+                        "backgroundColor": "#121212",
+                        "color": "white",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "padding": "5px",
+                        "marginBottom": "10px",
+                        "marginTop": "10px",
+                    },
+                ),
+                html.Label("HV Threshold High:", style={"color": "white"}),
+                dcc.Input(
+                    id="hv_threshold_high",
+                    type="number",
+                    value=1520,
+                    style={
+                        "marginRight": "10px",
+                        "width": "50px",
+                        "textAlign": "center",
+                        "backgroundColor": "#121212",
+                        "color": "white",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "padding": "5px",
+                        "marginBottom": "10px",
+                        "marginTop": "10px",
+                    },
+                ),
+                dcc.Checklist(
+                    id="hv_threshold_check",
+                    options=[{"label": "Enable HV Threshold", "value": "hv_threshold"}],
+                    value=["hv_threshold"],
+                    inline=True,
+                    style={
+                        "marginRight": "1px",
+                        "marginBottom": "1px",
+                        "marginTop": "1px",
+                        "color": "white",
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "2px",
+                        "justifyContent": "center",
+                        "width": "200px",
+                        "flexDirection": "row",
+                        "padding": "5px",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "backgroundColor": "#121212",
+                        "overflow": "hidden",
+                    },
+                ),
+                dcc.Checklist(
+                    id="save_fig_check",
+                    options=[{"label": "Save Figure", "value": "save_fig"}],
+                    value=[],
+                    inline=True,
+                    style={
+                        "marginRight": "1px",
+                        "marginBottom": "1px",
+                        "marginTop": "1px",
+                        "color": "white",
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "2px",
+                        "justifyContent": "center",
+                        "width": "200px",
+                        "flexDirection": "row",
+                        "padding": "5px",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "backgroundColor": "#121212",
+                        "overflow": "hidden",
+                    },
+                ),
+                dcc.Checklist(
+                    id="log_scale_check",
+                    options=[{"label": "Log Scale", "value": "log_scale"}],
+                    value=[],
+                    inline=True,
+                    style={
+                        "marginRight": "1px",
+                        "marginBottom": "1px",
+                        "marginTop": "1px",
+                        "color": "white",
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "2px",
+                        "justifyContent": "center",
+                        "width": "200px",
+                        "flexDirection": "row",
+                        "padding": "5px",
+                        "border": "1px solid white",
+                        "borderRadius": "5px",
+                        "backgroundColor": "#121212",
+                        "overflow": "hidden",
+                    },
+                ),
+            ],
+            style={
+                "marginTop": "10px",
+                "display": "flex",
+                "justifyContent": "center",
+                "gap": "10px",
+                "alignItems": "center",
+            },
+        ),
+    ],
 )
 
 
 @app.callback(
     Output("line_plot", "figure"),
-    [Input("operation_filter", "value"),
-     Input("column_selector", "value"),
-     Input("filtering_length", "value"),
-     Input("hv_threshold_low", "value"),
-     Input("hv_threshold_high", "value"),
-     Input("hv_threshold_check", "value"),
-     Input("save_fig_check", "value"),
-     Input("log_scale_check", "value"),
-     Input("x_axis_selector", "value")]
+    [
+        Input("operation_filter", "value"),
+        Input("column_selector", "value"),
+        Input("filtering_length", "value"),
+        Input("hv_threshold_low", "value"),
+        Input("hv_threshold_high", "value"),
+        Input("hv_threshold_check", "value"),
+        Input("save_fig_check", "value"),
+        Input("log_scale_check", "value"),
+        Input("x_axis_selector", "value"),
+    ],
 )
-def update_plot(selected_operations, selected_columns, filtering_length, hv_threshold_low, hv_threshold_high, hv_threshold_check, save_fig_check, log_scale_check, x_axis_selector):
+def update_plot(
+    selected_operations,
+    selected_columns,
+    filtering_length,
+    hv_threshold_low,
+    hv_threshold_high,
+    hv_threshold_check,
+    save_fig_check,
+    log_scale_check,
+    x_axis_selector,
+):
     if not selected_columns:
         return px.line(template="plotly_dark", title="No Column Selected")
 
@@ -170,19 +342,38 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
 
     # If hv_threshold_check is not checked, then set the hv_threshold_low and hv_threshold_high to
     # None
+    # For each column that is not Datetime, set the maximum number fo sig-figs to 2
+    for col in df.columns:
+        try:
+            df[col] = df[col].round(2)
+        except Exception:
+            pass
+
     if not hv_threshold_check:
         hv_threshold_low = 0
         hv_threshold_high = 2500
     for idx, col in enumerate(selected_columns):
-        df[f"{col}_smooth"] = df[col].rolling(f"{filtering_length}s", center=False).mean()
-        filtered_df = df[df["operation_number"].isin(selected_operations)]
-        filtered_df = filtered_df[(filtered_df["HV_value"] > hv_threshold_low) & (filtered_df["HV_value"] < hv_threshold_high)][filtering_length:-filtering_length]
+        if filtering_length >= 1:
+            df[f"{col}_smooth"] = df[col].rolling(f"{filtering_length}s", center=False).mean()
+            filtered_df = df[df["operation_number"].isin(selected_operations)]
+            filtered_df = filtered_df[
+                (filtered_df["HV_value"] > hv_threshold_low)
+                & (filtered_df["HV_value"] < hv_threshold_high)
+            ][filtering_length:-filtering_length]
+        if filtering_length <= 0:
+            df[f"{col}_smooth"] = df[col].rolling("1s", center=False).mean()
+            filtered_df = df[df["operation_number"].isin(selected_operations)]
+            filtered_df = filtered_df[
+                (filtered_df["HV_value"] > hv_threshold_low)
+                & (filtered_df["HV_value"] < hv_threshold_high)
+            ][:]
 
         # Set the maximum number of sig figs for each column to 2
         filtered_df[col] = filtered_df[col].round(2)
+        filtered_df[f"{col}_smooth"] = filtered_df[f"{col}_smooth"].round(2)
         base_color = column_colors[col]
         # Modify the DateTime column to have the following format: "YYYY-MM-DD HH:MM:SS"
-        filtered_df["DateTime"] = filtered_df.index.strftime("%Y-%m-%d %H:%M:%S.%f")
+        filtered_df["DateTime"] = filtered_df.index.strftime("%Y-%m-%d %H:%M:%S")
 
         # If log_scale_check is checked, then ignore all the negative values and zero values
         if "log_scale" in log_scale_check:
@@ -196,18 +387,51 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
             y_axis = "y" if idx == 0 else "y2"
 
             # Define hover data dynamically
-            common_hover_data = {"event_number": False, "operation_number": False, "DateTime": False, f"{col}_smooth": False, col: True}  # Common hover data
-            specific_hover_data = {col: True, "event_number": False, f"{col}_smooth": False, "DateTime": True, "operation_number": True}  # Only show column-specific data
+            common_hover_data = {
+                "event_number": False,
+                "operation_number": False,
+                "DateTime": False,
+                f"{col}_smooth": False,
+                col: True,
+            }  # Common hover data
+            specific_hover_data = {
+                col: True,
+                "event_number": False,
+                f"{col}_smooth": False,
+                "DateTime": True,
+                "operation_number": True,
+            }  # Only show column-specific data
 
             hover_data = common_hover_data if idx != 0 else specific_hover_data
-            temp_fig = px.line(
-                temp_df,
-                x=x_axis_selector,
-                y=f"{col}_smooth",
-                labels={"event_number": "Event Number"},
-                color_discrete_sequence=[color_shade],
-                hover_data=hover_data,
-            )
+            if filtering_length > 1:
+                temp_fig = px.line(
+                    temp_df,
+                    x=x_axis_selector,
+                    y=f"{col}_smooth",
+                    labels={"event_number": "Event Number"},
+                    color_discrete_sequence=[color_shade],
+                    hover_data=hover_data,
+                )
+            if filtering_length == 1:
+                temp_fig = px.scatter(
+                    temp_df,
+                    x=x_axis_selector,
+                    y=col,
+                    labels={"event_number": "Event Number"},
+                    color_discrete_sequence=[color_shade],
+                    hover_data=hover_data,
+                )
+            if filtering_length <= 0:
+                temp_fig = px.scatter(
+                    temp_df,
+                    x=x_axis_selector,
+                    y=col,
+                    labels={"event_number": "Event Number"},
+                    color_discrete_sequence=[color_shade],
+                    hover_data=hover_data,
+                    size="HV_value",
+                    size_max=5,
+                )
             for trace in temp_fig["data"]:
                 trace["name"] = f"{col} - Operation {op}"
                 trace["line"]["color"] = color_shade
@@ -250,7 +474,9 @@ def update_plot(selected_operations, selected_columns, filtering_length, hv_thre
     fig.update_yaxes(showgrid=True, gridwidth=0.2, gridcolor="rgba(0, 255, 255, 0.25)")
 
     if "save_fig" in save_fig_check:
-        fig_name = "_".join(selected_columns) + "_Operations_" + "_".join(map(str, selected_operations))
+        fig_name = (
+            "_".join(selected_columns) + "_Operations_" + "_".join(map(str, selected_operations))
+        )
         fig.write_html(f"../figures/{fig_name}_plot.html")
     return fig
 

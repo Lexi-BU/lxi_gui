@@ -1,9 +1,10 @@
 import csv
 import datetime
 import importlib
-import os
-import platform
 import logging
+import os
+import pickle
+import platform
 import shutil
 import struct
 from pathlib import Path
@@ -15,7 +16,6 @@ import lxi_misc_codes as lmsc
 import numpy as np
 import pandas as pd
 import pytz
-import pickle
 
 importlib.reload(lmsc)
 
@@ -531,7 +531,12 @@ def read_binary_data_sci(
     if platform.system() == "Windows":
         df["Date"] = pd.to_datetime(df["Date"], format="mixed")
     else:
-        df["Date"] = pd.to_datetime(df["Date"])
+        try:
+            df["Date"] = pd.to_datetime(df["Date"])
+        except Exception:
+            df["Date"] = pd.to_datetime(df["Date"], format="mixed")
+        except Exception:
+            df["Date"] = pd.to_datetime(df["Date"], format="ISO8601")
 
     # Set index to the date
     df.set_index("Date", inplace=False)

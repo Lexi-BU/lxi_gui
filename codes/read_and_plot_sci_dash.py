@@ -1,17 +1,17 @@
+import glob
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+import dash
 import numpy as np
 import pandas as pd
-import glob
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-import dash
+import plotly.graph_objects as go
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-import plotly.graph_objects as go
-import threading
-
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 # Global dataframe to store the data
 df_all = pd.DataFrame()
@@ -72,6 +72,8 @@ def read_sci_l1c_data(parent_folder):
             try:
                 df = future.result()
                 if df is not None:
+                    # At places where "TimeStamp" is less than 1, ignore those rows
+                    df = df[df["TimeStamp"] > 1]
                     df_list.append(df)
                     print(f"Reading file ==> \x1b[1;32;255m {np.round((i + 1) / len(csv_files) * 100, 3)}\x1b[0m % complete", end="\r")
             except Exception as e:
@@ -555,8 +557,12 @@ def update_histogram(
     min_value_channel4, max_value_channel4 = channel_limits["Channel4"]
 
     # Filter the data based on the min and max values of each channel
-    df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
-
+    df_all_filtered = df_all_filtered[
+        df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1)
+        & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2)
+        & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3)
+        & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)
+    ]
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:
@@ -568,8 +574,6 @@ def update_histogram(
         x_channel, y_channel = "Channel2", "Channel4"
         x_data = df_all_filtered[x_channel]
         y_data = df_all_filtered[y_channel]
-
-        threshold = 5
 
         # If zmin and zmax are not provided, set them to 1 and 120 respectively
         if zmin is None:
@@ -722,8 +726,12 @@ def update_x_y_positions(
     min_value_channel4, max_value_channel4 = channel_limits["Channel4"]
 
     # Filter the data based on the min and max values of each channel
-    df_all_filtered = df_all_filtered[df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1) & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2) & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3) & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)]
-
+    df_all_filtered = df_all_filtered[
+        df_all_filtered["Channel1"].between(min_value_channel1, max_value_channel1)
+        & df_all_filtered["Channel2"].between(min_value_channel2, max_value_channel2)
+        & df_all_filtered["Channel3"].between(min_value_channel3, max_value_channel3)
+        & df_all_filtered["Channel4"].between(min_value_channel4, max_value_channel4)
+    ]
 
     # Filter the data based on the IsCommanded event
     if "is_commanded" in is_commanded_checkbox:

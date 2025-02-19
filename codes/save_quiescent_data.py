@@ -1,12 +1,12 @@
+import colorsys
+import importlib
+from builtins import max, min
+from pathlib import Path
+
+import download_and_plot_data as dapd
+import numpy as np
 import pandas as pd
 import plotly.express as px
-import colorsys
-import numpy as np
-from pathlib import Path
-import download_and_plot_data as dapd
-import importlib
-
-from builtins import min, max
 
 importlib.reload(dapd)
 

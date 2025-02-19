@@ -1,8 +1,9 @@
-import pandas as pd
 import glob
-import numpy as np
-from pathlib import Path
 import platform
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 
 
 def prepare_thruster_data():

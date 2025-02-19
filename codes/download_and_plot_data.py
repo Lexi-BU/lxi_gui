@@ -1,23 +1,27 @@
-import importlib
 import datetime
-import numpy as np
-import pandas as pd
 import glob
+import importlib
 import shutil
-
 from pathlib import Path
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-
 
 import lxi_misc_codes as lmsc
+import numpy as np
+import pandas as pd
 import temp_lxi_pipeline_file as lpf
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 importlib.reload(lmsc)
 importlib.reload(lpf)
 
 
-def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end="2025-02-19 00:00:00", download_data=True, all_files=False):
+def get_data_dataframes(
+    time_threshold=10,
+    t_start="2025-02-14 00:00:00",
+    t_end="2025-02-19 00:00:00",
+    download_data=True,
+    all_files=False,
+):
 
     # Download data
     if download_data:
@@ -57,7 +61,9 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
             # Convert the maximum time to datetime
             t_end = datetime.datetime.fromtimestamp(max_time, tz=datetime.timezone.utc)
             # Define t_end as 2 hours before t_start
-            t_start = (t_end - datetime.timedelta(hours=2, minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
+            t_start = (t_end - datetime.timedelta(hours=2, minutes=10)).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             t_end = t_end.strftime("%Y-%m-%d %H:%M:%S")
 
     # Copy all the files in the list to the "quiescent_data" folder
@@ -72,7 +78,12 @@ def get_data_dataframes(time_threshold=10, t_start="2025-02-14 00:00:00", t_end=
 
     print(f"Number of files within the time range: {len(file_val_list)}")
 
-    df_hk, df_sci, df_sci_l1b, file_name_hk, file_name_sci = lpf.read_binary_file(file_val="../data/from_LEXI/quiescent_data", t_start=t_start, t_end=t_end, multiple_files=True)
+    df_hk, df_sci, df_sci_l1b, file_name_hk, file_name_sci = lpf.read_binary_file(
+        file_val="../data/from_LEXI/quiescent_data",
+        t_start=t_start,
+        t_end=t_end,
+        multiple_files=True,
+    )
 
     if all_files:
         df_hk = df_hk.loc[df_hk.index > (df_hk.index[0] + pd.Timedelta(seconds=600))]

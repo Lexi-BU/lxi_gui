@@ -1,13 +1,13 @@
+import colorsys
+import importlib
+import time
+from builtins import max, min
+from pathlib import Path
+
+import download_and_plot_data as dapd
+import numpy as np
 import pandas as pd
 import plotly.express as px
-import colorsys
-import numpy as np
-from pathlib import Path
-import download_and_plot_data as dapd
-import importlib
-import time  # Import the time module
-
-from builtins import min, max
 
 importlib.reload(dapd)
 
@@ -22,7 +22,9 @@ def main():
     t_end = current_utc_time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"t_start: {t_start}, t_end: {t_end}")
     if read_data:
-        df, t_start, t_end = dapd.get_data_dataframes(t_start=t_start, t_end=t_end, time_threshold=10, download_data=True)
+        df, t_start, t_end = dapd.get_data_dataframes(
+            t_start=t_start, t_end=t_end, time_threshold=10, download_data=True
+        )
         # Add HV_value column to df
         df["HV_value"] = df["AnodeVoltMon"] * 599
         input_key_unit = "-"
@@ -43,7 +45,10 @@ def main():
     input_key_unit = "-"
     df.index = pd.to_datetime(df.index)
     available_columns = list(df.columns)
-    default_columns = [available_columns[3], available_columns[5]]  # Default to first column
+    default_columns = [
+        available_columns[3],
+        available_columns[5],
+    ]  # Default to first column
     unique_operations = sorted(df["operation_number"].unique())
 
     # Assign unique base colors for columns
@@ -61,7 +66,20 @@ def main():
         return f"#{int(adjusted_rgb[0] * 255):02x}{int(adjusted_rgb[1] * 255):02x}{int(adjusted_rgb[2] * 255):02x}"
 
     # Define a plot key list
-    plot_key_list = ["PinPullerTemp", "LEXIbaseTemp", "HVsupplyTemp", "+5.2V_Imon", "+10V_Imon", "+3.3V_Imon", "AnodeVoltMon", "+28V_Imon", "DeltaEvntCount", "DeltaDroppedCount", "DeltaLostEvntCount", "HV_value"]
+    plot_key_list = [
+        "PinPullerTemp",
+        "LEXIbaseTemp",
+        "HVsupplyTemp",
+        "+5.2V_Imon",
+        "+10V_Imon",
+        "+3.3V_Imon",
+        "AnodeVoltMon",
+        "+28V_Imon",
+        "DeltaEvntCount",
+        "DeltaDroppedCount",
+        "DeltaLostEvntCount",
+        "HV_value",
+    ]
 
     # Define the parameters for the plot
     selected_operations = [unique_operations[-1]]
@@ -86,7 +104,10 @@ def main():
 
         df[f"{key}_smooth"] = df[key].rolling(f"{filtering_length}s", center=False).mean()
         filtered_df = df[df["operation_number"].isin(selected_operations)]
-        filtered_df = filtered_df[(filtered_df["HV_value"] > hv_threshold_low) & (filtered_df["HV_value"] < hv_threshold_high)][filtering_length:-filtering_length]
+        filtered_df = filtered_df[
+            (filtered_df["HV_value"] > hv_threshold_low)
+            & (filtered_df["HV_value"] < hv_threshold_high)
+        ][filtering_length:-filtering_length]
 
         filtered_df[key] = filtered_df[key].round(2)
         base_color = column_colors[key]
@@ -109,7 +130,14 @@ def main():
             min_value = temp_df[key].min()
             max_value = temp_df[key].max()
             print(f"Key: {key}, Operation: {op}, Min: {min_value:.2f}, Max: {max_value:.2f}")
-            hover_data = {key: True, "event_number": False, f"{key}_smooth": False, "DateTime": False, "operation_number": False, "Date": False}
+            hover_data = {
+                key: True,
+                "event_number": False,
+                f"{key}_smooth": False,
+                "DateTime": False,
+                "operation_number": False,
+                "Date": False,
+            }
             temp_fig = px.line(
                 temp_df,
                 x="Date",
@@ -175,7 +203,7 @@ def main():
                 f"<span style='color: red;'>{t_end_time}</span> (Figure updated at "
                 f"<span style='color: magenta;'>{current_time}</span> [ET])"
             ),
-            title_font=dict(size=24)
+            title_font=dict(size=24),
         )
         # Save the figure
         fig_name = f"{key}_Operations_{'_'.join(map(str, selected_operations))}_2hours"
@@ -188,7 +216,9 @@ def main():
         fig.write_html(f"{folder_name}/{fig_name}_plot.html")
         # Save figures as png as well
         fig.write_image(f"{folder_name}/{fig_name}_plot.png", width=1920, height=1080)
-        print(f"Figure saved as \033[1;32m{fig_name}_plot.html\033[0m at \033[1;91m{current_time}\033[0m\n \n")
+        print(
+            f"Figure saved as \033[1;32m{fig_name}_plot.html\033[0m at \033[1;91m{current_time}\033[0m\n \n"
+        )
 
 
 # Run the main function every 5 minutes
