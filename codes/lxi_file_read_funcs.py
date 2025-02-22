@@ -129,14 +129,17 @@ class sci_packet_cls_gsfc(NamedTuple):
     @classmethod
     def from_bytes(cls, bytes_: bytes):
         structure = struct.unpack(packet_format_sci, bytes_)
-        return cls(
-            is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
-            timestamp=structure[1] & 0x3FFFFFFF,  # mask for getting all timestamp bits
-            channel1=structure[2] * volts_per_count,
-            channel2=structure[3] * volts_per_count,
-            channel3=structure[4] * volts_per_count,
-            channel4=structure[5] * volts_per_count,
-        )
+        if structure[1] & 0x80000000:
+            return None
+        else:
+            return cls(
+                is_commanded=bool(structure[1] & 0x40000000),  # mask to test for commanded event type
+                timestamp=structure[1] & 0x3FFFFFFF,  # mask for getting all timestamp bits
+                channel1=structure[2] * volts_per_count,
+                channel2=structure[3] * volts_per_count,
+                channel3=structure[4] * volts_per_count,
+                channel4=structure[5] * volts_per_count,
+            )
 
 
 class hk_packet_cls(NamedTuple):
