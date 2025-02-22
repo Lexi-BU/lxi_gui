@@ -85,17 +85,21 @@ class sci_packet_cls(NamedTuple):
     def from_bytes(cls, bytes_: bytes):
         structure_time = struct.unpack(">d", bytes_[2:10])
         structure = struct.unpack(packet_format_sci, bytes_[12:])
-        return cls(
-            Date=structure_time[0],
-            is_commanded=bool(
-                structure[1] & 0x40000000
-            ),  # mask to test for commanded event type
-            timestamp=structure[1] & 0x3FFFFFFF,  # mask for getting all timestamp bits
-            channel1=structure[2] * volts_per_count,
-            channel2=structure[3] * volts_per_count,
-            channel3=structure[4] * volts_per_count,
-            channel4=structure[5] * volts_per_count,
-        )
+        # Check if the packet is house-keeping packet. The Housekeeping packets are skipped.
+        if structure[1] & 0x80000000:
+            return None
+        else:
+            return cls(
+                Date=structure_time[0],
+                is_commanded=bool(
+                    structure[1] & 0x40000000
+                ),  # mask to test for commanded event type
+                timestamp=structure[1] & 0x3FFFFFFF,  # mask for getting all timestamp bits
+                channel1=structure[2] * volts_per_count,
+                channel2=structure[3] * volts_per_count,
+                channel3=structure[4] * volts_per_count,
+                channel4=structure[5] * volts_per_count,
+            )
 
 
 class sci_packet_cls_gsfc(NamedTuple):
@@ -411,6 +415,9 @@ def read_binary_data_sci(
                 continue
 
             index += 1
+
+    # Drop the packets that are None
+    packets = [packet for packet in packets if packet is not None]
 
     # Split the file name in a folder and a file name
     # Format filenames and folder names for the different operating systems
