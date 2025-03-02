@@ -956,7 +956,7 @@ def read_and_plot_all_files():
 
     file_name_format = "payload_lexi_*_*_hk_output_L1a.csv"
     csv_files = glob.glob(str(parent_folder / "**" / file_name_format), recursive=True)
-    print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder.\n")
+    print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the surface folder.\n")
     # Remove files that has "_hk_hk_" in the name
     exclude_pattern = re.compile(r"_hk_hk_")
     # Also exlude files that have names like these:
@@ -967,11 +967,11 @@ def read_and_plot_all_files():
     # Sort the files by name
     csv_files.sort()
     print(
-        f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder after excluding some files."
+        f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the surface folder after excluding some files."
     )
     df_list = []
     if not csv_files:
-        print("\033[1;91m No CSV files found in the orbit folder.\033[0m\n")
+        print("\033[1;91m No CSV files found in the surface folder.\033[0m\n")
         return pd.DataFrame()
     for i, file in enumerate(csv_files):
         # print(f"Reading file {i + 1} of {len(csv_files)}: {file}")

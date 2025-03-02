@@ -957,7 +957,7 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # Insert the default folder path in the text box based on the operating system
 if platform.system() == "Windows":
     todays_date = datetime.datetime.now().strftime("%Y%m%d")
-    folder_location = f"..\\data\\from_LEXI\\orbit\\{todays_date}\\"
+    folder_location = f"..\\data\\from_LEXI\\surface\\{todays_date}\\"
     # Get the full path
     folder_location = Path(folder_location).resolve()
     # Add "/" to the end of the folder path
@@ -965,7 +965,7 @@ if platform.system() == "Windows":
     folder_path.insert(1, folder_location)
 elif platform.system() == "Linux" or platform.system() == "Darwin":
     todays_date = datetime.datetime.now().strftime("%Y%m%d")
-    folder_location = f"../data/from_LEXI/orbit/{todays_date}/"
+    folder_location = f"../data/from_LEXI/surface/{todays_date}/"
     # Get the full path
     folder_location = Path(folder_location).resolve()
     # Add "/" to the end of the folder path
