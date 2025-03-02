@@ -58,8 +58,8 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     default_key_list = [
         "HVsupplyTemp",
-        # "DeltaDroppedCount",
-        "LEXIbaseTemp",
+        "DeltaDroppedCount",
+        # "LEXIbaseTemp",
         "PinPullerTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
@@ -1041,8 +1041,8 @@ def long_time_series_plot():
 
     default_key_list = [
         "HVsupplyTemp",
-        "LEXIbaseTemp",
-        # "DeltaDroppedCount",
+        # "LEXIbaseTemp",
+        "DeltaDroppedCount",
         "PinPullerTemp",
         "+3.3V_Imon",
         "+5.2V_Imon",
