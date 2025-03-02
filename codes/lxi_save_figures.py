@@ -27,6 +27,10 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Get the Sliced Housekeeping Data from the global variable
     df = global_variables.all_file_details["df_slice_hk"]
 
+    if start_time is None:
+        start_time = df.index[0].strftime("%Y-%m-%d %H:%M:%S")
+    if end_time is None:
+        end_time = df.index[-1].strftime("%Y-%m-%d %H:%M:%S")
     # Filter the data to get the data between the start and end time
     df = df.loc[start_time:end_time]
 
@@ -36,11 +40,11 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Filter the data to get the data between the start and end time
     df_sci = df_sci.loc[start_time:end_time]
 
-    start_time = df_sci.index[0]
-    end_time = df_sci.index[-1]
+    # start_time = df.index[0]
+    # end_time = df.index[-1]
 
-    start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
-    end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
+    # start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
+    # end_time = end_time.strftime("%Y-%m-%d %H:%M:%S")
 
     # In global_variables, if hv_status is not defined, set it to False
     if "hv_status" not in global_variables.__dict__:
@@ -135,21 +139,23 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Plot the data
     for i, key in enumerate(default_key_list):
         # Get rid of NaN values
-        df = df.dropna(subset=[key])
+        df_new = df.dropna(subset=[key])
+        # Get rid of rows with duplicate indices
+        df_new = df_new[~df_new.index.duplicated(keep="first")]
         # Get the 10th, 50th and 90th percentile values of the data
-        key_10p_val = np.percentile(df[key], 10)
-        key_50p_val = np.percentile(df[key], 50)
-        key_90p_val = np.percentile(df[key], 90)
-        key_std = np.nanstd(df[key])
+        key_10p_val = np.percentile(df_new[key], 10)
+        key_50p_val = np.percentile(df_new[key], 50)
+        key_90p_val = np.percentile(df_new[key], 90)
+        key_std = np.nanstd(df_new[key])
 
         # Set the x and y limits
-        key_x_lim = [df.index[0], df.index[-1]]
+        key_x_lim = [df_new.index[0], df_new.index[-1]]
         key_y_lim = [0.9 * key_10p_val, 1.05 * key_90p_val]
         # key_y_lim = [key_50p_val - 3 * key_std, key_50p_val + 3 * key_std]
 
         # For any data that is more than 5 standard deviations away from the median, modify it
-        outliers = df[np.abs(df[key] - key_50p_val) > 4 * key_std]
-        df_outliers_replaced = df.copy()
+        outliers = df_new[np.abs(df_new[key] - key_50p_val) > 4 * key_std]
+        df_outliers_replaced = df_new.copy()
         df_outliers_replaced.loc[outliers.index, key] = key_y_lim[0]
 
         # If the key is "DeltaEvntCount", then ignore the outliers
@@ -157,14 +163,14 @@ def save_figures(df=None, start_time=None, end_time=None):
             pass
         else:
             # Set the values at the outliers to NaN in the original dataframe
-            df.loc[outliers.index, key] = np.nan
+            df_new.loc[outliers.index, key] = np.nan
 
         row = i // 3
         col = i % 3
 
         axs[row, col].plot(
-            df.index,
-            df[key],
+            df_new.index,
+            df_new[key],
             ".",
             label=key,
             color="green",
@@ -205,7 +211,7 @@ def save_figures(df=None, start_time=None, end_time=None):
             # axs[row, col].set_yticks([0, 1, 10, 100, 500, 1500, 5000])
             # axs[row, col].yaxis.set_major_formatter(FormatStrFormatter("%d"))
 
-            axs[row, col].set_ylim(0.5, 1.05 * df[key].max())
+            axs[row, col].set_ylim(0.5, 1.05 * df_new[key].max())
         else:
             axs[row, col].set_ylim(key_y_lim[0], key_y_lim[-1])
 
@@ -281,10 +287,10 @@ def save_figures(df=None, start_time=None, end_time=None):
         # Set the xlabel only if it is the last row
         if row == 2:
             # Format the x-axis to show the time
-            axs[row, col].xaxis.set_major_locator(mdates.MinuteLocator(interval=20))
+            axs[row, col].xaxis.set_major_locator(mdates.MinuteLocator(interval=60))
 
             # Set a 5-minute interval for minor tick marks
-            axs[row, col].xaxis.set_minor_locator(mdates.MinuteLocator(interval=5))
+            axs[row, col].xaxis.set_minor_locator(mdates.MinuteLocator(interval=20))
 
             # Format the x-axis to display labels only for major tick marks
             axs[row, col].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
@@ -456,6 +462,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print("Long term time series plot saved.")
     """
+
     fontsize = 18
     label_factor = 1.3
     linewidth = 4.5
@@ -949,7 +956,7 @@ def read_and_plot_all_files():
 
     file_name_format = "payload_lexi_*_*_hk_output_L1a.csv"
     csv_files = glob.glob(str(parent_folder / "**" / file_name_format), recursive=True)
-    print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder.\n")
+    print(f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the surface folder.\n")
     # Remove files that has "_hk_hk_" in the name
     exclude_pattern = re.compile(r"_hk_hk_")
     # Also exlude files that have names like these:
@@ -960,11 +967,11 @@ def read_and_plot_all_files():
     # Sort the files by name
     csv_files.sort()
     print(
-        f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the orbit folder after excluding some files."
+        f"Found \033[1;31m{len(csv_files)}\033[0m CSV files in the surface folder after excluding some files."
     )
     df_list = []
     if not csv_files:
-        print("\033[1;91m No CSV files found in the orbit folder.\033[0m\n")
+        print("\033[1;91m No CSV files found in the surface folder.\033[0m\n")
         return pd.DataFrame()
     for i, file in enumerate(csv_files):
         # print(f"Reading file {i + 1} of {len(csv_files)}: {file}")

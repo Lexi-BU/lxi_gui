@@ -598,9 +598,9 @@ def download_latest_files(time_threshold=1.0):
     # password = "your_password"  # Only needed if not using an SSH key
     remote_directory = "/BGM1/1_Payload_Science/2_LEXI/"
     if platform.system() == "Windows":
-        local_directory = "..\\data\\from_LEXI\\orbit\\"
+        local_directory = "..\\data\\from_LEXI\\surface\\"
     else:
-        local_directory = "../data/from_LEXI/orbit/"
+        local_directory = "../data/from_LEXI/surface/"
     local_directory = Path(local_directory).expanduser()
     try:
         time_delta_minutes = float(time_threshold)  # Time range in minutes
