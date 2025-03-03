@@ -158,8 +158,8 @@ def save_figures(df=None, start_time=None, end_time=None):
         df_outliers_replaced = df_new.copy()
         df_outliers_replaced.loc[outliers.index, key] = key_y_lim[0]
 
-        # If the key is "DeltaEvntCount", then ignore the outliers
-        if key == "DeltaEvntCount":
+        # If the key is "DeltaEvntCount" or "DeltaDroppedCount", then ignore the outliers
+        if key == "DeltaEvntCount" or key == "DeltaDroppedCount":
             pass
         else:
             # Set the values at the outliers to NaN in the original dataframe
@@ -469,6 +469,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     mincnt = 1
 
     # Compute the pulse height by adding all 4 channels together
+    df_sci = df_sci.copy()
     df_sci["PulseHeight"] = (
         df_sci["Channel1"] + df_sci["Channel2"] + df_sci["Channel3"] + df_sci["Channel4"]
     )
@@ -921,7 +922,7 @@ def save_figures(df=None, start_time=None, end_time=None):
 
     print(f"Figure saved as \033[1;32m{default_folder / fig_name}\033[0m\n")
 
-    long_time_series_plot()
+    # long_time_series_plot()
 
     print("\033[1;31m Long term time series plot saved.\033[0m\n")
 

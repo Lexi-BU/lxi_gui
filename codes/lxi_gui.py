@@ -2,10 +2,10 @@ import datetime
 import importlib
 import logging
 import platform
-from pathlib import Path
 import tkinter as tk
-from tkinter import font, ttk
 import tkinter.font as tkFont
+from pathlib import Path
+from tkinter import font, ttk
 
 import global_variables
 import lxi_file_read_funcs as lxrf
@@ -294,10 +294,10 @@ def refresh_ts_plot():
                 f"{plot_opt_entry_9.get()}"
             )
             pass
-        try:
-            lsf.save_figures()
-        except Exception:
-            pass
+        # try:
+        #     lsf.save_figures()
+        # except Exception:
+        #     pass
     else:
         logger.info("No time series data to plot")
 
@@ -957,7 +957,8 @@ folder_path.grid(row=7, column=0, columnspan=2, sticky="nsew")
 # folder_path.insert(1, "For multiple files, enter the folder path here")
 # Insert the default folder path in the text box based on the operating system
 if platform.system() == "Windows":
-    todays_date = datetime.datetime.now().strftime("%Y%m%d")
+    # Get today's date in UTC
+    todays_date = datetime.datetime.utcnow().strftime("%Y%m%d")
     folder_location = f"..\\data\\from_LEXI\\surface\\{todays_date}\\"
     # Get the full path
     folder_location = Path(folder_location).resolve()
@@ -965,7 +966,7 @@ if platform.system() == "Windows":
     folder_location = f"{folder_location}\\"
     folder_path.insert(1, folder_location)
 elif platform.system() == "Linux" or platform.system() == "Darwin":
-    todays_date = datetime.datetime.now().strftime("%Y%m%d")
+    todays_date = datetime.datetime.utcnow().strftime("%Y%m%d")
     folder_location = f"../data/from_LEXI/surface/{todays_date}/"
     # Get the full path
     folder_location = Path(folder_location).resolve()
