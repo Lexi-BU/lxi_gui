@@ -85,8 +85,9 @@ class sci_packet_cls(NamedTuple):
     def from_bytes(cls, bytes_: bytes):
         structure_time = struct.unpack(">d", bytes_[2:10])
         structure = struct.unpack(packet_format_sci, bytes_[12:])
-        packet_type_byte = bytes_[16:17]
-        if packet_type_byte.hex() == "00" or packet_type_byte.hex() == "40":
+        if structure[1] & 0x80000000:
+            return
+        else:
             return cls(
                 Date=structure_time[0],
                 is_commanded=bool(
@@ -98,8 +99,6 @@ class sci_packet_cls(NamedTuple):
                 channel3=structure[4] * volts_per_count,
                 channel4=structure[5] * volts_per_count,
             )
-        else:
-            return
 
 
 class sci_packet_cls_gsfc(NamedTuple):
