@@ -393,36 +393,37 @@ class plot_data_class:
                 label=self.plot_key,
             )
         else:
-            axs1.plot(
-                x_axs_val,
-                df_outliers_replaced[self.plot_key],
-                ".",
-                color="green",
-                alpha=alpha,
-                ms=ms,
-                label=self.plot_key,
-            )
+            try:
+                axs1.plot(
+                    x_axs_val,
+                    df_outliers_replaced[self.plot_key],
+                    ".",
+                    color="green",
+                    alpha=alpha,
+                    ms=ms,
+                    label=self.plot_key,
+                )
+                axs1.plot(
+                    outlier.index,
+                    df_outliers_replaced.loc[outlier.index, self.plot_key],
+                    "d",
+                    color="red",
+                    alpha=alpha,
+                    ms=ms,
+                    label="Outliers",
+                    zorder=20,
+                )
+            except Exception:
+                axs1.plot(
+                    x_axs_val,
+                    self.df_slice_hk[self.plot_key],
+                    ".",
+                    color="green",
+                    alpha=alpha,
+                    ms=ms,
+                    label=self.plot_key,
+                )
 
-            # axs1.plot(
-            #     x_axs_val,
-            #     self.df_slice_hk[self.plot_key],
-            #     ".",
-            #     color="green",
-            #     alpha=alpha,
-            #     ms=ms,
-            #     label=self.plot_key,
-            # )
-            # Plot the outliers in red
-            axs1.plot(
-                outlier.index,
-                df_outliers_replaced.loc[outlier.index, self.plot_key],
-                "d",
-                color="red",
-                alpha=alpha,
-                ms=ms,
-                label="Outliers",
-                zorder=20,
-            )
         # On the plot, display the minimum, maximum, 10 percentile, 50 percentile, and 90
         # percentile values as as mu, where mu is 50 percentile value and subscript is the 10 and
         # superscript is 90 percentile values
