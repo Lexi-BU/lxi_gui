@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytz
-from matplotlib.ticker import MaxNLocator, FormatStrFormatter
+from matplotlib.ticker import FormatStrFormatter, MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 importlib.reload(global_variables)
@@ -677,19 +677,19 @@ class plot_data_class:
             & (self.df_slice_sci["Channel4"] <= v_max)
             & (
                 (
-                    self.df_slice_sci["v1_shift"]
-                    + self.df_slice_sci["v2_shift"]
-                    + self.df_slice_sci["v3_shift"]
-                    + self.df_slice_sci["v4_shift"]
+                    self.df_slice_sci["Channel1"]
+                    + self.df_slice_sci["Channel2"]
+                    + self.df_slice_sci["Channel3"]
+                    + self.df_slice_sci["Channel4"]
                 )
                 >= v_sum_min
             )
             & (
                 (
-                    self.df_slice_sci["v1_shift"]
-                    + self.df_slice_sci["v2_shift"]
-                    + self.df_slice_sci["v3_shift"]
-                    + self.df_slice_sci["v4_shift"]
+                    self.df_slice_sci["Channel1"]
+                    + self.df_slice_sci["Channel2"]
+                    + self.df_slice_sci["Channel3"]
+                    + self.df_slice_sci["Channel4"]
                 )
                 <= v_sum_max
             )

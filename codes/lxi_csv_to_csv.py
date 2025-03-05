@@ -1,6 +1,7 @@
 import importlib
-from pathlib import Path
 import platform
+from pathlib import Path
+
 import lxi_file_read_funcs as lxrf
 
 importlib.reload(lxrf)
@@ -146,5 +147,22 @@ def lxi_csv_to_csv(
         df.to_csv(csvs_file, index=True, header=True)
 
         print(f"\n  CSV file created: \x1b[1;32;255m {csvs_file} \x1b[0m")
+
+        # Selected key list
+        selected_key_list = [
+            "x_mcp_lin",
+            "y_mcp_lin",
+        ]
+
+        df_selected = df[selected_key_list]
+
+        # Round off each value in the DataFrame to 3 decimal places
+        df_selected = df_selected.round(3)
+
+        # Save to data to a CSV file
+        csvs_file_selected = csvs_file.replace(".csv", "_selected.csv")
+        df_selected.to_csv(csvs_file_selected, index=True, header=True)
+
+        print(f"\n  CSV file created: \x1b[1;32;255m {csvs_file_selected} \x1b[0m")
 
     return csvs_file
