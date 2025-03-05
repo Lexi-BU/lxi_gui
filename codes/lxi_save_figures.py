@@ -40,6 +40,14 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Filter the data to get the data between the start and end time
     df_sci = df_sci.loc[start_time:end_time]
 
+    # Print the start and end time
+    print(f"Start Time: {start_time}")
+    print(f"End Time: {end_time}")
+
+    # Print the minimum and maximum value of index in df_sci
+    print(f"Minimum Index: {df_sci.index.min()}")
+    print(f"Maximum Index: {df_sci.index.max()}")
+
     # start_time = df.index[0]
     # end_time = df.index[-1]
 
@@ -125,6 +133,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Use dark background
     plt.style.use("dark_background")
 
+    """
     # Create a figure with 3 by 3 subplots
     fig, axs = plt.subplots(3, 3, figsize=(15, 6), sharex=True)
     fig.subplots_adjust(hspace=0.165, wspace=0.25, top=0.92)
@@ -348,6 +357,7 @@ def save_figures(df=None, start_time=None, end_time=None):
     # Close the figure
     plt.close(fig)
     print(f"Figure saved as \033[1;31m {default_folder / fig_name} \033[0m\n")
+    """
     """
 
     default_key_list = [
@@ -727,36 +737,37 @@ def save_figures(df=None, start_time=None, end_time=None):
     )
 
     # Select only the data where x_mcp_lin and y_mcp_lin are withing +/- 6
+    max_x_y_val = 10
     df_sci = df_sci[
-        (df_sci["x_mcp_lin"] < 6)
-        & (df_sci["x_mcp_lin"] > -6)
-        & (df_sci["y_mcp_lin"] < 6)
-        & (df_sci["y_mcp_lin"] > -6)
+        (df_sci["x_mcp_lin"] < max_x_y_val)
+        & (df_sci["x_mcp_lin"] > -max_x_y_val)
+        & (df_sci["y_mcp_lin"] < max_x_y_val)
+        & (df_sci["y_mcp_lin"] > -max_x_y_val)
     ]
     # Only select the data where IsCommanded is False
-    # df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
+    df_sci_cmd_false = df_sci[df_sci["IsCommanded"] == False]
     # Plot the hexbin historagram of between "x_mcp_lin" and "y_mcp_lin". Ignore any bins where the
     # number of points is less than 10
-    try:
-        axs[2, 2].hexbin(
-            df_sci_cmd_false["x_mcp_lin"],
-            df_sci_cmd_false["y_mcp_lin"],
-            gridsize=50,
-            cmap="plasma",
-            alpha=1,
-            mincnt=mincnt,
-            norm=mpl.colors.LogNorm(vmin=mincnt),
-        )
-    except Exception:
-        axs[2, 2].hexbin(
-            df_sci["x_mcp_lin"],
-            df_sci["y_mcp_lin"],
-            gridsize=50,
-            cmap="plasma",
-            alpha=1,
-            mincnt=mincnt,
-            norm=mpl.colors.LogNorm(vmin=mincnt),
-        )
+    # try:
+    axs[2, 2].hexbin(
+        df_sci_cmd_false["x_mcp_lin"],
+        df_sci_cmd_false["y_mcp_lin"],
+        gridsize=50,
+        cmap="plasma",
+        alpha=1,
+        mincnt=mincnt,
+        norm=mpl.colors.LogNorm(vmin=mincnt),
+    )
+    # except Exception:
+    #     axs[2, 2].hexbin(
+    #         df_sci["x_mcp_lin"],
+    #         df_sci["y_mcp_lin"],
+    #         gridsize=50,
+    #         cmap="plasma",
+    #         alpha=1,
+    #         mincnt=mincnt,
+    #         norm=mpl.colors.LogNorm(vmin=mincnt),
+    #     )
     axs[2, 2].set_xlabel("X [cm]", fontsize=fontsize)
     axs[2, 2].set_ylabel("Y [cm]", fontsize=fontsize)
     # Set equal aspect ratio

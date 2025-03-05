@@ -1079,7 +1079,7 @@ def open_file_b_multiple(file_val=None, t_start=None, t_end=None, multiple_files
     )
 
     # Save the "L1c" files
-    lmsc.save_csv()
+    # lmsc.save_csv()
 
     return file_val
 

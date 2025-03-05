@@ -315,7 +315,7 @@ def toggle_hv_status():
         # Modify the value of the global variable
         global_variables.hv_status = False
     refresh_ts_plot()  # Call the plot refresh function
-    lsf.save_figures()
+    # lsf.save_figures()
 
 
 def load_and_copy_files():
@@ -357,7 +357,7 @@ def load_and_copy_files():
         default_opt_var.set(True)
         ts_button_val_change(default_opt_var)
         refresh_ts_plot()
-        lsf.save_figures()
+        # lsf.save_figures()
 
     except Exception as e:
         logger.exception(f"Exception occurred while refreshing the time series plot: {e}")
@@ -482,7 +482,7 @@ def dark_mode_change():
     if global_variables.all_file_details:
         try:
             refresh_ts_plot()
-            lsf.save_figures()
+            # lsf.save_figures()
         except Exception:
             pass
 
