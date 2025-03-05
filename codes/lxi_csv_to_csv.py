@@ -154,13 +154,30 @@ def lxi_csv_to_csv(
             "y_mcp_lin",
         ]
 
+        # Only select rows where "IsCommanded" is False
+        df = df[df["IsCommanded"] == False]
+        # Select the columns in the DataFrame
         df_selected = df[selected_key_list]
 
         # Round off each value in the DataFrame to 3 decimal places
         df_selected = df_selected.round(3)
 
-        # Save to data to a CSV file
-        csvs_file_selected = csvs_file.replace(".csv", "_selected.csv")
+        start_time = df_selected.index[0]
+        start_time_str = start_time.strftime("%Y-%m-%d_%H-%M-%S")
+        end_time = df_selected.index[-1]
+        end_time_str = end_time.strftime("%Y-%m-%d_%H-%M-%S")
+
+        # Find the location of "lexi_payload_" in the csv_file string
+        lxi_payload_index = csvs_file.find("lexi_payload_")
+        print(f"lxi_payload_index: {lxi_payload_index}")
+        csvs_file_selected = (
+            csvs_file[: lxi_payload_index + 13]
+            + start_time_str
+            + "_"
+            + end_time_str
+            + "_sci_selected_L1c.csv"
+        )
+        print(f"csvs_file_selected: {csvs_file_selected}")
         df_selected.to_csv(csvs_file_selected, index=True, header=True)
 
         print(f"\n  CSV file created: \x1b[1;32;255m {csvs_file_selected} \x1b[0m")
