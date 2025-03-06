@@ -844,6 +844,7 @@ ts_menu_9.grid(row=4, column=8, columnspan=1, sticky="w")
     lin_corr_status_var,
     non_lin_corr_status_var,
     cmap_option,
+    time_norm_status_var,
 ) = lgeb.populate_entries(root=sci_tab, dark_mode=dark_mode)
 
 # Redo the histogram plot if the status of the checkbox is changed

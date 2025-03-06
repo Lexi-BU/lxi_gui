@@ -1,6 +1,7 @@
 import importlib
 import tkinter as tk
 from tkinter import font, ttk
+
 import lxi_gui_config as lgcf
 
 importlib.reload(lgcf)
@@ -414,6 +415,28 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
         font_style=font_style_box,
     )
 
+    # Add a check box for time normalization
+    time_norm_label = tk.Label(
+        root, text="Chromonorm", font=font_style_box, bg=bg_color, fg=fg_color
+    )
+    time_norm_label.grid(row=21, column=opt_col_num2, columnspan=1, sticky="n")
+
+    # Add a checkbox to choose whether to implement time normalization or not
+    time_norm_status_var = tk.BooleanVar()
+    time_norm_status_var.set(default_opt_dict["time_norm_status"])  # type: ignore
+    time_norm_checkbox = tk.Checkbutton(
+        root,
+        bg=bg_color,
+        fg=fg_color,
+        text="",
+        font=font_style_box,
+        variable=time_norm_status_var,
+        highlightcolor="green",
+        selectcolor="#808080",
+        cursor="hand2",
+    )
+    time_norm_checkbox.grid(row=21, column=opt_col_num, columnspan=1, sticky="n")
+
     return (
         x_min_entry,
         x_max_entry,
@@ -434,4 +457,5 @@ def populate_entries(root=None, dark_mode=True, default_vals=False):
         lin_corr_status_var,
         non_lin_corr_status_var,
         cmap_option,
+        time_norm_status_var,
     )

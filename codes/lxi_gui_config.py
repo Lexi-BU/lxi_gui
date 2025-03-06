@@ -29,6 +29,7 @@ def create_config_file(default_vals=False):
             gui_config.set("sci_plot_options", "lin_corr_status", "0")
             gui_config.set("sci_plot_options", "non_lin_corr_status", "0")
             gui_config.set("sci_plot_options", "cmap", "0")
+            gui_config.set("sci_plot_options", "time_norm_status", "0")
 
             gui_config.add_section("time_options")
             gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
@@ -52,13 +53,14 @@ def create_config_file(default_vals=False):
         gui_config.set("sci_plot_options", "unit_type", "mcp")
         gui_config.set("sci_plot_options", "v_min_thresh_entry", "1.2")
         gui_config.set("sci_plot_options", "v_max_thresh_entry", "3.4")
-        gui_config.set("sci_plot_options", "v_sum_min_thresh_entry", "5")
-        gui_config.set("sci_plot_options", "v_sum_max_thresh_entry", "7")
+        gui_config.set("sci_plot_options", "v_sum_min_thresh_entry", "0")
+        gui_config.set("sci_plot_options", "v_sum_max_thresh_entry", "20")
         gui_config.set("sci_plot_options", "cut_status", "0")
         gui_config.set("sci_plot_options", "curve_fit_status", "0")
         gui_config.set("sci_plot_options", "lin_corr_status", "1")
         gui_config.set("sci_plot_options", "non_lin_corr_status", "1")
         gui_config.set("sci_plot_options", "cmap", "viridis")
+        gui_config.set("sci_plot_options", "time_norm_status", "0")
 
         gui_config.add_section("time_options")
         gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
@@ -95,17 +97,14 @@ def get_config_entry(default_vals=False):
             "unit_type": gui_config.get(entry_sec, "unit_type"),
             "v_min_thresh_entry": gui_config.get(entry_sec, "v_min_thresh_entry"),
             "v_max_thresh_entry": gui_config.get(entry_sec, "v_max_thresh_entry"),
-            "v_sum_min_thresh_entry": gui_config.get(
-                entry_sec, "v_sum_min_thresh_entry"
-            ),
-            "v_sum_max_thresh_entry": gui_config.get(
-                entry_sec, "v_sum_max_thresh_entry"
-            ),
+            "v_sum_min_thresh_entry": gui_config.get(entry_sec, "v_sum_min_thresh_entry"),
+            "v_sum_max_thresh_entry": gui_config.get(entry_sec, "v_sum_max_thresh_entry"),
             "cut_status": gui_config.get(entry_sec, "cut_status"),
             "curve_fit_status": gui_config.get(entry_sec, "curve_fit_status"),
             "lin_corr_status": gui_config.get(entry_sec, "lin_corr_status"),
             "non_lin_corr_status": gui_config.get(entry_sec, "non_lin_corr_status"),
             "cmap": gui_config.get(entry_sec, "cmap"),
+            "time_norm_status": gui_config.get(entry_sec, "time_norm_status"),
         }
     else:
         default_opt_dict = {
@@ -128,6 +127,7 @@ def get_config_entry(default_vals=False):
             "lin_corr_status": "False",
             "non_lin_corr_status": "False",
             "cmap": "viridis",
+            "time_norm_status": "False",
         }
         # Save the default options to a configuration file
         gui_config = ConfigParser()
@@ -169,6 +169,10 @@ def get_config_entry(default_vals=False):
             entry_sec, "non_lin_corr_status", default_opt_dict["non_lin_corr_status"]
         )
         gui_config.set(entry_sec, "cmap", default_opt_dict["cmap"])
+        gui_config.add_section("time_norm_options")
+        gui_config.set(
+            "time_norm_options", "time_norm_status", default_opt_dict["time_norm_status"]
+        )
         with open("luigi.cfg", "w") as config_file:
             gui_config.write(config_file)
         print("\033[1;32mConfiguration file 'luigi.cfg' created.\033[0m")
@@ -230,6 +234,7 @@ def save_config(entry_list=None, entry_sec=["sci_plot_options"]):
     gui_config.set(entry_sec[0], "lin_corr_status", config_vals[16])
     gui_config.set(entry_sec[0], "non_lin_corr_status", config_vals[17])
     gui_config.set(entry_sec[0], "cmap", config_vals[18])
+    gui_config.set("time_norm_options", "time_norm_status", config_vals[22])
 
     gui_config.add_section(entry_sec[1])
     gui_config.set(entry_sec[1], "start_time", config_vals[19])
