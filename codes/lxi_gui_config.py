@@ -32,8 +32,8 @@ def create_config_file(default_vals=False):
             gui_config.set("sci_plot_options", "time_norm_status", "0")
 
             gui_config.add_section("time_options")
-            gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
-            gui_config.set("time_options", "end_time", "2024-12-31 00:00:00")
+            gui_config.set("time_options", "start_time", "2025-03-04 22:06:00")
+            gui_config.set("time_options", "end_time", "2025-03-04 22:08:00")
             gui_config.set("time_options", "time_threshold", "60")
             with open("luigi.cfg", "w") as config_file:
                 gui_config.write(config_file)
@@ -63,8 +63,8 @@ def create_config_file(default_vals=False):
         gui_config.set("sci_plot_options", "time_norm_status", "0")
 
         gui_config.add_section("time_options")
-        gui_config.set("time_options", "start_time", "2023-01-01 00:00:00")
-        gui_config.set("time_options", "end_time", "2024-12-31 00:00:00")
+        gui_config.set("time_options", "start_time", "2025-03-04 22:06:00")
+        gui_config.set("time_options", "end_time", "2025-03-04 22:08:00")
         gui_config.set("time_options", "time_threshold", "60")
         with open("luigi.cfg", "w") as config_file:
             gui_config.write(config_file)
@@ -234,12 +234,12 @@ def save_config(entry_list=None, entry_sec=["sci_plot_options"]):
     gui_config.set(entry_sec[0], "lin_corr_status", config_vals[16])
     gui_config.set(entry_sec[0], "non_lin_corr_status", config_vals[17])
     gui_config.set(entry_sec[0], "cmap", config_vals[18])
-    gui_config.set("time_norm_options", "time_norm_status", config_vals[22])
+    gui_config.set(entry_sec[0], "time_norm_status", config_vals[19])
 
     gui_config.add_section(entry_sec[1])
-    gui_config.set(entry_sec[1], "start_time", config_vals[19])
-    gui_config.set(entry_sec[1], "end_time", config_vals[20])
-    gui_config.set(entry_sec[1], "time_threshold", config_vals[21])
+    gui_config.set(entry_sec[1], "start_time", config_vals[20])
+    gui_config.set(entry_sec[1], "end_time", config_vals[21])
+    gui_config.set(entry_sec[1], "time_threshold", config_vals[22])
     with open("luigi.cfg", "w") as config_file:
         gui_config.write(config_file)
     print("\033[1;32mConfiguration file 'luigi.cfg' updated.\033[0m")

@@ -203,6 +203,7 @@ class plot_data_class:
         lin_corr=None,
         non_lin_corr=None,
         cmap=None,
+        time_norm_status=None,
         use_fig_size=None,
         dark_mode=None,
         hv_status=None,
@@ -240,6 +241,7 @@ class plot_data_class:
         self.lin_corr = lin_corr
         self.non_lin_corr = non_lin_corr
         self.cmap = cmap
+        self.time_norm_status = time_norm_status
         self.use_fig_size = use_fig_size
         self.dark_mode = dark_mode
         self.hv_status = hv_status
@@ -527,7 +529,6 @@ class plot_data_class:
         ------
             fig: figure object
         """
-
         # Try to convert the start_time and end_time to float or int
         try:
             t_start = datetime.datetime.strptime(self.start_time, "%Y-%m-%d %H:%M:%S")
@@ -656,6 +657,15 @@ class plot_data_class:
             print(f"Invalid cmap: {self.cmap}. Using default cmap: 'viridis'")
             self.cmap = "viridis"
 
+        # Check if time_norm_status is checked or not
+        try:
+            time_norm_status = self.time_norm_status
+        except Exception:
+            time_norm_status = None
+            logger.exception(
+                "Invalid time_norm_status value. Setting time_norm_status value to False."
+            )
+
         x_range = [x_min, x_max]
         y_range = [y_min, y_max]
 
@@ -665,6 +675,7 @@ class plot_data_class:
         # ]
         # Select data in the specified time range
         self.df_slice_sci = self.df_slice_sci.loc[t_start:t_end]
+
         # Exclude channel1 to channel4 data based on v_min and v_max
         # Check if either v_min or v_max or v_sum_min or v_sum_max are None
         self.df_slice_sci = self.df_slice_sci[
@@ -768,6 +779,7 @@ class plot_data_class:
             "\033[1;32m Plotting histogram with linearity correction set to "
             f"{self.lin_corr} and non-linear correction set to {self.non_lin_corr} and axes units set to {self.unit}\033[0m"
         )
+
         counts, xedges, yedges, im = axs1.hist2d(
             self.df_slice_sci[x_key],
             self.df_slice_sci[y_key],
@@ -778,6 +790,18 @@ class plot_data_class:
             cmin=cmin,
             density=density,
         )
+
+        if time_norm_status:
+            time_diff = (self.df_slice_sci.index[-1] - self.df_slice_sci.index[0]).total_seconds()
+            if time_diff > 0:  # Avoid division by zero
+                counts /= time_diff
+
+            # Divide the image array by the total number of seconds in the time range
+            im.set_array(counts.ravel())
+            im.set_clim(vmin=cmin, vmax=cmax)
+            print(
+                f"The minimim and maximum values of the counts are {np.nanmin(counts)} and {np.nanmax(counts)}"
+            )
 
         # Location of the 54 holes in the mask
         xy = np.array([[3.06650655, 1.01332765, 1.65660378, 2.29987991, 2.94315604,

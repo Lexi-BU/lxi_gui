@@ -1,12 +1,11 @@
 import importlib
 import tkinter as tk
 
+import global_variables
+import lxi_file_read_funcs as lxrf
+import lxi_gui_plot_routines as lgpr
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-import global_variables
-import lxi_gui_plot_routines as lgpr
-import lxi_file_read_funcs as lxrf
 
 importlib.reload(lgpr)
 importlib.reload(lxrf)
@@ -119,6 +118,7 @@ def load_hist_plots(
     lin_corr=False,
     non_lin_corr=False,
     cmap=None,
+    time_norm_status=False,
     use_fig_size=False,
     dark_mode=True,
 ):
@@ -223,6 +223,7 @@ def load_hist_plots(
         lin_corr=lin_corr,
         non_lin_corr=non_lin_corr,
         cmap=cmap,
+        time_norm_status=time_norm_status,
         use_fig_size=use_fig_size,
         dark_mode=dark_mode,
     ).hist_plots()
@@ -394,6 +395,7 @@ def load_all_hist_plots(
     lin_corr=None,
     non_lin_corr=None,
     cmap=None,
+    time_norm_status=None,
     use_fig_size=False,
     dark_mode=True,
 ):
@@ -502,6 +504,7 @@ def load_all_hist_plots(
         lin_corr=lin_corr,
         non_lin_corr=non_lin_corr,
         cmap=cmap,
+        time_norm_status=time_norm_status,
         use_fig_size=use_fig_size,
         dark_mode=dark_mode,
     )

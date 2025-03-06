@@ -106,9 +106,12 @@ def hist_plot_inputs(dpi=100):
             "lin_corr": lin_corr_status_var.get(),
             "non_lin_corr": non_lin_corr_status_var.get(),
             "cmap": cmap_option.get(),
+            "time_norm_status": time_norm_status_var.get(),
             "use_fig_size": True,
             "dark_mode": dark_mode_var.get(),
         }
+        # Print the status of time_norm_status_var
+        print(f"time_norm_status_var: {time_norm_status_var.get()}\n\n\n")
         llpr.load_all_hist_plots(**inputs)
     else:
         logger.info("No data to plot")
@@ -864,6 +867,8 @@ lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
 non_lin_corr_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
 
+time_norm_status_var.trace("w", lambda *_: hist_plot_inputs(dpi=dpi))
+
 # Add a button to save the data to a cdf file
 cdf_save_button = tk.Button(
     sci_tab,
@@ -1260,6 +1265,7 @@ entry_list = [
     lin_corr_status_var,
     non_lin_corr_status_var,
     cmap_option,
+    time_norm_status_var,
     start_time,
     end_time,
     time_threshold,
