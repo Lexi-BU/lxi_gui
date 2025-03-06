@@ -773,8 +773,8 @@ class plot_data_class:
             elif self.unit == "deg":
                 x_key = "x_deg_lin"
                 y_key = "y_deg_lin"
-            axs1 = lmsc.add_circle(axs=axs1, radius=4, units=self.unit, color=["r", "c"], fill=False,
-                                   linewidth=2, zorder=10, fontsize=12)
+            # axs1 = lmsc.add_circle(axs=axs1, radius=4, units=self.unit, color=["r", "c"], fill=False,
+            #                        linewidth=2, zorder=10, fontsize=12)
         print(
             "\033[1;32m Plotting histogram with linearity correction set to "
             f"{self.lin_corr} and non-linear correction set to {self.non_lin_corr} and axes units set to {self.unit}\033[0m"
@@ -797,7 +797,7 @@ class plot_data_class:
                 counts /= time_diff
 
             # Divide the image array by the total number of seconds in the time range
-            im.set_array(counts.ravel())
+            im.set_array(counts.T.ravel())
             im.set_clim(vmin=cmin, vmax=cmax)
             print(
                 f"The minimim and maximum values of the counts are {np.nanmin(counts)} and {np.nanmax(counts)}"
