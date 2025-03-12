@@ -1215,14 +1215,16 @@ def compute_position(v1=None, v2=None, n_bins=401, bin_min=0, bin_max=4):
 
     z2_min = 1000 * xx[max_index_v2]
 
-    n1_z = z1_min / 1000
-    n2_z = z2_min / 1000
+    # n1_z = z1_min / 1000
+    # n2_z = z2_min / 1000
 
+    n1_z = 1
+    n2_z = 1
     v1_shift = v1 - n1_z
     v2_shift = v2 - n2_z
 
-    # particle_pos = v2_shift / (v2_shift + v1_shift)
-    particle_pos = v2 / (v2 + v1)
+    particle_pos = v2_shift / (v2_shift + v1_shift)
+    # particle_pos = v2 / (v2 + v1)
 
     return particle_pos, v1_shift, v2_shift
 
